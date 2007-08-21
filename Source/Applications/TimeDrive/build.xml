@@ -1,0 +1,65 @@
+<!-- Name: build.xml
+     By:   John P. Wilson
+     Date: 01/26/2006
+
+     Description:
+         Build file for TimeDrive.  This application acts as an HTTP proxy
+	 to add munge parameters to requests being made to Tomcat/RBNB server.
+     
+     NOTE: The only rbnb class files required by TimeDrive are:
+           com.rbnb.utility.ArgHandler and com.rbnb.utility.ParseURL
+	   We include these files in timedrive.jar so that the person
+	   launching the TimeDrive server doesn't need to specify rbnb.jar 
+	   on the classpath.
+-->
+
+<project name="APPLICATION.TIMEDRIVE" default="library" basedir=".">
+
+ <!-- Import the standard definitions (properties). -->
+ <import file="../../definitions.xml" />
+
+ <!-- Initialize by setting the timestamp. -->
+ <target name="init">
+  <tstamp />
+  <buildnumber />
+  <mkdir dir="${rbnb.builddir}" />
+  <mkdir dir="${rbnb.classesdir}" />
+  <mkdir dir="${rbnb.classesdir}/Applications" />
+  <mkdir dir="${rbnb.classesdir}/Applications/TimeDrive" />
+  <mkdir dir="${rbnb.librarydir}" />
+ </target>
+
+ <!-- Compile the TimeDrive Java source code and place the results in the
+      TimeDrive classes directory.  References the Core library and the
+       TimeDrive classes for dependencies.
+  -->
+ <target name="compile" depends="init">
+  <javac destdir="${rbnb.classesdir}/Applications/TimeDrive"
+         deprecation="on">
+   <src path="${rbnb.sourcedir}/Applications/TimeDrive" />
+   <classpath path="${rbnb.classesdir}/Applications/TimeDrive" />
+   <classpath path="${rbnb.librarydir}/rbnb.jar" />
+  </javac>
+ </target>
+ 
+ <!-- Copy needed files. -->
+ <target name="copy_files">
+    <!-- Copy the HTML file to the classes directory. -->
+    <copy file="timedrive.html" todir="${rbnb.classesdir}/Applications/TimeDrive"/>
+ </target>
+ 
+ <!-- Create the TimeDrive jar file using the TimeDrive classes. -->
+ <target name="library" depends="compile,copy_files">
+  <jar destfile="${rbnb.librarydir}/timedrive.jar"
+       basedir="${rbnb.classesdir}/Applications/TimeDrive"
+       manifest="Manifest"
+   />
+ </target>
+
+ <!-- Cleans out all compiled and library files for the TimeDrive project. -->
+ <target name="clean">
+  <delete dir="${rbnb.classesdir}/Applications/TimeDrive" />
+  <delete file="${rbnb.librarydir}/timedrive.jar" />
+ </target>
+
+</project>

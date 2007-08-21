@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Meta>
+    <name>Mill W</name>
+    <LookAt>
+	    <longitude>-72.23306264657225</longitude>
+	    <latitude>43.68479079334369</latitude>
+	    <altitude>0</altitude>
+	    <range>117.7678454140739</range>
+	    <tilt>2.80015285636843</tilt>
+	    <heading>162.8587728802795</heading>
+    </LookAt>
+    <Camera>
+	<coordinates>-72.23296475392725,43.68494776161644,10</coordinates>
+	<roll>0</roll>
+	<tilt>0</tilt>
+	<heading>-83</heading>
+	<zoom>1</zoom>
+    </Camera>
+    <Image>
+	<distance>1000</distance>
+	<height>500</height>
+	<aspect>1.333</aspect>
+	<zoffset>0</zoffset>
+	<zskew>0</zskew>
+    </Image>
+</Meta>

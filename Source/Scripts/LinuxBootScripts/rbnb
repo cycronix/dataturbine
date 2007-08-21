@@ -1,0 +1,91 @@
+#!/bin/sh
+#
+# Startup/shutdown script for the RBNB server.
+#
+# Launches or terminates the Creare RBNB V2 server at system startup or
+# shutdown.  This script can be placed in the /etc/rc.d directory hierarchy.
+#
+# Author Ian Brown
+#
+# Since V2.3.2
+# Version 06/22/2004
+
+# The install path of the RBNB V2 system.  Change this to match your
+# installation.
+RBNB_HOME=/home/rbnb/RBNB/Current
+
+# The install path of the Java Virtual Machine (JVM).  This can be either a
+# JRE or full SDK installation.
+JAVA_HOME=/usr/local/j2sdk1.4.1_02
+
+# Source the standard init function library.
+. /etc/rc.d/init.d/functions
+
+# Ensure that the RBNB server is installed.
+[ -f ${RBNB_HOME}/bin/rbnb.jar ] || exit 0
+RBNB_ADDRESS=${2:-localhost:3333}
+
+start() {
+    echo -n $"Starting RBNB: "
+    daemon ${JAVA_HOME}/bin/java \
+       -jar ${RBNB_HOME}/bin/rbnb.jar \
+       -a ${RBNB_ADDRESS} &
+    RETVAL=$?
+    [ ${RETVAL} -eq 0 ] && touch /var/lock/subsys/rbnb
+    echo
+    return ${RETVAL}
+}
+
+stop() {
+    if ${JAVA_HOME}/bin/java \
+	-cp ${RBNB_HOME}/bin/rbnb.jar:${RBNB_HOME}/bin/utility-apps.jar \
+	 ServerStatus -a ${RBNB_ADDRESS}; \
+    then
+        echo -n $"Stopping RBNB: "
+	${JAVA_HOME}/bin/java \
+	  -cp ${RBNB_HOME}/bin/rbnb.jar:${RBNB_HOME}/bin/utility-apps.jar \
+	  TerminateServer -a ${RBNB_ADDRESS}
+        echo
+    fi
+    RETVAL=$?
+    [ ${RETVAL} -eq 0 ] && rm -f /var/lock/subsys/rbnb
+    return ${RETVAL}
+}
+
+case "$1" in
+	start)
+	    start
+	    ;;
+	
+	stop)
+	    stop
+	    ;;
+	
+	status)
+	    ${JAVA_HOME}/bin/java \
+	      -cp ${RBNB_HOME}/bin/rbnb.jar:${RBNB_HOME}/bin/utility-apps.jar \
+	      ServerStatus -a ${RBNB_ADDRESS}
+	    ;;
+
+	restart)
+	    stop
+	    start
+	    ;;
+
+	condrestart)
+	    if ${JAVA_HOME}/bin/java \
+	      -cp ${RBNB_HOME}/bin/rbnb.jar:${RBNB_HOME}/bin/utility-apps.jar \
+	      ServerStatus -a ${RBNB_ADDRESS}; \
+	    then
+		stop
+		start
+	    fi
+	    ;;
+	
+	*)
+	    echo $"Usage: $0 {start|stop|restart|condrestart|status}"
+	    exit 1
+
+esac
+
+exit 0

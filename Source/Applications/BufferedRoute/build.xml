@@ -1,0 +1,57 @@
+<!-- Name: build.xml
+     By:   Ian Brown
+     Date: 06/18/2004
+
+     Description:
+         This file is the primary Ant build file for the RBNB BufferedRoute
+         application.  This application is used to provide access to remote
+	 data using a local buffer (cache).  The program automatically
+         retrieves the data from the remote system if it is newer than whatever
+         is in the cache (or if nothing is in the cache).
+-->
+
+<project name="APPLICATION.BUFFEREDROUTE" default="library" basedir=".">
+
+ <!-- Import the standard definitions (properties). -->
+ <import file="../../definitions.xml" />
+
+ <!-- Initialize by setting the timestamp. -->
+ <target name="init">
+  <tstamp />
+  <buildnumber />
+  <mkdir dir="${rbnb.builddir}" />
+  <mkdir dir="${rbnb.classesdir}" />
+  <mkdir dir="${rbnb.classesdir}/Applications" />
+  <mkdir dir="${rbnb.classesdir}/Applications/BufferedRoute" />
+  <mkdir dir="${rbnb.librarydir}" />
+ </target>
+
+ <!-- Compile the BufferedRoute Java source code and place the results in the
+      BufferedRoute classes directory.  References the Core library and the
+      BufferedRoute classes for dependencies.
+  -->
+ <target name="compile" depends="init">
+  <javac destdir="${rbnb.classesdir}/Applications/BufferedRoute"
+         deprecation="on">
+   <src path="${rbnb.sourcedir}/Applications/BufferedRoute" />
+   <classpath path="${rbnb.classesdir}/Applications/BufferedRoute" />
+   <classpath path="${rbnb.librarydir}/rbnb.jar" />
+  </javac>
+ </target>
+
+ <!-- Create the BufferedRoute jar file using the BufferedRoute classes. -->
+ <target name="library" depends="compile">
+  <jar destfile="${rbnb.librarydir}/bufferedroute.jar"
+       basedir="${rbnb.classesdir}/Applications/BufferedRoute"
+       manifest="Manifest"
+   />
+ </target>
+
+ <!-- Cleans out all compiled and library files for the BufferedRoute project.
+   -->
+ <target name="clean">
+  <delete dir="${rbnb.classesdir}/Applications/BufferedRoute" />
+  <delete file="${rbnb.librarydir}/bufferedroute.jar" />
+ </target>
+
+</project>

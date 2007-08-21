@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://earth.google.com/kml/2.1">
+<Document>
+	<name>Entry North Camera</name>
+	<Style id="style">
+		<IconStyle>
+			<scale>1.1</scale>
+			<Icon>
+				<href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+			</Icon>
+		</IconStyle>
+		<LabelStyle>
+			<scale>1.1</scale>
+		</LabelStyle>
+	</Style>
+	<Placemark>
+		<name>Entry North</name>
+    	<LookAt>
+	    <longitude>-72.2331477659897</longitude>
+	    <latitude>43.68483851083865</latitude>
+	    <altitude>0</altitude>
+	    <range>119.5939153249135</range>
+	    <tilt>14.52185438058025</tilt>
+	    <heading>-38.91303688135665</heading>
+ 	</LookAt>
+		<Style>
+			<IconStyle>
+				<scale>1.1</scale>
+				<Icon>
+					<href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+				</Icon>
+			</IconStyle>
+			<LabelStyle>
+				<scale>1.1</scale>
+			</LabelStyle>
+		</Style>
+		<Point>
+			<altitudeMode>relativeToGround</altitudeMode>
+			<coordinates>-72.23291283684088,43.68482493120781,1</coordinates>
+		</Point>
+	</Placemark>
+</Document>
+</kml>

@@ -1,0 +1,227 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Creating Your Own Panels</TITLE>
+<META NAME="description" CONTENT="Creating Your Own Panels">
+<META NAME="keywords" CONTENT="izpack-doc">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="izpack-doc.css">
+
+<LINK REL="next" HREF="node8.html">
+<LINK REL="previous" HREF="node6.html">
+<LINK REL="up" HREF="izpack-doc.html">
+<LINK REL="next" HREF="node8.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html380"
+  HREF="node8.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
+<A NAME="tex2html376"
+  HREF="izpack-doc.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
+<A NAME="tex2html370"
+  HREF="node6.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
+<A NAME="tex2html378"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html381"
+  HREF="node8.html">User Input</A>
+<B> Up:</B> <A NAME="tex2html377"
+  HREF="izpack-doc.html">izpack-doc</A>
+<B> Previous:</B> <A NAME="tex2html371"
+  HREF="node6.html">Desktop Shortcuts</A>
+ &nbsp; <B>  <A NAME="tex2html379"
+  HREF="node1.html">Contents</A></B> 
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<!--Table of Child-Links-->
+<A NAME="CHILD_LINKS"><STRONG>Subsections</STRONG></A>
+
+<UL>
+<LI><A NAME="tex2html382"
+  HREF="node7.html#SECTION00710000000000000000">How It Works</A>
+<UL>
+<LI><A NAME="tex2html383"
+  HREF="node7.html#SECTION00711000000000000000">What You Need</A>
+<LI><A NAME="tex2html384"
+  HREF="node7.html#SECTION00712000000000000000">What You Have To Do</A>
+</UL>
+<BR>
+<LI><A NAME="tex2html385"
+  HREF="node7.html#SECTION00720000000000000000">The <TT>IzPanel</TT> Class</A>
+<UL>
+<LI><A NAME="tex2html386"
+  HREF="node7.html#SECTION00721000000000000000">UML Diagram</A>
+<LI><A NAME="tex2html387"
+  HREF="node7.html#SECTION00722000000000000000">Description</A>
+</UL></UL>
+<!--End of Table of Child-Links-->
+<HR>
+
+<H1><A NAME="SECTION00700000000000000000">
+Creating Your Own Panels</A>
+</H1>
+
+<P>
+
+<H1><A NAME="SECTION00710000000000000000">
+How It Works</A>
+</H1>
+
+<P>
+
+<H2><A NAME="SECTION00711000000000000000">
+What You Need</A>
+</H2>
+
+<P>
+First you have to read the NanoXML documentation if you need to use XML
+in your panel. Secondly, it is necessary that you use the
+Javadoc-generated class references. We will just explain here briefly
+how to start making your panels.
+<BR>
+<P>
+It is a good idea to read the source code of some IzPack panels. They
+are usually <I>very</I> small, which makes it easier to understand how
+to write your own.
+<BR>
+<P>
+
+<H2><A NAME="SECTION00712000000000000000">
+What You Have To Do</A>
+</H2>
+
+<P>
+Extending I<SMALL>Z</SMALL>P<SMALL>ACK</SMALL> with a panel is quite simple. A panel used with
+I<SMALL>Z</SMALL>P<SMALL>ACK</SMALL> must be a subclass of <TT>IzPanel</TT>. The <TT>IzPanel</TT>
+class is located in the <TT>com.izforge.izpack.installer</TT> package
+but your panels need to belong to <TT>com.izforge.izpack.panels</TT>.
+<BR>
+<P>
+Things will get a good deal easier if you build IzPack with Jakarta Ant.
+Simply add your class in the source tree and add the And directives to
+build your own panels. In this way you'll be able to focus on your code
+:-)
+<BR>
+<P>
+
+<H1><A NAME="SECTION00720000000000000000">
+The <TT>IzPanel</TT> Class</A>
+</H1>
+
+<P>
+
+<H2><A NAME="SECTION00721000000000000000">
+UML Diagram</A>
+</H2>
+
+<P>
+<DIV ALIGN="CENTER">
+<!-- MATH
+ $\fbox{\includegraphics[scale=0.5]{img/ch5-izpanel}}$
+ -->
+<IMG
+ WIDTH="573" HEIGHT="555" ALIGN="MIDDLE" BORDER="0"
+ SRC="img5.png"
+ ALT="\fbox{\includegraphics[scale=0.5]{img/ch5-izpanel}}">
+</DIV> 
+<P>
+
+<H2><A NAME="SECTION00722000000000000000">
+Description</A>
+</H2>
+
+<P>
+The two data members are : the install data (refer to the <TT>InstallData</TT>
+Javadoc reference) and a reference to the parent installer frame.
+<BR>
+<P>
+The methods have the following functionality :
+<BR>
+<UL>
+<LI><I>(constructor)</I> : called just after the language
+  selection dialog. All the panels are constructed at this time and then
+  the installer is shown. So be aware of the fact that the installer
+  window is <B>not</B> yet visible when the panel is created. If you
+  need to do some work when the window is created, it is in most cases
+  better do it in <TT>panelActivate</TT>.
+<BR>
+<P>
+</LI>
+<LI><TT>isValidated</TT> returns <TT>true</TT> if the user is
+  allowed to go a step further in the installation process. Returning
+  <TT>false</TT> will lock it. For instance the LicencePanel returns
+  <TT>true</TT> only if the user has agreed with the license agreement.
+  The default is to return <TT>true</TT>.
+<BR>
+<P>
+</LI>
+<LI><TT>panelActivate</TT> is called when the panel becomes active.
+  This is the best place for most initialization tasks. The default is
+  to do nothing.
+<BR>
+<P>
+</LI>
+<LI><TT>makeXMLData</TT> is called to build the automated installer
+  data. The default is to do nothing. <TT>panelRoot</TT> refers to the
+  node in the XML tree where you can save your data. Each panel is given
+  a node. You can organize it as you want with the markups you want
+  starting from <TT>panelRoot</TT>. It's that simple.
+<BR>
+<P>
+</LI>
+<LI><TT>runAutomated</TT> is called by an automated-mode
+  installation. Each panel is called and can do its job by picking the
+  data collected during a previous installation as saved in
+  <TT>panelRoot</TT> by <TT>makeXMLData</TT>.
+<BR>
+<P>
+</LI>
+</UL>   
+<P>
+<HR>
+<!--Navigation Panel-->
+<A NAME="tex2html380"
+  HREF="node8.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
+<A NAME="tex2html376"
+  HREF="izpack-doc.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
+<A NAME="tex2html370"
+  HREF="node6.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
+<A NAME="tex2html378"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html381"
+  HREF="node8.html">User Input</A>
+<B> Up:</B> <A NAME="tex2html377"
+  HREF="izpack-doc.html">izpack-doc</A>
+<B> Previous:</B> <A NAME="tex2html371"
+  HREF="node6.html">Desktop Shortcuts</A>
+ &nbsp; <B>  <A NAME="tex2html379"
+  HREF="node1.html">Contents</A></B> 
+<!--End of Navigation Panel-->
+<ADDRESS>
+
+2004-06-05
+</ADDRESS>
+</BODY>
+</HTML>

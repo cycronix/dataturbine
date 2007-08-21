@@ -1,0 +1,1 @@
+cl /GX /FeJavaEnv.exe /Fo%TEMP%\JavaEnv.obj ..\Src\JavaEnv.c advapi32.lib

@@ -1,0 +1,1095 @@
+<html>
+<head>
+<title>RBNB TimeDrive</title>
+<script language="javascript">
+
+// TimeDrive:  Web Interface to TimeDrive server
+// Version 1.0  JPW 01/06
+// Version 1.1  MJM 02/06
+// Version 1.2  JPW 05/06  Remove playdir = <pause|forward|backward>
+//                         Change
+//                            playmode = <step|play|live>
+//                         into
+//                            playmode = <pause|live|forward|backward>
+//              JPW 10/06  Set background color for the page to "antiquewhite"
+
+//
+//--------------------------------------------------------------
+// Global variables
+
+var time = 0.0;
+// NOTE: We are always, only in "absolute" mode - we never use
+//       "oldest" or "newest"
+var reference = "absolute";
+// playmode is "pause", "live", "forward", or "backward"
+var playmode = "pause";
+var rate = 1.0;
+var duration = 0.0;
+
+// We send parameters to the server using XmlHttpRequest; as such, these URLs
+// must be relative (that is, the server contacted will be the same as the
+// server this timedrive.html is sent from)
+// Orig:
+// var updateMungeURL = "/updatemunge";
+// var updateToCurrentTimeURL = "/updatetocurrenttime";
+var updateMungeURL = "updatemunge";
+var updateToCurrentTimeURL = "updatetocurrenttime";
+
+// Hashtable to store key/value pairs from the Server
+var serverParameters = {};
+// ID for the timer that is used to perform automatic refreshes
+// when we are playing forward or backward
+var refreshTimerID = null;
+var timeRefreshPeriod = 1000;
+// For blinking text showing the direction of play/live data
+var blinkRefreshTimerID = null;
+var blink_onoff = 1;
+var blinkRefreshPeriod= 500;
+// The displayed URL text
+var lastFullURLStr = "";
+// The local time zone
+var timezoneStr = "";
+
+//
+//--------------------------------------------------------------
+// This method is called when the HTML page is loaded
+
+function initializeHTML() {
+    document.timestepform.blinktext.value = "Pause";
+    document.timestepform.step.value = rate;
+    startRefreshTimer();
+    timezoneStr = "GMT" + tzCalculation_LocalTimeZone();
+    // Note: I assume timezoneStr won't be longer than 20 characters
+    document.getElementById("timezoneDisplay").firstChild.replaceData(0,20,timezoneStr);
+}
+
+//
+//--------------------------------------------------------------
+// Trim whitespace (including tabs, linefeeds, etc.) from a string.
+
+// NOTE: This function will NOT WORK WITH PRE VERSION 4 BROWSERS
+function trimString (str) {
+    return str.replace(/^\s*|\s*$/g,'');
+}
+
+//
+//--------------------------------------------------------------
+// Update absolute time to what the user has set in the time fields;
+// set playmode = "pause".
+
+function setTime() {
+    var year = document.timeform.year.value;
+    var month = document.timeform.month.value;
+    var day = document.timeform.day.value;
+    var hour = document.timeform.hour.value;
+    var min = document.timeform.minute.value;
+    var sec = document.timeform.second.value;
+    var msec = 0.;
+    var userDate = new Date(year, month, day, hour, min, sec, msec);
+    
+    // Convert from milliseconds to seconds
+    time = (userDate.valueOf()) / 1000.0;
+    
+    setPlaymode("pause");
+    
+    // Send request to TimeDrive server
+    updateServer();
+    /*
+    now = new Date(); // to fake out browser cache
+    url =
+	updateMungeURL +
+	"@reference=" + reference +
+	"&time=" + parseFloat(time) +
+	"&duration=" + parseFloat(duration) +
+	"&play=pause" +
+	"&i=" + now.valueOf();
+    communicateWithServer(url);
+    */
+
+    startRefreshTimer();  // restart timer
+}
+
+//
+//--------------------------------------------------------------
+// Request server to update its absolute time to current wallclock time
+
+function setTimeToNow() {
+
+    // If we are in play or live mode, get out of it
+    changePlaymode('pause');
+
+    // Request the server to set the time its current system clock time
+    now = new Date();
+    var url = updateToCurrentTimeURL + "&i=" + now.valueOf();
+    communicateWithServer(url);
+    
+}
+
+//
+//--------------------------------------------------------------
+// Set new timestep
+// NOTE: Don't use updateServer() to send the new munge parameters,
+//       because we *don't* want to send updated "time"
+
+function updateTimeStep() {
+    // Get the updated time step (also used as rate)
+    rate = parseFloat(document.timestepform.step.value);
+    // Send request to TimeDrive server
+    now = new Date(); // to fake out browser cache
+    url =
+	updateMungeURL +
+	"@play=" + playmode +
+	"&rate=" + rate +
+	"&i=" + now.valueOf();
+    communicateWithServer(url);
+    startRefreshTimer();  // make sure its (re)started
+}
+
+//
+//--------------------------------------------------------------
+// Send new duration to TimeDrive server
+
+function updateDuration() {
+    // Get the updated duration
+    tempDuration = parseFloat(document.timeform.duration.value);
+    if (tempDuration < 0) {
+	duration = parseFloat(0);
+    } else {
+	duration = parseFloat(tempDuration);
+    }
+    // Send *only* updated duration to TimeDrive server (NOTE: *don't*
+    // use updateServer(), because this will send all munge params to server)
+    // Fake out cache by sending "&i=" munge
+    now = new Date();
+    url =
+	updateMungeURL +
+	"@duration=" + parseFloat(duration) +
+	"&i=" + now.valueOf();
+    communicateWithServer(url);
+    startRefreshTimer();  // make sure its (re)started
+}
+
+//
+//--------------------------------------------------------------
+// Request updated parameters from the TimeDrive server
+
+function getTimeDriveParameters() {
+    now = new Date();
+    url =
+	updateMungeURL +
+	"@i=" + now.valueOf();
+    communicateWithServer(url);
+}
+
+//
+//--------------------------------------------------------------
+// Kick off the timer callbacks by scheduling to call refreshTimerCallback()
+
+function startRefreshTimer() {
+    // If no refresh timer is currently executing, start one
+    if (refreshTimerID == null) {
+	refreshTimerID =
+	    setTimeout("refreshTimerCallback()", timeRefreshPeriod);
+    }
+}
+
+//
+//--------------------------------------------------------------
+// Kick off the blink text callbacks by scheduling to call
+// refreshBlinkTextCallback()
+
+function startRefreshBlinkText() {
+    if (blinkRefreshTimerID == null) {
+	blinkRefreshTimerID =
+	    setTimeout("refreshBlinkTextCallback()", blinkRefreshPeriod);
+    }
+}
+
+//
+//--------------------------------------------------------------
+// Stop periodic timer calls
+
+function stopRefreshTimer() {
+    if (refreshTimerID != null) {
+	clearTimeout(refreshTimerID);
+	refreshTimerID = null;
+    }
+}
+
+//
+//--------------------------------------------------------------
+// Stop periodic blink text calls
+
+function stopRefreshBlinkText() {
+    if (blinkRefreshTimerID != null) {
+	clearTimeout(blinkRefreshTimerID);
+	blinkRefreshTimerID = null;
+	// Make sure text is cleared out
+	document.timestepform.blinktext.value = "Pause";
+    }
+}
+
+//
+//--------------------------------------------------------------
+// This is the callback which occurs when the timer expires; if we
+// are in live or play mode, get updated TimeDrive parameters and then
+// schedule another timer.
+
+function refreshTimerCallback() {
+    if(refreshTimerID == null) return;  // timer is (in-process) shutdown
+    // Refresh data
+    getTimeDriveParameters();
+    // Start the timer again
+    refreshTimerID = setTimeout("refreshTimerCallback()", timeRefreshPeriod);
+    updateStatus(1);
+}
+
+//
+//--------------------------------------------------------------
+// This is the callback which occurs when the blink text timer expires
+
+function refreshBlinkTextCallback() {
+    updateStatus(blink_onoff);
+    // Start the timer again
+    blinkRefreshTimerID =
+	setTimeout("refreshBlinkTextCallback()", blinkRefreshPeriod);
+    if(blink_onoff == 1) blink_onoff = 0;
+    else                 blink_onoff = 1;
+}
+
+//
+//--------------------------------------------------------------
+// Set the message in "blinktext" field
+
+function updateStatus(bmode) {
+    StatusStr2 = "";
+    if (playmode == "live") {
+	statusStr = "> Live";
+    } else if (playmode == "backward") {
+	statusStr = new String("< " + rate + "x");
+    } else if (playmode == "forward") {
+	statusStr = new String("> " + rate + "x");
+    }
+    else statusStr = statusStr2 = "Pause";
+    if (bmode == 1) {
+	document.timestepform.blinktext.value = statusStr;
+    } else {
+	document.timestepform.blinktext.value = StatusStr2;
+    }
+}
+
+//
+//--------------------------------------------------------------
+// Update the playmode
+
+function changePlaymode(newPlaymode) {
+    setPlaymode(newPlaymode);
+    updateServer();
+}
+
+//
+//--------------------------------------------------------------
+// Update the playmode to the given value
+
+function setPlaymode(newPlaymode) {
+    // Make periodic updates:
+    // Blink text update
+    if ( (newPlaymode == "live")        ||
+         (newPlaymode == "forward") ||
+	 (newPlaymode == "backward") )
+    {
+	startRefreshBlinkText();
+    }
+    else
+    {
+	stopRefreshBlinkText();
+    }
+    playmode = newPlaymode;
+}
+
+//
+//--------------------------------------------------------------
+// play forward or reverse
+
+function play(playdirI) {
+    rate = parseFloat(document.timestepform.step.value);
+    if (playdirI == "forward") {
+	playmode = 'forward';
+    } else if (playdirI == "backward") {
+	playmode = 'backward';
+    }
+    updateServer();
+}
+
+//
+//--------------------------------------------------------------
+// step forward or reverse
+
+function tstep(stepdirI) {
+    document.timestepform.blinktext.value = "Step";
+    rate = parseFloat(document.timestepform.step.value);
+    playmode = 'pause';
+    if (stepdirI == 'forward') {
+	dir = 1;
+    } else {
+	dir = -1;
+    }
+    time = time + rate * dir;
+    if (time < 0) {
+        // JPW 06/01/2006: t=0 no longer indicates live mode, so don't be
+	//                 afraid of setting t=0
+	// Don't set time exactly at 0, since this indicates live mode
+	// time = parseFloat(0.0001);
+	time = parseFloat(0.0);
+    }
+    updateServer();
+}
+
+//
+//--------------------------------------------------------------
+// update Server with current settings
+
+function updateServer() {
+    now = new Date();
+    url =
+	updateMungeURL +
+	"@reference=" + reference +
+	"&time=" + time +
+	"&duration=" + duration +
+	"&play=" + playmode +
+	"&rate=" + rate +
+	"&i=" + now.valueOf();   // to fake out browser cache
+    communicateWithServer(url);
+}
+
+//
+//--------------------------------------------------------------
+// Select the pull-down selection object entry that has the given value
+// Return the text of the selected object, or null if no match was found
+
+function setSelection(options, value) {
+    for (i=0; i<options.length; ++i) {
+	if (options[i].value == value) {
+	    // We've got a match!
+	    options[i].selected = new Boolean(true);
+	    return options[i].text;
+	}
+    }
+    // No entry matched - return null
+    return null;
+}
+
+//
+//--------------------------------------------------------------
+// Send the given URL to the TimeDrive server using XMLHttpRequest
+
+function communicateWithServer(url) {
+   http = getHTTPObject(); // create the HTTP Object
+   idx = new Date();       // need to trick browser cache
+   http.open("GET", url, true);
+   // To set an HTTP header field, call http.setRequestHeader("<field>","<value>")
+   // As an example, here's how we could set the Authorization field.
+   // NOTE: If the browser client has its own Authorization set, then it will
+   //       override what we set here!  It must be that the client sets its
+   //       fields *after* we set the fields here.
+   // http.setRequestHeader("Authorization","Basic Zm9vIG9uIHlvdTogaGVsbG8=");
+   // Specify the callback method
+   http.onreadystatechange = handleServerResp;
+   http.send(null);
+}
+
+//
+//--------------------------------------------------------------
+// Initiate a new XMLHttp request; this will be used to communicate
+// with the TimerDrive server
+
+function getHTTPObject() {
+  var xmlhttp;
+  /*@cc_on
+  @if (@_jscript_version >= 5)
+    try {
+      xmlhttp = new ActiveXObject("Msxml2.XMLHTTP");
+    } catch (e) {
+      try {
+	xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+      } catch (E) {
+	xmlhttp = false;
+      }
+    }
+  @else
+  xmlhttp = false;
+  @end @*/
+  if (!xmlhttp && typeof XMLHttpRequest != 'undefined') {
+    try {
+      xmlhttp = new XMLHttpRequest();
+    } catch (e) {
+      xmlhttp = false;
+    }
+  }
+  return xmlhttp;
+}
+
+//
+//--------------------------------------------------------------
+// Asynchronous function to handle response from TimeDrive server
+
+function handleServerResp() {
+   
+   if (refreshTimerID == null) {
+       // timer is (in-process) shutdown
+       return;
+   }
+   
+   // When readyState is 4, we know the return value is ready
+   if(http.readyState == 4) {
+     var resp = http.responseText;
+     // JPW 08/16/2006: If the reponse contains the word "error" then assume
+     //                 there is nothing good to parse from it
+     var tempStr = resp.toLowerCase();
+     if (tempStr.indexOf("error") != -1) {
+        document.getElementById("urlDisplay").firstChild.replaceData(0,300,"An error has occurred; the TimeDrive server or servlet may be unavailable.");
+	lastFullURLStr = " ";
+	return;
+     }
+     // alert('server response:\n' + resp);
+     // The server response is in key/value form as follows:
+     // "reference=<r>&time=<t>&duration=<d>&play=<p>&rate=<r>"
+     // JPW 05/31/2006: No mode "live=<t/f>" response from TimeDrive server;
+     //                 live mode will be indicated in the "play=<p>" flag
+     parseKeyValuePairs(resp);
+     
+     ///////
+     // TIME
+     ///////
+     // time is in seconds; Date() takes number of milliseconds since 1970
+     // If no "time" key is set, then check on "t"
+     var temptime = getValue("time");
+     if (temptime == null) {
+         temptime = getValue("t");
+     }
+     if ( (temptime != null) && (parseFloat(temptime) != NaN) ) {
+	 time = parseFloat(temptime);
+	 var playTime = new Date( 1000.0 * time );
+	 setSelection(document.timeform.year.options, playTime.getFullYear());
+	 setSelection(document.timeform.month.options, playTime.getMonth());
+	 setSelection(document.timeform.day.options, playTime.getDate());
+	 setSelection(document.timeform.hour.options, playTime.getHours());
+	 setSelection(document.timeform.minute.options, playTime.getMinutes());
+	 setSelection(document.timeform.second.options, playTime.getSeconds());
+	 // Set label on the time button to be the time itself
+	 // document.timeform.time.value = playTime.toLocaleString();
+     }
+     
+     ///////////
+     // DURATION
+     ///////////
+     // If no "duration" key is set, then check on "d"
+     var tempduration = getValue("duration");
+     if (tempduration == null) {
+         tempduration = getValue("d");
+     }
+     if ( (tempduration != null) && (parseFloat(tempduration) != NaN) ) {
+        duration = parseFloat(tempduration);
+	document.timeform.duration.value = duration;
+     }
+     
+     ////////////
+     // REFERENCE
+     ////////////
+     // If no "reference" key is set, then check on "r"
+     var tempreference = getValue("reference");
+     if (tempreference == null) {
+         tempreference = getValue("r");
+     }
+     if (tempreference != null) {
+	reference = tempreference;
+     } else {
+         // No reference was explicitly given; assume "absolute"
+	 reference = "absolute";
+     }
+     
+     ///////
+     // RATE
+     ///////
+     var temprate = getValue("rate");
+     if ( (temprate > 0) && (temprate != null) && (parseFloat(temprate) != NaN) ) {
+	 rate = parseFloat(temprate);
+	 document.timestepform.step.value = rate;
+     }
+     
+     ///////////
+     // PLAYMODE
+     ///////////
+     var tempPlayMode = getValue("play");
+     // If mode isn't explicitly given, assume "pause"
+     if ( (tempPlayMode == null) || (tempPlayMode == "") ) {
+         tempPlayMode = "pause";
+     }
+     setPlaymode(tempPlayMode);
+     
+     //////////////////////////////////////////////////////////////
+     // DISPLAY THE URL (INCLUDING MUNGE) TO THE USER
+     // This is useful, for instance, to allow the user to bookmark
+     // a particular TimeDrive time and mode
+     //////////////////////////////////////////////////////////////
+     
+     // Several ways we can do this:
+     
+     /*
+        Method 1.
+        Show just the munge after the URL hash ('#').  This has the advantage
+        that it doesn't initiate a new server call.  However, it also isn't
+        a legal URL w/o some changes to our JavaScript
+        (see http://ajaxpatterns.org/Unique_URLs#Solution for more details).
+     */
+     // window.location.hash = trimString(resp);
+     
+     /*
+        Method 2.
+	Show the entire URL.  Unfortunately, this initiates a new server call,
+	therefore we don't want to use this method.
+     */
+     // window.location.href = window.location.href + '?' + trimString(resp);
+     
+     /*
+        Method 3.
+	Display the URL in a label.  Set the label by manipulating the Document
+     */
+     /*
+        HERE'S A SLIGHTLY MORE INVOLVED METHOD OF CLEARING CHILD OBJECTS
+	AND THEN CREATING AND ADDING A NEW TextNode OBJECT
+        d = document;
+        // Clear the current content of the "urlDisplay" object
+        obj = document.getElementById("urlDisplay");
+        while (obj.firstChild) {
+            obj.removeChild(obj.firstChild);
+        }
+        // Create a new textNode to display in "urlDisplay"
+        // NOTE: I'm just displaying the munge here; this could be changed to
+        //       display the entire URL
+        textNode = document.createTextNode("RBNB URL:  " + trimString(resp));
+        document.getElementById("urlDisplay").appendChild(textNode);
+     */
+     
+     // Display this URL to the user
+     serverURLStr = document.URL;
+     // Peel off any munge and final slash from the server URL
+     charIndex = serverURLStr.indexOf("?");
+     if (charIndex == -1) {
+         charIndex = serverURLStr.indexOf("@");
+     }
+     if (charIndex > -1) {
+         serverURLStr = serverURLStr.substring(0,charIndex);
+     }
+     if (serverURLStr.charAt(serverURLStr.length-1) == '/') {
+         serverURLStr = serverURLStr.substring(0,serverURLStr.length-1);
+     }
+     mungeStr = trimString(resp);
+     fullURLStr = serverURLStr + "?" + mungeStr;
+     if ( (mungeStr == null) || (mungeStr == "") ) {
+         fullURLStr = serverURLStr;
+     }
+     // Only replace the string if it has actually changed
+     if (fullURLStr != lastFullURLStr) {
+     	// I assume here that the full URL is never longer than 300 characters
+	document.getElementById("urlDisplay").firstChild.replaceData(0,300,fullURLStr);
+	lastFullURLStr = fullURLStr;
+     }
+     
+   }
+   
+}
+
+//
+//--------------------------------------------------------------
+// Parse a given key/value string which has the form:
+//     "key1=value1&key2=value2&..."
+// This code is based on a solution from Adam Vandenberg;
+//     http://adamv.com/dev/javascript/querystring
+// To see similar solutions, do a Google search on "javascript querystring"
+
+function parseKeyValuePairs(pairStr) {
+    
+    // JPW 04/13/2006: Reset the hashtable
+    serverParameters = {};
+    
+    if ( (pairStr == null) || (pairStr.length == 0) ) {
+	return;
+    }
+    // NOTE: This trim is absolutely necessary! I will sometimes (but not all
+    //       the time) get a carriage return at the end of the string from the
+    //       server; this was screwing up the last token by including a
+    //       carriage return at the end of it
+    pairStr = trimString(pairStr);
+    // parse out key/value pairs separated via &
+    var args = pairStr.split('&');
+    // split out each key=value pair
+    for (var i = 0; i < args.length; ++i) {
+	var pair = args[i].split('=');
+	var value;
+	// A note on the "unescape()" function: To convert a string from URL-
+	// encoded form, use the JavaScript function unescape(string). This
+	// function works as follows: if the string contains escape-sequences
+	// of the form %XX, where XX stands for two hexadecimal digits, each
+	// escape-sequence is replaced by the character whose ASCII code is XX.
+	// Otherwise, the string remains unchanged.
+	var key = unescape(pair[0]);
+	if (pair.length == 2) {
+	    value = unescape(pair[1]);
+	} else {
+	    value = key;
+	}
+	serverParameters[key] = value;
+    }
+}
+
+//
+//--------------------------------------------------------------
+// Get the value corresponding to the given key.  Any call to this
+// method must be preceeded by a call to the parsing method,
+// parseKeyValuePairs()
+
+function getValue(key, defaultVal) {
+    // Silly looking, but works to change UNDEFINED to NULL
+    if (defaultVal == null) {
+	defaultVal = null;
+    }
+    // Look for the given key in the array
+    var value = serverParameters[key];
+    if (value==null) {
+	value=defaultVal;
+    }
+    return value;
+}
+
+//
+//--------------------------------------------------------------
+// Construct a string representing the time zone as an offset from GMT.
+// This method is from:
+// http://www.desisoftsystems.com/tzCalculation_LocalTimeZone.js
+
+function tzCalculation_LocalTimeZone() {
+    var rightNow;
+    var rightNow_UTC_MillisecondsSinceTimBegan;
+    var rightNow_Local_MillisecondsSinceTimBegan;
+    var rightNow_MillisecondsDifference;
+    var rightNow_MinutesDifference;
+    var rightNow_timeZoneString;
+    var rightNow_MinutesPart;
+    var rightNow_HoursDifference;
+    
+    rightNow = new Date();
+    
+    rightNow_UTC_MillisecondsSinceTimBegan = Date.UTC (
+	rightNow.getUTCFullYear (),
+	rightNow.getUTCMonth (),
+	rightNow.getUTCDate (),
+	rightNow.getUTCHours (),
+	rightNow.getUTCMinutes (),
+	rightNow.getUTCSeconds ()
+	);
+    rightNow_Local_MillisecondsSinceTimBegan = Date.UTC (
+	rightNow.getFullYear (),
+	rightNow.getMonth (),
+	rightNow.getDate (),
+	rightNow.getHours (),
+	rightNow.getMinutes (),
+	rightNow.getSeconds ()
+	);
+    
+    rightNow_MillisecondsDifference = rightNow_Local_MillisecondsSinceTimBegan - rightNow_UTC_MillisecondsSinceTimBegan;
+    
+    rightNow_MinutesDifference = (rightNow_MillisecondsDifference / 1000) / 60;
+    
+    if (0 > rightNow_MinutesDifference) {
+	rightNow_timeZoneString = "-";
+    } else {
+	rightNow_timeZoneString = "+";
+    }
+    
+    rightNow_MinutesPart = rightNow_MinutesDifference % 60;
+    
+    if (rightNow_MinutesPart != 0) {
+	rightNow_MinutesDifference -= rightNow_MinutesPart;
+	if (0 > rightNow_MinutesPart) {
+	    rightNow_MinutesPart = Math.abs (rightNow_MinutesPart);
+	}
+    }
+    
+    if (0 > rightNow_MinutesDifference) {
+	rightNow_MinutesDifference = Math.abs (rightNow_MinutesDifference);
+    }
+    
+    rightNow_HoursDifference = rightNow_MinutesDifference / 60;
+    
+    if (10 > rightNow_HoursDifference) {
+	rightNow_timeZoneString = rightNow_timeZoneString + '0';
+    }
+    
+    rightNow_timeZoneString = rightNow_timeZoneString + rightNow_HoursDifference;
+    
+    if (10 > rightNow_MinutesPart) {
+	rightNow_timeZoneString = rightNow_timeZoneString + '0';
+    }
+    
+    rightNow_timeZoneString = rightNow_timeZoneString + rightNow_MinutesPart;
+    
+    return rightNow_timeZoneString;
+}
+
+</script>
+
+<STYLE TYPE="text/css">
+    .urlLabelStyle
+    {
+	font-family:sans-serif;
+	font-style:italic;
+	font-size:0.8em;
+	text-align:center;
+	vertical-align:middle;
+    }
+</STYLE>
+
+<STYLE TYPE="text/css">
+    .timezoneLabelStyle
+    {
+	font-family:sans-serif;
+	font-style:normal;
+	font-size:0.8em;
+	text-align:center;
+	vertical-align:middle;
+    }
+</STYLE>
+
+</head>
+<body onload="initializeHTML()" bgcolor="antiquewhite">
+<center>
+<table border="1" cellpadding="2">
+<form name="timestepform">
+<tr>
+<td align="center" bgcolor="lightblue">
+&nbsp;
+<font id=blink><input name="blinktext" size="11" value="" type="text" readonly></font>
+&nbsp;&nbsp;
+<input type="button" value=" &lt;&lt; " onmousedown="play('backward')">
+<input type="button" value=" |&lt; " onmousedown="tstep('backward')">
+&nbsp;<span style="font-weight: bold;">|</span>&nbsp
+<input type="button" value="  ||  " onmousedown="changePlaymode('pause')">
+&nbsp;<span style="font-weight: bold;">|</span>&nbsp;
+<input type="button" value=" &gt;| " onmousedown="tstep('forward')">
+<input type="button" value=" &gt;&gt; " onmousedown="play('forward')">
+&nbsp;<span style="font-weight: bold;">|</span>&nbsp;
+<!--
+<input type="button" value=" >| " onmousedown="setTimeToNow()">&nbsp;
+-->
+<input type="button" value=" RT " onmousedown="changePlaymode('live')">
+&nbsp
+</td>
+<td align="center" bgcolor="lightblue">
+&nbsp<b>TimeStep:</b>&nbsp
+<select name="step" onchange="updateTimeStep()" onmousedown="stopRefreshTimer()">
+<option value=1>1sec
+<option value=2>2s
+<option value=5>5s
+<option value=10>10s
+<option value=30>30s
+<option value=60>1min
+<option value=120>2m
+<option value=300>5m
+<option value=600>10m
+<option value=1800>30m
+<option value=3600>1hour
+<option value=7200>2h
+<option value=21600>6h
+<option value=43200>12h
+<option value=86400>1day
+<option value=172800>2day
+<option value=604800>1week
+<option value=2592000>1Month
+<option value=5184000>2Month
+<option value=15768000>6Month
+<option value=31536000>1year
+</select>
+&nbsp
+</td>
+</tr>
+</form>
+<!--form name="timeform" onsubmit="setTime()"-->
+<!-- onsubmit="return false;" prevents the form being submitted on ENTER -->
+<form name="timeform" onsubmit="return false;">
+<tr>
+<td align="center" bgcolor="lightblue">
+&nbsp;
+<select name="year" onchange="setTime()" onmousedown="stopRefreshTimer()">
+<option value=1995>1995
+<option value=1996>1996
+<option value=1997>1997
+<option value=1998>1998
+<option value=1999>1999
+<option value=2000>2000
+<option value=2001>2001
+<option value=2002>2002
+<option value=2003>2003
+<option value=2004>2004
+<option value=2005>2005
+<option value=2006>2006
+<option value=2007>2007
+<option value=2008>2008
+<option value=2009>2009
+<option value=2010>2010
+<option value=2011>2011
+<option value=2012>2012
+</select>
+<select name="month" onchange="setTime()" onmousedown="stopRefreshTimer()">
+<option value=0>Jan
+<option value=1>Feb
+<option value=2>Mar
+<option value=3>Apr
+<option value=4>May
+<option value=5>Jun
+<option value=6>Jul
+<option value=7>Aug
+<option value=8>Sep
+<option value=9>Oct
+<option value=10>Nov
+<option value=11>Dec
+</select>
+<select name="day" onchange="setTime()" onmousedown="stopRefreshTimer()">
+<option value=1>1
+<option value=2>2
+<option value=3>3
+<option value=4>4
+<option value=5>5
+<option value=6>6
+<option value=7>7
+<option value=8>8
+<option value=9>9
+<option value=10>10
+<option value=11>11
+<option value=12>12
+<option value=13>13
+<option value=14>14
+<option value=15>15
+<option value=16>16
+<option value=17>17
+<option value=18>18
+<option value=19>19
+<option value=20>20
+<option value=21>21
+<option value=22>22
+<option value=23>23
+<option value=24>24
+<option value=25>25
+<option value=26>26
+<option value=27>27
+<option value=28>28
+<option value=29>29
+<option value=30>30
+<option value=31>31
+</select>
+&nbsp;&nbsp;
+<select name="hour" onchange="setTime()" onmousedown="stopRefreshTimer()">
+<option value=0>00
+<option value=1>01
+<option value=2>02
+<option value=3>03
+<option value=4>04
+<option value=5>05
+<option value=6>06
+<option value=7>07
+<option value=8>08
+<option value=9>09
+<option value=10>10
+<option value=11>11
+<option value=12>12
+<option value=13>13
+<option value=14>14
+<option value=15>15
+<option value=16>16
+<option value=17>17
+<option value=18>18
+<option value=19>19
+<option value=20>20
+<option value=21>21
+<option value=22>22
+<option value=23>23
+</select>
+:
+<select name="minute" onchange="setTime()" onmousedown="stopRefreshTimer()">
+<option value=0>00
+<option value=1>01
+<option value=2>02
+<option value=3>03
+<option value=4>04
+<option value=5>05
+<option value=6>06
+<option value=7>07
+<option value=8>08
+<option value=9>09
+<option value=10>10
+<option value=11>11
+<option value=12>12
+<option value=13>13
+<option value=14>14
+<option value=15>15
+<option value=16>16
+<option value=17>17
+<option value=18>18
+<option value=19>19
+<option value=20>20
+<option value=21>21
+<option value=22>22
+<option value=23>23
+<option value=24>24
+<option value=25>25
+<option value=26>26
+<option value=27>27
+<option value=28>28
+<option value=29>29
+<option value=30>30
+<option value=31>31
+<option value=32>32
+<option value=33>33
+<option value=34>34
+<option value=35>35
+<option value=36>36
+<option value=37>37
+<option value=38>38
+<option value=39>39
+<option value=40>40
+<option value=41>41
+<option value=42>42
+<option value=43>43
+<option value=44>44
+<option value=45>45
+<option value=46>46
+<option value=47>47
+<option value=48>48
+<option value=49>49
+<option value=50>50
+<option value=51>51
+<option value=52>52
+<option value=53>53
+<option value=54>54
+<option value=55>55
+<option value=56>56
+<option value=57>57
+<option value=58>58
+<option value=59>59
+</select>
+:
+<select name="second" onchange="setTime()" onmousedown="stopRefreshTimer()">
+<option value=0>00
+<option value=1>01
+<option value=2>02
+<option value=3>03
+<option value=4>04
+<option value=5>05
+<option value=6>06
+<option value=7>07
+<option value=8>08
+<option value=9>09
+<option value=10>10
+<option value=11>11
+<option value=12>12
+<option value=13>13
+<option value=14>14
+<option value=15>15
+<option value=16>16
+<option value=17>17
+<option value=18>18
+<option value=19>19
+<option value=20>20
+<option value=21>21
+<option value=22>22
+<option value=23>23
+<option value=24>24
+<option value=25>25
+<option value=26>26
+<option value=27>27
+<option value=28>28
+<option value=29>29
+<option value=30>30
+<option value=31>31
+<option value=32>32
+<option value=33>33
+<option value=34>34
+<option value=35>35
+<option value=36>36
+<option value=37>37
+<option value=38>38
+<option value=39>39
+<option value=40>40
+<option value=41>41
+<option value=42>42
+<option value=43>43
+<option value=44>44
+<option value=45>45
+<option value=46>46
+<option value=47>47
+<option value=48>48
+<option value=49>49
+<option value=50>50
+<option value=51>51
+<option value=52>52
+<option value=53>53
+<option value=54>54
+<option value=55>55
+<option value=56>56
+<option value=57>57
+<option value=58>58
+<option value=59>59
+</select>
+&nbsp;
+<!-- NOTE: The JavaScript code above changes the label put in this field.  -->
+<!--       In order for this to work with IE and the Google Earth browser, -->
+<!--       then we *must* keep some default text in here (currently, the   -->
+<!--       default text is just ".").                                      -->
+<font class="timezoneLabelStyle" id="timezoneDisplay">
+.
+</font>
+&nbsp;
+</td>
+<td align="center" bgcolor="lightblue">
+&nbsp;&nbsp;<b>Interval:</b>&nbsp;&nbsp;&nbsp;
+<select name="duration" onchange="updateDuration()" onmousedown="stopRefreshTimer()">
+<option value=0>0
+<option value=1>1sec
+<option value=2>2s
+<option value=5>5s
+<option value=10>10s
+<option value=30>30s
+<option value=60>1min
+<option value=120>2m
+<option value=300>5m
+<option value=600>10m
+<option value=1800>30m
+<option value=3600>1hour
+<option value=7200>2h
+<option value=21600>6h
+<option value=43200>12h
+<option value=86400>1day
+<option value=172800>2day
+<option value=604800>1week
+<option value=2592000>1Month
+<option value=5184000>2Month
+<option value=15768000>6Month
+<option value=31536000>1year
+<option value=63072000>2year
+<option value=157680000>5year
+<option value=315360000>10year
+</select>
+&nbsp
+</td>
+</tr>
+</form>
+</table>
+<hr>
+<!-- NOTE: The JavaScript code above changes the label put in this field.  -->
+<!--       In order for this to work with IE and the Google Earth browser, -->
+<!--       then we *must* keep some default text in here (currently, the   -->
+<!--       default text is just ".").                                      -->
+<span class="urlLabelStyle" id="urlDisplay">&nbsp;</span>
+</center>
+</body>
+</html>

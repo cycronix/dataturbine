@@ -1,0 +1,181 @@
+<html>
+<head>
+	<title>RBNB WebDAV Name Extension Options</title>
+	<LINK REL=STYLESHEET HREF="/stylesheets/rbnbstyles.css" TYPE="text/css">
+</head>
+<body background="c_bg.gif">
+	<H1>RBNB WebDAV Name Extension Options</H1>
+	<p>RBNB request and flushing options can be accessed using the following
+		syntax:</p>
+	<p style="margin-left: 1in;">
+		<code>[channel][options-start-marker][option1][value1]
+			&lt;&amp;&lt;option2&gt;&lt;value2&gt;...</code></p>
+	<p>where <code>channel</code> is the RBNB<sup>TM</sup> channel, 
+		<code>options-start-marker</code> is one of <code>?</code> or
+		<code>@</code>, and the option value pairs are specified below.
+	</p>
+	<H2>Folder (Source) Options</H2>
+	<p>The following options are for use with the MKCOL WebDAV command
+		when used to create RBNB sources.</p>
+	<table BORDER CELLSPACING=0 CELLPADDING=3 class="featuretable">
+		<tr>
+			<th class="highlight">Option</th>
+			<th class="highlight">Alias</th>
+			<th class="highlight">Values</th>
+			<th class="highlight">Description</th>
+			<th class="highlight">Example</th>
+		</tr>
+		<tr><td>mode</td><td>m</td><td>
+			One of "none", "create", "append", "load", or "delete".&nbsp;
+			For flushes, any valid mime type.</td>
+			<td>Valid only for source creation.&nbsp; The
+				default is "none" (or "append" if option <code>archive</code>
+				is used).</td>
+			<td><code>MKCOL source@mode=create&amp;archive=1000</code>
+				starts a source with a new archive of 1000 frames.
+			</td>
+		</tr>
+		<tr><td>archive</td><td>a</td>
+			<td>Any non-negative integer.</td>
+			<td>This option specifies the
+				number of frames of data to use for the server's archive 
+				for this source.&nbsp; The default mode is changed to "append".
+			</td>
+			<td><code>MKCOL foo@a=1000</code> creates an archive with 1000 
+				frames.
+			</td>
+		</tr>
+		<tr><td>cache</td><td>c</td>
+			<td>Any non-negative integer.</td>
+			<td>This option specifies the
+				number of frames of data in the ring buffer.&nbsp; The default
+				is currently 10000.</td>
+			<td><code>MKCOL foo@c=1000</code> creates a cache with 1000 
+				frames.
+			</td>
+		</tr>
+		<tr><td>protect</td><td>p</td>
+			<td>One of "on" or "off".</td>
+			<td>When on, when the DELETE command is used on files located under
+				this folder, the files are not truly removed, but rather hidden
+				until another frame is added to the file.</td>
+			<td><code>MKCOL foo@protect=on</code></td>
+		</tr>
+	</table>
+	<H2>File (Channel) Options</H2>
+	<p>These options specify the format of file creation and access.</p>
+	<table BORDER CELLSPACING=0 CELLPADDING=3 class="featuretable">
+		<tr>
+			<th class="highlight">Option</th>
+			<th class="highlight">Alias</th>
+			<th class="highlight">Values</th>
+			<th class="highlight">Description</th>
+			<th class="highlight">Example</th>
+		</tr>
+		<tr><td>time</td><td>t</td><td>Any double</td>
+			<td>Start time of the request or flushed data.
+				&nbsp;Note that specifing this option 
+				changes the default reference from "newest" to "absolute" for
+				requests.&nbsp; If unspecified for flushes, the default is
+				seconds since the epoch.
+			</td>
+			<td><code>GET foo@t=0</code> returns the point of data available
+				at time 0.
+			</td>
+		</tr>
+		<tr><td>duration</td><td>d</td><td>Any double</td>
+			<td>Duration of the request or flushed data.&nbsp; A duration of
+				zero means "one point".</td>
+			<td><code>GET foo@d=1</code> returns one unit (probably seconds)
+				of data.
+			</td>
+		</tr>
+		<tr><td>reference</td><td>r</td>
+			<td>One of "newest", "oldest", or "absolute".</td>
+			<td>Valid only for requests.&nbsp; Determines how the
+			start time is interpretted.</td>
+			<td><code>GET foo@r=oldest&amp;d=1</code> returns the oldest 
+				unit (probably seconds)	of data availble on the server.
+			</td>
+		</tr>
+		<tr><td>fetch</td><td>f</td><td>One of "data", "d", "time", "times",
+			"t", "size", "s", "datatype", "dt", "mime", "m", "info", or "i".
+			</td>
+			<td>For requests, determines what information is retrieved from the 
+				server.</td>
+			<td><code>GET foo@fetch=times</code> retrieves the time for the
+				last point in the server.</td>
+		</tr>
+		<tr><td>byteorder</td><td>bo</td>
+			<td>One of "msb", "lsb", or "local".</td>
+			<td>For requests, specifies the byte order desired for the returned
+				data. &nbsp;For flushes, specifies the byte order of the 
+				data to be flushed.&nbsp; <strong>MSB is the default.</strong>
+			</td>
+			<td><code>PUT foo@t=0&amp;d=1&amp;bo=msb</code> specifies that 
+				a chunk of one unit's worth of data is to be sent to the 
+				RBNB with MSB byte order.
+			</td>
+		</tr>
+		<tr><td>datatype</td><td>dt</td>
+			<td>One of "int8", "i8", "int16", "i16", "int32", 
+			"i32", "int64", "i64", "float32", "f32", "float64", "f64",
+			"string", "s", "bytearray", "b", "ba", or "unknown".</td>
+			<td>For flushes, specifies the low level type of the 
+				data to be flushed.&nbsp; The default is "bytearray" except
+				in the case of MUX channels, where it is "int8".</td>
+			<td><code>PUT foo@dt=float32</code> specifies that 
+				a chunk of single precision data is to be sent to the
+				RBNB.
+			</td>
+		</tr>
+		<tr><td>mux</td><td>x</td>
+			<td>Any positive integer.</td>
+			<td>Specifies the number of channels of multiplexed data.&nbsp; The
+			default is 1 (no multiplexing).&nbsp; For PUTs, indicates that the
+			specified
+			URL is the prefix for a channel set, where the number of channels 
+			in the set is the MUX parameter.&nbsp; The data block is assumed
+			to consist of <code>n</code> sets of 'blocksize' words, where
+			n = data_block_size / blocksize / wordsize, and wordsize is a 
+			function of the 'datatype' parameter.&nbsp; Note that incomplete
+			blocks (at the end of the data stream) are discarded.</td>
+			<td><code>PUT foo@x=10</code> puts the data into ten channels marked
+			<code>foo0</code>, <code>foo1</code>, etc, one 8 bit integer per
+			channel per pass until all the data has been used.
+		</tr>
+		<tr><td>blocksize</td><td>bs</td>
+			<td>Any positive integer.</td>
+			<td>Specified the number of words of data that are contiguous
+			for each channel for multiplexed data.&nbsp; The default is one.
+			</td>
+			<td><code>PUT foo@x=10&amp;bs=5&amp;dt=f32</code> will divide the
+			data into 10 channels, each with five 32 bit floats per pass, and
+			enough passes to use all the data.</td>
+		<tr><td>mime</td><td>m</td><td>For flushes, any valid mime type.</td>
+			<td>Valid only for flushes.&nbsp; The
+				default is "application/octet-stream".</td>
+			<td><code>PUT foo@mime=text/xml</code> specifies that the mime
+				type of 'foo' is to be 'text/xml'.
+			</td>
+		</tr>
+		<!--  2006/09/28  WHF  This option has been removed.
+		<tr><td>message</td><td>msg</td>
+			<td>Any string.&nbsp; May need to be URL encoded if POST is not 
+				used.</td>
+			<td>Arbitrary string included as a message to PlugIns.
+			</td>
+			<td><code>GET SQLPlugIn@msg=SHOW+tables</code> asks the 
+				SQLPlugIn to perform an SQL database query to show the
+				tables available in the current database.</td>
+		</tr> -->
+	</table>
+	<p>Note that the query string will be forwarded as a data string in the
+		RBNB request in the case of GET and POST.&nbsp;  This may be retrieved
+		by RBNB PlugIns and used to configure the response.
+	</p>
+</body>
+</html>
+
+
+

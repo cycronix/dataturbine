@@ -1,0 +1,47 @@
+<html>
+<head>
+	<title>Start SQL PlugIn</title>
+	<LINK REL=STYLESHEET HREF="/stylesheets/rbnbstyles.css" TYPE="text/css">
+</head>
+<body>
+<h1>SQL PlugIn</h1>
+<p>This PlugIn connects to the specified database, receives SQL queries and 
+	returns the response in comma separated value format.  The first line 
+	consists of the column names.</p>
+<form action="StartPlugIn.jsp" method="GET" 
+		onSubmit="this.arg[5].value=this.arg[3].value; return true;" >
+	<input type="hidden" name="className" value="SQLPlugIn" />
+	<input type="hidden" name="plugInName" 
+		value="SQL PlugIn" />
+	
+	<div class="centered">
+	<table celpadding=5 class="leftjustified">
+	<tr><!-- Note that the order of these arguments is now significant -->
+		<td>RBNB Server Address:</td>
+		<td><input type="hidden" name="arg" value="-a"/>
+		<input type="TEXT" name="arg" 
+			value="localhost:3333" size=30/></td>
+	</tr><tr>
+		<td>Database Name:</td>
+		<td><input type="hidden" name="arg" value="-d"/>
+		<input type="TEXT" name="arg" value="northwind" size=30/>
+		<input type="hidden" name="arg" value="-n" />
+		<input type="hidden" name="arg" value="XXX" />
+		</td>
+	</tr>
+	<!-- old way <tr>
+		<td>PlugIn Name:</td>
+		<td><input type="hidden" name="arg" value="-n"/>
+		<input type="TEXT" name="arg" value="SQLPlugIn" size=30/></td> 
+	</tr> -->
+	</table>
+	<p><input type="submit" value="Start PlugIn" /></p></div>
+</form>
+<p><emp>Note:</emp> This configuration is for database access via ODBC.  To 
+	configure for access by JDBC, use 
+	<a href="StartPlugIn.jsp?configForm=StartJdbcSQLPI.html">this</a>
+	form.</p>
+<p class="footer"><a href="/webTurbine">Home</a></p>
+</body>
+</html>
+

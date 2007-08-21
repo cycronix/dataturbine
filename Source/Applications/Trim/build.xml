@@ -1,0 +1,55 @@
+<!-- Name: build.xml
+     By:   John Wilson
+     Date: 07/11/2005
+
+     Description:
+         This file is the primary Ant build file for the RBNB Trim
+         application.  This program copies data from an existing RBNB Source
+	 and saves the data in a new Archive.
+-->
+
+<project name="APPLICATION.TRIM" default="library" basedir=".">
+
+ <!-- Import the standard definitions (properties). -->
+ <import file="../../definitions.xml" />
+
+ <!-- Initialize by setting the timestamp. -->
+ <target name="init">
+  <tstamp />
+  <buildnumber />
+  <mkdir dir="${rbnb.builddir}" />
+  <mkdir dir="${rbnb.classesdir}" />
+  <mkdir dir="${rbnb.classesdir}/Applications" />
+  <mkdir dir="${rbnb.classesdir}/Applications/Trim" />
+  <mkdir dir="${rbnb.librarydir}" />
+ </target>
+
+ <!-- Compile the Trim Java source code and place the results in the Trim
+      classes directory.  References the Core library and the Trim classes for
+      dependencies.
+  -->
+ <target name="compile" depends="init">
+  <javac destdir="${rbnb.classesdir}/Applications/Trim"
+         deprecation="on">
+   <src path="${rbnb.sourcedir}/Applications/Trim" />
+   <classpath path="${rbnb.classesdir}/Applications/Trim" />
+   <classpath path="${rbnb.librarydir}/rbnb.jar" />
+  </javac>
+ </target>
+
+ <!-- Create the Trim jar file using the Trim classes. -->
+ <target name="library" depends="compile">
+  <jar destfile="${rbnb.librarydir}/trim.jar"
+       basedir="${rbnb.classesdir}/Applications/Trim"
+       manifest="Manifest"
+   />
+ </target>
+
+ <!-- Cleans out all compiled and library files for the Trim project. -->
+ <target name="clean">
+  <delete dir="${rbnb.classesdir}/Applications/Trim" />
+  <delete file="${rbnb.librarydir}/trim.jar" />
+ </target>
+
+</project>
+

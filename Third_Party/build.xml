@@ -1,0 +1,54 @@
+<!-- Name: build.xml
+     By:   Ian Brown
+     Date: 06/18/2004
+
+     Modified:
+         EMF 12/08/2005: added Java1.4 Tomcat compatibility file
+         JPW 08/20/2007: Third_Party directory has been moved out of the
+	                 Source directory (it now resides at the top level
+			 alongside Source).  Therefore, in this build file,
+			 I had to change how to find definitions.xml.
+
+     Description:
+         This file is the primary Ant build file for the third party
+         applications.
+-->
+
+<project name="THIRD_PARTY" default="library" basedir=".">
+
+ <!-- Import the standard definitions (properties). -->
+ <!-- JPW 08/20/2007: Since Third_Party has been moved out of the Source -->
+ <!--                 directory, changed where to find definitions.xml   -->
+ <!-- import file="../definitions.xml" /-->
+ <import file="../Source/definitions.xml" />
+
+ <!-- Library directory. -->
+ <property name="rbnb.thirdpartylibdir"
+           value="${rbnb.librarydir}/Third_Party" />
+
+ <!-- Initialize the application build directory. -->
+ <target name="init">
+  <mkdir dir="${rbnb.thirdpartylibdir}" />
+ </target>
+
+ <!-- Compile all of the applications - a NOP. -->
+ <target name="compile" depends="init">
+ </target>
+
+ <!-- Copy the third party libraries to the build directory. -->
+ <target name="library" depends="compile">
+  <copy todir="${rbnb.thirdpartylibdir}">
+<!--   <fileset dir="${rbnb.thirdpartydir}"
+            includes="jakarta-tomcat-4.1.21.zip,JAI.zip" />  -->
+	<fileset dir="${rbnb.thirdpartydir}"
+            includes="apache-tomcat-5.5.12.zip,
+                      apache-tomcat-5.5.12-compat.zip,JAI.zip" /> 
+  </copy>
+ </target>
+
+ <!-- Cleans out all compiled and library files for the applications. -->
+ <target name="clean">
+  <delete dir="${rbnb.builddir}/Third_Party" />
+ </target>
+
+</project>

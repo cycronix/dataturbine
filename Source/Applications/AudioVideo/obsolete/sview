@@ -1,0 +1,1 @@
+java -cp "CLASSES:/SDP/RBNB/Dev/Build/Lib/rbnb.jar" rbnbVidView -r nomad -v rbnbVideo/Video.jpg

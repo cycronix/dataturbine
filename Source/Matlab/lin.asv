@@ -1,0 +1,11 @@
+function y=lin(x)
+disp('lin called');
+beep
+scale=10;
+
+if nargin==0
+    y=2;
+else
+    y=x{1} + scale*x(2);
+end
+    

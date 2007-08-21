@@ -1,0 +1,129 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>Routing PlugIn Help</title>
+  <link rel="STYLESHEET" href="/stylesheets/rbnbstyles.css"
+ type="text/css">
+</head>
+<body>
+<h1>Routing PlugIn Help</h1>
+Robustly connects one RBNB server to another. The "parent" server can
+see and access the "child" server as if the entire contents of the
+child were a source to the parent.
+<br>
+<h2>Input arguments</h2>
+<table border="1" cellpadding="2" cellspacing="2"
+ style="width: 423px; height: 76px; text-align: left; margin-left: auto; margin-right: auto;">
+  <tbody>
+    <tr>
+      <td>-a</td>
+      <td style="text-align: left;"> Parent server address (e.g.
+localhost:3333)</td>
+    </tr>
+    <tr>
+      <td>-b</td>
+      <td> Child server address</td>
+    </tr>
+    <tr>
+      <td style="text-align: left;">-t</td>
+      <td> Connection timeout (msec)</td>
+    </tr>
+  </tbody>
+</table>
+<h2>Description</h2>
+This works similar to how the built-in server routing, or more closely,
+"shortcuts" work, but via modular external plugins.&nbsp; Relative to
+built-in server routing:<br>
+<ul>
+  <li>Each route is one-way, i.e. routing parent to child means parent
+can see and access child, but child cannot access parent.&nbsp; At the
+interface level, a plugin connection is made to the parent that
+reflects the contents of the child.&nbsp; The child only sees a sink
+connection.&nbsp; For two-way connections, use a pair of routing
+plugins.</li>
+  <li>Streaming is not yet fully supported.&nbsp; Streaming (pushing
+data) via routes has always been a difficult problem.&nbsp; The routing
+plugin approach provides a better testbed from which to develop and
+test new approaches to this.</li>
+  <li>Routing can be established after-the-fact.&nbsp; I.e. it does not
+need to be decided upon at RBNB server startup.</li>
+  <li>Routing via plugins does not establish a rigid&nbsp; hierarchy,
+i.e. paths to data are relative.&nbsp; This is more flexible, but also
+can be more difficult to know how to find certain data.</li>
+  <li>Routing can be accomplished from third-party machines.&nbsp; E.g.
+a machine in Hanover NH can establish the route between an airborne
+server flying over Alaska and a ground based server in California.<br>
+  </li>
+</ul>
+<h2>Disruption Tolerance</h2>
+Network connections can fail in a number of ways to a number of
+disruptions. Putting the routing logic in&nbsp; a plugin makes it
+possible to more readily&nbsp; experiment, test, and tailor&nbsp;
+disruption tolerant routing logic.<br>
+<h3>Old Logic</h3>
+Earlier attempts at disruption tolerance (e.g. the routing built into
+the RBNB server) used an approach something like:<br>
+<ul>
+  <li>Try to sustain good connections (keep-alive pings)<br>
+  </li>
+  <li>Detect connections when they go bad (status requests)<br>
+  </li>
+  <li>Try to repair bad connections when they are detected (exception
+handling)<br>
+  </li>
+</ul>
+This approach has met with several difficulties:<br>
+<ul>
+  <li>Bad connections cannot always be avoided</li>
+  <li>It is difficult or impossible to detect some bad connections</li>
+  <li>Trying to repair a connection can lead to more problems</li>
+</ul>
+<h3>New Logic</h3>
+The robust routing plugin takes a new approach:<br>
+<ul>
+  <li>Stateless design that doesn't depend on maintaining connections<br>
+  </li>
+  <li>Presume idle connections are bad, regardless of status<br>
+  </li>
+  <li>Discard and restart connections<br>
+  </li>
+</ul>
+There are several types of connections that this plugin makes:<br>
+<ul>
+  <li>Server connections (to parent)</li>
+  <li>Server connection (to child)<br>
+  </li>
+  <li>PlugIn client connection (to parent server)<br>
+  </li>
+  <li>Sink client connection (to child server)<br>
+  </li>
+</ul>
+If a parent server connection goes down, for example the RBNB server
+itself aborts, the plugin goes into a sleepy loop attempting to
+reconnect.<br>
+<br>
+If a child server connection goes down, the current sink-request
+handler aborts, but the next incoming request will automatically create
+a new sink connection.<br>
+<br>
+PlugIn connections are periodically automatically restarted based upon
+the timeout period.&nbsp; Successful activity resets the timeout clock
+so as to retain proven connections for efficiency.&nbsp; Inactivity for
+the timeout period causes
+the plugin to automatically close and reopen its plugin
+connection.&nbsp; Thus, even if a connection has an undetected problem,
+it is automatically repaired at the next reconnect interval.<br>
+<br>
+Sink connections are implemented as separate threads to handle multiple
+simultaneous requests in parallel.&nbsp; Sink threads
+are put in a stack to be re-used only if they have successfully
+completed the previous request. A sink thread is considered stale and
+is discarded if it has not been used in the specified timeout period.
+Thus, bad or hung connections are abandoned, yet good connections are
+sustained for efficiency.<br>
+<br>
+<hr class="sectionbreak">
+<p class="footer"><a href="javascript:history.back()"> Back to PlugIn</a>
+- <a href="/webTurbine">Home</a></p>
+</body>
+</html>

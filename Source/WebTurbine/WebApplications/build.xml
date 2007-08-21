@@ -1,0 +1,291 @@
+<!-- Name: build.xml
+     By:   Bill Finger
+     Date: 2005/12/08
+	 
+	 History
+	 2004/06/22  WHF  Created.
+	 2005/10/12  WHF  Made the leap to the new RBNB WebDav.
+	 2005/12/08  WHF  Cleaned up some old definitions.
+	 2005/12/12  EMF  Do not make WAR archives, just copy files.
+	 2006/01/11  JPW  Copy KMLTrackPlugIn config file over to the
+	                      Web Applications area for distribution.
+	 2006/02/23  JPW  Copy the entire KMLResources directory.
+	 2006/04/26  WHF  Builds HttpMonitor.
+	 2006/07/13  JPW  No longer copy KMLResources directory; copy
+	                      TrackResources directory.
+	 2007/03/23  WHF  Attempt to use Piccolo as the SAX driver, versus xerces.				
+-->
+
+<project name="WebApplications" default="library" basedir=".">
+	<description>
+	Builds various RBNB web applications.
+	</description>
+
+	<!-- Import the standard definitions (properties). -->
+	<import file="../../definitions.xml" />
+	
+	<!-- Properties specific to this build file: -->
+	<property name="rbnb.waclassesdir" 
+			value="${rbnb.classesdir}/WebTurbine/WebApplications" />
+	<property name="rbnb.wasourcedir" 
+			value="${rbnb.sourcedir}/WebTurbine/WebApplications" />
+	<property name="rbnb.walibdir"
+			value="${rbnb.librarydir}/WebServerImage" />
+			
+	<property name="rbnb.wtimageroot"
+			value="${rbnb.waclassesdir}/webapps/webTurbine" />
+	<property name="rbnb.wtclassesdir"
+			value="${rbnb.wtimageroot}/WEB-INF/classes" />
+	<property name="rbnb.wtwarpath"
+			value="${rbnb.walibdir}/webapps/webTurbine.war" />
+	<property name="rbnb.docwarpath"
+			value="${rbnb.walibdir}/webapps/documentation.war" />
+			
+	<!-- WebDAV properties: -->
+	<property name="rbnb.webdavsourcedir"
+			value="${rbnb.wasourcedir}/src/webdav" />
+	<property name="rbnb.webdavclassesdir"
+			value="${rbnb.waclassesdir}/webdav" />
+	<property name="rbnb.webdavwarpath"
+			value="${rbnb.walibdir}/webapps/RBNB.war" />
+	
+	<!-- Third party paths  -->  
+	<property name="rbnb.jakartadir" 
+			value="${rbnb.thirdpartydir}/apache-tomcat-5.5.12" />			
+	<path id = "servletcp" >
+		<pathelement location="${rbnb.jakartadir}/common/lib/servlet-api.jar"/>
+		<pathelement location="${rbnb.jakartadir}/common/lib/jsp-api.jar" />
+	</path>
+	<path id = "corecp" >
+		<pathelement location = "${rbnb.obfuscatedir}/rbnb.jar" />
+	</path>
+
+	<!--*****  Targets *****-->
+	<target name="init" description="Initialize build environment.">
+		<tstamp />
+		<buildnumber />
+		<mkdir dir="${rbnb.builddir}" />
+		<mkdir dir="${rbnb.classesdir}" />
+		<mkdir dir="${rbnb.waclassesdir}" />
+		<mkdir dir="${rbnb.waclassesdir}/HttpMonitor" />
+		<mkdir dir="${rbnb.wtimageroot}" />
+		<mkdir dir="${rbnb.wtclassesdir}" />
+		<mkdir dir="${rbnb.librarydir}" />
+		<mkdir dir="${rbnb.walibdir}" />
+		<mkdir dir="${rbnb.walibdir}/webapps" />
+		<mkdir dir="${rbnb.webdavclassesdir}" />
+	</target>
+	
+	<!-- Target which defines the Jasper, or JSP precompiler, task. -->
+	<target name="jspc"> 
+		<taskdef classname="org.apache.jasper.JspC" name="jasper2" > 
+			<classpath id="jspc.classpath"> 
+				<pathelement location="${java.home}/../lib/tools.jar"/> 
+				<fileset dir="${rbnb.jakartadir}/bin"> 
+					<include name="*.jar"/> 
+				</fileset> 
+				<fileset dir="${rbnb.jakartadir}/server/lib"> 
+					<include name="*.jar"/> 
+				</fileset>
+				<fileset dir="${rbnb.jakartadir}/common/lib"> 
+					<include name="*.jar"/> 
+				</fileset>
+				<!-- Tag library, which for some reason is not included in
+						the common area: -->
+				<fileset dir="${rbnb.jakartadir}/webapps/jsp-examples/WEB-INF/lib"> 
+					<include name="*.jar"/> 
+				</fileset>				
+			</classpath> 
+		</taskdef>
+	</target> 
+
+	<target name="compile" depends="init,jspc"
+			description = "Compile servlets and server side beans.">
+		<!-- Create image of webTurbine web application: -->	
+		<copy todir="${rbnb.wtimageroot}">
+			<fileset dir = "${rbnb.wasourcedir}/webapps/webTurbine" />
+		</copy>
+		<javac destdir="${rbnb.wtclassesdir}"
+				deprecation = "on"
+				debug = "${rbnb.compiledebug}"
+				srcdir = "${rbnb.wasourcedir}/src/other" 
+				includes = "*.java" >
+			<classpath refid = "corecp" />
+			<classpath refid = "servletcp" />
+		</javac>
+		<mkdir dir="${rbnb.waclassesdir}/temp" />
+		<jasper2 
+             validateXml="false" 
+             uriroot="${rbnb.wtimageroot}" 
+             webXmlFragment="${rbnb.waclassesdir}/temp/webJasper.xml" 
+             outputDir="${rbnb.waclassesdir}/temp" />
+		<!-- Build JSP servlets: -->
+		<javac destdir="${rbnb.wtclassesdir}"
+				deprecation = "on"
+				debug = "${rbnb.compiledebug}"
+				srcdir = "${rbnb.waclassesdir}/temp" 
+				includes = "**/*.java" >
+			<classpath refid = "corecp" />
+			<classpath refid = "jspc.classpath" />
+		</javac>
+		<concat destfile="${rbnb.wtimageroot}/WEB-INF/web.xml">
+			<fileset file="${rbnb.wasourcedir}/JasperXML/webPrefix.xml" />
+			<fileset file="${rbnb.waclassesdir}/temp/webJasper.xml" />
+			<fileset file="${rbnb.wasourcedir}/JasperXML/webPostfix.xml" />
+		</concat>
+		<!-- Build new RBNB WebDAV servlet: -->
+		<javac destdir="${rbnb.webdavclassesdir}" debug = "${rbnb.compiledebug}"
+				srcdir = "${rbnb.webdavsourcedir}"
+				includes = "*.java" >
+			<classpath refid = "corecp" />
+			<classpath refid = "servletcp" />
+		</javac>
+		<!-- HttpForward: -->
+		<javac destdir="${rbnb.webdavclassesdir}" debug = "${rbnb.compiledebug}"
+				srcdir = "${rbnb.wasourcedir}/src/HttpForward"
+				includes = "*.java" >
+			<classpath refid = "corecp" />
+			<classpath refid = "servletcp" />
+		</javac>
+
+		<!-- HttpMonitor: -->
+		<javac destdir="${rbnb.waclassesdir}/HttpMonitor" debug="on"
+				deprecation="off"
+				source="1.4" target="1.4" >
+			<classpath refid = "servletcp" />
+			<src path="src/HttpMonitor/src" />
+			<src path="${rbnb.thirdpartydir}/dav4jSrc" />
+			<src path="${rbnb.thirdpartydir}/piccolo" />
+		</javac>
+		<mkdir dir="${rbnb.walibdir}/webapps/webTurbine/WEB-INF/lib" />
+		<!-- 2007/01/24  WHF  Copied to this area in 'library' task. 
+		<jar destfile="${rbnb.walibdir}/webapps/webTurbine/WEB-INF/lib/HttpMonitor.jar"
+				manifest="src/HttpMonitor/monitorManif.txt">
+			<fileset dir="${rbnb.waclassesdir}" 
+					includes="com/rbnb/web/**,com/ibm/**" />
+			<fileset dir="${rbnb.thirdpartydir}/xerces" />
+		</jar> -->
+		<!-- JPW 06/09/2006: Create HttpMonitor.jar in the standard RBNB lib directory as well -->
+		<jar destfile="${rbnb.librarydir}/HttpMonitor.jar"
+				manifest="src/HttpMonitor/monitorManif.txt">
+			<!-- <fileset dir="${rbnb.waclassesdir}" 
+					includes="com/rbnb/web/**,com/ibm/**" />  -->
+			<fileset dir="${rbnb.waclassesdir}/HttpMonitor" />
+			<!-- 2007/01/24  WHF  Xerces class files moved to 'Third_Party' -->
+			<!-- <fileset dir="src/HttpMonitor/SAX" /> -->
+			<!-- 2007/03/23  WHF  Now use Piccolo instead of Xerces. -->
+			<!-- <fileset dir="${rbnb.thirdpartydir}/xerces" /> -->
+		</jar>
+	</target>
+
+	<target name="library" depends="compile" description 
+			= "Build necessary war (Web Application Resource) files.">
+		<!-- just copy files, do not war them up
+		<jar destfile = "${rbnb.wtwarpath}">
+			<fileset dir = "${rbnb.wtimageroot}" /> 
+			<zipfileset dir = "${rbnb.librarydir}" 
+				    includes="admin.jar,plot.jar,source.jar,webcache.jar,
+					messaging.jar,chat.jar,proxy.jar,bufferedroute.jar,
+					rbnbAVCP.jar,player.jar"
+					prefix="WEB-INF/lib" />
+			<zipfileset dir = "${rbnb.classesdir}/Applications/PlugIns"
+                                    includes="*.class"
+				    prefix="WEB-INF/classes" />
+			 Tag library used by ViewRoutingPI.jsp
+			<zipfileset dir = "${rbnb.jakartadir}/webapps/jsp-examples/WEB-INF/lib"
+					prefix="WEB-INF/lib"> 
+				<include name="*.jar"/> 
+			</zipfileset>
+		</jar> -->
+		<mkdir dir = "${rbnb.walibdir}/webapps/webTurbine" />
+		<copy todir = "${rbnb.walibdir}/webapps/webTurbine" >
+			<fileset dir = "${rbnb.wtimageroot}" />
+		</copy>
+		<mkdir dir = "${rbnb.walibdir}/webapps/webTurbine/WEB-INF/lib" />
+		<copy todir = "${rbnb.walibdir}/webapps/webTurbine/WEB-INF/lib" >
+			<fileset dir = "${rbnb.librarydir}" 
+				    includes="admin.jar,plot.jar,source.jar,webcache.jar,
+					messaging.jar,chat.jar,proxy.jar,bufferedroute.jar,
+					rbnbAVCP.jar,player.jar,HttpMonitor.jar" />
+		</copy>
+		<mkdir dir = "${rbnb.walibdir}/webapps/webTurbine/WEB-INF/classes" />
+		<copy todir = "${rbnb.walibdir}/webapps/webTurbine/WEB-INF/classes" >
+			<fileset dir = "${rbnb.classesdir}/Applications/PlugIns"
+					includes = "*.class" />
+		</copy>
+		<!-- JPW 07/13/2006: Copy TrackResources directory -->
+		<mkdir dir = "${rbnb.walibdir}/webapps/webTurbine/WEB-INF/classes/TrackResources" />
+		<copy todir="${rbnb.walibdir}/webapps/webTurbine/WEB-INF/classes/TrackResources">
+		    <fileset dir="${rbnb.classesdir}/Applications/PlugIns/TrackResources"/>
+		</copy>
+		<copy todir = "${rbnb.walibdir}/webapps/webTurbine/WEB-INF/lib" >
+			<fileset dir = "${rbnb.jakartadir}/webapps/jsp-examples/WEB-INF/lib"
+					includes = "*.jar" />
+		</copy>
+			
+		
+		<jar destfile = "${rbnb.docwarpath}">
+			<fileset dir = "${rbnb.wasourcedir}/webapps/documentation" />
+			<zipfileset dir = "${rbnb.documentationdir}/JavaDoc" 
+					prefix="api" /> 
+			<fileset dir = "${rbnb.documentationdir}"
+					excludes = "JavaDoc/**" />
+		</jar>
+		<copy todir="${rbnb.walibdir}">
+<!-- Sneaky, from WebServer source area, which does not put files in the
+		WebServerImage directory.  -->
+			<fileset dir = "${rbnb.sourcedir}/WebTurbine/WebServer" >
+				<include name = "conf/**" />
+				<include name = "bin/JavaEnv*" />
+				<include name = "bin/setclasspath.bat" />
+			</fileset>
+			<fileset dir = "${rbnb.wasourcedir}">
+				<include name="webapps/stylesheets/**" />
+				<include name="webapps/ROOT/**" />
+			</fileset>
+		</copy>
+		<copy file = "${rbnb.obfuscatedir}/rbnb.jar"
+				todir = "${rbnb.walibdir}/common/lib" />
+		
+		<!-- just copy files, do not war them up
+		 Build RBNB WebDAV WAR file: 
+		<jar destfile = "${rbnb.webdavwarpath}" >
+			<fileset dir = "${rbnb.wasourcedir}/webapps/RBNB" />
+			<zipfileset dir = "${rbnb.webdavclassesdir}" 
+					prefix="WEB-INF/classes" />
+		</jar>			-->
+		<mkdir dir = "${rbnb.walibdir}/webapps/RBNB" />
+		<copy todir = "${rbnb.walibdir}/webapps/RBNB">
+			<fileset dir = "${rbnb.wasourcedir}/webapps/RBNB" />
+		</copy>
+		<mkdir dir = "${rbnb.walibdir}/webapps/RBNB/WEB-INF/classes" />
+		<copy todir = "${rbnb.walibdir}/webapps/RBNB/WEB-INF/classes">
+			<fileset dir = "${rbnb.webdavclassesdir}" />
+		</copy>
+		<!-- copy into rbnbUser for backward compatibility -->
+		<mkdir dir = "${rbnb.walibdir}/webapps/rbnbUser" />
+		<copy todir = "${rbnb.walibdir}/webapps/rbnbUser">
+			<fileset dir = "${rbnb.wasourcedir}/webapps/RBNB" />
+		</copy>
+		<mkdir dir = "${rbnb.walibdir}/webapps/rbnbUser/WEB-INF/classes" />
+		<copy todir = "${rbnb.walibdir}/webapps/rbnbUser/WEB-INF/classes">
+			<fileset dir = "${rbnb.webdavclassesdir}" />
+		</copy>
+		<!-- TimeDrive web app -->
+		<mkdir dir = "${rbnb.walibdir}/webapps/TimeDrive" />
+		<copy todir = "${rbnb.walibdir}/webapps/TimeDrive">
+			<fileset dir = "${rbnb.wasourcedir}/webapps/TimeDrive" />
+		</copy>
+		<mkdir dir = "${rbnb.walibdir}/webapps/TimeDrive/WEB-INF/classes" />
+		<copy todir = "${rbnb.walibdir}/webapps/TimeDrive/WEB-INF/classes">
+			<fileset dir = "${rbnb.webdavclassesdir}" />
+		</copy>			
+	</target>
+
+	<target name="clean" description = "Delete binary files.">
+		<delete dir="${rbnb.waclassesdir}" />
+		<delete dir="${rbnb.walibdir}" />
+	</target>
+ 
+</project>
+

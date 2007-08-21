@@ -1,0 +1,23 @@
+<html>
+<head>
+	<title>rbnbChat</title>
+	<LINK REL=STYLESHEET HREF="/stylesheets/rbnbstyles.css" TYPE="text/css">
+</head>
+<body>
+<h1><span class="application">rbnbChat</span> Application</h1>
+<p><span class="application">rbnbChat</span> is a Java application which 
+connects to a DataTurbine and allows the user to communicate with other
+users. It provides both a chat client and an interface for launching the chat
+host server, which provides the central clearing host and storage for the chat groups.</p>
+<form action="StartPlugIn.jsp" method="GET">
+	<div class="centered">
+	<input type="hidden" name="className" value="com.rbnb.chat.Chat" />
+	<input type="hidden" name="plugInName" value="RBNB Chat Client" />
+	<p><input type="submit" value="Start rbnbChat" /></p></div>
+	<input type="hidden" name="arg" value="" />
+</form>
+<p class="footer"><a href="/documentation/Chat/rbnbChat.html">Help</a> -
+	<a href="/webTurbine">Home</a></p>
+</body>
+</html>
+

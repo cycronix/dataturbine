@@ -1,0 +1,57 @@
+<html>
+<head>
+	<title>RBNB PlugIn Request</title>
+	<LINK REL=STYLESHEET HREF="/stylesheets/rbnbstyles.css" TYPE="text/css">
+
+	<script language="javascript">
+	<!--
+		function makeURL(requestFormRef)
+		{
+			channelFormRef=document.channelForm;
+			//requestFormRef=document.requestForm;
+			requestFormRef.action="/RBNB";
+			requestFormRef.action=requestFormRef.action.concat(
+				channelFormRef.channel.value);
+			//alert(requestFormRef.action);
+			return true;
+		}
+	-->
+	</script>
+	
+</head>
+<body>
+	<h1>RBNB PlugIn Request</h1>
+	<p>Fill in the form below to make a request of an RBNB PlugIn.&nbsp;
+		The data field will be inserted into the request.</p>
+	<p class=".form">
+			<table cols="2" border="0" align="center">
+				<form method="GET" action="" name="channelForm" 
+					onSubmit="return false;">
+				<tr>
+					<td>Channel:</td>
+					<td><textarea name="channel" rows=1 cols="30"></textarea>
+						</td>
+				</tr>
+				</form>
+				<form method="POST" action="" name="requestForm">
+				<tr>
+					<td>Request Data:</td>
+					<td><textarea name="message" rows="6" cols="30" 
+						wrap="virtual"></textarea>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="2"><center>
+						<input type="submit" 
+							onClick="makeURL(document.requestForm);"/>
+						</center>
+					</td>
+				</tr>
+				</form>
+			</table>
+	</p>
+</body>
+</html>
+
+
+

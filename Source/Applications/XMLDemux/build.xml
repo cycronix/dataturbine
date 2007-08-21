@@ -1,0 +1,59 @@
+<!-- Name: build.xml
+     By:   John Wilson
+     Date: 07/10/2006
+
+     Description:
+         Ant build file for XMLDemux application.
+	 
+     Modified: 09/13/2006 EMF to work from Source/Applications
+-->
+
+<project name="XMLDemux" default="compile" basedir=".">
+
+  <!-- Import the standard definitions (properties). -->
+ <import file="../../definitions.xml" />
+ 
+  <!-- Initialize by setting the timestamp. -->
+ <target name="init">
+  <tstamp />
+  <buildnumber />
+  <mkdir dir="${rbnb.builddir}" />
+  <mkdir dir="${rbnb.classesdir}" />
+  <mkdir dir="${rbnb.classesdir}/Applications" />
+  <mkdir dir="${rbnb.classesdir}/Applications/XMLDemux" />
+  <mkdir dir="${rbnb.librarydir}" />
+ </target>
+ 
+ <!-- Compile the XMLDemux source code; put class files in the same directory
+      as the source code files.
+  -->
+ <target name="compile" depends="init">
+   <javac destdir="${rbnb.classesdir}/Applications/XMLDemux"
+         deprecation="on"
+         excludes="**/SinkDav.java"
+		 debug="${rbnb.compiledebug}"
+		 source="${rbnb.javaver}"
+		 target="${rbnb.javaver}">
+   <src path="${rbnb.sourcedir}/Applications/XMLDemux" />
+   <classpath path="${rbnb.classesdir}/Applications/XMLDemux" />
+   <classpath path="${rbnb.librarydir}/rbnb.jar" />
+  </javac>
+  <echo>Compiled XMLDemux</echo>
+ </target>
+ 
+ <!-- A dummy library target to keep the build system happy. -->
+ <target name="library" depends="compile">
+  <echo message="XMLDemux: Dummy library target to keep build system happy."/> 
+ </target>
+ 
+ <!-- Cleans out all compiled files. -->
+ <target name="clean">
+  <delete>
+    <!-- Delete all files with ".class" extension from -->
+    <!-- the current directory and any subdirectories. -->
+    <fileset dir="${rbnb.classesdir}/Applications/XMLDemux"/>
+  </delete>
+ </target>
+ 
+</project>
+

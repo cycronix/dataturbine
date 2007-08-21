@@ -1,0 +1,47 @@
+<html>
+<head>
+	<title>Start Signature PlugIn</title>
+	<LINK REL=STYLESHEET HREF="/stylesheets/rbnbstyles.css" TYPE="text/css">
+</head>
+<body>
+<h1>Signature PlugIn</h1>
+<p>Signs and checks signatures to verify authenticity of source.</p>
+<form action="StartPlugIn.jsp" method="GET">
+	<input type="hidden" name="className" 
+		value="SignaturePlugIn" />
+	<input type="hidden" name="plugInName" 
+		value="Signature PlugIn" />
+	
+	<div class="centered">
+	<table celpadding=5 class="leftjustified">
+	<tr>
+		<td>RBNB Server:</td>
+		<td><input type="hidden" name="arg" value="-a"/>
+		<input type="TEXT" name="arg" 
+			value="localhost:3333" size=60/></td>
+	</tr>
+	<tr>
+		<td>PlugIn Name:</td>
+		<td><input type="hidden" name="arg" value="-n"/>
+		<input type="TEXT" name="arg" 
+			value="Signature" size=60/></td>
+	</tr>
+	<tr>
+		<td>Signature (Password):</td>
+		<td><input type="hidden" name="arg" value="-s"/>
+		<input type="TEXT" name="arg" 
+			value="password" size=60/></td>
+	</tr>
+	<tr>
+		<td>Timeout (ms):</td>
+		<td><input type="hidden" name="arg" value="-t"/>
+		<input type="TEXT" name="arg" value="60000" 
+			size=60/></td>
+	</table>
+	<p><input type="submit" value="Start PlugIn" /></p></div>
+</form>
+<p class="footer"><a href="/documentation/PlugIns/SignaturePlugIn.html">
+	Help</a> - <a href="/webTurbine">Home</a></p>
+</body>
+</html>
+

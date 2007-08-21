@@ -1,0 +1,84 @@
+<!-- Name: build.xml
+     By:   Ian Brown
+     Date: 06/18/2004
+
+     Description:
+         This file is the primary Ant build file for the RBNB DataTurbine.  The
+         RBNB DataTurbine contains the RBNB server, the low-level API, and the
+         user-level simple API (SAPI), plus a JMF video media handler.
+
+     Modification History:
+     11/10/2004    JPW    Added "jsharp" target for setting up the Java 1.1.4/J#
+                          version of the code in the Build directory
+-->
+
+<project name="DATATURBINE" default="library" basedir=".">
+
+ <!-- Import the standard definitions (properties). -->
+ <import file="../definitions.xml" />
+ 
+ <!-- Override this property for this sub-project.  -->
+ <property name="rbnb.api.javaver" value="1.3" />
+
+
+ <!-- Initialize by setting the timestamp. -->
+ <target name="init">
+	<tstamp />
+	<buildnumber />
+	<mkdir dir="${rbnb.classesdir}/DataTurbine" />
+ </target>
+
+ <!-- Create a file to contain the build version and date.  This is used by
+      the server and the API to determine their version. -->
+ <target name="version.file">
+  <tstamp>
+   <format property="rbnb.builddate"
+           pattern="MMM dd yyyy HH:mm:ss zzz"
+    />
+  </tstamp>
+  <echo file="${rbnb.classesdir}/DataTurbine/rbnbBuild.txt">
+BUILT=${rbnb.builddate}
+VERSION=${rbnb.version} build ${build.number}
+  </echo>
+ </target>
+
+ <!-- Compile the DataTurbine Java source code and place the results in the DataTurbine
+      classes directory.  References the DataTurbine class files for dependencies.
+  -->
+ <target name="compile" depends="init,version.file">
+  <echo message="JVER = ${rbnb.api.javaver}" />
+  <javac destdir="${rbnb.classesdir}/DataTurbine"
+         debug="${rbnb.compiledebug}" deprecation="on"
+		 source="${rbnb.api.javaver}" target="${rbnb.api.javaver}">
+   <src path="${rbnb.sourcedir}/DataTurbine" />
+   <classpath path="${rbnb.classesdir}/DataTurbine" /> 
+  </javac>
+ </target>
+
+ <!-- Set up the Java 1.1.4/J# version of the code in the Build directory. -->
+ <target name="jsharp" depends="compile">
+  <!-- Delete the existing JSharp code directory -->
+  <delete dir="${rbnb.builddir}/JSharp_prep_dir" />
+  <!-- Only if this is a UNIX system, generate the JSharp code -->
+  <exec executable="${rbnb.sourcedir}/DataTurbine/jsharp_code_prep_script" os="Linux">
+  </exec>
+ </target>
+ 
+ <!-- Create the DataTurbine jar file using the DataTurbine classes. -->
+ <target name="library" depends="jsharp">
+  <jar destfile="${rbnb.librarydir}/rbnb.jar"
+       basedir="${rbnb.classesdir}/DataTurbine"
+       manifest="Manifest"
+   />
+ </target>
+ 		
+ <!-- Cleans out all compiled and library files for the DataTurbine
+      project.
+   -->
+ <target name="clean">
+  <delete dir="${rbnb.builddir}/JSharp_prep_dir" />
+  <delete dir="${rbnb.classesdir}/DataTurbine" />
+  <delete file="${rbnb.librarydir}/rbnb.jar" />
+ </target>
+ 
+</project>

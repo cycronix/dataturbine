@@ -1,0 +1,132 @@
+<!DOCTYPE html PUBLIC "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=iso-8859-1">
+  <meta name="Author" content="Matt Miller">
+  <meta name="GENERATOR"
+ content="Mozilla/4.75 [en] (WinNT; U) [Netscape]">
+  <title>rbnbAdmin</title>
+</head>
+<body>
+&nbsp;
+<center>
+<h1>DataTurbine Trim<br>
+</h1>
+</center>
+<center>
+<h1><i>rbnbTrim</i></h1>
+</center>
+<center>
+<h1>User Manual</h1>
+</center>
+<center>
+<h2>V1.0</h2>
+</center>
+<center>
+<h2>&nbsp; August 8, 2005</h2>
+</center>
+<center>
+<h2>Copyright, Creare Inc.</h2>
+</center>
+<p><br>
+</p>
+<hr width="100%">
+<h1>Table Of Contents</h1>
+<blockquote>
+  <h3><a href="#intro">Introduction</a></h3>
+  <h3><a href="#startup">Startup</a></h3>
+</blockquote>
+<hr width="100%">
+<h1><a name="intro"></a>Introduction</h1>
+<i>rbnbTrim</i> is a Java application which connects to a DataTurbine,
+requests data (within a specified time range) from all of a Source's
+registered channels, and saves this data to the archive of a new
+Source.&nbsp; <span style="font-style: italic;">rbnbTrim </span>could
+be used to copy the entire content of a Source or just a "slice" of
+data out of a Source.<br>
+<br>
+<hr style="width: 100%; height: 2px;">
+<h1><a name="startup"></a>Startup</h1>
+<i>rbnbTrim</i> needs to be run under a Java Virtual Machine
+(JVM).&nbsp; <i>rbnbTrim</i>
+has the command-line arguments shown in the table below.<br>
+<br>
+<table
+ style="width: 466px; height: 220px; text-align: left; margin-left: auto; margin-right: auto;"
+ border="2" cellpadding="2" cellspacing="2">
+  <tbody>
+    <tr>
+      <td style="vertical-align: top; font-weight: bold;">Description<br>
+      </td>
+      <td style="vertical-align: top; font-weight: bold;">Argument
+format<br>
+      </td>
+      <td style="vertical-align: top; font-weight: bold;">Required?<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">RBNB address<br>
+      </td>
+      <td style="vertical-align: top; font-family: courier;">-a
+&lt;host[:port]&gt;</td>
+      <td style="vertical-align: top;">No<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">Start (<span
+ style="font-weight: bold;">b</span>egin) time<br>
+      </td>
+      <td style="vertical-align: top; font-family: courier;">-b
+&lt;start time&gt;</td>
+      <td style="vertical-align: top;">Yes<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">Stop (<span
+ style="font-weight: bold;">e</span>nd) time<br>
+      </td>
+      <td style="vertical-align: top; font-family: courier;">-e
+&lt;stop time&gt;</td>
+      <td style="vertical-align: top;">Yes<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">Input source<br>
+      </td>
+      <td style="vertical-align: top; font-family: courier;">-i
+&lt;input source name&gt;</td>
+      <td style="vertical-align: top;">Yes<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">Output source<br>
+      </td>
+      <td style="vertical-align: top; font-family: courier;">-o
+&lt;output source name&gt;</td>
+      <td style="vertical-align: top;">Yes<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">Print help message<br>
+      </td>
+      <td style="vertical-align: top; font-family: courier;">&lt;-h |
+-?&gt;<br>
+      </td>
+      <td style="vertical-align: top;">No<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+The format of the command line looks like the following:
+<blockquote><span
+ style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;">java -jar
+trim.jar -a &lt;RBNB host[:port]&gt;
+-b &lt;start time&gt; -e &lt;stop time&gt; -i &lt;input source name&gt;
+-o
+&lt;output source name&gt;</span></blockquote>
+<p></p>
+<hr width="100%"><br>
+</body>
+</html>

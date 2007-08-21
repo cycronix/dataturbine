@@ -1,0 +1,1 @@
+java -cp "/Volumes/sdp.creare.com/RBNB/Dev/Build/Lib/rbnbAVview.jar:/Volumes/sdp.creare.com/RBNB/Dev/Build/Lib/rbnb.jar:/Applications/JMF-2.1.1e/lib/jmf.jar" rbnbVidView -r nomad -a rbnbVideo/Audio -v rbnbVideo/Video.jpg 

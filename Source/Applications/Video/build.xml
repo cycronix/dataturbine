@@ -1,0 +1,72 @@
+<!-- Name: build.xml
+     By:   Ian Brown
+     Date: 06/18/2004
+
+     Description:
+         This file is the primary Ant build file for the RBNB Video project.
+	 There are two programs here, one to capture video and place it into
+         the RBNB server in the form of a series of JPEG images, and one to
+	 display those images.
+-->
+
+<project name="APPLICATION.VIDEO" default="library" basedir=".">
+
+ <!-- Import the standard definitions (properties). -->
+ <import file="../../definitions.xml" />
+
+ <!-- Initialize by setting the timestamp. -->
+ <target name="init">
+  <tstamp />
+  <buildnumber />
+  <mkdir dir="${rbnb.builddir}" />
+  <mkdir dir="${rbnb.classesdir}" />
+  <mkdir dir="${rbnb.classesdir}/Applications" />
+  <mkdir dir="${rbnb.classesdir}/Applications/Video" />
+  <mkdir dir="${rbnb.librarydir}" />
+ </target>
+
+ <!-- Compile the Video Java source code and place the results in the Video
+      classes directory.  References the Core library and the Video classes for
+      dependencies.
+  -->
+ <target name="compile" depends="init">
+  <javac destdir="${rbnb.classesdir}/Applications/Video"
+         deprecation="on">
+   <src path="${rbnb.sourcedir}/Applications/Video" />
+   <classpath path="${rbnb.classesdir}/Applications/Video" />
+   <classpath path="${rbnb.librarydir}/rbnb.jar" />
+   <classpath path="${rbnb.basedir}/../LicensedSoftware/JMF-2.1.1e/lib/jmf.jar" />
+  </javac>
+ </target>
+
+ <!-- Create a jar file for the capture application. -->
+ <target name="capture.library" depends="compile">
+  <jar destfile="${rbnb.librarydir}/rbnbjcap.jar"
+       basedir="${rbnb.classesdir}/Applications/Video"
+       includes="**/JPEGCapture*.class,**/Handler*.class"
+       manifest="CaptureManifest"
+   />
+ </target>
+
+ <!-- Create a jar file for the view application. -->
+ <target name="view.library" depends="compile">
+  <jar destfile="${rbnb.librarydir}/rbnbjview.jar"
+       basedir="${rbnb.classesdir}/Applications/Video"
+       includes="**/JPEGViewer*.class"
+       manifest="ViewManifest"
+   />
+ </target>
+
+ <!-- Create the two jar files using the Video classes. -->
+ <target name="library" depends="capture.library,view.library">
+ </target>
+
+ <!-- Cleans out all compiled and library files for the Video project. -->
+ <target name="clean">
+  <delete dir="${rbnb.classesdir}/Applications/Video" />
+  <delete file="${rbnb.librarydir}/rbnbjcap.jar" />
+  <delete file="${rbnb.librarydir}/rbnbjview.jar" />
+ </target>
+
+</project>
+

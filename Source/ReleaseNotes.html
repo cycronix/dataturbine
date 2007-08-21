@@ -1,0 +1,1274 @@
+<!DOCTYPE html PUBLIC "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=iso-8859-1">
+  <meta name="Author" content="Matt Miller">
+  <meta name="GENERATOR"
+ content="Mozilla/4.79 [en] (X11; U; Linux 2.4.9-e.3smp i686) [Netscape]">
+  <title>RBNB Release Notes</title>
+</head>
+<body>
+<h1>RBNB V3.1 Release Notes</h1>
+<h2>V3.0 to V3.1B1 Changes</h2>
+Third_Party directory has been pulled out of Source directory; build files have been adjusted as appropriate. This is consistant with the folder structure at NEESForge and makes more sense (since the content of Third_Party isn't Creare Source code).
+<h3>rbnbServer</h3>
+<ul>
+	<li>Some debug features of Locks and Doors are conditional, using the 
+		system property com.rbnb.api.Door.debug.  Set this to "true" to 
+		allow debug.  This reduces memory consumption in some cases by 30-40%.
+	</li>
+</ul>
+<h1>RBNB V3.0 Release Notes</h1>
+This release of the RBNB system contains the following changes:<br>
+<h2>V3.0 Production</h2>
+<li>Code is frozen as a stable production release.</li>
+<h2>V3.0B4 to V3.0B5 Changes</h2>
+<li>Both "push" and "pull" mirrors now have reconnect logic</li>
+<li>Added limited support for displaying 3D icons (".dae" models) to TrackKMLPlugIn.  An "Icon Scale" combo box has been added to the GUI which allows the user to specify the scale for both 2D and 3D icons.</li>
+<h2>V3.0B3 to V3.0B4 Changes</h2>
+<li>RBNBPlot's font size can be specified with the java debug flag -Dplot.fontsize=N</li>
+<li>"Pull" mirrors will automatically reconnect if the network link goes down.  This is a beta test change, with "push" mirrors to follow in a future release.</li>
+<li>Parameters targeted to specific plugins can now be specified via both the URL "munge" interface and the API.  
+The URL syntax is "?pio=plug-in-name,key1=value1,...,keyn=valuen".
+The API interface is ChannelMap.AddPlugInOption()</li>
+<h2>V3.0B2 to V3.0B3 Changes</h2>
+<li>Fixed bug in ResamplePlugin so it now handles multiple channels per request
+<h2>V3.0B1 to V3.0B2 Changes</h2>
+<h3>rbnbServer</h3>
+<ul>
+  <li>Plugins now properly handle "Monitor" mode by passing through source frames consistent with how a direct (non-plugin) connection works
+  <li>Mirrors forward registration metadata (also known as "User Info").
+  <li>Subscribe to oldest and Mirror from oldest bug fix in the case where the Subscription/Mirror is set up before data is in the Source and the Source has registered channels.
+  <li>Tweeks to server thread-locking logic should make it less likely for certain rare but annoying thread-lockup problems to happen
+</ul>
+<h3>Developer API</h3>
+<ul>
+  <li>When a user registers channels in a Source, it is now allowed to have a mix of channels with and without registration metadata (also known as "User Info").
+</ul>
+<h2>V2.6 to V3.0B1 Changes</h2>
+V3.0B1 is the first beta release of V3 RBNB.  It is identical to
+V2.6 except that it is being released under the Apache 2.0 Open Source
+license.  See the 
+revised EULA for license details, and the new "Source" link to download
+source code.
+Future releases will provide build/source documentation as available.  
+<h2>V2.6B6 to V2.6 Changes</h2>
+V2.6 is a stable production release.<br>
+<h3>rbnbServer</h3>
+<ul>
+  <li>Various archive-recovery tweeks.  Fire-walled an obscure infinite
+recovery loop problem; continued archive-robustness logic TBD.
+</ul>
+<h3>Plugins</h3>
+<ul>
+<li>Resample plugin
+added that will downsample and/or limit the amount of numerical
+data fetched through it, similar to ThumbNail for images.
+</ul>
+<h2>V2.6B5 to V2.6B6 Changes</h2>
+<h3>rbnbServer</h3>
+<ul>
+  <li>Changed the archive-append logic. Now, when a source opens an
+archive for append and changes the size (number of frames) of the
+archive, no data is trimmed. Rather, any change to the archive size
+applies to new filesets as they are written, such that the new size
+will be achieved after a complete set of data at the new size is
+written. This change is to prevent the inadvertent loss of previously
+recorded data.</li>
+  <br>
+  <li>Backed out the one-deep default registration request logic change
+of V2.6B5.
+This caused problems where plugins and routes could be flooded with
+repeated registration requests, e.g. from the WebDAV interface.
+  </li>
+  <li>Various archive-recovery tweeks.  Fire-walled an obscure infinite
+recovery loop problem; continued archive-robustness logic TBD.
+</ul>
+<h3>TrackKMLPlugIn</h3>
+<ul>
+  <li>Add support for munge-settable display parameter options:
+KmlLabel, KmlSort, KmlIcon, KmlColor, KmlCurtain</li>
+  <li>In the configuration file, add support for custom Type and
+Classification color mapping<br>
+  </li>
+</ul>
+<h2>V2.6B4 to V2.6B5 Changes</h2>
+<h3>rbnbServer</h3>
+<ul>
+  <li>Fixed a bug where a source would detach, then reconnect and write
+more data, would fail to properly register the new data, thus making it
+unavailable upon subsequent reloading the archive.</li>
+  <br>
+  <li>Improved archive recovery logic to use much less memory, enabling
+the recovery of very large archives. To force the recovery of an
+archive at any level, remove the associated "seal.rbn" files from the
+archive directory tree. Also extended the range of potential types of
+archive corruption that can be handled by the recovery process.</li>
+  <br>
+  <li>Changed default behavior to (once again) use multiple framesets
+per cache. Using a small number of framesets per cache improved
+playback performance, but could hurt source performance for large
+numbers (e.g. 500) channels. Symptoms would be a surge of CPU use on
+each cache-flush. The old behavior can still be invoked by using the
+-Dnumframesets=N (N&gt;0).</li>
+</ul>
+<h3>PlugIns</h3>
+<ul>
+  <li>Enhanced server-side plugin handler to automatically convert
+streaming (monitor, subscribe) modes into a sequence of requests. This
+enables streaming through most existing plugins without modification.</li>
+  <br>
+  <li>PlugInTemplate class added to streamline plugin development.</li>
+  <br>
+  <li>ThumbNail and PNGPlugIns converted to use PlugInTemplate.</li>
+</ul>
+<h3>Developer API</h3>
+<ul>
+  <li>The RequestRegistration() method with no arguments now defaults
+to a "*/..." request. That is, default registration requests will go
+one-deep into PlugIns and Routing connections to better enable
+selection of channels from applications with pull-down menus etc.</li>
+</ul>
+<h3>TimeDrive</h3>
+<ul>
+  <li>Add multi-user support, where each user has control of their own
+time munge parameters. Two multi-user modes: based on IP address (the
+default) and using HTTP Basic Authorization (user is prompted for a
+username/password).</li>
+</ul>
+<h3>HttpForward servlet</h3>
+<ul>
+  <li>A new servlet delivered with Tomcat. Allows a client which can
+connect to Tomcat (standard port 80 access) to make requests of servers
+running at ports to which they may not have access. Client connects to
+Tomcat and then HttpForward servlet passes this request on as part of a
+user-defined URL. For example, this servlet can be used to provide
+TimeDrive support to clients who only have port 80 access to Tomcat.</li>
+</ul>
+<h3>TrackKMLPlugIn and TrackDataPlugIn</h3>
+<ul>
+  <li>KMLTrackPlugIn has been broken up into these two modular
+components. Together, these PlugIns convert a series of RBNB alt, lat,
+lon data points into a KML document viewable with Google Earth.
+TrackDataPlugIn handles the low-level RBNB data requests;
+TrackKMLPlugIn formats this data into a KML.</li>
+</ul>
+<ul>
+  <li>Changes in TrackDataPlugIn</li>
+  <ul>
+    <li>Add "append=&lt;chan&gt;" munge to request data on an extra
+channel (used as pseudo-alt channel in TrackKMLPlugIn)</li>
+    <li>Add "tactical=1" munge to obtain a full duration worth of data
+on the ancillary channels (including Speed and Heading)</li>
+  </ul>
+</ul>
+<ul>
+  <li>Changes in TrackKMLPlugIn</li>
+  <ul>
+    <li>If an extra channel (an "append" channel) comes back from
+TrackDataPlugIn, display it as a pseudo-alt track.<br>
+    </li>
+  </ul>
+</ul>
+<h2>V2.6B3 to V2.6B4 Changes</h2>
+<h3>rbnbServer</h3>
+<ul>
+  <li>As part of cache/archive optimization, changed logic to write
+entire cache to archive (vs in parts). This means you want a cache that
+is no larger than needed for efficient disk-block write efficiency,
+e.g. 100 frames.</li>
+  <li>Workaround for archive writing inconsistancy on some
+multiprocessor
+machines added to FrameSet.writeToArchive()</li>
+  <li>Incoming single-channel frames are recast in a more efficient
+format, which reduces archive sizes and greatly improves read
+performance.</li>
+  <li>Plain userinfo registration data is updated to xml format.</li>
+  <li>Add "-H" command line flag to specify the archive home directory.<br>
+  </li>
+</ul>
+<h3>rbnbAdmin</h3>
+<ul>
+  <li>Add "-u" command line flag to specify username.</li>
+</ul>
+<h3>rbnbPlayer</h3>
+<ul>
+  <li>In single-point mode, when Player is sleeping (for rate/pacing
+control), the time on the Position slider is updated - this provides
+feedback to the user that Player isn't "stuck", rather it is just
+pacing its output.&nbsp; Note, however, that the location of the
+Position slider itself is not updated - just the time label is updated.</li>
+</ul>
+<h2>V2.6B1 to V2.6B3 Changes</h2>
+<h3>WebTurbine</h3>
+Rebuilt code to run with JRE (versus full JDK required with previous
+release).
+<h3>rbnbServer</h3>
+A "frameset" is a collection of cache frames which are written to the
+archive. The rbnbServer code has been modified to set the default
+number of framesets to 2. For example, if a Source has 100 cache
+frames, then by default this cache is broken up into 2 framesets of 50
+frames each. If this Source has an archive, then the archive will be
+appended each time 50 new frames arrives in the Source.
+<br>
+<br>
+A new RBNB Server command line option has been added for setting the
+number of framesets in each cache, "-Dnumframesets=&lt;positive
+integer&gt;". For example, if a Source is created which has 1000 cache
+frames, and if the RBNB Server was started with the command line option
+"-Dnumframesets=5", then this Source's cache is broken up into 5
+framesets of 200 frames each. If this Source has an archive, then the
+archive will be appended each time 200 new frames arrives in the
+Source.
+<br>
+<br>
+If the user specifies "-Dnumframesets=0" on the RBNB Server command
+line, this is a special case which tells the Server to set the number
+of framesets for each Source equal to the square root of the number of
+cache frames in the Source. This is equivalent to the legacy method of
+setting the number of framesets (before the Server change to set the
+default number of framesets to 2, see above for details). For example,
+if the RBNB Server command line included "-Dnumframesets=0" and a
+Source is created which has 100 cache frames, then the number of
+framesets will be set to 10 (since the square root of 100 is 10), and
+each frameset will contain 10 cache frames.
+<h2>V2.5 to V2.6B1 Changes</h2>
+V2.6B1 is a beta release
+<h3>WebTurbine</h3>
+Upgraded to Jakarta Tomcat 5 Web Server.&nbsp; This change entails a
+re-implemented RBNB Web servlet which should be more efficient.&nbsp;
+As part of this change, the "rbnbUser" web interface has been
+deprecated and replaced by "RBNB".&nbsp; The "rbnbNet" interface is no
+longer available.&nbsp; All URL references to an RBNB are relative to
+the connected server via the "RBNB" servlet, as in:<br>
+<br>
+http://localhost/RBNB<br>
+<br>
+WebTurbine now recognizes If-Modified-Since headers and only returns
+data if it
+has changed. This greatly improves the efficiency of the WebTurbine for
+polling
+applications.
+<h3>rbnbServer</h3>
+Fixed a bug if Source archive length was less than cache size, no
+archive would be created. <br>
+<br>
+Fixed a bug if a Source did a Detach() too quickly after the last
+Flush, a corrupted ring buffer would prevent subsequent Sinks from
+Fetching data.
+<br>
+<br>
+Fixed a bug where the Server would orphan a thread each time a client
+made a Registration request. This would eventually cause the Server to
+grow in memory and thread resource use.&nbsp;<br>
+<h3>Routing PlugIn</h3>
+The Robust Routing Plugin now has a "Routing Console" web interface to
+launch/stop and review routing plugin status. <br>
+If a _loopback RoutingPlugIn is running at the source, UDP is used for
+monitoring
+instead of the usual SAPI connection.<span style="font-weight: bold;"><br>
+</span>
+<h3>rbnbAVCP</h3>
+Bug fix for 16-bit audio; performance tweaks.<span
+ style="font-weight: bold;"><br>
+</span>
+<h3>ThumbNail PlugIn</h3>
+If max number of images has been set to 1, ThumbNail now correctly
+limits max number of images to 1.<br>
+Added "-n" option for setting PlugIn name.<br>
+<h3>KMLTrackPlugIn</h3>
+KMLTrackPlugIn is a new PlugIn being distributed with RBNB.&nbsp; This
+PlugIn converts a series of RBNB alt, lat, lon<br>
+data points into a KML document viewable with Google Earth.<br>
+<h3>TimeDrive</h3>
+TimeDrive is a new application being distributed with RBNB.&nbsp;
+TimeDrive is a Web proxy server which adds a time munge<br>
+to WebTurbine requests.&nbsp; A Web interface is provided with VCR-like
+controls for setting TimeDrive's current time.<br>
+<h2>V2.5B7 to V2.5 Changes</h2>
+V2.5 is a stable production release
+<h3>rbnbPlot</h3>
+A problem that under certain laggy conditions could lock up channel
+selection has been fixed.
+<br>
+The plot label units-multiplier (e.g. "kilo") that was temporarily lost
+is now back.
+<h3>rbnbAdmin</h3>
+Admin now recognizes and displays PlugIn channels (one level deep).
+<h3>RoutingPlugIn</h3>
+The Robust Routing PlugIn has been updated to better support streaming
+data connections. <br>
+There are some server mods specific to plugins that support this. <br>
+<h3>WebTurbine</h3>
+The default archive-mode via the WeDAV (file) interface is once again
+"append" (vs "create").
+<h2>V2.5B6 to V2.5B7 Changes</h2>
+V2.5B7 is an updated beta release.
+<h3>rbnbPlot</h3>
+The plot display boxes are under user-controlled layout manager,
+allowing individual window components to be positioned and sized
+independently.
+<h2>V2.5B5 to V2.5B6 Changes</h2>
+V2.5B6 is an updated beta release.
+<h3>rbnbPlayer</h3>
+A TCP output option has been added to Player.&nbsp; The user specifies
+a port number on which Player will open a server socket to listen for
+TCP client connections.&nbsp; RBNB data is sent to each connected TCP
+client. Default display mode and duration have been modified.<br>
+<h3>RBNB Server</h3>
+Due to numerical round-off in the RBNB Server, certain problems have
+been identified with time-based subscriptions where the Source has a
+multi-point frame defined by a single start time and non-zero duration
+(a time is not set for each point in the frame). This problem has been
+fixed (by adding a small roundoff correction) for some of the cases
+where the problem occurred.
+<h3>rbnbPlot</h3>
+Text channels (those with mime type text/plain, or ending in ".txt" or
+".text")
+will be displayed in a scrolling text box, synchronously with other
+data.
+<h3>Web Interface</h3>
+An option to the WebDAV interface for converting fetched data to text
+("&amp;dt=string") has been added.
+<h2>V2.5B4 to V2.5B5 Changes</h2>
+V2.5B5 is an updated beta release.
+<h3>RBNB Server</h3>
+We found and fixed some subtle bugs in streaming modes (monitor and
+subscribe).
+The bugs occured when a sink streams multiple channels from a source
+with multiple ring buffers
+(e.g when a source puts different channels in different frames at
+different rates).
+<br>
+<br>
+The following bugs were fixed:<br>
+<br>
+<li style="margin-left: 40px;">Monitor mode could get duplicate frames</li>
+<div style="margin-left: 40px;"></div>
+<li style="margin-left: 40px;">Subscribe mode could block forever
+waiting to start</li>
+<div style="margin-left: 40px;"></div>
+<li style="margin-left: 40px;">Streaming from oldest or newest could
+skip the first frame</li>
+<h3>ChannelTree</h3>
+The ChannelTree API structure now has time info (start &amp; duration)
+consistent with the ChannelMap object.
+<h3>rbnbPlot</h3>
+<ul>
+  <li>rbnbPlot is updated to the Java Swing interface,
+including a much nicer "tree view" channel selection window.</li>
+</ul>
+<ul>
+  <li>rbnbPlot recognizes source metadata and perform associated linear
+scaling and plot annotation.&nbsp; To use it, a source provides
+metadata of the
+form:</li>
+  <ul>
+    <li>
+      <pre><span style="font-family: monospace;"></span>cm.PutUserInfo(0,"units=volts,scale=2,offset=3")</pre>
+    </li>
+  </ul>
+  <li>rbnbPlot can "zoom" via cursor control to selected portions of
+stripchart data.&nbsp; <br>
+  </li>
+</ul>
+<ul>
+  <li>rbnbPlot allows type-in start and duration time fields.<br>
+  </li>
+</ul>
+<div style="margin-left: 40px;">
+<div style="margin-left: 40px;"></div>
+</div>
+<h3>rbnbAVCP</h3>
+rbnbAVCP now supports full command-line option control. It also uses
+the new registration <span style="font-style: italic;">userInfo</span>
+methods for describing its content.
+<h3>WebTurbine</h3>
+You can now fetch channel meta-data ("userInfo") via the WebDAV option
+'fetch=info'.
+<h2>V2.5B3 to V2.5B4 Changes</h2>
+V2.5B4 is an updated beta release.
+<h3>rbnbPlot</h3>
+A new capability to export selected data to the locally connected
+DataTurbine
+is implemented.
+<h3>Registration metadata</h3>
+New API methods putUserInfo and getUserInfo enable per-channel metadata
+to be stored and retrieved in the registration channel map of a data
+source.
+<h3>Server side automatic timestamps</h3>
+Server timestamps were broken and are now fixed.
+<br>
+&nbsp;
+<h2>V2.5B2 to V2.5B3 Changes</h2>
+V2.5B3 is an updated beta release.
+<h3>Sink constructor deprecation</h3>
+The Sink constructor taking arguments (cache,mode,archive) has been
+deprecated,
+and now calls Sink() instead. The server does not support setting cache
+and archive for Sinks.
+<h3>rbnbAVCP</h3>
+The rbnbAVCP video capture and display application has been updated and
+improved.
+<h3>rbnbPlayer</h3>
+The rbnbPlayer application has been updated and several bug fixed in
+the
+beta version.&nbsp; Specifically, single-point playback now works
+properly.
+<h3>rbnbAdmin</h3>
+The rbnbAdmin application now has an option to load archives from
+disconnected
+sources.
+<h3>Authentication (Beta)</h3>
+Authentication via Kerberos or Grid GSI security is supported.
+<br>
+&nbsp;
+<h2>V2.5B to V2.5B2 Changes</h2>
+V2.5B2 is an updated beta release.
+<h3>Applet Security</h3>
+The RBNB API has been updated to allow clients (sources and sinks) to
+run
+as applets using default applet security rules (e.g. connecting back to
+the same server from which the applet was loaded).&nbsp; Previously,
+there
+were a number of Java System.getProperty() calls that would throw
+uncaught
+exceptions if run as an applet.&nbsp; These are now caught and defaults
+used for the case of applets.
+<h3>Audio/Video Capture and Display</h3>
+Updated audio/video capture and display application (rbnbAVCP) is
+included
+in this release.&nbsp; This is effectively an RBNB "videophone" that
+has
+built-in record and playback capabilities.
+<h3>rbnbPlayer (Beta)</h3>
+The V1 "rbnbPlayer" application has been updated and ported to RBNB
+V2.&nbsp;
+This application "plays" data from one source and outputs it to
+another,&nbsp;
+time-slewing it using VCR-like controls.&nbsp; Sink clients can
+subscribe
+to the player output channels and thereby by remote-controlled.&nbsp;<span
+ style="font-style: italic;">(This
+release of player is Beta-only.&nbsp; There are known issues and some
+debug
+print-outs).</span>
+<h3>Improved Archive Recovery Logic</h3>
+The archive recovery logic was improved so that certain types of
+previously
+unrecoverable corrupt archives are now recoverable.
+<h3>ThumbNail Plugin</h3>
+A new "thumbnail" plugin is available that will downsample and/or
+reduce
+JPEG image size.&nbsp; This enables remote access to large volumes of
+video
+data over limited network bandwidth links.
+<h2>V2.4.4 to V2.5B Changes</h2>
+V2.5B is a beta release of the RBNB system.&nbsp; It includes a number
+of new and enhanced applications, and optionally supports a&nbsp; .NET
+compatable interface.
+<h3>PlugIns</h3>
+New and enhanced plugins are available:
+<ul>
+  <li>SignaturePlugIn - signs and checks signatures to authenticate
+data
+sources</li>
+  <li>FileDrop - picks up specified channels and drops them to local
+files</li>
+  <li>RoutingPlugIn - robust RBNB-routing using plugins</li>
+  <li>FolderPlugIn - updated to automatically update file-list upon
+data
+requests</li>
+  <li>rbnbSource - fixed logic that would "detach" instead of close
+connections</li>
+</ul>
+See the on-line Help documentation for details about each of these
+plugins.
+<h3>rbnbPlot</h3>
+The rbnbPlot stripchart application now supports video images.&nbsp;
+Channels
+that end in ".jpg" are displayed as a "filmstrip" of video images.
+Clicking
+on the video window brings up options to set the image number and size.
+<h3>Java V1.1 Compatability</h3>
+The low-level server and API code modifications have continued in
+various
+places to retain (old) Java V1.1.4 compatability, in order to support
+the
+.NET J# compiler.&nbsp; Client code can be developed using the latest
+(e.g.
+Java 1.4) features.&nbsp; Among the changes made:
+<ul>
+  <li>When using the Server command-line "-O" option to load an options
+file,
+the URL of the specified file can no longer use HTTPS.</li>
+  <li>When using the Server command-line "-A" option to load a
+security/address
+authorization file, the URL of the specified file can no longer use
+HTTPS.</li>
+</ul>
+<h2>
+V2.4.3 to V2.4.4 Changes</h2>
+<h3>
+Registration Metadata Bug Fix</h3>
+A bug was fixed that could cause the "user" registration data
+(metadata)
+to be unreliably updated and retrieved.
+<h3>Router Shutdown Robustness</h3>
+Modified the synchronization of router shutdown, to increase tolerance
+for network lapses.
+<h3>Java V1.1 Compatability</h3>
+The low-level server and API code was modified in several places to
+retain
+(old) Java V1.1.4 compatability, in order to support the .NET J#
+compiler.&nbsp;
+Client code can be developed using the latest (e.g. Java 1.4)
+features.&nbsp;
+This work is in progress.
+<h3>Another shot at rbnbjcap</h3>
+The rbnbjcap/jview video applications in the previous release (still)
+did
+not have all the required class files. This build hopefully fixes that.
+<h2>V2.4.2 to V2.4.3 Changes</h2>
+<h3>
+Subscription by Wildcards</h3>
+It is now possible to specify a "*" wildcard for subscriptions by
+time.&nbsp;
+Subscriptions by frame still do not support wildcards.
+<h3>Zero-Duration Request Logic Enhanced</h3>
+Prior to this release, a request for zero-duration at an absolute time
+would fetch data at-or-before the specified time.&nbsp; This is handy
+so
+that sources can put data at zero-duration, and a request for
+zero-duration
+will find the "then-newest" data at any time.
+<p>With this release, the enhanced at-or-before logic is extended to
+include
+the time-relative requests ("newest" and "oldest").&nbsp; Thus,
+relative
+and absolute requests behave consistently in this respect.
+</p>
+<h3>Build Includes rbnbjview and rbnbjcap Applications</h3>
+V2.4.x had inadvertently omitted including the video client
+applications
+in the build.&nbsp; They are now back.<span style="font-weight: bold;">
+<br>
+</span>
+<h3><span style="font-weight: bold;"></span>Minor API Documentation
+Updates</h3>
+The javadoc has been tweeked for some methods.
+<h3>Change in Low Level Communication</h3>
+A change was made in the low level client/server communication to allow
+better cross-Java-version compatability. (Transmission of serialized
+Java
+objects was eliminated). Specifically, the .NET J# compiler will soon
+be
+supported.
+<p>This change should be transparent to all users, and
+cross-RBNB-version
+compatability is maintained.
+</p>
+<h2>V2.4.1 to V2.4.2 Changes</h2>
+<h3>
+Multiple Ring Buffer Request Problem</h3>
+A bug in the server caused a string index out of range error when
+requesting
+a short channel name (&lt;3 characters) from a source with multiple
+ring
+buffers (channels sent in separate groups).
+<h2>V2.4 to V2.4.1 Changes</h2>
+<h3>
+Delete Channels from Registration</h3>
+An oversight in the delete channels capability would result in channels
+not being fully deleted if they were explicitly registered. This
+effected
+the WebDAV system, which uses explicit registration for empty files.
+Moving,
+renaming, and deleting files now works properly.
+<h3>Updated Documentation</h3>
+Documentation has been updated to reflect the changes to the layout and
+all of the documentation is now included as part of the WebTurbine
+system.
+<h2>V2.3.2 to V2.4 Changes</h2>
+<h3>
+New Installation System</h3>
+The RBNB DataTurbine and WebTurbine system is now delivered as an
+IzPack
+installation rather than an InstallAnywhere system. The former is a
+freely
+distributable package. It lacks the JRE installation capability used on
+Windows systems, but is otherwise similar to the latter.
+<h3>New Installation Layout</h3>
+The installation layout has changed somewhat, mostly in the WebTurbine
+area where we now use .war files to package the RBNB extensions.
+Renamed
+Package The former <tt>COM.Creare.Utility</tt> package has been
+renamed
+to
+<tt>com.rbnb.utility</tt> for consistency. This package contains some
+useful, general-purpose utility code.
+<h2>V2.3.1 to V2.3.2 Changes</h2>
+<h3>
+COM.Creare.Utility Package renamed to com.rbnb.utility</h3>
+The COM.Creare.Utility package has been renamed to com.rbnb.utility for
+consistency with Java standards.
+<h3>Restructured Installation</h3>
+The build and installation process has been changed, resulting in a
+somewhat
+different structure to the resulting delivery. The major, noticable
+change
+is that the WebTurbine files have been packaged in .war files.
+<h2>V2.3 to V2.3.1 Changes</h2>
+<h3>
+Routing Reconnect Loop</h3>
+If an error (not a network problem or server shutdown) caused a routing
+connection to be lost, it was possible for the two servers to get into
+an infinite loop of lose routing/re-establish routing. This has been
+fixed.
+<h3>Number of Threads</h3>
+Some types of requests, especially going across routing, had the
+potential
+of stranding threads due to a notification problem. This has been
+fixed.
+<h3>JNDI_Sink Names</h3>
+The names of the JNDI_Sinks (used by the WebDAV interface) have been
+changed
+to reflect the Web application that creates them.
+<h3>JNDI_Sink Pool</h3>
+The number of JNDI_Sinks (used by the WebDAV interface) held in a pool
+for future reuse has been reduced from 16 to 4. This may cause some
+degradation
+in responsiveness, but improves overall resource use.
+<h3>Stranded Web Turbine JNDI_Sinks</h3>
+The number of JNDI_Sinks (used by the WebDAV interface) could
+potentially
+grow indefinitely if problems occured on the server side. The
+JNDI_Sinks
+now have a one minute timeout on any request and automatically shutdown
+if they do not get a response before the timeout expires.
+<h3>Linux IBM Java Requirement</h3>
+The Linux startup scripts used to state that an IBM JVM was required
+for
+proper operation. This is no longer true.
+<h2>V2.2.2 to V2.3 Changes</h2>
+<h3>
+Client Address Access Permissions</h3>
+The authorization security file now allows specific permissions (read,
+write, etc.) to be permitted rather than just full access
+allowed/denied.
+<h3>Unconnected Shortcuts</h3>
+If a client asked for a registration map from a server with a shortcut
+that was in the process of being connected, the server would wait for
+the
+shortcut before returning the registration map. The server now skips
+over
+such shortcuts.
+<h3>Connection Lockups</h3>
+A timeout has been added to the code that makes TCP connections to
+remote
+servers (both in the client API and in the server code for setting up
+routing).
+This ensures that failures in the low-level TCP socket connection logic
+due not result in client or server level lockups.
+<h3>Duration Zero Request Problem</h3>
+A duration zero request for data with zero duration sometimes returned
+the wrong data. This would happen when the request time fell between
+two
+framesets. Instead of returning the last frame in the frameset
+preceededing
+the request, the code was returning the first frame in that frameset.
+<h2>V2.2.1 to V2.2.2 Changes</h2>
+<h3>
+Deadlocks</h3>
+Under load, especially at startup, there was the potential for deadlock
+situations in the server. As a result, sources and sinks would produce
+informational messages about being blocked. These have been fixed.
+<h3>Frame-based Streaming from a Source with an Archive</h3>
+Streaming from a source with an archive using frame-based streaming has
+been problematic. While the use of reframing (see <a
+ href="#SubscribeArchives">archive
+subscription problem</a>), it is at the price of increased storage. As
+of V2.2.2, the server will terminate a frame-based stream that attempts
+to get data out of an archive (either by requesting oldest or due to
+the
+fact that the stream is unable to keep up and falls out of the cache).
+Performance when streaming from the cache when there is an archive has
+been improved as well.
+<h3>Mirror Shutdowns</h3>
+If the RBO side of a mirror was shut down, the mirror might not
+properly
+clean up. This could result in memory growth, eventually causing out of
+memory problems.
+<h2>V2.2 to V2.2.1 Changes</h2>
+<h3>
+Storage/Retrieval of rbnbPlot Configurations</h3>
+The rbnbPlot application now allows the user to store and retrieve
+configuration
+information.
+<h3>Monitor Mode Timing Bug</h3>
+A timing bug in Monitor retrieval mode caused premature termination of
+the stream of data being sent from the server.
+<h2>V2.2B6a to V2.2 Changes</h2>
+<h3>
+Duplicate Times in Time-Based Subscriptions</h3>
+If the input stream of a time-based subscription contains points with
+identical
+times, the subscription could go into a loop retrieving those two
+points
+until they disappear from the ring buffer.
+<h3>Per-Channel Times in Time-Based Subscriptions</h3>
+Per-channel (as opposed to per-frame - i.e., shared by all channels
+within
+a frame) times would not be properly handled by time-based
+subscriptions
+for channels other than the first.
+<h3>RBNB Window Minimized</h3>
+On Windows machines, the RBNB window is now started in a minimized
+state.
+<h3>Failed Data Connections When Lots of Clients Simultaneously Connect</h3>
+Due to a lack of synchronization, the server could fail to properly
+link
+a data connection to its control connection when lots of clients
+simultaneously
+connect to the server. The result would be that the client would fail
+to
+connect and the server would eventually time out the client handler.
+<h3>Shutting Down a Source During Data Retrieval</h3>
+Under certain circumstances, it was possible for the RBO handling a
+source
+client to go through its shutdown process while a NBO was in the middle
+of retrieving data. This would result in the NBO getting locked up
+waiting
+to get data that had been deleted. This has been fixed so that the NBO
+gets no data from the source.
+<h3>Improperly Aborted Remote Connections</h3>
+If the local side of a request for remote data terminated while that
+request
+was being set up, a connection between the local and remote servers
+could
+be stranded. This has been fixed.
+<h3>Stranded Remote Monitor/Subscribe Connections</h3>
+If the local side of a monitor or subscribe request terminated, it
+could
+leave an active stranded connection between the two servers. The
+connection
+used up resources trying to deliver responses to the request to a
+non-existent
+client. The connection is now terminated.
+<h3>Lockups Due to Routing Failures</h3>
+A number of changes have been made to ensure that servers detect
+(within
+a timeout period of a couple of minutes) routes that have failed (or
+which
+never were fully established).
+<h3>Failure to Find Routes in Hierarchies of Servers</h3>
+A bug in the code that determined where next to deliver a message that
+is going up a chain of parents and children caused routing problems.
+<h3>Delivery of Routed Messages to Terminated Clients</h3>
+If the local client of a request made to a routed server was closed
+before
+the response to that request could be delivered, the response would be
+sent back to the remote server. The result was that the route between
+the
+two servers would lock up because all of the connections were occupied
+with trying to deliver the message. The local server now reports that
+it
+failed to find the local client, which forces the remote handler to
+shut
+down as well.
+<h3>Properly Handle Client Shutdowns During Initialization</h3>
+If a client application shuts down while the connection between it and
+the server is being established, the server might not properly clean up
+its side of the failed connection. The result was that there was a
+client
+handler in the server that could not be terminated. This has been
+fixed.
+<h3>Properly Handle Exceptions During Routing Initialization</h3>
+If an exception occured when a route is being established between a
+child
+and a parent server, the parent server might not properly clean up its
+side of the failed route. The result was that the parent server would
+report
+a route where there was none. Attempts to use it would lock up.
+Attempts
+to terminate it would fail. This has been fixed.
+<h3>Improved Error Message Reporting</h3>
+Some exception and error messages were being quietly swallowed by the
+RBNB
+server. These messages now appear in the log and on the console.
+<h3>Delivering Error Messages via Failed Connections</h3>
+The server was attempting to deliver an error message reporting a
+failed
+connection via that connection. The result was that the message would
+never
+be delivered and the client handler in the server would never properly
+exit. The server no longer tries to deliver such messages.
+<h2>V2.2B6 to V2.2B6a Changes</h2>
+<h3>
+Fixed Bug in Server-Side Data Retrieval</h3>
+A timing problem could cause the server side for a sink to lock up if
+an
+RBO from which it was retrieving data terminated during that retrieval.
+<h3>Fixed Bug in Server-Side PlugIn Shutdown</h3>
+A bug in the server-side shutdown code for plugins would cause a
+stranded
+plugin object in the server. The client-side would properly exit.
+<h2>V2.2B5 to V2.2B6 Changes</h2>
+<h3>
+Extended Start Requests</h3>
+When requesting data, it is now possible to ask that the server
+retrieve
+an additional data point before the specified start time of the request
+if there is no data point exactly at that time.
+<h3>Clearing RBO Caches</h3>
+The new <tt>ClearCache</tt> method can been called to clear out the
+contents
+of an RBO's cache. The data is flushed to the archive and then removed
+from the server's memory, reducing the RBO's footprint.
+<h3>Asynchronous Log Display</h3>
+The display of log messages to the console is now asynchronous to the
+rest
+of the server. If the console output be blocked for some reason, the
+server
+still continues to operate normally, although some messages may not be
+displayed (they are still logged if logging is on).
+<h3>Fixed Metrics History</h3>
+Metrics data for detached connections was being lost.
+<h3>Reduced Memory Usage for "Live" Archives</h3>
+When data is removed from the cache, it is supposed to be removed from
+memory. With an archvie, some of this memory was not being released
+properly.
+<h3>Improved Handling of Data Retrieval Errors within the Server</h3>
+The server now properly reports that no data is available from RBOs
+that
+close during the data retrieval process.
+<h3>Improved Error Handling during Connection Process</h3>
+If a client disconnected during the connection process, it was possible
+for it to leave its server side handler in a blocked state. The server
+side handler now times out and shuts down.
+<h3>Improved rbnbAdmin Exit Handling</h3>
+The rbnbAdmin application now properly exits even if its connection to
+the RBNB server has been locked up due to problems on the server side.
+<h3>Enhanced ProxyPlugIn</h3>
+The proxy plugin has been enhanced to provide a number of new features.
+<h3>Echo Message PlugIn</h3>
+A new plugin has been added that echoes messages it receives to the
+console.
+It is intended as an example of how to write a plugin.
+<h2>V2.2B4 to V2.2B5 Changes</h2>
+<h3>
+Absolute Requests for Duration of Zero (0)</h3>
+Absolute (specific time) requests with a duration of zero (0) now
+retrieve
+the first data point at or before the time specified. Previous versions
+would only retrieve a data point if there was one exactly at the
+specified
+time. This mode can be turned off using the new&nbsp;<quote>-C V2.1</quote>
+flag.
+<h3>Subscribe by Time</h3>
+A new capability has been added that allows a sink to specify the
+nominal
+duration to retrieve on each fetch call when subscribing (not
+monitoring).
+This allows the sink to get data in chunks that are not constrained by
+the source-specified frame duration (except in so far as the latter is
+all the data that is available).
+<p>This capability addresses the <a href="#SubscribeArchives">archive
+subscription
+problem</a> described in the release notes for V2.2B4 as the reframing
+does not effect times, just frames.
+</p>
+<h3>Fixed Registration Problem</h3>
+A problem in the code that computes the registration time information
+for
+a source would fail to consistently update the limits for the second
+and
+subsequent channel groups. This would result in requests for "newest"
+failing
+to properly get the latest data.
+<h3>Fixed Backwards Going Time Problem in Appending to Archives</h3>
+A bug in the code that determines the time of the newest data in an
+archive
+loaded for append resulted in the code improperly allowing time to back
+up.
+<h3>Fixed Further Deadlock Problems</h3>
+A variety of deadlock or runaway CPU problems that effect multiple,
+simultaneous
+sinks retrieving data from a single source have been fixed, improving
+on
+the work done in V2.2B4.
+<h3>Fixed the Frame Indexing in Append Mode</h3>
+The frame index for assigned to new frames being added to an existing
+archive
+(append mode) was not set to be after the last frame in the archive.
+The
+result is that such neither monitor nor subscribe (frame-based) would
+work
+properly on such archives. This has been fixed.
+<h3>Bug in Archiving Data with a Zero (0) Duration and Multiple Points
+per
+Time</h3>
+Archives containing data where a single time and zero (0) duration
+spans
+multiple points did not work correctly in earlier versions.&nbsp; The
+time
+information for the second and subsequent points would be lost and a
+time
+of 0 would be assigned, resulting in unusable archives.
+<p>This is an uncommon format for data.&nbsp; It requires that the
+source
+specify a time interval with a duration of zero (0) and then provide a
+data array containing more than one point.&nbsp; For ecample, the
+following
+Java code would produce the problem:
+</p>
+<p style="margin-left: 40px;"><tt>cmap.PutTime(1.,0.);&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+// Set a time of 1 with a duration of 0.</tt>
+<br>
+<tt>float[] data = { 1.F, 2.F, 3.F, 4.F };&nbsp;&nbsp; // Create a
+data array containing the values 1 to 4.</tt>
+<br>
+<tt>cmap.PutDataAsFloat32(0,data);&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+// Add that data to the channel.</tt>
+</p>
+<h2>V2.2B3 to V2.2B4 Changes</h2>
+<h3>
+The Cache and Archive Sizes are Changed when Reconnecting to an Open
+Archive</h3>
+When using the reconnect capability (close an archive with keep cache
+and
+then reopen for append), the cache and archive sizes are now changed to
+match those requested by the reconnecting client, rather than silently
+using the internal values.
+<br>
+<a name="SubscribeArchives"></a>
+<h3>Known Issues with Streaming (Frame-based) from Archives</h3>
+There are a number of problems when streaming (subscribing/monitoring)
+datastored in archives. The reframing of archives causes the loss of
+information
+needed to be able to properly stream. These problems can be alleviated
+by turning off reframing at the cost of some performance.
+<p>Note that reframing is on or off for the server as a whole and must
+be set when writing the archives (it isn't required for reading them
+back).
+</p>
+<p>Reframing can be turned off by defining a Java system property
+called
+"noreframe" (the value is irrelevant so long as the property is
+defined).
+The property can be defined when the Java Virtual Machine (JVM) is
+launched
+by using the following command:
+</p>
+<p>prompt&gt; java -Dnoreframe=true&nbsp;<additional arguments=""></additional>
+</p>
+<p>For those using the Windows RBNB icon to launch the system, you need
+to define CATALINA_OPTS as "-Dnoreframe=true".
+</p>
+<p>For those using the Unix shell scripts, add "-Dnoreframe=true" to
+the
+definition of CATALINA_OPTS in the ${RBNBHOME}/bin/Start_Webserver.sh
+script.
+</p>
+<h3>Streaming from Oldest Limitation</h3>
+When streaming from oldest, it was possible for the code to miss frames
+when it reached the end of the available data and started waiting for
+new
+data to arrive. For now, the code has been modified so that it won't
+miss
+data, but it may fail to properly move forward when looking at data in
+a source containing multiple ring buffers.
+<h3>Fixed a Deadlock Problem with Archives</h3>
+Under some circumstances, it was possible to cause a deadlock when
+using
+archives. If the maximum number of open filesets was reached due to
+sources
+(either because of the number of sources or the number of ring buffers
+within one or more of sources), then the code could get into an
+infinite
+blocking state for some of the ring buffers. If a sink subsequently
+attempted
+to read from the source, it would eventually start reporting timeouts.
+This bug has been fixed.
+<h3>Fixed additional Deadlock Problems</h3>
+Additional problems with deadlock situations between a source and a
+sink,
+where the sink could end up blocked waiting for the source and
+vice-versa,
+have been fixed.
+<h3>Fixed Error in Versioning Feature Support Logic</h3>
+A timing error in the code that is supposed to check to see if a
+feature
+is supported could unexpectedly cause the code to temporarily think a
+feature
+was not supported during startup.&nbsp; In combination with the load
+all
+archives (-F) flag on the server, this error would result in some
+archives
+failing to load without any indication of a problem.
+<h3>Fixed a Problem with Loading All Archives</h3>
+An additional problem with loading archives was discovered when the
+number
+of archives to be loaded is large.&nbsp; Some archives might fail to
+load
+because of a limit on the number of simultaneous new connections to the
+server. The code now retries the attempt to load the archive until it
+either
+loads, fails for a reason other than a rejected connection, or the
+server
+exits.
+<h3>Improved Automatic Re-establish Routing Logic</h3>
+Under some circumstances, there was an opportunity for a deadlock
+situation
+in the code that re-establishes a routing connection between a child
+and
+parent server.&nbsp; This has been fixed.
+<br>
+<span style="font-weight: bold;"></span>
+<h2>V2.2B2 to V2.2B3 Changes</h2>
+<h3>
+Fixed Data Retrieval Bug Caused by Deleting a Channel</h3>
+When attempting to retrieve data from an archive that had a channel
+deleted
+out of it, the V2.2B2 code might either fail to find valid data or
+might
+get an exception. This has been fixed.
+<h3>Fixed Source Connection Shutdown Code</h3>
+The code that was supposed to close down a source with an archive had
+some
+problems. In particular, if the source application disconnected, but
+told
+the server to keep the cache and archive loaded, then the only way to
+close
+the server side properly was to re-connect to the source (using
+"append"
+mode) and then do a disconnect with keep cache set <tt>false.</tt>
+<p>Using rbnbAdmin to attempt to terminate the server side of the
+connection
+would not have any effect. Shutting down the server would leave the
+archive
+in a bad state.
+</p>
+<p>These problems have been fixed in this release.
+</p>
+<h3>Improved Archive Recovery</h3>
+A number of improvements have been made to the archive recovery code to
+allow it to recover from a broader range of damaged archives. Further
+work
+in this area is planned for the next release.
+<h3>Improved Simultaneous Access to Archives</h3>
+Improvements to the server's handling of limited resources when
+multiple
+sources and sinks simultaneously access archives have been made. These
+reduce problems with thrashing and long-term lockouts.
+<h2>V2.2B1 to V2.2B2 Changes</h2>
+<h3>
+Documentation Updated</h3>
+The documentation has been updated to reflect changes made to the code.
+<h3>WebTurbine Port Changed to 80</h3>
+The default port for the WebTurbine has been changed from 8080 to 80.
+UNIX
+users should note that this change requires that the WebTurbine be
+launched
+with root privileges. Alternatively, you can change the port as noted
+below.
+UNIX users or people who are already running a web server on port 80
+can
+change the port to something else. To do this, dit the file
+'server.xml'
+found in {installation directory}/jakarta-tomcat-4.1.21/conf directory.
+<h3>Messaging Host Times Fixed</h3>
+Times in the V2.2B1 message host were stored in milliseconds since 1970
+rather than the standard seconds since 1970. This has been fixed.
+<h2>V2.1 to V2.2B1 Changes</h2>
+<h3>
+Deleting Channels</h3>
+Channels can now be deleted via the Simple API (SAPI) or via the WebDAV
+interface. Note: channels created via the WebDAV interface only have
+their
+contents deleted, not the channel itself. This will be fixed in a
+future
+release.
+<h3>Messaging</h3>
+Messaging allows applications to send messages to unknown recipients
+via
+a central host. It represents a generalization of the Chat capability.
+<br>
+Messaging is supported through the new com.rbnb.message.Message class
+and the messaging host. The latter can be launched from the Web page.
+<h3>Proxy Source</h3>
+The proxy source allows programs that support output to a TCP socket to
+connect to the RBNB server. When launched from the Web page, the proxy
+source requests a description of the data and sets up a server socket.
+Connect your application's output to the proxy source and your data
+appears
+in the RBNB.
+<h2>V2.0 to V2.1 Changes</h2>
+Version 2.1 is a functional (as opposed to simply bug fix) revision of
+the RBNB system, with the following significant features.
+<h3>Folders in Registration ChannelMaps</h3>
+In order to provide support for folders, ChannelMaps returned by
+registration
+requests now include folders, which are denoted by a trailing slash
+(/).
+PlugIns and Sources may register folders by including a trailing slash
+on the name added to a ChannelMap.
+<h3>Multiple Ring Buffers per Source</h3>
+The new V2.1 source handler (RBO) now provides multiple ring buffers
+per
+source, rather than just a single one as used in previous releases.
+This
+capability:
+<ul>
+  <li>Places unrelated groups of channels into separate ring buffers,</li>
+  <li>Protects data for channels that are updated rarely or never at
+all from
+being overwritten by new data for unrelated, higher-speed channels,</li>
+  <li>Changes the monotonically increasing time requirement from a per
+source
+requirement to a per ring buffer requirement,</li>
+  <li>V2.1 automcatically recovers V2.0 archives.</li>
+</ul>
+<h3>
+Reconnecting to Archives</h3>
+The new V2.1 source handler (RBO) now allows source applications to
+reconnect
+to an archive. This allows a source application to come and go without
+removing the data from the server.
+<p>When a source application that has an archive disconnects from the
+server,
+it may leave the archive loaded in the server by setting both the
+keepCache
+and keepArchive flags. The source application (or another using the
+same
+password) may subsequently reconnect to the archive by specifying that
+it wishes to append to the archive. The source handler in the server
+never
+shuts down, leaving the archived data available to all sinks even while
+the source application is disconnected.
+</p>
+<p>The server now automatically selects keepCache and keepArchive if it
+detects a problem with the TCP socket connection between a source
+handler
+and the source application using an archive. This ensures that data is
+not removed from the server if the source application crashes or loses
+connectivity (such as when a wireless connection goes out of range).
+</p>
+<h3>Improved Error Handling</h3>
+The server now catches and handles errors (such as out of memory) by
+shutting
+down the application handler that caught the error. If the application
+is a source writing to an archive, the server attempts to save all data
+it has received.
+<h3>Playback from Archives</h3>
+An obscure bug in the playback code could result in some data to appear
+to be missing, although the data is actually in the archive. This bug
+has
+been fixed.
+<h3>New Release of the Jakarta-Tomcat Web Server</h3>
+Packaged with the V2.1 release is version 2.1.21 of the Jakarta Tomcat
+Web Server.
+<h3>WebDAV Support for Multiplexed Data</h3>
+The WebDAV interface now supports multiplexed data, by automatically
+demultiplexing
+into a specified number of channels.
+<h3>Known Issues</h3>
+ChannelMaps that contain channels with data as well as channels without
+cannot be used when making requests.&nbsp; The following fragment is
+not
+legal:
+<blockquote><tt>import com.rbnb.sapi.*;</tt> <br>
+  <tt>...</tt> <br>
+  <tt>Sink snk = new Sink();</tt> <br>
+  <tt>snk.OpenRBNBConnection('localhost:3333','mySink');</tt> <br>
+  <tt>ChannelMap cmap = new ChannelMap();</tt> <br>
+  <tt>cmap.Add('rbnbSource/c0');</tt> <br>
+  <tt>cmap.Add('plugin/c1');</tt> <br>
+  <tt>cmap.PutDataAsString(1,'Message to plugin.");</tt> <br>
+  <tt>snk.Request(cmap,0.,0.,'newest');</tt></blockquote>
+<h2>
+V1 to V2 Changes</h2>
+Version 2 is a major revision of the RBNB system, with the following
+significant
+features.
+<h3>New Licensing Model - Free to Developers and End Users</h3>
+The new V2 licensing model is designed to promote the widespread
+deployment
+of RBNB technology:
+<blockquote><li>&nbsp;Free unrestricted developer and end-user license</li>
+  <li>&nbsp;Negotiated right-to-distribute OEM license</li>
+</blockquote>
+If you want to bundle RBNB with your product or custom solution, please
+contact us to discuss the terms of an OEM redistribution agreement.
+<p>Creare offers RBNB consulting services, such as:
+</p>
+<blockquote><li>
+&nbsp;Development support</li>
+  <li>&nbsp;Custom features</li>
+  <li>&nbsp;System integration</li>
+  <li>&nbsp;Training</li>
+</blockquote>
+<h3>
+Web Integration</h3>
+The new WebTurbine<sup>TM</sup> interface enables:
+<blockquote><li>WebDAV compatible</li>
+  <li>Browser access to RBNB applications and documentation</li>
+  <li>Run and configure RBNB clients as Web servlets</li>
+  <li>Browser access (view/save) to RBNB channel data</li>
+  <li>Build your own custom browser interface to RBNB</li>
+</blockquote>
+<h3>
+Improved Developer API</h3>
+The new Application Programming Interface (API) employs simple
+channelMap
+and client objects.&nbsp; There are no more "ring buffer types".&nbsp;
+Timestamps are simple double-precision vectors.&nbsp; Efficiency is
+retained
+or enhanced while greatly reducing complexity.
+<p>Although not source-compatible with the V1 API, you will find it
+straight-forward
+(and refreshingly easy) to port old applications to the new system.
+</p>
+<h3>Powerful Application "PlugIns"</h3>
+Use your browser to configure and deploy a distributed data processing
+system. Example PlugIns include:
+<blockquote><li>&nbsp;Chat with other users (rbnbChat)</li>
+  <li>&nbsp;Publish local disk files as RBNB channels (rbnbFolder)</li>
+  <li>&nbsp;Buffered routing to minimize network traffic
+(rbnbBufferedRoute)</li>
+  <li>&nbsp;"Virtual Sources" consolidate and sequence remote sources
+and
+PlugIns
+(rbnbVSource)</li>
+  <li>&nbsp;Browser proxy cache to store and retrieve Web content via
+RBNB
+(rbnbWebCache)</li>
+  <li>&nbsp;Make PNG strip charts of numerical vector data</li>
+</blockquote>
+Develop and deploy your own RBNB PlugIns with the new easy to use V2
+API.
+<h3>Peer to Peer Solution</h3>
+With hierarchical routing of "personal" RBNB servers, the V2 RBNB
+provides
+a true "Peer to Peer" (P2P) solution.&nbsp; Benefits include data and
+processing
+"at the client", while being able to locate and publish to "peers" via
+an RBNB address that is independent of the IP/DNS address tied to a
+physical
+location or ISP.
+<h3>New "Rmap" Core Engine</h3>
+In the old RBNB V1, data channels were relatively "flat"
+structures.&nbsp;
+In RBNB V2, Rmaps are hierarchical objects comprised of name, data,
+timestamp
+and optional (recursive) child Rmaps.&nbsp; For example, channel groups
+can share inherited metadata, or use multi-tiered RBNB channels to
+directly
+reflect the structure of file systems or Web URLs.
+<br>
+&nbsp;
+<br>
+&nbsp;
+</body>
+</html>

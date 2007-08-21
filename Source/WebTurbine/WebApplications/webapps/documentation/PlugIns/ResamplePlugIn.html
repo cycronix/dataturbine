@@ -1,0 +1,33 @@
+<html>
+<head>
+	<title>Resample PlugIn Help</title>
+	<LINK REL=STYLESHEET HREF="/stylesheets/rbnbstyles.css" TYPE="text/css">
+</head>
+<body>
+<h1>Resample PlugIn Help</h1>
+The Resample PlugIn is useful for reducing the sample rate of a data stream
+in order to reduce network load.
+<p>It will take time series data in an RBNB channel,
+and either limit the data to a maximum number of samples 
+(via the <b>Max points per request</b> parameter) by decimating the data,
+or it will apply a fixed decimation factor 
+(through the <b>Downsample factor</b> parameter).
+If the sample limit requirement
+calls for a higher decimation factor than the fixed factor, the higher factor
+will be used.
+<p>For example, say the Resample PlugIn is started with 
+a Downsample factor of 2 and a Max points value of 1000. 
+If a request is then made for 1000 points, 500 points would be returned
+because the downsample factor of 2 would be used.  If a request were made
+for 3000 points, 1000 points would be returned because the limit would
+establish a factor of 3.  Note that only integer decimations are currently
+supported.
+<p>The Resample PlugIn also features an anti-aliasing capability.  An 8 pole
+Butterworth low pass filter is used, with a breakpoint frequency at the 
+Nyquist frequency of the downsampled data stream.  This filter does have a
+noticeable startup transient.
+<hr class="sectionbreak">
+<p class="footer"><a href="javascript:history.back()">
+	Back to PlugIn</a> - <a href="/webTurbine">Home</a></p>
+</body>
+</html>

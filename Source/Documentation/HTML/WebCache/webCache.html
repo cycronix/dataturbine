@@ -1,0 +1,275 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Author" content="Eric Friets">
+   <meta name="GENERATOR" content="Mozilla/4.77 [en] (WinNT; U) [Netscape]">
+   <title>WebCache</title>
+</head>
+<body>
+
+<center>
+<h1>
+<i>WebCache</i></h1></center>
+
+<center>
+<h1>
+User Manual</h1></center>
+
+<center>
+<h2>
+V2.4</h2></center>
+
+<center>
+<h2>
+December 7, 2001</h2></center>
+
+<center>
+<h2>
+Copyright 2001 Creare Inc.</h2></center>
+
+<p><br>
+<hr WIDTH="100%">
+<h1>
+Table Of Contents</h1>
+
+<blockquote>
+<h3>
+<a href="#overview">Overview</a></h3>
+
+<h3>
+<a href="#theory">Theory of Operation</a></h3>
+
+<h3>
+<a href="#setup">Setup and Startup</a></h3>
+
+<h3>
+<a href="#future">Future Enhancements</a></h3>
+
+<blockquote>&nbsp;</blockquote>
+</blockquote>
+
+<hr WIDTH="100%">
+<h2>
+<a NAME="overview"></a>Overview</h2>
+Include motivation for why a user and ISP and web server would want to
+use caching.
+<br>Include use of RBNB technology as core building block.
+<br>Include future enhancements made possible by RBNB technology (e.g.
+streaming media, peer-to-peer scalability, personal web hosting).
+<br>
+<hr WIDTH="100%">
+<h2>
+<a NAME="theory"></a>Theory of Operation</h2>
+
+<p><br>In a typical browsing configuration, without the use of a cache,
+a proxy connects the browser on an intranet to a web server on the internet,
+as shown schematically in Figure 1.&nbsp; The proxy passes data across
+the firewall which otherwise isolates the intranet and internet.&nbsp;
+When the user wishes to revisit a page, the content is refetched from the
+web server across the internet.
+<center><img SRC="Figure-1.gif" height=222 width=506>
+<br>Figure 1.&nbsp; Typical browsing configuration without the use of a
+cache.</center>
+
+<p>When a WebCache is used to cache previously accessed pages, the browser
+connects to the cache as if it were the proxy, as shown schematically in
+Figure 2.&nbsp; This topology requires no change to the browser software
+beyond a simple reconfiguration, and no change to the proxy or web server.&nbsp;
+When the WebCache receives a request for a web page, it first checks its
+embedded DataTurbine server for the content.&nbsp; If the page is found,
+it simply returns it to the browser.&nbsp; If the page is not found, the
+WebCache passes the request on to the web server via the proxy.&nbsp; When
+the page is returned, the WebCache saves a copy in the DataTurbine and
+passes a copy to the browser.&nbsp; Subsequent requests for that page are
+then handled locally.
+<center>
+<p><img SRC="Figure-2.gif" height=203 width=554>
+<br>Figure 2.&nbsp; Typical browsing configuration with the use of a WebCache.</center>
+
+<p>Other topologies are possible.&nbsp; While a browser's cache can reduce
+network traffic, it cannot be shared among many users.&nbsp; The WebCache
+can operate as a shared resource, as shown in Figure 3, wherein users have
+quick access to pages previously accessed by other users.&nbsp; This shared
+resource can be hosted by an ISP, to reduce their needed bandwidth to the
+Internet and improve response times, or it can be hosted by a workgroup,
+to similarly reduce the load on their connection to the ISP.
+<center>
+<p><img SRC="Figure-3.gif" height=241 width=556>
+<br>Figure 3.&nbsp; Use of a WebCache as a shared resource.</center>
+
+<p>Multiple WebCaches can be configured in a hierarchical fashion, with
+peer-to-peer connections*, for scalability with local control.&nbsp; An
+ISP hosting many dialup connections could be configured with each user
+having a local WebCache, and the ISP hosting a WebCache at the central
+network link to the internet and at each dialup location.&nbsp; Figure
+4 shows the topology, which serves to minimize traffic across each layer
+of the network to offer users unprecedented performance without expensive
+upgrades.&nbsp; User's requests are handled on their own machine, then
+passed to their dialup location if needed, then passed to the central ISP
+if needed, and only sent to the original web server on the internet if
+no user at the ISP had recently requested the same page.
+<center>
+<p><img SRC="Figure-4.gif" height=356 width=633>
+<p>Figure 4.&nbsp; Use of multiple WebCaches to improve an ISP's performance.</center>
+
+<p><font size=-1>*peer-to-peer connections are implemented at the DataTurbine
+level, but not yet implemented at the WebCache level</font>
+<hr WIDTH="100%">
+<h2>
+<a NAME="setup"></a>Setup and Startup</h2>
+
+<p><br><i>WebCache</i> needs to be run under a Java Virtual Machine (JVM).
+Start the application from the command line as:
+<blockquote><tt>java -jar webcache.jar</tt></blockquote>
+There are several command line options, summarized in the table below.
+<br>&nbsp;
+<center><table BORDER WIDTH="100%" >
+<tr>
+<td>Flag</td>
+
+<td>Parameter</td>
+
+<td>Default</td>
+
+<td>Description</td>
+</tr>
+
+<tr>
+<td><tt>-h</tt></td>
+
+<td></td>
+
+<td></td>
+
+<td><tt>prints usage info to console, then quits</tt></td>
+</tr>
+
+<tr>
+<td><tt>-s</tt></td>
+
+<td><tt>serversocket</tt></td>
+
+<td><tt>6677</tt></td>
+
+<td><tt>socket webcache listens on</tt></td>
+</tr>
+
+<tr>
+<td><tt>-p</tt></td>
+
+<td><tt>proxy</tt></td>
+
+<td><tt>none</tt></td>
+
+<td><tt>web proxy webcache connects to, as host:port</tt></td>
+</tr>
+
+<tr>
+<td><tt>-r</tt></td>
+
+<td><tt>rbnbSocket</tt></td>
+
+<td><tt>3333</tt></td>
+
+<td><tt>server socket of embedded RBNB server</tt></td>
+</tr>
+
+<tr>
+<td><tt>-c</tt></td>
+
+<td><tt>cache frames</tt></td>
+
+<td><tt>1000</tt></td>
+
+<td><tt>number of web objects cached in memory</tt></td>
+</tr>
+
+<tr>
+<td><tt>-a</tt></td>
+
+<td><tt>archive frames</tt></td>
+
+<td><tt></tt></td>
+
+<td><tt>number of web objects cached on disk.</tt>
+<br><tt>default is number in existing archive,</tt>
+<br><tt>or number cached in memory if new archive</tt></td>
+</tr>
+
+<tr>
+<td><tt>-n</tt></td>
+
+<td></td>
+
+<td></td>
+
+<td><tt>create a new archive (default: append to existing)</tt></td>
+</tr>
+
+<tr>
+<td><tt>-d</tt></td>
+
+<td><tt>level</tt></td>
+
+<td><tt>0</tt></td>
+
+<td><tt>print out debug info as application runs</tt></td>
+</tr>
+</table></center>
+
+<p>Upon startup, WebCache creates an internal RBNB server, and begins listening
+for connections from browsers on the specified
+<tt>serversocket</tt>.&nbsp;
+A new thread is spawned to handle each connection.
+<p>Incoming requests are parsed.&nbsp; If the request is for anything other
+than the protocol <tt>http</tt> and the command <tt>GET</tt>, no caching
+is done.&nbsp; The request is passed on to the proxy, and the results passed
+back to the browser.&nbsp; If the request is for <tt>http</tt> and <tt>GET</tt>,
+the DataTurbine is checked.&nbsp; If the page is found, it is returned
+to the browser.&nbsp; If the page is not found, the request is passed on
+to the proxy (if specified) or the originating web server.&nbsp; When the
+proxy or web server returns the page, it is passed on to the browser and
+a copy parsed.&nbsp; If the page's status code is <tt>200 OK</tt>, the
+page is written to the DataTurbine.&nbsp; Pages with other status codes
+are not cached.&nbsp; This ensures that only complete web objects are placed
+into the cache, eliminating conflicts between browser's built in caches
+and the WebCache.
+<p>Additionally, when a request is answered from the cache, a background
+update of that object is started.&nbsp; This allows for updated content
+to be obtained and put in the cache.&nbsp; Users wishing to see the updated
+content simply hit the 'Reload' button on their browsers.&nbsp; This approach
+of performing background updates avoids waiting for web access yet allows
+for new content to be viewed.&nbsp; In order to minimize network bandwidth
+usage, modification dates are parsed, and "If-Modified-Since" requests
+and&nbsp; "Not Modified" responses sent when appropriate.
+<p>
+<hr WIDTH="100%">
+<h2>
+<a NAME="future"></a>Future Enhancements</h2>
+This initial implementation, while useful for more than just a proof of
+concept, is missing some important features.&nbsp; Future improvements
+may include:
+<ul>
+<li>
+Support for additional protocols, such as <tt>ftp</tt></li>
+
+<li>
+Parsing of caching directives contained in the request and page headers</li>
+
+<li>
+Configuration via <tt>http</tt> through the browser</li>
+
+<li>
+Viewing of the cache contents, with direct hyperlinks (supported through
+the WebAccess package)</li>
+
+<li>
+Expiration capabilities beyond the simple ring buffer looping</li>
+
+<li>
+Ability to selectively expire pages</li>
+</ul>
+
+</body>
+</html>

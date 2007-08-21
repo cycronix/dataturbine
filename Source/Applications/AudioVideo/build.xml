@@ -1,0 +1,71 @@
+<!-- Name: build.xml
+     By:   Ian Brown
+     Date: 08/30/2004
+
+     Description:
+         This file is the primary Ant build file for the RBNB Audio/Video
+         project.  There are two programs here, one to capture audio and video
+         and place it into the RBNB server in the form of an audio stream and a
+         series of JPEG images, and one to play the sound and display the
+         images.
+-->
+
+<project name="APPLICATION.AUDIOVIDEO" default="library" basedir=".">
+
+ <!-- Import the standard definitions (properties). -->
+ <import file="../../definitions.xml" />
+ 
+ <property name="debugsetting" value="on" />
+
+ <!-- Initialize by setting the timestamp. -->
+ <target name="init">
+  <tstamp />
+  <buildnumber />
+  <mkdir dir="${rbnb.builddir}" />
+  <mkdir dir="${rbnb.classesdir}" />
+  <mkdir dir="${rbnb.classesdir}/Applications" />
+  <mkdir dir="${rbnb.classesdir}/Applications/AudioVideo" />
+  <mkdir dir="${rbnb.classesdir}/Applications/AudioVideo/Video" />
+  <mkdir dir="${rbnb.librarydir}" />
+ </target>
+
+ <!-- Compile the audio/video capture and display application. -->
+ <target name="compile" depends="init">
+	<javac destdir="${rbnb.classesdir}/Applications/AudioVideo"
+			 debug="${debugsetting}" deprecation="on"
+			 source="${rbnb.javaver}" target="${rbnb.javaver}" >
+		<src path="${rbnb.sourcedir}/Applications/AudioVideo" />
+		<include name="**/JPEGCapture*.java" />
+		<include name="com/rbnb/media/datasink/protocol/*.java" />
+		<include name="**/rbnbAVCP.java" />
+		<include name="com/rbnb/media/protocol/*.java" />
+		<classpath path="${rbnb.librarydir}/rbnb.jar" />
+		<classpath path = 
+   			"${rbnb.basedir}/../LicensedSoftware/JMF-2.1.1e/lib/jmf.jar" />
+  </javac>
+ </target>
+
+ <!-- Copy the audio/video display button images to the classes directory. -->
+ <target name="images">
+  <copy todir="${rbnb.classesdir}/Applications/AudioVideo/Video">
+   <fileset dir="Video" />
+  </copy>
+ </target>
+
+ <!-- Create a jar file for the avcp application. -->
+ <target name="library" depends="compile,images">
+ 	<jar destfile="${rbnb.librarydir}/rbnbAVCP.jar"
+			manifest="AVCPManifest"
+			compress="false" >
+		<fileset dir="${rbnb.classesdir}/Applications/AudioVideo" includes="**"/>
+	</jar>
+ </target>
+
+ <!-- Cleans out all compiled and library files for the Video project. -->
+ <target name="clean">
+	<delete dir="${rbnb.classesdir}/Applications/AudioVideo" />
+	<delete file="${rbnb.librarydir}/rbnbAVCP.jar" />
+ </target>
+
+</project>
+

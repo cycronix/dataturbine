@@ -1,0 +1,651 @@
+<!DOCTYPE html PUBLIC "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=iso-8859-1">
+  <meta name="Author" content="Matt Miller">
+  <meta name="GENERATOR"
+ content="Mozilla/4.75 [en] (WinNT; U) [Netscape]">
+  <title>rbnbPlot</title>
+</head>
+<body>
+<center>
+<h1>DataTurbine Plot Utility</h1>
+</center>
+<center>
+<h1><i>rbnbPlot</i></h1>
+</center>
+<center>
+<h1>User Manual</h1>
+</center>
+<center>
+<h2>V2.51</h2>
+</center>
+<center>
+<h2>November 29, 2006</h2>
+</center>
+<center>
+<h2>Copyright 1999-2006, Creare Inc.</h2>
+</center>
+<p><br>
+</p>
+<hr width="100%">
+<h1>Table of Contents</h1>
+<blockquote>
+  <h3><a href="#intro">Introduction</a></h3>
+  <blockquote><b><a href="#overview">Overview</a></b> <br>
+    <b><a href="#setup">Setup and Startup</a></b></blockquote>
+  <h3> <b><a href="#menubar">Menu Bar</a></b></h3>
+  <blockquote><b><a href="#file">File</a></b></blockquote>
+</blockquote>
+<blockquote>
+  <blockquote>
+    <blockquote><b><a href="#open">Open RBNB</a></b> <br>
+      <b><a href="#close">Close RBNB</a></b> <br>
+      <b><a href="#loadconfig">Load Config</a></b> <br>
+      <b><a href="#saveconfig">Save Config</a></b> <br>
+      <b><a href="#Export">Export to DataTurbine</a></b> <br>
+      <b><a href="#exit">Exit</a></b></blockquote>
+    <b><a href="#mode">Mode</a></b>
+    <blockquote><b><a href="#plotmode">Plot</a></b> <br>
+      <b><a href="#tablemode">Table</a></b></blockquote>
+    <b><a href="#window">Window</a></b>
+    <blockquote><a href="#cascade"><b>Cascade</b> </a><br>
+      <b><a href="#tile">Tile</a></b><br>
+      <b><a href="#manual">Manual</a></b><b><br>
+      </b></blockquote>
+    <b><a href="#help">Help</a></b>
+    <blockquote><b><a href="#about">About</a></b></blockquote>
+  </blockquote>
+  <h3> <b><a href="#controls">Operation Controls</a></b></h3>
+  <blockquote><b><a href="#playbackbuttons">Playback Buttons</a></b> <br>
+    <b><a href="#positionslider">Position Slider</a></b> <br>
+    <b><a href="#durationslider">Duration Slider</a></b> <br>
+    <b><a href="#channelselection">Channel Selection</a></b> <br>
+    <b><a href="#displaygroup">Display Groups</a></b></blockquote>
+  <h3> <b><a href="#configuration">Plot Configuration</a></b></h3>
+  <blockquote><b><a href="#autoscale">Automatic Scaling</a></b> <br>
+    <b><a href="#manualscale">Manual Scaling</a><br>
+    <a href="#zoom">Zooming<br>
+    </a></b></blockquote>
+  <h3> <b><a href="#userinfo">User Info Interpretation</a></b></h3>
+</blockquote>
+<hr width="100%">
+<h1><a name="intro"></a>Introduction</h1>
+<h2>
+<a name="overview"></a>Overview</h2>
+The <i>rbnbPlot</i> utility provides a graphical interface to
+numerical
+data in the DataTurbine.&nbsp; It functions much like a combination
+oscilloscope
+and strip chart recorder.&nbsp; It has both real-time monitoring and
+playback
+features. In fact, the transition between real-time and playback is
+completely
+seamless; simply "rewind" to review historical data while new
+information
+continues to stream into the DataTurbine. The following figure shows an
+example
+<i>rbnbPlot</i> display window.
+<br>
+<br>
+<a name="plotmodedisplay"></a>
+<center><img src="plottypes.png" title=""
+ alt="Example display, showing different plot types."
+ style="width: 640px; height: 618px;"><br>
+<p><b>Example <i>rbnbPlot</i> Display, Showing Text, StripChart, and
+Image Display Types<br>
+</b></p>
+</center>
+<p>The <i>rbnbPlot</i> window is comprised of several functional
+areas:
+</p>
+<blockquote><li> <a href="#menubar">Menu Bar</a> for connecting,
+saving
+configuration, and
+setting operation mode</li>
+  <li> <a href="#controls">Operation Controls</a> for selection of
+channels, data
+position and plot duration</li>
+  <li> <a href="#configuration">Plot Configuration</a> menus for plot
+axis
+scaling</li>
+</blockquote>
+<h2>
+<a name="setup"></a>Setup and Startup</h2>
+The <i>rbnbPlot</i> application needs to be run under a Java Virtual
+Machine
+(JVM).&nbsp; Different flavors of Java come by different names (e.g. <i>java</i>,
+<i>jre</i>,
+<i>jview</i>).
+See the <i>Installation Guide</i> which come with your software for
+how
+to setup a script or shortcut to execute <i>rbnbPlot</i>.
+<p>The <i>rbnbPlot</i> application has the following optional
+command-line
+arguments:
+<br>
+&nbsp;
+</p>
+<center>
+<table border="1" width="86%">
+  <tbody>
+    <tr>
+      <td><b>Option</b></td>
+      <td><b>Description</b></td>
+    </tr>
+    <tr>
+      <td><tt>-c</tt></td>
+      <td>Show channels with unknown point sizes (default is to hide
+them).</td>
+    </tr>
+    <tr>
+      <td><tt>-d duration</tt></td>
+      <td>Specify a startup time duration for the initial display of
+data (float).</td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;"><span
+ style="font-family: monospace;">-D max duration</span><br>
+      </td>
+      <td style="vertical-align: top;">Specify the maximum duration the
+slider will allow.<br>
+      </td>
+    </tr>
+    <tr>
+      <td><tt>-u time units</tt></td>
+      <td>Units for time (string).&nbsp; Default is 'Sec'.</td>
+    </tr>
+    <tr>
+      <td><tt>-r host:port&nbsp;</tt></td>
+      <td>Specifies DataTurbine to which to connect; defaults to none,
+use <a href="#open">File/Open</a>
+to connect.</td>
+    </tr>
+    <tr>
+      <td><tt>-k</tt></td>
+      <td>Attempts to kill DataTurbine when exiting <i>rbnbPlot</i></td>
+    </tr>
+    <tr>
+      <td><tt>-p x,y</tt></td>
+      <td>Specify upper left corner of main window in pixels; default
+centers
+window on screen</td>
+    </tr>
+    <tr>
+      <td><tt>-s min,max,div&nbsp;</tt></td>
+      <td>Specifies manual scaling from <i>min</i> to <i>max</i> with
+      <i>div</i>
+divisions</td>
+    </tr>
+    <tr>
+      <td><tt>-S</tt></td>
+      <td>"Start" mode, which forces rbnbPlot to start up in RT mode
+(versus
+paused mode)&nbsp;</td>
+    </tr>
+    <tr>
+      <td><tt>-w msec</tt></td>
+      <td>Specify number of extra milliseconds to sleep between
+real-time updates</td>
+    </tr>
+    <tr>
+      <td><tt>-n</tt></td>
+      <td>Allow RealTime Streaming</td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;"><span
+ style="font-family: monospace;">-g</span><br>
+      </td>
+      <td style="vertical-align: top;">Turn off gridline scrolling.<br>
+      </td>
+    </tr>
+    <tr>
+      <td><tt>-i</tt></td>
+      <td>Interpret 4 byte data values as integers (default is float)<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</center>
+<p><b><i>Example</i></b>:
+</p>
+<blockquote><tt>java -jar plot.jar</tt></blockquote>
+On startup or upon the initial opening of a connection to a
+DataTurbine,
+<i>rbnbPlot</i>
+attempts to:
+<blockquote><li>Make a connection to the specified DataTurbine</li>
+  <li>Obtain a list of all available channels</li>
+  <li>Put 4 channels into each display group</li>
+  <li>Obtain a 'reasonable' amount of data for each channel in the
+first
+display
+group</li>
+</blockquote>
+The endpoints of the position slider reflect the earliest and latest
+available
+data.&nbsp; The default initial run mode is set to <i>RT</i>, so the
+plots
+automatically update as data becomes available.
+<p></p>
+<hr width="100%">
+<h1><a name="menubar"></a>Menu Bar</h1>
+The top Menu Bar has several pull-down menus, as described below.
+<h2><a name="file"></a>File</h2>
+The <i>File</i> selection provides several functions, described below.
+<h3><a name="open"></a>Open RBNB</h3>
+<center><img src="openrbnb.jpg" height="188" width="244"></center>
+<p>Opening a connection to the DataTurbine is required before data can
+be displayed.&nbsp; Provide the DataTurbine host name (or IP address)
+and
+port number.&nbsp; You should see confirmation of your connection in
+the
+<i>rbnbPlot</i>
+title bar, and the available channels will be listed in the channel
+selection
+panel.
+</p>
+<h3><a name="close"></a>Close RBNB</h3>
+This closes your current connection to the DataTurbine.
+<h3><a name="loadconfig"></a>Load Config</h3>
+<center><img src="loadconfig.jpg" height="110" width="258"></center>
+<p>This function pops up a menu for loading previously-saved <i>rbnbPlot</i>
+configuration (see <a href="#saveconfig">Save Config)</a>. Click <i>OK</i>
+and the display groups, channels, and scaling will be restored to the
+saved
+settings.
+</p>
+<h3><a name="saveconfig"></a>Save Config</h3>
+<center><img src="saveconfig.jpg" height="111" width="568"></center>
+<p>This function allows you to save your current <i>rbnbPlot</i>
+configuration.&nbsp;
+You need to give it a name by which it can be later recalled (see <a
+ href="#loadconfig">Load
+Config</a>).&nbsp; Information regarding your <a
+ href="#channelselection">channel
+selection</a>, <a href="#displaygroup">display groups</a> and <a
+ href="#configuration">plot
+configuration</a> is saved.
+</p>
+<p>This information is saved as an DataTurbine channel.&nbsp; <i>rbnbPlot</i>
+recognizes configuration channels as special, and will not try to plot
+a configuration channel as data.
+</p>
+<p>Saved configuration channels are not archived, and will be lost if
+the
+DataTurbine terminates.
+<br>
+&nbsp;
+</p>
+<h3><a name="Export"></a>Export to DataTurbine<br>
+</h3>
+<center><img alt="Export to DataTurbine dialog" src="export_to_rbnb.jpg"
+ style="width: 396px; height: 163px;"><br>
+</center>
+<p>When <span style="font-style: italic;">rbnbPlot</span> is connected
+to an RBNB Server, selecting "Export to DataTurbine" from the File menu
+pops up the Export to DataTurbine non-modal dialog box (shown
+above).&nbsp; In this dialog, specify the desired name of the exported
+source and whether the source should be archived.&nbsp; Hitting the <span
+ style="font-style: italic;">Export</span> button will copy the
+currently displayed channels to a new RBNB Source.&nbsp; What you see
+is what you
+get; i.e. the same data that is currently plotted is exported.&nbsp; Be
+warned that exporting a large amount of data can take a long time and
+use
+a large amount of system memory.&nbsp; After exporting, the new source
+is "detached", leaving it connected to the RBNB but not under <span
+ style="font-style: italic;">rbnbPlot</span>'s control<span
+ style="font-style: italic;"></span>.<br>
+</p>
+<h3><a name="exit"></a>Exit</h3>
+This command exits the <i>rbnbPlot</i> program.
+<h2><a name="mode"></a>Mode</h2>
+Two display modes are provided, as described below.
+<h3><a name="plotmode"></a>Plot</h3>
+<i>Plot</i> mode is the default "strip chart" mode shown <a
+ href="#plotmodedisplay">above</a>.&nbsp;
+Each plot contains an annotated data trace.
+<h3><a name="tablemode"></a>Table</h3>
+<i>Table</i> mode displays numerical (versus graphical) information, as
+shown below.
+<center>
+<p><img src="tableplot.jpg" height="231" width="352"></p>
+<p><b>Example <i>rbnbPlot</i> in Table Mode</b></p>
+</center>
+<p><i>Table</i> mode displays the following columns of information, one
+row for each selected channel:
+<br>
+&nbsp;
+</p>
+<center>
+<table border="1" width="55%">
+  <tbody>
+    <tr>
+      <td><b>Name</b></td>
+      <td>Name of the selected channel</td>
+    </tr>
+    <tr>
+      <td><b>Units</b></td>
+      <td>Given units (if any) of the channel</td>
+    </tr>
+    <tr>
+      <td><b>First</b></td>
+      <td>Value of first data point for current interval</td>
+    </tr>
+    <tr>
+      <td><b>Last</b></td>
+      <td>Value of last data point for current interval</td>
+    </tr>
+    <tr>
+      <td><b>Min</b></td>
+      <td>Minimum data value for selected interval</td>
+    </tr>
+    <tr>
+      <td><b>Max</b></td>
+      <td>Maximum value in selected interval</td>
+    </tr>
+    <tr>
+      <td><b>Ave</b></td>
+      <td>Average of all values in selected interval</td>
+    </tr>
+    <tr>
+      <td><b>StdDev&nbsp;</b></td>
+      <td>Standard deviation of values in selected interval</td>
+    </tr>
+  </tbody>
+</table>
+</center>
+<h2><a name="window"></a> Window</h2>
+The <span style="font-weight: bold;">Window </span>menu contains
+options that allows the user to specify the desired layout of the plot
+windows within the <span style="font-style: italic;">rbnbPlot </span>viewing
+area.&nbsp; The user can select <span style="font-weight: bold;">Cascade</span>,
+<span style="font-weight: bold;">Tile</span>, or <span
+ style="font-weight: bold;">Manual</span>.<br>
+<h3><a name="cascade"></a>Cascade</h3>
+Selecting the <span style="font-weight: bold;">Cascade </span>menu
+item cascades all plot windows, where plot windows are added in a stack
+with the title bars showing.&nbsp; When the user selects a new channel
+to display, a new plot window containing the data for this channel will
+be added to the cascade.&nbsp; Resizing the <span
+ style="font-style: italic;">rbnbPlot </span>window will not re-layout
+the individual plot windows.&nbsp; While in <span
+ style="font-weight: bold;">Cascade </span>mode, the user may move and
+resize the individual plot windows as desired.<br>
+<h3><a name="tile"></a>Tile</h3>
+Selecting the <span style="font-weight: bold;">Tile </span>menu item
+tiles all plot windows, where each plot window is fully exposed and all
+available space within the <span style="font-style: italic;">rbnbPlot </span>viewing
+area is fully utilized.&nbsp; When the user selects a new channel to
+display, a new plot window
+containing the data for this channel will be added to the viewing area
+and all existing plot windows will be re-tiled to accomodate the new
+plot window.&nbsp;
+Resizing the <span style="font-style: italic;">rbnbPlot </span>window
+automatically re-tiles the viewing area such that all plot windows will
+still be fully exposed in the new view.&nbsp; While in <span
+ style="font-weight: bold;">Tile </span>mode, the user may move and
+resize the individual plot windows as desired, however as soon as the <span
+ style="font-style: italic;">rbnbPlot </span>window is resized, the
+plot windows will be automatically re-tiled.
+<h3><a name="manual"></a>Manual</h3>
+Selecting the <span style="font-weight: bold;">Manual </span>menu
+item specifies that no automatic layout should be performed on the plot
+windows when the <span style="font-style: italic;">rbnbPlot </span>window
+is resized.&nbsp; When the user selects a new channel to display, a new
+plot window
+containing the data for this channel will be added in cascading fashion
+to the viewing area.
+<h2><a name="help"></a>Help</h2>
+<h3>
+<a name="about"></a>About</h3>
+Pops up an identification and version information window.
+<h1>
+<hr width="100%"></h1>
+<h1>
+<a name="controls"></a>Operation Controls</h1>
+The top part of the <i>rbnbPlot</i> window contains a variety of
+operation
+controls.&nbsp; Refer to the example <i>rbnbPlot</i> screen <a
+ href="#plotmodedisplay">above</a>
+for reference.
+<h2><a name="playbackbuttons"></a>Playback Buttons</h2>
+The top row of control buttons provide tapedeck-like position control:
+<br>
+&nbsp;
+<center>
+<table border="1" width="68%">
+  <tbody>
+    <tr>
+      <td><b><tt>&nbsp; |&lt;&nbsp;</tt></b></td>
+      <td>Go to beginning (oldest) of data.</td>
+    </tr>
+    <tr>
+      <td><b><tt>&nbsp; &lt;</tt></b></td>
+      <td>Play continuously backwards. Press multiple times to go
+faster.</td>
+    </tr>
+    <tr>
+      <td>&nbsp;<tt>&nbsp; <b>&lt;|</b></tt></td>
+      <td>Single-step one interval backwards.</td>
+    </tr>
+    <tr>
+      <td><b><tt>&nbsp; ||</tt></b></td>
+      <td>Pause (stop) playback.</td>
+    </tr>
+    <tr>
+      <td>&nbsp;&nbsp;<b><tt> |&gt;</tt></b></td>
+      <td>Single-step one interval forwards.</td>
+    </tr>
+    <tr>
+      <td><b><tt>&nbsp; &gt;</tt></b></td>
+      <td>Play continuously forwards. Press multiple times to go faster.</td>
+    </tr>
+    <tr>
+      <td><b><tt>&nbsp; &gt;|</tt></b></td>
+      <td>Go to end (newest) of data.</td>
+    </tr>
+    <tr>
+      <td><b><tt>&nbsp; RT</tt></b></td>
+      <td>Real-time (continuous) update.</td>
+    </tr>
+  </tbody>
+</table>
+</center>
+&nbsp;
+<h2><a name="positionslider"></a>Position Slider</h2>
+The top of the two slider bars is an alternate way to set the data
+position
+(time).&nbsp; Pull it left or right until the desired time-stamp is
+displayed
+above the slider.
+<p>The <i>Position</i> information (above the <i>Position</i> slider)
+shows
+the time-stamp for either the oldest or newest displayed data,
+depending
+upon the condition. For real-time tracking (<b><tt>RT</tt></b>) and
+end-of-data
+(<b><tt>&gt;|</tt></b>), the newest time-stamp (right edge of plotted
+data)
+is shown.&nbsp; For all other cases, the oldest time-stamp (left edge
+of
+the plotted data) is shown.&nbsp; A position may be typed or pasted
+into the textbox, and that data will be fetched and displayed when the
+return key is pressed.<br>
+</p>
+<h2><a name="durationslider"></a>Duration Slider</h2>
+The bottom of the two slider bars sets the length, or <i>duration</i>
+of
+the displayed data interval.&nbsp; Slide it left or right until the
+desired
+duration interval is displayed above the slider.&nbsp; The <span
+ style="font-style: italic;">Duration</span> information is displayed
+above the slider, and a new duration may be typed or pasted into the
+textbox.&nbsp; When the return key is pressed, that data will be
+fetched and displayed.<br>
+<p><b><i>Note</i></b>:&nbsp; Be careful when selecting long durations;
+it is possible under some circumstances to request <i>very</i> large
+amounts
+of data, which can take a long time to fetch and plot, or worse yet,
+cause
+an application to run out of memory.
+</p>
+<h2><a name="channelselection"></a>Channel Selection</h2>
+The panel in the upper right of the <i>rbnbPlot</i> window is the
+channel
+selection box.&nbsp; Click it to pop up an independent, resizable
+channel
+selection window.&nbsp; Click n a channel to select or deselect
+it.&nbsp; Click <i>Reset</i> to deselect all channels.&nbsp; The
+following figure shows channels, three of which are selected for
+display.
+<center>
+<p><img src="channels.jpg" style="height: 322px; width: 300px;" title=""
+ alt="Channel Selection Menu"></p>
+<p><b>Channel Selection Menu</b></p>
+</center>
+<p>In Tile mode, channels are displayed first in a single column of
+plot
+boxes, then in multiple columns, according to a built-in heuristic.<br>
+</p>
+<p>Even though all selected channels will be requested, rbnbPlot can
+only
+display data for three types of channels: image, text, and
+stripchart.&nbsp; Channels are displayed as images if the channel name
+ends with ".jpg" or ".jpeg".&nbsp; Channels are displayed as text if
+the channel name ends with ".txt" or ".text", or if the channel's MIME
+type begins with "text".&nbsp; All other channels are displayed as
+Stripchart channels, though data is displayed only for word lengths
+given in the table below.<br>
+&nbsp;
+</p>
+<center>
+<table border="1" width="80%">
+  <tbody>
+    <tr>
+      <td>
+      <center><b>Data Word Length</b></center>
+      </td>
+      <td>
+      <center><b>Presumed Data Format</b></center>
+      </td>
+    </tr>
+    <tr>
+      <td>
+      <center>2 Bytes</center>
+      </td>
+      <td>
+      <center>short integer</center>
+      </td>
+    </tr>
+    <tr>
+      <td>
+      <center>4 Bytes</center>
+      </td>
+      <td>
+      <center>single precision floating point</center>
+      </td>
+    </tr>
+    <tr>
+      <td>
+      <center>8 Bytes</center>
+      </td>
+      <td>
+      <center>double precision floating point</center>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</center>
+<p>
+</p>
+<p></p>
+<h2><a name="displaygroup"></a>Display Groups</h2>
+The numbered buttons below the other operation controls (and above the
+display area) are <i>Display Group</i> selection buttons. Each display
+group has an associated selection of channels.&nbsp; You can
+pre-configure
+groups of channels in different display groups, then switch between
+them
+quickly at run-time.
+<p><b><i>Note:</i></b>&nbsp; Some data source applications
+pre-configure
+display group information, and provide labels which automatically
+appear
+on the display group selection buttons.
+</p>
+<p></p>
+<hr width="100%">
+<h1><a name="configuration"></a>Plot Configuration</h1>
+Mouse click on any of the display plots to bring up the following plot
+configuration window:
+<center>
+<p><img src="plotscale.jpg" height="324" width="307"></p>
+<p><b>Example Plot Configuration Pop-Up Menu</b></p>
+</center>
+<h2>
+<a name="autoscale"></a>Automatic Scaling</h2>
+You can select to either automatically or manually scale the
+data.&nbsp;
+The top <i>AutoScale</i> (increasing/decreasing) selection will update
+the Y-axis limits (up or down) every time new data is plotted.
+<p>The second <i>AutoScale (increasing only) </i>selection only
+updates
+the Y-axis limits when the plot scale increases.&nbsp; This latter
+choice
+is advantageous when rapidly changing plot scales would otherwise be
+distracting.&nbsp;
+You can also specify the initial plot limits and number of Y-axis
+divisions
+for this mode.
+</p>
+<p><i>Autoscale</i> <i>(increasing only)</i> is the default plot mode.
+</p>
+<h2><a name="manualscale"></a>Manual Scaling</h2>
+The <i>Manual Scaling</i> option lets you set the number of divisions
+in
+the Y-axis, as well as the minimum and maximum Y-axis limits.<br>
+<h2><a name="zoom"></a>Zoom</h2>
+Dragging the mouse in a display plot will highlight the region
+selected.&nbsp; When the mouse is released, rbnbPlot will zoom in to
+that start and duration for all displayed channels, and update the
+position and duration information accordingly.<br>
+<br>
+<div style="text-align: center;">.<img src="dragforzoom.png" title=""
+ alt="Dragging to select a region for zooming."
+ style="width: 640px; height: 384px;"><br>
+<p><span style="font-weight: bold;">Dragging a Region to Specify Zooming</span></p>
+<p><span style="font-weight: bold;"><img src="zoomed.png" title=""
+ alt="The zoomed data" style="width: 640px; height: 384px;"><br>
+<span style="font-weight: bold;"><br>
+The Resulting Zoomed Display</span><br>
+</span></p>
+</div>
+<p></p>
+<br>
+<hr style="width: 100%; height: 2px;"><br clear="all">
+<h1><a name="userinfo"></a>User Info Interpretation</h1>
+When a data source has supplied User Info specifying units, scale,
+and/or offset, rbnbPlot applies this EU conversion prior to plotting
+the data, and the units are shown at the top of the ordinate
+axis.&nbsp; User Info must be in the form of key-value pairs, separated
+by commas.&nbsp; An example setting of user info for the ChannelMap <span
+ style="font-style: italic;">cm </span>and channel index <span
+ style="font-style: italic;">0 </span>is<br>
+<br>
+cm.PutUserInfo(0,"units=feet,scale=3.281,offset=0");<br>
+<br>
+For the data shown above in the Zoom section, this User Info results in
+the display:<br>
+<br>
+<div style="text-align: center;"><img src="euconvert.png" title=""
+ alt="image scaled from meters to feet"
+ style="width: 640px; height: 407px;"><br>
+<span style="font-weight: bold;"><br>
+Data Converted from Meters to Feet via User Info<br>
+</span></div>
+<br>
+</body>
+</html>

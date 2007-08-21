@@ -1,0 +1,27 @@
+
+#
+# This file provides TrackDataPlugIn the names of the RBNB channels.
+#
+# Blank lines or lines that start with '#' will be skipped
+#
+# The left column indicates the type of channel (see codes below).
+# The right column provides the specific RBNB channel name this data will be acquired from.
+#
+# The channel name codes are as follows (these names must be exactly used in the left column):
+# alt       (altitude channel)
+# lat       (latitude channel)
+# lon       (longitude channel)
+# id        (track id channel)
+# type      (type channel)
+# class     (classification channel)
+# speed     (speed channel)
+# heading   (heading channel)
+
+alt		Alt
+lat		Lat
+lon		Lon
+id		TrackID
+type		Type
+class		Classification
+speed		Speed
+heading		Heading

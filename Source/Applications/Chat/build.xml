@@ -1,0 +1,57 @@
+<!-- Name: build.xml
+     By:   Ian Brown
+     Date: 06/18/2004
+
+     Description:
+         This file is the primary Ant build file for the RBNB Chat
+         application.  This application allows the exchange of messages between
+         various users.  It uses a central host, which is started by the first
+         user.
+-->
+
+<project name="APPLICATION.CHAT" default="library" basedir=".">
+
+ <!-- Import the standard definitions (properties). -->
+ <import file="../../definitions.xml" />
+
+ <!-- Initialize by setting the timestamp. -->
+ <target name="init">
+  <tstamp />
+  <buildnumber />
+  <mkdir dir="${rbnb.builddir}" />
+  <mkdir dir="${rbnb.classesdir}" />
+  <mkdir dir="${rbnb.classesdir}/Applications" />
+  <mkdir dir="${rbnb.classesdir}/Applications/Chat" />
+  <mkdir dir="${rbnb.librarydir}" />
+ </target>
+
+ <!-- Compile the Chat Java source code and place the results in the Chat
+      classes directory.  References the Core library and the Chat classes for
+      dependencies.
+  -->
+ <target name="compile" depends="init">
+  <javac destdir="${rbnb.classesdir}/Applications/Chat"
+         deprecation="on"
+		 debug = "on">
+   <src path="${rbnb.sourcedir}/Applications/Chat" />
+   <classpath path="${rbnb.classesdir}/Applications/Chat" />
+   <classpath path="${rbnb.librarydir}/rbnb.jar" />
+  </javac>
+ </target>
+
+ <!-- Create the Chat jar file using the Chat classes. -->
+ <target name="library" depends="compile">
+  <jar destfile="${rbnb.librarydir}/chat.jar"
+       basedir="${rbnb.classesdir}/Applications/Chat"
+       manifest="Manifest"
+   />
+ </target>
+
+ <!-- Cleans out all compiled and library files for the Chat project. -->
+ <target name="clean">
+  <delete dir="${rbnb.classesdir}/Applications/Chat" />
+  <delete file="${rbnb.librarydir}/chat.jar" />
+ </target>
+
+</project>
+

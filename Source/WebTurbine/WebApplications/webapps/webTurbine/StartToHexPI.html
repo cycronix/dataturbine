@@ -1,0 +1,34 @@
+<html>
+<head>
+	<title>Start ToString PlugIn</title>
+	<LINK REL=STYLESHEET HREF="/stylesheets/rbnbstyles.css" TYPE="text/css">
+</head>
+<body>
+<h1>ToHex PlugIn</h1>
+<p>Converts input bytes to a hexidecimal string representation.</p>
+<form action="StartPlugIn.jsp" method="GET">
+	<input type="hidden" name="className" 
+		value="ToHexPlugIn" />
+	<input type="hidden" name="plugInName" 
+		value="ToHex PlugIn" />
+	
+	<div class="centered">
+	<table celpadding=5 class="leftjustified">
+	<tr>
+		<td>RBNB Server:</td>
+		<td><input type="hidden" name="arg" value="-a"/>
+		<input type="TEXT" name="arg" 
+			value="localhost:3333" size=60/></td>
+	</tr><tr>
+		<td>ToString name:</td>
+		<td><input type="hidden" name="arg" value="-n"/>
+		<input type="TEXT" name="arg" value="ToHex" 
+			size=60/></td>
+	</table>
+	<p><input type="submit" value="Start PlugIn" /></p></div>
+</form>
+<p class="footer"><a href="/documentation/PlugIns/ToHexPlugIn.html">
+	Help</a> - <a href="/webTurbine">Home</a></p>
+</body>
+</html>
+

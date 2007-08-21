@@ -1,0 +1,42 @@
+<html>
+<head>
+	<title>Start Portable Network Graphic PlugIn</title>
+	<LINK REL=STYLESHEET HREF="/stylesheets/rbnbstyles.css" TYPE="text/css">
+</head>
+<body>
+<h1>Portable Network Graphic PlugIn</h1>
+<p>This PlugIn converts time series data to a PNG format plot viewable by most browsers.</p>
+<form action="StartPlugIn.jsp" method="GET">
+	<input type="hidden" name="className" value="PNGPlugIn" />
+	<input type="hidden" name="plugInName" 
+		value="Portable Network Graphic PlugIn" />
+	
+	<div class="centered">
+	<table celpadding=5 class="leftjustified">
+	<tr>
+		<td>RBNB server address:</td>
+		<td><input type="hidden" name="arg" value="-a"/>
+		<input type="TEXT" name="arg" 
+			value="localhost:3333" size=30/></td>
+	</tr><tr>
+		<td>PlugIn client name:</td>
+		<td><input type="hidden" name="arg" value="-n"/>
+		<input type="TEXT" name="arg" value="PNGPlugIn" size=30/></td>
+	</tr><tr>
+		<td>Width of plot (pixels):</td>
+		<td><input type="hidden" name="arg" value="-w"/>
+		<input type="TEXT" name="arg" value="320" size=6/></td>
+	</tr><tr>
+		<td>Height of plot (pixels):</td>
+		<td><input type="hidden" name="arg" value="-h"/>
+		<input type="TEXT" name="arg" value="200" size=6/></td>
+	</tr>
+	</table>
+	<p><input type="submit" value="Start PlugIn" /></p></div>
+</form>
+<p class="footer"><a href=
+	"/documentation/PlugIns/PortableNetworkGraphicPlugIn.html">Help</a> -
+	<a href="/webTurbine">Home</a></p>
+</body>
+</html>
+

@@ -1,0 +1,64 @@
+<!-- Name: build.xml
+     By:   Ian Brown
+     Date: 06/22/2004
+
+     Description:
+         This file is the primary Ant build file for the RBNB Utility
+         applications.  These applications provide some simple utility
+         functions, such as:
+
+	 - Is an RBNB server running?
+	 - Terminate an RBNB server.
+
+	 Note: These application may use the so-called "full" API, which is a
+	 low-level that is not intended for general use.  At some point, the
+	 functionality needed by this program should be added to the simple
+	 API.
+-->
+
+<project name="APPLICATION.UTILITY-APPS" default="library" basedir=".">
+
+ <!-- Import the standard definitions (properties). -->
+ <import file="../../definitions.xml" />
+
+ <!-- Initialize by setting the timestamp. -->
+ <target name="init">
+  <tstamp />
+  <buildnumber />
+  <mkdir dir="${rbnb.builddir}" />
+  <mkdir dir="${rbnb.classesdir}" />
+  <mkdir dir="${rbnb.classesdir}/Applications" />
+  <mkdir dir="${rbnb.classesdir}/Applications/Utility-Apps" />
+  <mkdir dir="${rbnb.librarydir}" />
+ </target>
+
+ <!-- Compile the Utility Java source code and place the results in the Utility
+      classes directory.  References the Core library and the Utility classes
+      for dependencies.
+  -->
+ <target name="compile" depends="init">
+  <javac destdir="${rbnb.classesdir}/Applications/Utility-Apps"
+         deprecation="on">
+   <src path="${rbnb.sourcedir}/Applications/Utility-Apps" />
+   <classpath path="${rbnb.classesdir}/Applications/Utility-Apps" />
+   <classpath path="${rbnb.obfuscatedir}/rbnb.jar" />
+  </javac>
+ </target>
+
+ <!-- Create the Utility-Apps jar file using the Utility-Apps classes. -->
+ <target name="library" depends="compile">
+  <jar destfile="${rbnb.librarydir}/utility-apps.jar"
+       basedir="${rbnb.classesdir}/Applications/Utility-Apps"
+       manifest="Manifest"
+   />
+ </target>
+
+ <!-- Cleans out all compiled and library files for the Utility-Apps
+      project.
+  -->
+ <target name="clean">
+  <delete dir="${rbnb.classesdir}/Applications/Utility-Apps" />
+  <delete file="${rbnb.librarydir}/utility-apps.jar" />
+ </target>
+
+</project>

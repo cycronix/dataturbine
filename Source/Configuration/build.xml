@@ -1,0 +1,41 @@
+<!-- Name: build.xml
+     By:   Ian Brown
+     Date: 06/18/2004
+
+     Description:
+         This file is the primary Ant build file for the RBNB configuration
+         files.
+-->
+
+<project name="CONFIGURATION" default="library" basedir=".">
+
+ <!-- Import the standard definitions (properties). -->
+ <import file="../definitions.xml" />
+
+ <!-- Library directory. -->
+ <property name="rbnb.configurationlibdir"
+           value="${rbnb.librarydir}/Configuration" />
+
+ <!-- Initialize the application build directory. -->
+ <target name="init">
+  <mkdir dir="${rbnb.configurationlibdir}" />
+ </target>
+
+ <!-- Compile all of the applications - a NOP. -->
+ <target name="compile" depends="init">
+ </target>
+
+ <!-- Copy the configuration files to the build directory. -->
+ <target name="library" depends="compile">
+  <copy todir="${rbnb.configurationlibdir}">
+   <fileset dir="${rbnb.sourcedir}/Configuration"
+            includes="*.rbn" />
+  </copy>
+ </target>
+
+ <!-- Cleans out the configuration files. -->
+ <target name="clean">
+  <delete dir="${rbnb.builddir}/Configuration" />
+ </target>
+
+</project>

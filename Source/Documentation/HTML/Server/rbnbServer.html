@@ -1,0 +1,450 @@
+<!DOCTYPE html PUBLIC "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=iso-8859-1">
+  <meta name="Author" content="Matt Miller">
+  <meta name="GENERATOR"
+ content="Mozilla/4.77 [en] (Windows NT 5.0; U) [Netscape]">
+  <title>rbnbServer</title>
+</head>
+<body>
+&nbsp;
+<center>
+<h1> DataTurbine Server</h1>
+</center>
+<center>
+<h1> <i>rbnbServer</i></h1>
+</center>
+<center>
+<h1> User Manual</h1>
+</center>
+<center>
+<h2> V2.5</h2>
+</center>
+<center>
+<h2> June, 2006</h2>
+</center>
+<center>
+<h2> Copyright, Creare Inc.</h2>
+</center>
+<p><br>
+</p>
+<hr width="100%">
+<h2> <a name="overview"></a> Overview</h2>
+<p> The <i>DataTurbine</i> server to which data sources and sinks
+connect, provides data buffering and routing functions. It is started
+by selecting the <i>rbnbServer</i> link on the <i>WebTurbine</i>
+page, shown in the figure.</p>
+<div align="center">
+<p><img src="StartServer.jpg" alt="StartServer HTML Page" align="middle"
+ height="568" width="512"> </p>
+</div>
+<div align="center"><b>Figure 1. &nbsp;StartServer Page</b><br>
+</div>
+<p>It can also be invoked by running the rbnb.jar file using <i>-jar</i>
+syntax as in:<code><br>
+</code></p>
+<blockquote>
+  <p><code>java -jar [<i>WebTurbine Installation Directory</i>]/rbnb.jar</code></p>
+</blockquote>
+<blockquote>
+  <p> </p>
+</blockquote>
+<p><i>DataTurbine</i> itself has no direct user interface.&nbsp; All
+interaction with <i>DataTurbine</i> is via connected applications,
+most notably the <i>rbnbAdmin </i> program.&nbsp; Its job is to
+enable information sharing between applications. </p>
+<p>As such, this manual is very short. For additional detail about the <i>
+DataTurbine</i> in general and specific application interfaces in
+particular, look to the related documentation at the <i><a
+ href="http://outlet.creare.com"> DataTurbine Web site</a> </i>.&nbsp;</p>
+<h2> <a name="setup"></a> Setup and Startup</h2>
+<p><i>DataTurbine</i> needs to be run under a Java Virtual Machine
+(JVM).&nbsp; Different flavors of Java come by different names (e.g. <i>java</i>,
+<i> jre</i> , <i>jview</i>). See the <i>Installation Guide</i> for
+instructions as to how to setup scripts or shortcuts to conveniently
+invoke <i>DataTurbine</i> . </p>
+<p>The following command line options are available:</p>
+<center>
+<table border="1" cellpadding="0" width="90%">
+  <caption><br>
+  <center></center>
+  </caption><tbody>
+  </tbody> <tbody>
+    <tr>
+      <td nowrap="nowrap" valign="top"><b>Option</b></td>
+      <td nowrap="nowrap" valign="top"><b>Web Page Field</b><br>
+      </td>
+      <td><b>Description</b></td>
+    </tr>
+    <tr>
+      <td nowrap="nowrap" valign="top"><b>-a </b><i>&lt;server
+address&gt;</i><br>
+      </td>
+      <td nowrap="nowrap" valign="top"><b>Server Address</b><br>
+      </td>
+      <td>Specifies the address of the server.<br>
+      <br>
+The format: is:<br>
+      <blockquote><i>host</i>:<i>port</i><br>
+      </blockquote>
+where:<br>
+      <blockquote><i>host </i>is either <code>localhost</code>, the
+DNS name of the local host, or the IP address of the local host, and<br>
+        <i>port</i> is the TCP server socket port identification.<br>
+      </blockquote>
+      </td>
+    </tr>
+    <tr>
+      <td nowrap="nowrap" valign="top"><b>-A</b> <i>&lt;security file
+URL&gt;</i><br>
+      </td>
+      <td nowrap="nowrap" valign="top"><br>
+      </td>
+      <td valign="top">Specifies the URL of the security file.<br>
+      <br>
+The security file determines whether a connection is allowed based on
+its DNS name or IP address. The file consists of a list of ALLOWED
+addresses (with optional lists of permissions) and a list of DENIED
+addresses. Without the file, all addresses are allowed. With the file,
+only
+addresses that match an allowed entry and not a more specific denied
+entry can
+be made.<br>
+      <br>
+The syntax of the file is:<br>
+      <blockquote><b># Comment<br>
+ALLOW </b><i>&lt;DNS or IP address string&gt;</i>[=<i>&lt;permissions&gt;</i>]<br>
+        <b>DENY</b><i> &lt;DNS or IP address string&gt;<br>
+        </i></blockquote>
+Multiple addresses can be specified after each ALLOW or DENY entry, so
+long as they are separated by whitespace (spaces, tabs, carriage
+returns, and new lines).<br>
+      <i> </i><br>
+An address can be a specific address such as:<br>
+      <blockquote>rbnb.creare.com<br>
+      </blockquote>
+or a wildcard such as:<br>
+      <blockquote>216.204.34.*<br>
+      </blockquote>
+The optional permissions parameter, which can only be added to ALLOW
+lines
+consists of the equals (=) followed by one or more allowed permissions
+from the
+following list:<br>
+      <ul>
+        <li>R - read permission (sink connections),</li>
+        <li>W - write permission (source connections),</li>
+        <li>X - execute permission (control connections and functions),</li>
+        <li>P - plugin permission (plugin connections), and</li>
+        <li>T - routing permission (routing connections).</li>
+      </ul>
+Example:<br>
+      <br>
+File:<br>
+      <blockquote># Allow Creare full access and NASA
+read/write/routing.
+        <br>
+ALLOW *.creare.com *.nasa.gov=RWT
+        <br>
+# Deny rbnb.creare.com.<br>
+DENY rbnb.creare.com<br>
+      </blockquote>
+Connections are allowed from all "nasa.gov" addresses, plus
+all "creare.com" addresses except "rbnb.creare.com". All other
+connections are denied.<br>
+      <br>
+An example security file is available through the web. Its default URL
+is:<br>
+      <blockquote>http://localhost/Configuration/Security.rbn<br>
+      </blockquote>
+This translates to:<br>
+      <blockquote><i>&lt;install folder&gt;</i>/jakarta-tomcat-<i>&lt;version&gt;</i>/webapps/ROOT/Configuration/Security.rbn<br>
+      </blockquote>
+This file contains comments, including some examples. If used as is,
+the file does not change the default security settings.<br>
+      <br>
+Note: If the security file URL is inaccessible, the server may block
+until a low-level timeout occurs.<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">-<span style="font-weight: bold;">C</span>
+&lt;version&gt;<br>
+      </td>
+      <td style="vertical-align: top;"><br>
+      </td>
+      <td style="vertical-align: top;">Selects a compatibility mode.<br>
+      <br>
+This flag specifies that, where there are differences in behavior
+between releases, the server should behave a close as possible to the
+version specified.<br>
+      <br>
+The default is the current version.&nbsp; Supported versions are:<br>
+      <ul>
+        <li><span style="font-weight: bold;">V2.1</span> - requests for
+a specified time and a duration of 0 are always handled as requests for
+the data point exactly at that time.&nbsp; The newer servers normally
+retrieve the newest data point at or before the specified time.<br>
+        </li>
+        <li><span style="font-weight: bold;">V2.3</span> - the current
+version.<br>
+        </li>
+      </ul>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top"><b>-F</b></td>
+      <td valign="top"><br>
+      </td>
+      <td valign="top">Automatically loads any archives in the server's
+home folder.<br>
+      <br>
+This operation may cause errors as the system will attempt to load
+every sub-folder in the server's home folder as an archive. If some
+of them are not actually archives, the system will report problems.<br>
+      <br>
+Also note that this operation can destroy files or move sub-sub-folders
+if the system thinks that it recognizes the files (those with .rbn
+extensions) or sub-sub-folders (those with names like RB# or FS#, where
+# is an integer value). </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">-<span style="font-weight: bold;">H</span>
+&lt;archive home dir&gt;<br>
+      </td>
+      <td style="vertical-align: top;"><br>
+      </td>
+      <td style="vertical-align: top;">Specify the archive home
+directory.&nbsp; All archive activity (load, creation, and append) will
+take place in the specified archive home directory.&nbsp; When using
+the "-F" command-line flag, archives will be automatically loaded from
+this archive home directory.<br>
+      <br>
+The argument to the "-H" flag must be an absolute or relative path <span
+ style="font-style: italic;">without any embedded</span> <span
+ style="font-style: italic;">spaces</span>.</td>
+    </tr>
+    <tr>
+      <td valign="top"><b>-l </b><i>&lt;period&gt;,<br>
+&nbsp; &nbsp;&lt;cache&gt;,<br>
+&nbsp; &nbsp;&lt;archive&gt;,<br>
+&nbsp; &nbsp;&lt;access&gt;</i><br>
+      </td>
+      <td valign="top"><br>
+      </td>
+      <td valign="top">Sets up the server log, a source called
+_Log.<br>
+      <br>
+Period specifies the amount of time between status reports, in seconds.
+Two special values can be set:<br>
+      <ol>
+        <li>OFF - turns off the log (remaining values are ignored), and</li>
+        <li>NONE (or 0) turns off the periodic status reports, but
+creates a log as specified by the remaining values.<br>
+        </li>
+      </ol>
+Cache frames specifies the size of the in-memory cache in terms of
+frames (messages) logged.<br>
+      <br>
+Archive frames specifies the size of the archive file in terms
+of frames. &nbsp;If an archive is created, it defaults to a size equal
+to that of the cache.<br>
+      <br>
+Archive access specifies that the log should be archived. &nbsp;It can
+be one of:<br>
+      <blockquote>
+        <ul>
+          <li>Create - creates a new archive, or</li>
+          <li>Append - adds to an existing archive.</li>
+        </ul>
+      </blockquote>
+At least one parameter must be specified, but each parameter is
+optional as shown in the examples.<br>
+      <br>
+Default:<br>
+      <blockquote>
+        <blockquote><b>-l 3600,1000,0,none<br>
+          </b></blockquote>
+      </blockquote>
+This means status being logged for each connection once an hour to a
+cache of 1000 frames.<br>
+      <br>
+Examples:<br>
+      <blockquote>
+        <ol>
+          <li><b>-l 60,10000,0,none</b></li>
+          <li><b>-l ,,1000000</b></li>
+          <li><b>-l ,100,,append</b></li>
+        </ol>
+      </blockquote>
+The first example is the default setting.<br>
+      <br>
+The second example uses the default period and cache size, and
+creates an archive of 1000000 frames.<br>
+      <br>
+The third example changes the cache size to 100 frames and appends to
+an existing archive.<br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top"><b>-L</b><br>
+      </td>
+      <td nowrap="nowrap" valign="top"><b>Lockdown Access</b><br>
+      </td>
+      <td valign="top">Specifies that the server is to locked
+down.<br>
+      <br>
+Only connections from the local machine will be allowed.<br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top"><b>-m </b><i>&lt;period&gt;,<br>
+&nbsp; &nbsp; &nbsp;&lt;cache&gt;,<br>
+&nbsp; &nbsp; &nbsp;&lt;archive&gt;,<br>
+&nbsp; &nbsp; &nbsp;&lt;access&gt;</i><br>
+      </td>
+      <td valign="top"><br>
+      </td>
+      <td valign="top">Sets up the server metrics, in a source called
+_Metrics.<br>
+      <br>
+The arguments to this flag are the same as those for the server log
+(-l), except that they set the metrics period and metrics source size.<br>
+      <br>
+Note: a period of OFF, NONE, or 0 turns metrics off.<br>
+      <br>
+Default:<br>
+      <blockquote>
+        <blockquote><b>-m 1,3600,0,none</b><br>
+        </blockquote>
+      </blockquote>
+This means metrics running once a second to a cache of 3600 frames.<br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top"><b>-M </b><i>&lt;maximum activity threads&gt;</i><br>
+      </td>
+      <td valign="top"><br>
+      </td>
+      <td valign="top">Specifies the maximum number of activity threads
+to have available.<br>
+      <br>
+These are Java threads that are used to handle certain types of actions
+- the only current activity performed is adding frames of data to ring
+buffers within a source handler. The value specifies the maximum number
+of such actions that can be handle simultaneously by the server. Note
+that the actual number of threads created may be less than this value -
+the server creates threads only when needed.<br>
+      <br>
+A large number of threads runs the risk of exceeding the maximum number
+of threads allowed or adversely impacting performance due to the time
+needed to switch between threads. A small number of threads can
+adversely effect performance by unnecessarily forcing independent
+actions to be handled sequentially.<br>
+      <br>
+The default value is 100 threads.<br>
+      </td>
+    </tr>
+    <tr>
+      <td nowrap="nowrap" valign="top"><b>-n </b><i>&lt;server
+name&gt;</i><br>
+      </td>
+      <td nowrap="nowrap" valign="top"><b>Server Name</b><br>
+      </td>
+      <td>Specifies the name of the server. <br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top"><b>-O </b><i>&lt;options file URL&gt;</i><br>
+      </td>
+      <td valign="top"><b>Options File</b><br>
+      </td>
+      <td valign="top">Specifies the URL of the options file.<br>
+      <br>
+The options file allows server options to be saved in a file that can
+be reused. It also provides the user of the Web RBNB Server startup
+page access to the options not otherwise available.<br>
+      <br>
+This contents of this file are options from this page. Comments can be
+added by starting a line with a "#".<br>
+      <br>
+An example options file is available through the web. Its default URL
+is:<br>
+      <blockquote>http://localhost/Configuration/Options.rbn<br>
+      </blockquote>
+This translates to:<br>
+      <blockquote><i>&lt;install folder&gt;</i>/jakarta-tomcat-<i>&lt;version&gt;</i>/webapps/ROOT/Configuration/Options.rbn<br>
+      </blockquote>
+This file contains comments, including some examples. If this file
+is used unchanged, no additional options are actually added.<br>
+      <br>
+Note: If the options file URL is inaccessible, the server may block
+until a low-level timeout occurs.<br>
+      </td>
+    </tr>
+    <tr>
+      <td nowrap="nowrap" valign="top"><b>-p</b> &lt;parent server
+address&gt;<br>
+      </td>
+      <td nowrap="nowrap" valign="top"><b>Parent Server Address</b><br>
+      </td>
+      <td>Specifies the address of the server that is to be this
+server's parent.<br>
+      <br>
+The server's lineage determines the full name of the server and
+determines where in the hierarchy of connected servers this server
+appears. &nbsp;For example:<br>
+      <blockquote><code>/Server</code> specifies a server named
+'Server' with no parent.<br>
+        <code>/Parent/Child</code> specifies a server named 'Child'
+with a parent named 'Parent'.<br>
+      </blockquote>
+      </td>
+    </tr>
+    <tr>
+      <td nowrap="nowrap" valign="top"><b>-s</b> <i>&lt;shortcut
+name&gt;,<br>
+&nbsp; &nbsp; &lt;server address&gt;,<br>
+      </i>&nbsp; &nbsp; [<i>&lt;cost&gt;</i>]<br>
+      </td>
+      <td nowrap="nowrap" valign="top"><br>
+      </td>
+      <td>Specifies a shortcut to another server.<br>
+      <br>
+The shortcut name specifies the name of the shortcut relative to the
+local server.<br>
+      <br>
+The server address specifies the address of the server to
+which the shortcut leads. &nbsp;The local server can be used to
+retrieve
+data from the remote server via the shortcut.<br>
+      <br>
+The optional cost specifies how much this shortcut costs to use.
+&nbsp;The server actually maps the shortcut to the full name
+of the server and then determines the best path amongst all possible
+paths based on the various costs.<br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top"><b>-S</b> <i>&lt;maximum open filesets&gt;</i><br>
+      </td>
+      <td valign="top"><br>
+      </td>
+      <td valign="top">Specifies the maximum number of filesets that
+can be kept open simiultaneously.<br>
+      <br>
+A large value runs the risk of running into a operating system per user
+limit on the number of open files. A small value may adversely effect
+performance because one source may be blocked waiting for another
+source to finish writing to an archive.<br>
+      <br>
+The default value is 10. </td>
+    </tr>
+  </tbody>
+</table>
+</center>
+<p></p>
+</body>
+</html>

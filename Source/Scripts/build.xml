@@ -1,0 +1,40 @@
+<!-- Name: build.xml
+     By:   Ian Brown
+     Date: 06/18/2004
+
+     Description:
+         This file is the primary Ant build file for the various startup
+         scripts.
+-->
+
+<project name="SCRIPTS" default="library" basedir=".">
+
+ <!-- Import the standard definitions (properties). -->
+ <import file="../definitions.xml" />
+
+ <!-- Library directory. -->
+ <property name="rbnb.scriptlibdir" value="${rbnb.librarydir}/Scripts" />
+
+ <!-- Initialize the application build directory. -->
+ <target name="init">
+  <mkdir dir="${rbnb.scriptlibdir}" />
+ </target>
+
+ <!-- Compile all of the applications - a NOP. -->
+ <target name="compile" depends="init">
+ </target>
+
+ <!-- Copy the scripts to the build directory. -->
+ <target name="library" depends="compile">
+  <copy todir="${rbnb.scriptlibdir}">
+   <fileset dir="${rbnb.sourcedir}/Scripts"
+            includes="LinuxScripts/**,OtherUnixScripts/**" />
+  </copy>
+ </target>
+
+ <!-- Cleans out all the scripts. -->
+ <target name="clean">
+  <delete dir="${rbnb.builddir}/Scripts" />
+ </target>
+
+</project>

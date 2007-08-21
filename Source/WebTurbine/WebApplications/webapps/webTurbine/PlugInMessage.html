@@ -1,0 +1,73 @@
+<html>
+<head>
+	<title>RBNB PlugIn Messenger</title>
+	<LINK REL=STYLESHEET HREF="/stylesheets/rbnbstyles.css" TYPE="text/css">
+
+	<script language="javascript">
+	<!--
+		function makeURL(requestFormRef)
+		{
+			channelFormRef=document.channelForm;
+			//requestFormRef=document.requestForm;
+			requestFormRef.action="/RBNB/";
+			requestFormRef.action=requestFormRef.action.concat(
+				channelFormRef.plugin.value);
+			requestFormRef.action=requestFormRef.action.concat("/");
+			requestFormRef.action=requestFormRef.action.concat(
+				channelFormRef.channel.value);
+			//alert(requestFormRef.action);
+			return true;
+		}
+	-->
+	</script>
+	
+</head>
+<body>
+	<h1>RBNB PlugIn Messenger</h1>
+	<p>Fill in the form below to send a message to a RBNB PlugIn.</p>
+	<p class=".form">
+			<table cols="2" border="0" align="center">
+				<form method="GET" action="" name="channelForm" 
+					onSubmit="return false;">
+				<tr>
+					<td>PlugIn:</td>
+					<td><textarea name="plugin" rows=1 cols="50"></textarea>
+						</td>
+				</tr>
+				<tr>
+					<td>Channel:</td>
+					<td><textarea name="channel" rows=1 cols="50"></textarea>
+						</td>
+				</tr>
+				</form>
+				<form method="POST" action="" name="requestForm">
+				<input type="hidden" name="datatype" value="string" />
+				<tr>
+					<td>Message:</td>
+					<td><textarea name="message" rows="6" cols="50" 
+						wrap="virtual"></textarea>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="2"><center>
+						<input type="submit" 
+							onClick="makeURL(document.requestForm);"/>
+						</center>
+					</td>
+				</tr>
+				</form>
+			</table>
+	</p>
+	<p>Examples:</p>
+	<p>If messaging rbnbChat:
+	<br>&nbsp;&nbsp;&nbsp;PlugIn: &lt;full path to chat host plugin&gt; (e.g. /Server/_host-chat)
+	<br>&nbsp;&nbsp;&nbsp;Channel: &lt;group&gt;/&lt;user&gt; (e.g. chat/John).</p>
+	<p>If messaging SQLPlugIn:
+	<br>&nbsp;&nbsp;&nbsp;PlugIn: &lt;full path to SQLPlugIn&gt; (e.g. /Server/&lt;database name&gt;)
+	<br>&nbsp;&nbsp;&nbsp;Channel: &lt;format for response&gt; (e.g. text | html | binary)
+	</p>
+</body>
+</html>
+
+
+

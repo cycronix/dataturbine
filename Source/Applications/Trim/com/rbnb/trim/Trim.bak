@@ -1,0 +1,324 @@
+
+package com.rbnb.trim;
+
+import com.rbnb.sapi.ChannelMap;
+import com.rbnb.sapi.SAPIException;
+import com.rbnb.sapi.Sink;
+import com.rbnb.sapi.Source;
+import com.rbnb.utility.ArgHandler;
+import com.rbnb.utility.HostAndPortDialog;
+import com.rbnb.utility.Utility;
+
+public class Trim {
+    
+    public Trim(String[] argsI) {
+	
+	String serverAddress = "localhost:3333";
+	double startTime = 0.0;
+	double endTime = 0.0;
+	String inputSourceName = null;
+	String outputSourceName = null;
+	// JPW 11/17/2005: Default 10 sec timeout on fetch
+	long timeout = 10000;
+	
+	// Parse command line args
+	try {
+	    ArgHandler ah = new ArgHandler(argsI);
+	    if (ah.checkFlag('h') || ah.checkFlag('?')) {
+		throw new Exception("Help message");
+	    }
+	    if (ah.checkFlag('a')) {
+		// RBNB address
+		String address = ah.getOption('a');
+		if (address != null) {
+		    serverAddress = address;
+		}
+	    }
+	    if (ah.checkFlag('b')) {
+		// Start (begin) time
+		String startStr = ah.getOption('b');
+		if (startStr != null) {
+		    // Make sure this is a double value
+		    try {
+			startTime = Double.parseDouble(startStr);
+		    } catch (NumberFormatException nfe) {
+			throw new Exception(
+			    "Must enter a number for the start time.");
+		    }
+		}
+	    } else {
+		throw new Exception("Must specify the start time.");
+	    }
+	    if (ah.checkFlag('e')) {
+		// Stop (end) time
+		String endStr = ah.getOption('e');
+		if (endStr != null) {
+		    // Make sure this is a double value
+		    try {
+			endTime = Double.parseDouble(endStr);
+		    } catch (NumberFormatException nfe) {
+			throw new Exception(
+			    "Must enter a number for the end time.");
+		    }
+		    // Make sure startTime < endTime
+		    if (endTime <= startTime) {
+			throw new Exception(
+			    "End time must be greater than start time.");
+		    }
+		}
+	    } else {
+		throw new Exception("Must specify the end time.");
+	    }
+	    if (ah.checkFlag('i')) {
+		// Input source
+		String sourceStr = ah.getOption('i');
+		if (sourceStr != null) {
+		    inputSourceName = sourceStr;
+		}
+	    } else {
+		throw new Exception("Must specify the input source.");
+	    }
+	    if (ah.checkFlag('o')) {
+		// Output source
+		String sourceStr = ah.getOption('o');
+		if (sourceStr != null) {
+		    outputSourceName = sourceStr;
+		}
+	    } else {
+		throw new Exception("Must specify the output source.");
+	    }
+	    if (ah.checkFlag('t')) {
+		// Fetch timeout
+		String timeoutStr = ah.getOption('t');
+		if (timeoutStr != null) {
+		    // Make sure this is a long value
+		    try {
+			timeout = Long.parseLong(timeoutStr);
+		    } catch (NumberFormatException nfe) {
+			throw new Exception(
+			    "Must enter an integer for the timeout");
+		    }
+		}
+	    }
+	} catch (Exception e) {
+	    if (!e.getMessage().equals("Help message")) {
+	        System.err.println(
+	    	    "rbnbTrim argument exception " + e.getMessage());
+	    }
+	    // Print a help message
+	    System.err.println("Produce RBNB archive by slicing a section from an existing RBNB source:");
+	    System.err.println("Print help message:    <-h | -?>");
+	    System.err.println("RBNB address:          -a <host[:port]>");
+	    System.err.println("Start (begin) time:    -b <start time>");
+	    System.err.println("Stop (end) time:       -e <stop time>");
+	    System.err.println("Input source:          -i <input source name>");
+	    System.err.println("Output source:         -o <output source name>");
+	    System.err.println("Fetch timeout:         -t <timeout in msec>");
+	    System.exit(0);
+	}
+	
+	try {
+	    processData(
+	        serverAddress,
+	        startTime,
+	        endTime,
+	        inputSourceName,
+	        outputSourceName,
+		timeout);
+	} catch (Exception e) {
+	    e.printStackTrace();
+	    System.exit(0);
+	}
+	
+    }
+    
+    private void processData(
+        String serverAddressI,
+	double startTimeI,
+	double endTimeI,
+	String inputSourceNameI,
+	String outputSourceNameI,
+	long timeoutI)
+    throws Exception
+    {
+	
+	System.err.println("\nRBNB:\t\t" + serverAddressI);
+	System.err.println("Input source:\t" + inputSourceNameI);
+	System.err.println("Output source:\t" + outputSourceNameI);
+	System.err.println("Start time:\t" + startTimeI);
+	System.err.println("End time:\t" + endTimeI);
+	System.err.println("Fetch timeout:\t" + timeoutI);
+	
+	// Get registration of input source to determine all the input chans
+	System.err.print(
+	    "\nObtain channel information from the input source...");
+	Sink sink = new Sink();
+	sink.OpenRBNBConnection(serverAddressI, "tempSink");
+	ChannelMap cm = new ChannelMap();
+	cm.Add( new String(inputSourceNameI + "/*") );
+	sink.RequestRegistration(cm);
+	ChannelMap registrationMap = sink.Fetch(10000);
+	sink.CloseRBNBConnection();
+	System.err.println("done.");
+	ChannelMap requestMap = new ChannelMap();
+	if ( (registrationMap == null) ||
+	     (registrationMap.NumberOfChannels() == 0) )
+	{
+	    throw new Exception(
+	        "No channels available from input source " + inputSourceNameI);
+	}
+	System.err.println("Request data from the following channels:");
+	for (int i = 0; i < registrationMap.NumberOfChannels(); ++i) {
+	    System.err.println("\t" + registrationMap.GetName(i));
+	    requestMap.Add(registrationMap.GetName(i));
+	}
+	System.err.println("");
+	
+	// Open source and sink connections
+	System.err.print("Open sink and source connections to the RBNB...");
+	sink = new Sink();
+	sink.OpenRBNBConnection(serverAddressI,"trimSink");
+	Source source = new Source(100, "create", 999999999);
+	source.OpenRBNBConnection(serverAddressI,outputSourceNameI);
+	System.err.println("done.");
+	String actualOutputSourceName = source.GetClientName();
+	if (!actualOutputSourceName.equals(outputSourceNameI)) {
+	    System.err.println(
+		"\nThe actual output source name = " +
+		actualOutputSourceName +
+		"\n");
+	}
+	
+	boolean bFirstTimeThrough = true;
+	double startTime = startTimeI;
+	ChannelMap dataMap = null;
+	long loopCount = 0;
+	while (true) {
+	    
+	    // Request data
+	    if (bFirstTimeThrough) {
+		bFirstTimeThrough = false;
+		sink.Request(requestMap,startTime,0.0,"absolute");
+		dataMap = sink.Fetch(timeoutI);
+		if ( (dataMap == null) || (dataMap.NumberOfChannels() == 0) ) {
+		    // No data point right at startTime; do a request using the
+		    // same start time but request "next"; this should get the
+		    // first point in the source.
+		    sink.Request(requestMap,startTime,0.0,"next");
+		    dataMap = sink.Fetch(timeoutI);
+		    if ( (dataMap == null) ||
+		         (dataMap.NumberOfChannels() == 0) )
+		    {
+			System.err.println(
+			    "No data available in source " + inputSourceNameI);
+			break;
+		    }
+		}
+	    } else {
+		sink.Request(requestMap,startTime,0.0,"next");
+		dataMap = sink.Fetch(timeoutI);
+	    }
+	    
+	    if ( (dataMap == null) || (dataMap.NumberOfChannels() == 0) ) {
+		// JPW 11/17/2005: Check to see if we got a timeout
+		if (dataMap.GetIfFetchTimedOut()) {
+		    System.err.println(
+		    	"\nFetch timeout; last data fetched was at time " +
+			startTime);
+		} else {
+		    System.err.println(
+		    	"\nNo data fetched; it appears that the end of the " +
+			"input data Source has been reached\n" +
+			"last data fetched was at time " +
+			startTime);
+		}
+		break;
+	    }
+	    // Find the largest time in dataMap; this is the time we'll use
+	    // as the basis for our next request
+	    double tempTime = lastStartTime(dataMap);
+	    if (tempTime >= endTimeI) {
+		System.err.println(
+		    "\nReached end time; " +
+		    "last data sent to output source was at time " +
+		    startTime);
+		break;
+	    }
+	    startTime = tempTime;
+	    if ( (loopCount != 0) && ((loopCount % 10) == 0) ) {
+		System.err.print(".");
+	    }
+	    
+	    // Send data to source
+	    // The following will only work if the channels in the dataMap
+	    // remain consistant for every Flush - which won't necessarily
+	    // be the case
+	    // source.Flush(dataMap, true);
+	    outputData(source, dataMap, inputSourceNameI);
+	    
+	    if (loopCount == 0) {
+		System.err.println(
+		    "First data sent to output source was at time " +
+		    startTime);
+	    }
+	    loopCount++;
+	}
+	
+	System.err.print(
+	    "\nDetaching output source and closing RBNB connections...");
+	source.Detach();
+	sink.CloseRBNBConnection();
+	source.CloseRBNBConnection();
+	System.err.println("done.");
+	System.exit(0);
+	
+    }
+    
+    // Taken from com.rbnb.player.PlayerEngine.java
+    private double lastStartTime(ChannelMap cmI) {
+	
+	double startT = -Double.MAX_VALUE;
+	double tempT = 0.0;
+	for (int i = 0; i < cmI.NumberOfChannels(); ++i) {
+	    tempT = cmI.GetTimeStart(i);
+	    if (tempT > startT) {
+		startT = tempT;
+	    }
+	}
+	
+	return startT;
+	
+    }
+    
+    // A modified form of com.rbnb.player.RBNBPlayerOutput.java
+    // Put each channel's data into its own RingBuffer (perform a separate
+    // flush on each channel).
+    public void outputData(
+        Source sourceI, ChannelMap outMapI, String inputSourceNameI)
+    throws Exception
+    {
+	
+	try {
+	    for (int i=0; i < outMapI.NumberOfChannels(); ++i) {
+		String chanName = outMapI.GetName(i);
+		// Peel off the original input source name from the beginning
+		if (chanName.startsWith(inputSourceNameI)) {
+		    chanName =
+		        chanName.substring(inputSourceNameI.length());
+		}
+		ChannelMap cm = new ChannelMap();
+		int chanIdx = cm.Add(chanName);
+       	       	cm.PutTimeRef(outMapI, i);
+      		cm.PutDataRef(chanIdx, outMapI, i);
+		sourceI.Flush(cm,true);
+	    }
+	} catch (Exception e) {
+	    System.err.println(
+	        "Exception encountered outputting to DataTurbine.");
+	    throw e;
+	}
+	
+    }
+    
+}
+

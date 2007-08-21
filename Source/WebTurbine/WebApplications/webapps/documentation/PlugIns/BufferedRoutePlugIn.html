@@ -1,0 +1,33 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Mozilla/4.77 [en] (WinNT; U) [Netscape]">
+   <meta name="Author" content="Eric Friets">
+   <title>rbnbCache PlugIn Help</title>
+<link REL=STYLESHEET HREF="/stylesheets/rbnbstyles.css" TYPE="text/css">
+</head>
+<body>
+
+<h1>
+rbnbCache PlugIn Help</h1>
+Requests made via the rbnbCache PlugIn are buffered in a local cache for
+efficient subsequent retrieval.&nbsp; Typical usage is to create a virtual
+source (VSourcePlugIn) that presents local channels, but handles requests
+via rbnbCache to the remote source.
+<p>Configuration options for rbnbCache are:
+<p>RBNB Server Address: the server the PlugIn connects to
+<p>RBNB Client Name: the name of this instance of rbnbCache
+<p>Cache Frames: the number of source responses to cache in memory before
+looping to remove old ones
+<p>Archive Frames: the number of source responses to archive on disk before
+looping to remove old ones.&nbsp; If set to 0 or less, there is no archiving.
+<p>New Archive: if checked, a new archive is created.&nbsp; If unchecked,
+an existing archive is loaded, and appended to.
+<br>
+<hr class="sectionbreak">
+
+<p class="footer"><a href="javascript:history.back()">Back to PlugIn</a>
+- <a href="/webTurbine">Home</a>
+</body>
+</html>

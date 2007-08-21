@@ -1,0 +1,303 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-2-1 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Getting started</TITLE>
+<META NAME="description" CONTENT="Getting started">
+<META NAME="keywords" CONTENT="izpack-doc">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-2-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="izpack-doc.css">
+
+<LINK REL="next" HREF="node4.html">
+<LINK REL="previous" HREF="node2.html">
+<LINK REL="up" HREF="izpack-doc.html">
+<LINK REL="next" HREF="node4.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html263"
+  HREF="node4.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
+<A NAME="tex2html259"
+  HREF="izpack-doc.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
+<A NAME="tex2html253"
+  HREF="node2.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
+<A NAME="tex2html261"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html264"
+  HREF="node4.html">Writing Installation XML Files</A>
+<B> Up:</B> <A NAME="tex2html260"
+  HREF="izpack-doc.html">izpack-doc</A>
+<B> Previous:</B> <A NAME="tex2html254"
+  HREF="node2.html">Introduction</A>
+ &nbsp; <B>  <A NAME="tex2html262"
+  HREF="node1.html">Contents</A></B> 
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<!--Table of Child-Links-->
+<A NAME="CHILD_LINKS"><STRONG>Subsections</STRONG></A>
+
+<UL>
+<LI><A NAME="tex2html265"
+  HREF="node3.html#SECTION00310000000000000000">Overview</A>
+<LI><A NAME="tex2html266"
+  HREF="node3.html#SECTION00320000000000000000">First Compilation</A>
+<LI><A NAME="tex2html267"
+  HREF="node3.html#SECTION00330000000000000000">The I<SMALL>Z</SMALL>P<SMALL>ACK</SMALL> Architecture</A>
+<UL>
+<LI><A NAME="tex2html268"
+  HREF="node3.html#SECTION00331000000000000000">The Compilation System</A>
+<LI><A NAME="tex2html269"
+  HREF="node3.html#SECTION00332000000000000000">How an Installer Works</A>
+<LI><A NAME="tex2html270"
+  HREF="node3.html#SECTION00333000000000000000">The Different Kinds of Installers</A>
+</UL></UL>
+<!--End of Table of Child-Links-->
+<HR>
+
+<H1><A NAME="SECTION00300000000000000000">
+Getting started</A>
+</H1>
+
+<P>
+
+<H1><A NAME="SECTION00310000000000000000">
+Overview</A>
+</H1>
+
+<P>
+To begin with, you should know what I<SMALL>Z</SMALL>P<SMALL>ACK</SMALL> is organized if you want to use
+it. Let's go into the directory where you have installed I<SMALL>Z</SMALL>P<SMALL>ACK</SMALL> on your
+machine. There are 3 text files and a set of directories. The most
+important for the moment are <TT>bin/ doc/ sample/</TT>. If you are reading this,
+you already know that <TT>doc</TT> contains this documentation :-)
+<BR>
+<P>
+So let's go into <TT>bin/</TT>. The <TT>icons/</TT> directory contains some
+directories for your system, in case you would like an icon to launch a
+component of I<SMALL>Z</SMALL>P<SMALL>ACK</SMALL> . But the most important things you can see in <TT>bin</TT>
+are the textttcompile scripts (in both Unix* and Windows formats).
+<TT>compile</TT> is used to compile a ready-to-go XML installation file from
+a command-line context or from an external tool.
+<BR>
+<P>
+
+<I>Note : these scripts can be launched from anywhere on your system as the
+installer has customized these scripts so that they can inform I<SMALL>Z</SMALL>P<SMALL>ACK</SMALL> of where
+it is located.</I>
+<BR>
+<P>
+
+<H1><A NAME="SECTION00320000000000000000">
+First Compilation</A>
+</H1>
+
+<P>
+Now you probably can't wait to build your first installer. So go on open a
+command-line shell and navigate to <TT>sample/</TT>. The following should work
+on both Unix* and Windows systems. For the latter, just change the path
+separator (slash '/') to a backslash. So type ($ is your shell prompt !) :
+<PRE>
+$ ../bin/compile install.xml -b . -o install.jar -k standard
+ (installer generation text output here)
+$ java -jar install.jar
+</PRE>
+
+<P>
+There you are! The first command has produced the installer and the
+second one did launch it.
+
+<P>
+
+<H1><A NAME="SECTION00330000000000000000">
+The I<SMALL>Z</SMALL>P<SMALL>ACK</SMALL> Architecture</A>
+</H1>
+
+<P>
+Now that you have packaged your first installer, it's time for you to understand
+how the whole thing works.
+<BR>
+<P>
+
+<H2><A NAME="SECTION00331000000000000000">
+The Compilation System</A>
+</H2>
+
+<P>
+The compilation system (see figure <A HREF="#comparch">1.1</A>) is quite modular. 
+Indeed, you can use the compiler in 3 ways :
+
+<UL>
+<LI>from a command-line
+</LI>
+<LI>from Jakarta Ant
+</LI>
+</UL> 
+<P>
+
+<DIV ALIGN="CENTER"><A NAME="comparch"></A><A NAME="277"></A>
+<TABLE>
+<CAPTION ALIGN="BOTTOM"><STRONG>Figure 1.1:</STRONG>
+         <I>The compiler architecture.</I></CAPTION>
+<TR><TD>
+<DIV ALIGN="CENTER">
+<!-- MATH
+ $\fbox{\includegraphics[scale=0.4]{img/ch1-comparch}}$
+ -->
+<IMG
+ WIDTH="382" HEIGHT="736" ALIGN="MIDDLE" BORDER="0"
+ SRC="img2.png"
+ ALT="\fbox{\includegraphics[scale=0.4]{img/ch1-comparch}}">
+</DIV></TD></TR>
+</TABLE>
+</DIV>
+
+<P>
+The compiler takes as its input an XML installation file that describes
+(at a relatively high-level) the installation. This file contains
+detailed information such as the application name, the authors, the
+files to install, the panels to use, which resources to load and much
+more (see figure <A HREF="#archinstaller">1.2</A>).
+<BR>
+<P>
+The compiler can generate different kinds of installers, but this information is
+not located inside the XML file as it is not were it should be. On the contrary,
+this is a compiler parameter.
+<BR>
+<P>
+The compilation options for a command-line installer are the following:
+
+<UL>
+<LI><TT>-?</TT>: gives a list of the available options.
+</LI>
+<LI><TT>-b</TT>: specifies the base path, <I>ie</I> the one that will be
+used to resolve the relative paths. If your XML file contains absolute paths,
+specify it to an empty string (<TT>-b ""</TT>).
+</LI>
+<LI><TT>-k</TT>: specifies the installer kind, for instance most users will
+want <TT>standard</TT> here.
+</LI>
+<LI><TT>-o</TT>: specifies the resulting installer Jar file name.
+</LI>
+</UL> 
+<P>
+
+<H2><A NAME="SECTION00332000000000000000">
+How an Installer Works</A>
+</H2>
+
+<P>
+An installer presents its panels to the end-user. For instance, there is
+one to select the packages, one to prompt for the license agreement, one
+to select the installation path and so on. You have a choice from a
+variety of panels to place in the installer. For example, you can choose
+between a plain text and a HTML text panel for the license agreement.
+Also, if you don't want of the <I>HelloPanel</I>, you just don't
+include it.
+<BR>
+<P>
+
+<DIV ALIGN="CENTER"><A NAME="archinstaller"></A><A NAME="279"></A>
+<TABLE>
+<CAPTION ALIGN="BOTTOM"><STRONG>Figure 1.2:</STRONG>
+         <I>The installer architecture.</I></CAPTION>
+<TR><TD>
+<DIV ALIGN="CENTER">
+<!-- MATH
+ $\fbox{\includegraphics[scale=0.4]{img/ch1-compinside}}$
+ -->
+<IMG
+ WIDTH="525" HEIGHT="831" ALIGN="MIDDLE" BORDER="0"
+ SRC="img3.png"
+ ALT="\fbox{\includegraphics[scale=0.4]{img/ch1-compinside}}">
+</DIV></TD></TR>
+</TABLE>
+</DIV>
+
+<P>
+It is very important to understand that some of the panels may need extra data. For
+instance, the license agreement panel needs the license text. A simple approach
+to specify such data would have been to add as many XML tags as needed for
+each panel. However, this makes the XML file too specific and not easy to
+maintain. The approach that has been chosen is to put the data in files and we
+call these files <I>resource files</I>. They are specified with a unique XML
+tag. This is a much cleaner approach.
+<BR>
+<P>
+You might wonder how your files are packaged. They can be grouped in
+<I>packs</I>. For instance, you can have one pack for the core files, one for
+the documentation, one for the source code and so on. In this way, your end-users
+will have the choice to install a pack or not (provided that the pack they don't
+want to install is not mandatory). Inside the jar file (which is a zip file), a
+sub directory contains the pack files. Each pack file contains the files that are
+part of it. Could we do it simpler ? :-)
+<BR>
+<P>
+
+<H2><A NAME="SECTION00333000000000000000">
+The Different Kinds of Installers</A>
+</H2>
+
+<P>
+There are for the moment 4 kinds of installers available :
+
+<UL>
+<LI><TT>standard</TT> : a single-file ready-to-run installer
+</LI>
+<LI><TT>standard-kunststoff</TT> : same as above but using the Kunststoff
+  Look and Feel
+</LI>
+<LI><TT>web</TT> : a web based installer (the packs files are located on a
+  HTTP server and the user installer will fetch it for him)
+</LI>
+<LI><TT>web-kunststoff</TT> : same as above but using the Kunststoff
+  Look and Feel.
+
+<P>
+</LI>
+</UL>   <HR>
+<!--Navigation Panel-->
+<A NAME="tex2html263"
+  HREF="node4.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
+<A NAME="tex2html259"
+  HREF="izpack-doc.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
+<A NAME="tex2html253"
+  HREF="node2.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
+<A NAME="tex2html261"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html264"
+  HREF="node4.html">Writing Installation XML Files</A>
+<B> Up:</B> <A NAME="tex2html260"
+  HREF="izpack-doc.html">izpack-doc</A>
+<B> Previous:</B> <A NAME="tex2html254"
+  HREF="node2.html">Introduction</A>
+ &nbsp; <B>  <A NAME="tex2html262"
+  HREF="node1.html">Contents</A></B> 
+<!--End of Navigation Panel-->
+<ADDRESS>
+
+2004-06-05
+</ADDRESS>
+</BODY>
+</HTML>

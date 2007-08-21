@@ -1,0 +1,74 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>Start RBNB Server</title>
+                 	 	            
+  <link rel="STYLESHEET" href="/stylesheets/rbnbstyles.css"
+ type="text/css">
+</head>
+ <body>
+         
+<h1>RBNB Server</h1>
+         
+<p>The Server is the core of the RBNB system.&nbsp; It is the component to
+  which  all other components connect.&nbsp; This form allows you to start
+ a RBNB server on the same machine as the webserver.</p>
+          
+<form action="StartPlugIn.jsp" method="get">
+    <input type="hidden"  name="className" value="com.rbnb.api.Server"/>
+    <input type="hidden"  name="plugInName" value="RBNB Server"/>
+    <div class="centered">
+	<table celpadding="5" class="leftjustified">
+	    <tbody>
+		<tr>
+		    <td>Server Address (host:port):
+			<input type="hidden" name="arg" value="-a" />
+		    </td>
+		    <td>
+			<input type="text" name="arg"
+			       value="localhost:3333" size=40 />
+		    </td>
+		</tr>
+		<tr>
+		    <td>Server Name (must be unique):
+			<input type="hidden" name="arg" value="-n" />
+		    </td>
+		    <td>
+			<input type="text" name="arg" value="Server" size=20 />
+		    </td>
+		</tr>
+		<tr>
+		    <td>Parent Server Address:
+		        <input type="hidden" name="arg" value="-p"/>
+		    </td>
+		    <td>
+			<input type="text" name="arg" value="" size=40 />
+		    </td>
+		</tr>
+		<tr>
+		    <td>Lockdown Access:</td>
+		    <td>
+			<input type="checkbox" name="arg" value="-L" size=6 />
+		    </td>
+		</tr>
+		<tr>
+		    <td>Options File:
+			<input type="hidden" name="arg" value="-O"/>
+		    </td>
+		    <td>
+			<input type="text" name="arg" value="" size=40 />
+		    </td>
+		</tr>
+	    </tbody>            
+	</table>
+     	            
+	<p><input type="submit" value="Start Server"/></p>
+    </div>
+</form>
+         
+<p class="footer"><a href="/documentation/Server/rbnbServer.html">Help</a>
+  - 	<a href="/webTurbine">Home</a></p>
+     <br>
+       
+</body>
+</html>

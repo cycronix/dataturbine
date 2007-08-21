@@ -1,0 +1,158 @@
+<html>
+<head>
+	<title>RBNB DataTurbine</title>
+	<LINK REL=STYLESHEET HREF="/stylesheets/rbnbstyles.css" TYPE="text/css">
+</head>
+<body background="c_bg.gif">
+<h1>RBNB DataTurbine</h1>
+<h2>Web Browser Interface</h2>
+<p>Thank you for using DataTurbine, a software system that uses Ring Buffer Network Bus (RBNB) to connect data sinks to sources via buffered middleware.&nbsp; 
+<br><br>
+  If you can see this message, you
+  have installed the software correctly, and found the index page.&nbsp; From
+  here you can view the documentation, start applications and plugins, and
+  view RBNB data.</p>  
+<h3 class="leftjustified"><a name="Server" />Server</h3>
+<ul>
+	<li><a href="StartPlugIn.jsp?configForm=StartServer.html">rbnbServer</a>
+		- Start an RBNB server on the webserver's machine.</li>
+	<li><a href="StartPlugIn.jsp?configForm=StartWebCache.html">WebCache</a>
+		- Start a WebCache on the webserver's machine.</li>
+</ul>
+<h3 class="leftjustified"><a name="Applications" />Applications<span class="smaller">&nbsp; 
+	(Note that these are started on the webserver's machine!)</span></h3>
+<ul>
+	<li><a href="StartPlugIn.jsp?configForm=StartAdmin.html">rbnbAdmin</a>
+		- Start <span class="application">rbnbAdmin</span> to view and configure
+		an existing 
+		RBNB server.</li>
+	<li><a href="StartPlugIn.jsp?configForm=StartAVCP.html">rbnbAVCP</a>
+		- Start <span class="application">rbnbAVCP</span> to capture and view
+		audio-visual data.</li>
+	<li><a href="StartPlugIn.jsp?configForm=StartPlayer.html">rbnbPlayer</a>
+		- Start <span class="application">rbnbPlayer</span> to control the
+		playback of RBNB channels.
+		</li>
+	<li><a href="StartPlugIn.jsp?configForm=StartPlot.html">rbnbPlot</a>
+		- Start <span class="application">rbnbPlot</span> to view RBNB channel 
+		data in real time.
+		</li>
+	<li><a href="StartPlugIn.jsp?configForm=StartSource.html">rbnbSource</a>
+		- Start <span class="application">rbnbSource</span>, the RBNB signal 
+		generator.</li>
+	<li><a href="StartPlugIn.jsp?configForm=StartChat.html">rbnbChat</a>
+		- Start <span class="application">rbnbChat</span>, the RBNB
+		chat room client.</li>
+	<li><a href="StartPlugIn.jsp?configForm=StartMsgHost.html">RBNB messaging host</a>
+		- Start <span class="application">rbnbMsgHost</span>, the RBNB
+		messaging host.</li>
+	<li><a href="StartPlugIn.jsp?configForm=StartFileDrop.html">FileDrop</a>
+		- Start <span class="application">FileDrop</span>, the RBNB
+		file drop application.</li>
+	<li><a href="StartPlugIn.jsp?configForm=StartHttpMonitor.html">HttpMonitor</a>
+		- Start <span class="application">HttpMonitor</span>, an application 
+		which copies files from any URL to any WebDAV server.</li>
+</ul>
+<h3 class="leftjustified"><a name="PlugIns" />PlugIns</h3>
+<ul>
+	<li><a href="ViewRoutingPI.jsp">Robust Routing PlugIn</a>
+		- Routes data from remote server to local server.
+		View running PlugIns and start new ones.
+	<li><a href="StartPlugIn.jsp?configForm=StartVSourcePI.html">
+		Virtual Source PlugIn</a> - Map remote source.</li>
+	<li><a href="StartPlugIn.jsp?configForm=StartVChansPI.html">
+		Virtual Channels PlugIn</a> - Map channels to another name.</li>
+	<li><a href="StartPlugIn.jsp?configForm=StartPNGPI.html">
+		Portable Network Graphic PlugIn</a> - Converts 
+		time series data to a PNG format plot, viewable
+		via most Web browsers.</li>
+	<li><a href="StartPlugIn.jsp?configForm=StartFolderPI.html">
+		Folder PlugIn</a> - Post local disk files 
+		and directories as RBNB channels.</li>
+	<li><a href="StartPlugIn.jsp?configForm=StartBufRoutePI.html">
+		Caching PlugIn</a> - Buffers remote data locally.</li>
+	<li><a href="StartPlugIn.jsp?configForm=StartSQLPI.html">
+		SQL PlugIn</a> - Passes SQL statements to database, returns response.
+		</li>
+	<li><a href="StartPlugIn.jsp?configForm=StartToStringPI.html">
+		ToString PlugIn</a> - Converts data to ASCII string format.
+		</li>
+	<li><a href="StartPlugIn.jsp?configForm=StartToHexPI.html">
+		ToHex PlugIn</a> - Converts bytes to their hexadecimal string 
+		representation.
+		</li>
+	<li><a href="StartPlugIn.jsp?configForm=StartProxyPI.html">
+		Proxy Source PlugIn</a> - Simple streaming TCP/IP data source proxy.
+		</li>
+	<li><a href="StartPlugIn.jsp?configForm=StartSignaturePI.html">
+		Signature PlugIn</a> - Sign and check signatures for authenticity.
+		</li>
+	<li><a href="StartPlugIn.jsp?configForm=StartThumbNailPI.html">
+		Thumb Nail PlugIn</a> - Convert a JPEG to a smaller thumbnail image.
+		</li>
+	<li><a href="StartPlugIn.jsp?configForm=StartResamplePI.html">
+		Resample PlugIn</a> - Change the sample rate of time series data.
+		</li>
+</ul>
+<h3 class="leftjustified"><a name="Tools" />Web Based Utilities</h3>
+<ul>
+	<li><a href="PlugInMessage.html">PlugIn Messenger</a> - Sends a message to 
+		a PlugIn, such as rbnbChat or SQLPlugIn, and displays the response.</li>
+</ul>
+<h3 class="leftjustified"><a name="Documentation" />Documentation</h3>
+<ul>
+	<li><a href="/documentation">
+		Documentation Folder</a> - Top level documentation folder.
+		</li>
+	<li><a href="/documentation/SAPI/DeveloperGuideV2.1.html">
+		RBNB Developer Guide</a> - Documentation for RBNB developers,
+		including an overview of RBNB clients and channel maps.
+		</li>
+	<li><a href="/documentation/WebDAVOptions.html">
+		RBNB WebDAV Options Reference</a> - Documents the request options used
+		in conjunction with the RBNB WebDAV interface.</li>		
+	<li><a href="/documentation/api/com/rbnb/sapi/package-summary.html">
+		SAPI Javadoc</a> - View the Simple API 
+		Reference Manual (javadoc) documentation.</li>
+<!--
+	<li><a href="/documentation/JavaBean_ActiveX">ActiveX Interface</a> - 
+		This manual explains the cross-language support offered on 
+		Windows platforms for the RBNB Simple API via the JavaBean to 
+		ActiveX bridge.</li>
+	<li><a href="/documentation/Capi/ccdoc.index.html">C API</a> -
+		This is a reference manual for the 'C' API, built on top
+		of the Java API using Java Native Interface (JNI).</li>
+-->
+	<li><a href="/documentation/Servlets/rbnbServlets.html">Servlet Deployment
+		Guide</a> -
+		This is a guide for how to add your own RBNB servlets 
+		to the DataTurbine sytsem.</li>
+	<li><a href="/tomcat_index.html">WebServer Docs</a> - Documentation for
+		the Jakarta-Tomcat servlet engine.</li>
+</ul>
+<h3 class="leftjustified"><a name="Viewers" />Online Viewers</h3>
+<ul>	<!--	
+	<li><a href="ViewChannels.html">View RBNB channels</a> - View RBNB
+	        channels using your Web browser.
+		</li>
+	<li><a href="SearchForm.html">Meta-Data Search Engine</a> - Search
+		meta-data on available RBNB channels.&nbsp; <span 
+		class="smaller">(Not yet implemented.)</span></li>
+		-->
+<!--	<li><a href="/rbnbNet/">RBNB WebDAV Interface, Hierarchy Browser</a>
+		- View RBNB channels via the WebDAV directory interface.</li>
+	<li><a href="/rbnbUser/">RBNB WebDAV Interface, User Browser</a>
+		- View RBNB user files via the WebDAV directory interface.</li>	-->
+	<li><a href="/RBNB/">RBNB WebDAV Interface</a>
+		- View RBNB channels via the WebDAV directory interface.</li>
+	<li><a href="RBNBAccessPortal.jsp">Portal to View and Search RBNB channels
+		</a>- This portal automatically generates URLs to view RBNB channels via
+		a web browser.&nbsp; These URLs may be pasted in web documents to 
+		create dynamic reports.</li>
+</ul>
+</body>
+</html> 
+
+
+
+

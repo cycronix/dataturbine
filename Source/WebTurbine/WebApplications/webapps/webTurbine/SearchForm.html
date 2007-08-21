@@ -1,0 +1,61 @@
+<html>
+<head>
+	<title>WebTurbine Meta Data Search</title>
+	<LINK REL=STYLESHEET HREF="/stylesheets/rbnbstyles.css" TYPE="text/css">	
+</head>
+<body>
+<H2>WebTurbine Meta Data Search
+<br>Non-Functional Example
+</H2>
+<form action="">
+<table border=1>
+	<tr>
+		<th width=25%>Server</th>
+		<td><input name="server" size=25 
+			value="localhost:3333"/></td>
+	</tr>
+	<tr>
+		<th width>Channel Subset</th>
+		<td><input name="channel" size=25 value="..."/></td>
+	</tr>
+	<tr>
+		<th>Mime Type</th>
+		<td><input name="mime" size=25 value="text/xml"/></td>
+	</tr>
+	<tr>
+		<th>Search Time Scope</th>
+		<td>	<input type="radio" name="timeScope" value="Existant"
+				checked=true />
+			Existant&nbsp; 
+			<input type="radio" name="timeScope" value="Newest"/>
+			New Only&nbsp;
+			<input type="radio" name="timeScope" value="All"/>
+			All</td>		
+	</tr>
+	<tr>
+		<th>XQuery WHERE String: <br>(use $x as parameter)</th>
+		<td><textarea name="xqueryWhere" cols=70 rows=5>
+$x/publisher = "Addison-Wesley" AND $x/@year &gt; 1991
+		</textarea></td>
+	</tr>
+	<tr>
+		<th>Return result:</th><td>
+		<table border=3><tr><td><input type="radio"
+			name="defaultReturn"
+			value="true" checked=true />WebTurbine Channel Viewer
+			</td><td></td></tr>
+			<tr><td><input type="radio" name="defaultReturn"
+			value="false" />Raw XML.&nbsp; Return string: 
+			<textarea name="xqueryReturn" cols=70 rows=5>
+&lt;book year={ $b/@year }&gt;
+   { $b/title }
+&lt;/book&gt;
+			</textarea></p></td></tr>
+			</table>
+		</td>	
+	</tr>
+</table>
+<p><center><input type="submit"/></center></p>
+</form>
+</body>
+</html>

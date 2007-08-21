@@ -1,0 +1,536 @@
+<!DOCTYPE html PUBLIC "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=iso-8859-1">
+  <meta name="Author" content="Ursula Bergstrom">
+  <meta name="GENERATOR"
+ content="Mozilla/4.77 [en] (Windows NT 5.0; U) [Netscape]">
+  <title>rbnbPlayer</title>
+</head>
+<body>
+<center>
+<h1><font size="+3">DataTurbine Player Utility</font></h1>
+</center>
+<center>
+<h1><b><i><font size="+3">rbnbPlayer</font></i></b></h1>
+</center>
+<center>
+<h1><font size="+3">User Manual</font></h1>
+</center>
+<center>
+<h2>V2.01</h2>
+</center>
+<center>
+<h2>June 16, 2005</h2>
+</center>
+<center>
+<h2>Copyright, Creare Inc.<br>
+</h2>
+</center>
+<center>
+<hr width="100%"></center>
+<h2>
+<font size="+3">Table of Contents</font></h2>
+<blockquote>
+  <h3><a href="#Intro">Introduction</a></h3>
+  <blockquote><a href="#IntroOverview">Overview</a> <br>
+    <a href="#IntroSetStart">Setup and Startup</a></blockquote>
+  <h3> <a href="#CommandLine">Command Line Arguments</a></h3>
+  <blockquote><a href="#CommandLineInput">Input DataTurbine</a> <br>
+    <a href="#CommandLineOutput">Output DataTurbine</a> <br>
+    <a href="#CommandLineFile">Use Settings File</a></blockquote>
+  <h3> <a href="#UI">User Interface</a></h3>
+  <blockquote><a href="#UIMenu">Menu Bar</a>
+    <blockquote><a href="#UIMenuFile">File Menu</a>
+      <blockquote><a href="#UIMenuFileOpenRBNB">Open (RBNB Output)</a> <br>
+        <a href="#UIMenuFileOpenIP">Open (IP Output)</a><br>
+        <a href="#UIMenuFileClose">Close</a> <br>
+        <a href="#UIMenuFileExit">Exit</a></blockquote>
+      <a href="#UIMenuView">View Menu</a>
+      <blockquote><a href="#UIMenuViewChan">Channels</a> <br>
+        <a href="#UIMenuViewPos">Position</a> <br>
+        <a href="#UIMenuViewDur">Duration</a> <br>
+        <a href="#UIMenuViewInc">Increment</a> <br>
+        <a href="#UIMenuViewRate">Rate</a><br>
+      </blockquote>
+      <a href="#UIMenuTimeFormat">Time Format</a><br>
+      <blockquote><a href="#UIMenuTimeFormatUnformatted">Unformatted</a><br>
+        <a href="#UIMenuTimeFormatSeconds">Seconds</a><br>
+      </blockquote>
+    </blockquote>
+    <a href="#UIBut">Player Control Buttons</a>
+    <blockquote><a href="#UIButBoD">Beginning of Data</a> <br>
+      <a href="#UIButPlayBack">Play Backwards</a> <br>
+      <a href="#UIButStepBack">Step Backwards</a> <br>
+      <a href="#UIButPause">Pause</a> <br>
+      <a href="#UIButStepFor">Step Forwards</a> <br>
+      <a href="#UIButPlayFor">Play Forwards</a> <br>
+      <a href="#UIButEoD">End of Data</a> <br>
+      <a href="#UIButRT">Realtime</a><a href="#UIButTF"><br>
+      </a></blockquote>
+    <a href="#UISlid">Player Control Sliders</a>
+    <blockquote><a href="#UISlidPos">Position</a> <br>
+      <a href="#UISlidDur">Duration</a> <br>
+      <a href="#UISlidInc">Increment</a> <br>
+      <a href="#UISlidRate">Rate</a></blockquote>
+  </blockquote>
+</blockquote>
+<hr width="100%">
+<h1><a name="Intro"></a>Introduction</h1>
+<h2>
+<a name="IntroOverview"></a>Overview</h2>
+The <i>rbnbPlayer</i> utility allows users to control the playback of
+data
+from one or more <a href="#UIMenuViewChan">input DataTurbine channels</a>
+to one of the following: (1) one or more output DataTurbine channels;
+(2) a UDP socket; or (3) to any number of connected TCP clients.&nbsp;
+When outputting to DataTurbine channels, by
+convention the
+output
+datapath is named "rbnbPlayer[_&lt;unique number&gt;]"; the final
+"_&lt;unique
+number&gt;" is appended to the datapath if one or more instances of <i>rbnbPlayer</i>
+are already connected to the output DataTurbine.&nbsp; Requests are
+sent to the input DataTurbine corresponding to the user settings.&nbsp;
+Data is then obtained from the input DataTurbine and either sent to the
+output DataTurbine, to the UDP socket, or to all connected TCP clients.
+<p>The <i>rbnbPlayer</i> utility uses either the <a
+ href="#CommandLine">command
+line</a> or the <a href="#UI">graphical user interface</a> to setup
+its
+input and output connections.&nbsp; Through the
+graphical
+interface, the user may choose which channels to read data from, and
+may
+configure the display.&nbsp; The user controls the playback of data via
+a set of buttons and sliders.
+</p>
+<p>The following figure shows an example <i>rbnbPlayer</i> session:
+</p>
+<center>
+<p><a name="GUI"></a><img src="rbnbPlayer.jpg"></p>
+</center>
+<dl>
+  <center><dt> <b>Example <i>rbnbPlayer </i>Session</b></dt>
+  </center>
+</dl>
+<h2>
+<a name="IntroSetStart"></a>Setup and Startup</h2>
+The <i>rbnbPlayer</i> application needs to be run under a Java Virtual
+Machine (JVM).&nbsp; Different flavors of Java come by different names
+(e.g. <i>java, jre, jview</i>).
+<p>At startup, the <i>rbnbPlayer</i> program permits the user to
+specify the input and output connections.&nbsp; After establishing
+the connections, <i>rbnbPlayer</i> displays a list of available input
+channels.&nbsp;
+Once the user has selected a set of channels to control, the buttons
+and
+sliders in the graphical interface activate.
+</p>
+<p>The user may start <i>rbnbPlayer</i> from the command-line or from
+the
+WebTurbine web browser interface.&nbsp;
+If a file named "PlayerSettings.dat" exists in the directory from which
+<i>rbnbPlayer</i>
+is run, <i>rbnbPlayer</i> will use it to store and retrieve its
+settings
+from one session to the next.<br>
+</p>
+<hr width="100%">
+<h1><a name="CommandLine"></a>Command Line Arguments</h1>
+<h1>
+<a name="CommandLineInput"></a><font size="+2">Input DataTurbine</font></h1>
+<b>-r [host][:port]</b>
+<p>This argument specifies which DataTurbine holds the input
+channels.&nbsp;
+The default is to set the input DataTurbine to localhost:3333, but not
+to automatically open the connection.
+</p>
+<h2><a name="CommandLineOutput"></a><font size="+2">Output DataTurbine</font></h2>
+<b>-w [host][:port]</b>
+<p>This argument specifies which DataTurbine to write the output
+channels
+to.&nbsp; The default is to set the output DataTurbine equal to the
+input
+DataTurbine.
+</p>
+<h2><a name="CommandLineFile"></a>Use Settings File</h2>
+<b>-f</b>
+<p>This argument signals <i>rbnbPlayer</i> to use the file named
+"PlayerSettings.dat"
+to store and retrieve its settings.&nbsp; The file must already exist
+in
+the directory from which <i>rbnbPlayer</i> is run.
+<br>
+</p>
+<hr width="100%">
+<h1><a name="UI"></a>User Interface</h1>
+<h2>
+<a name="UIMenu"></a>Menu Bar</h2>
+At the top of the <a href="#GUI">graphical interface screen</a> is the
+menu bar.&nbsp; The menu bar has three menus: <a href="#UIMenuFile">File
+Menu</a>, <a href="#UIMenuView">View
+Menu</a>, and <a href="#UIMenuTimeFormat">Time Format Menu</a>.
+<h3><a name="UIMenuFile"></a>File Menu</h3>
+The file menu has options to open connections to the input and output
+DataTurbines
+(<a href="#UIMenuFileOpenRBNB">Open (RBNB Output)</a>), to open a
+connection to the input DataTurbine and output IP socket (<a
+ href="#UIMenuFileOpenIP">Open (IP Output)</a>), to
+close connections
+(<a href="#UIMenuFileClose">Close</a>), and to exit the program (<a
+ href="#UIMenuFileExit">Exit</a>).
+<h4><a name="UIMenuFileOpenRBNB"></a>Open (RBNB Output)</h4>
+The Open (RBNB Output) menu item on the <a href="#UIMenuFile">File Menu</a>
+opens connections to input and output DataTurbines.&nbsp; <i>rbnbPlayer</i>
+pops up a dialog box to ask for the names and ports of the
+DataTurbine.
+<p>The following is an example of the host names and ports dialog:
+</p>
+<center>
+<p><img src="openRBNBDlg.jpg" title="" alt="Open RBNB Dialog"
+ style="width: 347px; height: 195px;"><br>
+</p>
+</center>
+<dl>
+  <center><dt> <b>Example <i>rbnbPlayer</i> Hosts and Ports Dialog
+for RBNB Input and Output</b></dt>
+  </center>
+</dl>
+<h4><a name="UIMenuFileOpenIP"></a>Open (IP Output)</h4>
+The <span style="font-weight: bold;">Open (IP Output)</span> menu item
+on the <a
+ href="file:///S:/RBNB/Dev/Source/Documentation/HTML/Player/rbnbPlayer.html#UIMenuFile">File
+Menu</a>
+opens connections to an input DataTurbine and to either an output UDP
+socket or a TCP server socket.&nbsp; <i>rbnbPlayer</i>
+pops up a dialog box to ask for the DataTurbine host and port.&nbsp;
+The user can select either <span style="font-weight: bold;">UDP Output</span>
+or <span style="font-weight: bold;">TCP Output</span>.&nbsp; If <span
+ style="font-weight: bold;">UDP Output</span> is selected, then the
+user must enter an IP address and port, specifying the address to send
+the UDP packets.&nbsp; If <span style="font-weight: bold;">TCP Output</span>
+is selected then the user must enter a TCP server port.&nbsp; If TCP
+Output is selected, <span style="font-style: italic;">rbnbPlayer </span>will
+open a server socket at the specified port.&nbsp; Any number of TCP
+clients can connect to this server socket; each client will receive a
+copy of the RBNB data.<br>
+<p>The following is an example of the host names and ports dialog:
+</p>
+<center>
+<p><img alt="Open IP Output Dialog" src="openIPDlg.jpg"
+ style="width: 407px; height: 297px;"><br>
+</p>
+</center>
+<dl>
+  <center><dt> <b>Example <i>rbnbPlayer</i> Hosts and Ports Dialog
+for RBNB Input and IP Output</b></dt>
+  </center>
+</dl>
+<h4>
+</h4>
+<h4><a name="UIMenuFileClose"></a>Close</h4>
+The Close menu item on the <a href="#UIMenuFile">File Menu</a> closes
+any
+open connections.
+<h4><a name="UIMenuFileExit"></a>Exit</h4>
+The Exit menu item on the <a href="#UIMenuFile">File Menu</a> exits
+the <i>rbnbPlayer</i>
+program.
+<h3><a name="UIMenuView"></a>View Menu</h3>
+The view menu has options to select <a href="#UIMenuViewChan">input
+channels</a>, and to
+configure
+the graphical interface.
+<h4><a name="UIMenuViewChan"></a>Channels</h4>
+The Channels menu item on the <a href="#UIMenuView">View Menu</a> pops
+a
+dialog
+for viewing and selecting input DataTurbine channels.&nbsp; The user
+clicks
+on the names of individual channels to select or deselect them, or the
+user may press the All or None buttons to select or deselect all
+available
+channels.&nbsp; When the "Select Range of Channels" checkbox is
+checked,
+the user may designate a range of channels for selection or deselection
+by clicking once on each of the ends of the range.&nbsp; The OK button
+commits the user's choices.
+<p>When outputting data to a DataTurbine, the output datapath is
+"rbnbPlayer[_&lt;unique number&gt;]"; the
+final
+"_&lt;unique number&gt;" is appended to the datapath if one or more
+instances
+of <i>rbnbPlayer</i> are already connected to the output
+DataTurbine.&nbsp; The output
+channels
+will have the same name as the input channels.&nbsp; Therefore, the
+user may not
+select
+multiple input channels with the same channel name.<br>
+</p>
+<p>When outputting data to UDP or TCP, the user is restricted to
+selecting only one RBNB channel for input.<br>
+</p>
+<p>The following is an example of the channel selection dialog:
+</p>
+<center>
+<p><img src="channelDlg.jpg" title="" alt="Channel Dialog"
+ style="width: 272px; height: 348px;"><br>
+</p>
+</center>
+<dl>
+  <center><dt> <b>Example <i>rbnbPlayer</i> Channel Selection Dialog</b></dt>
+  </center>
+</dl>
+<h4>
+<a name="UIMenuViewPos"></a>Position</h4>
+The Position menu item on the <a href="#UIMenuView">View Menu</a>
+controls
+the visibility of the <a href="#UISlidPos">Position slider and display</a>.
+<h4>
+<a name="UIMenuViewDur"></a>Duration</h4>
+The Duration menu item on the <a href="#UIMenuView">View Menu</a>
+controls
+the visibility of the <a href="#UISlidDur">Duration slider and display</a>.
+<h4>
+<a name="UIMenuViewInc"></a>Increment</h4>
+The Increment menu item on the <a href="#UIMenuView">View Menu</a>
+controls
+the visibility of the <a href="#UISlidInc">Increment slider and display</a>.
+<h4>
+<a name="UIMenuViewRate"></a>Rate</h4>
+The Rate menu item on the <a href="#UIMenuView">View Menu</a> controls
+the
+visibility of the <a href="#UISlidRate">Rate slider and display</a>.
+<h3><a name="UIMenuTimeFormat"></a>Time Format Menu</h3>
+The time format menu contains a list of radio-button options (only one
+option can be chosen from the list) which instruct <span
+ style="font-style: italic;">rbnbPlayer</span> how the time information
+on the input channels should be interpreted.<br>
+<h4><a name="UIMenuTimeFormatUnformatted"></a>Unformatted</h4>
+The Unformatted radio selection on the <a href="#UIMenuTimeFormat">Time
+Format Menu</a> directs <span style="font-style: italic;">rbnbPlayer</span>
+to interpret the time information from the input channels as generic
+floating point numbers.&nbsp; In rate and timing calculations performed
+within <span style="font-style: italic;">rbnbPlayer</span>, units of
+seconds are still assumed.&nbsp; That is, a change in the input time
+value of 1.0 is used as a 1.0 second increment in <span
+ style="font-style: italic;">rbnbPlayer's</span> internal calculations.<br>
+<h4><a name="UIMenuTimeFormatSeconds"></a>Seconds</h4>
+The Seconds radio selection on the <a href="#UIMenuTimeFormat">Time
+Format Menu</a> directs <span style="font-style: italic;">rbnbPlayer</span>
+to interpret the time information from the input channels as seconds.
+<h2><a name="UIBut"></a>Player Control Buttons</h2>
+Towards the top of the <a href="#GUI">graphical interface</a> are a
+set
+of buttons for taking particular actions: reading the beginning or end
+of the input data, playing or single-stepping forwards and backwards,
+pausing,
+and realtiming.
+<h3><a name="UIButBoD"></a>Beginning of Data</h3>
+The Beginning of Data button will playback the earliest data currently
+available; note that this may result in data being read from some
+channels
+but not from others.
+<center>
+<p><img src="bodButton.jpg" height="28" width="28"></p>
+</center>
+<dl>
+  <center><dt> <b>Beginning of Data Button</b></dt>
+  </center>
+</dl>
+<h3>
+<a name="UIButPlayBack"></a>Play Backwards</h3>
+The Play Backwards button will playback the data starting at the
+current
+<a href="#UISlidPos">Position</a>
+and moving backwards to the earliest available data, in increments set
+by the <a href="#UISlidInc">Increment</a> slider.&nbsp; At each step
+of
+play, a frame with a duration specified by the <a href="#UISlidDur">Duration</a>
+slider will be output.&nbsp; <i>rbnbPlayer</i> will attempt to play at
+the rate set by the <a href="#UISlidRate">Rate</a> slider.
+<center>
+<p><img src="rplayButton.jpg" height="28" width="28"></p>
+</center>
+<dl>
+  <center><dt> <b>Play Backwards Button</b></dt>
+  </center>
+</dl>
+<h3>
+<a name="UIButStepBack"></a>Step Backwards</h3>
+The Step Backwards button will playback a single step of data from the
+current <a href="#UISlidPos">Position</a> backwards.&nbsp; The
+duration
+of the step is set by the <a href="#UISlidDur">Duration</a> slider.
+<center><img src="rstepButton.jpg" height="28" width="28"></center>
+<dl>
+  <center><dt> <b>Step Backwards Button</b></dt>
+  </center>
+</dl>
+<h3>
+<a name="UIButPause"></a>Pause</h3>
+The Pause button stops the current action and halts the output of data.
+<center><img src="pauseButton.jpg" height="28" width="28"></center>
+<dl>
+  <center><dt> <b>Pause Button</b></dt>
+  </center>
+</dl>
+<h3>
+<a name="UIButStepFor"></a>Step Forwards</h3>
+The Step Forwards button will playback a single step of data from the
+current
+<a href="#UISlidPos">Position</a>
+forwards.&nbsp; The duration of the step is set by the <a
+ href="#UISlidDur">Duration</a>
+slider.
+<center><img src="stepButton.jpg" height="28" width="28"></center>
+<dl>
+  <center><dt> <b>Step Forwards Button</b></dt>
+  </center>
+</dl>
+<h3>
+<a name="UIButPlayFor"></a>Play Forwards</h3>
+The Play Forwards button will playback the data starting at the current
+<a href="#UISlidPos">Position</a>
+and moving forwards to the latest available data, in increments set by
+the <a href="#UISlidInc">Increment</a> slider.&nbsp; At each step of
+play,
+a frame with a duration specified by the <a href="#UISlidDur">Duration</a>
+slider will be output.&nbsp; <i>rbnbPlayer</i> will attempt to play at
+the rate set by the <a href="#UISlidRate">Rate</a> slider.
+<center><img src="playButton.jpg" height="28" width="28"></center>
+<dl>
+  <center><dt> <b>Play Forwards Button</b></dt>
+  </center>
+</dl>
+<h3>
+<a name="UIButEoD"></a>End of Data</h3>
+The End of Data button will cause the latest data currently
+available to be output;
+note that this may result in data being read from some channels but not
+from others.
+<center><img src="eodButton.jpg" height="28" width="28"></center>
+<dl>
+  <center><dt> <b>End of Data Button</b></dt>
+  </center>
+</dl>
+<h3>
+<a name="UIButRT"></a>Realtime</h3>
+The Realtime button repeatedly fetches the latest available data; note
+that this may result in data being read from some channels but not from
+others.&nbsp; No unique output frame will be written out more than
+once,
+and the starttime of each new output frame will be later than the
+previous
+by an amount set by the <a href="#UISlidInc">Increment</a> slider.
+<p>Note that the <a href="#UISlidRate">Rate</a> slider is disabled
+during
+Realtime play.&nbsp; During Realtime play, the rate slider displays the
+ratio of the
+difference in time between subsequent input data to the "wall-clock"
+time.&nbsp; In this case, the ideal value is 1.0.<br>
+</p>
+<center><img src="rtButton.jpg" height="28" width="28"></center>
+<dl>
+  <center><dt> <b>Realtime Button</b></dt>
+  </center>
+</dl>
+<h2><a name="UISlid"></a>Player Control Sliders</h2>
+The Player Control Sliders are used to specify and view the <a
+ href="#UISlidPos">position</a>
+within the data at which an action is occuring, the <a
+ href="#UISlidDur">duration</a>
+of each output frame, the <a href="#UISlidInc">increment</a> between
+subsequent
+output frames, and the <a href="#UISlidRate">rate</a> of playback.
+<h3><a name="UISlidPos"></a>Position</h3>
+The Position slider specifies the starttime for <a href="#UIButPlayFor">playing</a>
+and <a href="#UIButStepFor">stepping</a>.&nbsp; By dragging the
+slider,
+the user may also scan rapidly through the dataset.
+<p>The time of the current
+position
+is displayed above the slider.&nbsp; Additionally, the slider itself
+moves
+in response to user action, to show the user where the position
+currently
+is within the whole input dataset.
+</p>
+<center>
+<p><img src="rbnbPlayer_posSlider.JPG" height="73" width="499"></p>
+</center>
+<dl>
+  <center><dt> <b>Position Slider and Display</b></dt>
+  </center>
+</dl>
+<h3>
+<a name="UISlidDur"></a>Duration</h3>
+The Duration slider specifies the desired duration for each output
+frame.&nbsp;
+Note that it is possible for <i>rbnbPlayer</i> to output a frame whose
+length is less than the specified duration.&nbsp; The desired duration
+is displayed above
+the
+slider.&nbsp; Moving the slider all the way to the left edge puts <span
+ style="font-style: italic;">rbnbPlayer</span> into "single-point"
+mode.&nbsp; In this mode, requests for single points of data are sent
+to the DataTurbine.&nbsp; The <a href="#UISlidInc">Increment</a>
+slider is disabled in this mode.
+<center>
+<p><img src="rbnbPlayer_durSlider.JPG" height="76" width="498"></p>
+</center>
+<dl>
+  <center><dt> <b>Duration Slider and Display</b></dt>
+  </center>
+</dl>
+<h3>
+<a name="UISlidInc"></a>Increment</h3>
+The Increment slider specifies the minimum acceptable difference
+between
+the starttimes of two successive output frames.&nbsp; The current
+increment
+is displayed above the slider.&nbsp; The units of the increment are
+multiples of the duration.
+<center>
+<p><img src="rbbPlayer_incSlider.JPG" height="73" width="495"></p>
+</center>
+<dl>
+  <center><dt> <b>Increment Slider and Display</b></dt>
+  </center>
+</dl>
+<h3>
+<a name="UISlidRate"></a>Rate</h3>
+The Rate slider specifies the desired playback speed.&nbsp; The rate
+indicates the desired ratio of the difference in time between
+subsequent input data to the playback or "wall-clock" time.&nbsp; Note
+that,
+although it is possible to simultaneously control playback on channels
+with different types of timestamps, ie. some channels stamped by
+absolute
+time since 1970 mixed with channels stamped with relative time, this is
+not recommended.&nbsp;
+The rate slider is always disabled during <a href="#UIButRT">Realtime</a>
+play.&nbsp; During Realtime play, the rate slider continues to display
+the ratio of the difference in time between subsequent input data to
+the "wall-clock" time.&nbsp; In this case, the ideal value is 1.0.<br>
+<p>The desired rate is displayed on the left above the slider.&nbsp;
+The
+actual playback rate, measured by <i>rbnbPlayer</i>, is displayed on
+the
+right above the slider, in italics.
+</p>
+<center>
+<p><img src="rbnbPlayer_rateSlider.JPG" height="73" width="495"></p>
+</center>
+<dl>
+  <center><dd> <b>Rate Slider and Display</b></dd>
+  </center>
+  <center><dd> <br>
+  </dd>
+  </center>
+</dl>
+</body>
+</html>

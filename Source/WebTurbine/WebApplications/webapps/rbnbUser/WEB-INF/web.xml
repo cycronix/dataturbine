@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!DOCTYPE web-app
+    PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+    "http://java.sun.com/dtd/web-app_2_3.dtd">
+
+<web-app>
+
+  <servlet>
+    <servlet-name>rbnbWebdav</servlet-name>
+    <servlet-class>org.apache.catalina.rbnb.RBNBWebDAVServlet</servlet-class>
+    <init-param>
+      <param-name>debug</param-name>
+      <param-value>0</param-value>
+    </init-param>
+    <init-param>
+      <param-name>listings</param-name>
+      <param-value>true</param-value>
+    </init-param>
+
+    <init-param>
+      <param-name>readonly</param-name>
+      <param-value>false</param-value>
+    </init-param>
+    <!--load-on-startup>1</load-on-startup-->
+  </servlet>
+
+  <!-- The mapping for the webdav servlet -->
+  <servlet-mapping>
+    <servlet-name>rbnbWebdav</servlet-name>
+    <url-pattern>/</url-pattern>
+  </servlet-mapping>
+
+	<resource-env-ref>
+		<description>
+		Object factory for RBNBDirContext instances.
+		</description>
+		<resource-env-ref-name>
+			com/rbnb/web/RBNBDirFactory
+		</resource-env-ref-name>
+		<resource-env-ref-type>
+			com.rbnb.web.RBNBDirContext
+		</resource-env-ref-type>
+	</resource-env-ref>
+
+	<!-- Example security constraint.  Change to the value of the desired
+			url pattern.  -->	
+<!--   <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>Bob's account</web-resource-name>
+      <url-pattern>/bob/*</url-pattern>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>bob</role-name>
+    </auth-constraint>
+  </security-constraint>  -->
+  
+  <!-- Secures the remainder of the webapplication against any access. -->
+<!--   <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>Secure remainder</web-resource-name>
+      <url-pattern>/*</url-pattern>
+    </web-resource-collection>
+    <auth-constraint />
+  </security-constraint>   -->
+
+  <login-config>
+    <auth-method>BASIC</auth-method>
+    <realm-name>RBNB WebDAV</realm-name>
+  </login-config>
+	
+	<env-entry>
+		<env-entry-name>com.rbnb.web.sinkname</env-entry-name>
+		<env-entry-value>rbnbUserSink</env-entry-value>
+		<env-entry-type>java.lang.String</env-entry-type>
+	</env-entry>
+	
+ 	<env-entry>
+		<env-entry-name>com.rbnb.web.defaultcache</env-entry-name>
+		<env-entry-value>100</env-entry-value>
+		<env-entry-type>java.lang.Integer</env-entry-type>
+	</env-entry>
+
+ 	<env-entry>
+		<env-entry-name>com.rbnb.web.defaultarchive</env-entry-name>
+		<env-entry-value>0</env-entry-value>
+		<env-entry-type>java.lang.Integer</env-entry-type>
+	</env-entry>
+	
+ 	<env-entry>
+		<env-entry-name>com.rbnb.web.defaultarchivemode</env-entry-name>
+		<env-entry-value>append</env-entry-value>
+		<env-entry-type>java.lang.String</env-entry-type>
+	</env-entry>
+
+ 	<env-entry>
+		<env-entry-name>com.rbnb.web.defaultuser</env-entry-name>
+		<env-entry-value>guest</env-entry-value>
+		<env-entry-type>java.lang.String</env-entry-type>
+	</env-entry>
+
+ 	<env-entry>
+		<env-entry-name>com.rbnb.web.isuserbrowser</env-entry-name>
+		<env-entry-value>true</env-entry-value>
+		<env-entry-type>java.lang.Boolean</env-entry-type>
+	</env-entry>
+	
+</web-app>

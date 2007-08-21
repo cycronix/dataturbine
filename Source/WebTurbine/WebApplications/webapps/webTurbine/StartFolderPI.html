@@ -1,0 +1,41 @@
+<html>
+<head>
+	<title>Start Folder PlugIn</title>
+	<LINK REL=STYLESHEET HREF="/stylesheets/rbnbstyles.css" TYPE="text/css">
+</head>
+<body>
+<h1>RBNB Folder PlugIn</h1>
+<p>This PlugIn posts the contents (files) of the specified directory to the server.</p>
+<form action="StartPlugIn.jsp" method="GET">
+	<input type="hidden" name="className" value="FolderPlugIn" />
+	<input type="hidden" name="plugInName" 
+		value="Folder PlugIn" />
+	
+	<div class="centered">
+	<table celpadding=5 class="leftjustified">
+	<tr>
+		<td>RBNB Server Address:</td>
+		<td><input type="hidden" name="arg" value="-a"/>
+		<input type="TEXT" name="arg" 
+			value="localhost:3333" size=30/></td>
+	</tr><tr>
+		<td>Published Name:</td>
+		<td><input type="hidden" name="arg" value="-n"/>
+		<input type="TEXT" name="arg" value="Folder" size=30/></td>
+	</tr><tr>
+		<td>Folder to Post:</td>
+		<td><input type="hidden" name="arg" value="-f"/>
+		<input type="TEXT" name="arg" value="temp" size=30/></td>
+	</tr><tr>
+		<td>Update Period (sec):</td>
+		<td><input type="hidden" name="arg" value="-p"/>
+		<input type="TEXT" name="arg" value="5" size=30/></td>
+	</tr>
+	</table>
+	<p><input type="submit" value="Start PlugIn" /></p></div>
+</form>
+<p class="footer"><a href="/documentation/PlugIns/FolderPlugIn.html">Help</a> -
+	<a href="/webTurbine">Home</a></p>
+</body>
+</html>
+

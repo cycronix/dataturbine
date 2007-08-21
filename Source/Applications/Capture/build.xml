@@ -1,0 +1,56 @@
+<!-- Name: build.xml
+     By:   John Wilson
+     Date: 06/27/2004
+
+     Description:
+         This file is the primary Ant build file for the RBNB Capture
+         application.  This application acquires unicast or multicast
+         UDP datagram packets (not TCP streams) and puts them into one
+         or more DataTurbines.  One use for this is to acquire live
+         video from a digital camera attached to a computer.  The
+         rbnbCapture application provides a simple command line interface
+         and displays acquisition statistics in a pop-up window.
+-->
+
+<project name="APPLICATION.CAPTURE" default="library" basedir=".">
+ <!-- Import the standard definitions (properties). -->
+ <import file="../../definitions.xml" />
+ <!-- Initialize by setting the timestamp. -->
+ <target name="init">
+  <tstamp />
+  <buildnumber />
+  <mkdir dir="${rbnb.builddir}" />
+  <mkdir dir="${rbnb.classesdir}" />
+  <mkdir dir="${rbnb.classesdir}/Applications" />
+  <mkdir dir="${rbnb.classesdir}/Applications/Capture" />
+  <mkdir dir="${rbnb.librarydir}" />
+ </target>
+
+ <!-- Compile the Capture Java source code and place the results in the Capture
+      classes directory.  References the Core library and the Capture classes for
+      dependencies.
+  -->
+ <target name="compile" depends="init">
+  <javac destdir="${rbnb.classesdir}/Applications/Capture"
+         deprecation="on">
+   <src path="${rbnb.sourcedir}/Applications/Capture" />
+   <classpath path="${rbnb.classesdir}/Applications/Capture" />
+   <classpath path="${rbnb.librarydir}/rbnb.jar" />
+  </javac>
+ </target>
+
+ <!-- Create the Capture jar file using the Capture classes. -->
+ <target name="library" depends="compile">
+  <jar destfile="${rbnb.librarydir}/capture.jar"
+       basedir="${rbnb.classesdir}/Applications/Capture"
+       manifest="Manifest"
+   />
+ </target>
+
+ <!-- Cleans out all compiled and library files for the Capture project. -->
+ <target name="clean">
+  <delete dir="${rbnb.classesdir}/Applications/Capture" />
+  <delete file="${rbnb.librarydir}/capture.jar" />
+ </target>
+
+</project>

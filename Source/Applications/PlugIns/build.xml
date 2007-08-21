@@ -1,0 +1,68 @@
+<!-- Name: build.xml
+     By:   Ian Brown
+     Date: 08/11/2004
+
+     Description:
+         This file is the primary Ant build file for the RBNB PlugIns.  These
+	 applications provide a variety of capabilities to the users of the
+         RBNB system by retrieving data on request by other applications.
+-->
+
+<project name="APPLICATION.PLUGINS" default="library" basedir=".">
+
+ <!-- Import the standard definitions (properties). -->
+ <import file="../../definitions.xml" />
+
+ <!-- Initialize by setting the timestamp. -->
+ <target name="init">
+  <tstamp />
+  <buildnumber />
+  <mkdir dir="${rbnb.builddir}" />
+  <mkdir dir="${rbnb.classesdir}" />
+  <mkdir dir="${rbnb.classesdir}/Applications" />
+  <mkdir dir="${rbnb.classesdir}/Applications/PlugIns" />
+  <!-- JPW 07/13/2006: Make a TrackResources directory in which we will store
+                       icons and files used by KMLPlugIn and TrackPlugIn -->
+  <mkdir dir="${rbnb.classesdir}/Applications/PlugIns/TrackResources" />
+  <mkdir dir="${rbnb.librarydir}" />
+ </target>
+
+ <!-- Compile the PlugIns Java source code and place the results in the PlugIns
+      classes directory.  References the Core library and the PlugIns classes
+      for dependencies.
+  -->
+ <target name="compile" depends="init">
+  <javac destdir="${rbnb.classesdir}/Applications/PlugIns"
+         deprecation="on" debug="on">
+   <src path="${rbnb.sourcedir}/Applications/PlugIns" />
+   <exclude name="Unsupported/**" />
+   <classpath path="${rbnb.classesdir}/Applications/PlugIns" />
+   <classpath path="${rbnb.classesdir}/DataTurbine" />
+   <classpath path="${rbnb.classesdir}/Applications/Plot" />
+   <classpath path="${rbnb.classesdir}/Applications/Proxy" />
+   <classpath path="${rbnb.thirdpartydir}/xmlrpc-1.1.jar" />
+  </javac>
+ </target>
+ 
+ <!-- JPW 07/13/2006: Copy files/icons used by KMLPlugIn and TrackPlugIn to PlugIns class directory -->
+ <target name="PlugIn_file_copy">
+  <copy todir="${rbnb.classesdir}/Applications/PlugIns/TrackResources">
+    <fileset dir="TrackResources"/>
+  </copy>
+  <copy todir="${rbnb.classesdir}/Applications/PlugIns/KMLitResources">
+    <fileset dir="KMLitResources"/>
+  </copy>
+ </target>
+ 
+ <!-- There is no actual library for the plugins, but we need this task to be
+      able to build from the Applications directory.
+  -->
+ <target name="library" depends="compile,PlugIn_file_copy" />
+
+ <!-- Cleans out all compiled files for the PlugIns project. -->
+ <target name="clean">
+  <delete dir="${rbnb.classesdir}/Applications/PlugIns" />
+ </target>
+
+</project>
+

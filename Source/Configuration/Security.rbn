@@ -1,0 +1,60 @@
+#
+# Security file for Creare's RBNB server.
+#
+# This file provides an administrator with the ability to restrict access to
+# an RBNB server by specifying DNS names or IP addresses of machines to be
+# allowed or denied access. The use of wildcards allows groups of machines
+# to be allowed or denied with a single entry.
+#
+# Any address that is not explicitly allowed is denied. This means that the
+# denial list need only be specified when a subset of an allowed group of
+# addresses is to be denied access.
+#
+# Entries in the file are separated by whitespace (a space, a tab, a carriage
+# return or a new line represent the whitespace characters). Each entry can be
+# one of:
+#
+# ALLOW   - specifies that the addresses following this entry are to be allowed
+#	    access (possibly limited to specific types).
+# DENY    - specifies that the addresses following this entry are to be denied
+#	    access.
+# address - specifies an address that is to be allowed or denied access.
+#
+# Addresses can be any legal DNS name (such as rbnb.creare.com) or IP address
+# (such as 216.204.34.147) or a string containing wildcard characters similar
+# to those used by Microsoft Word(TM) that can be matched against DNS names or
+# IP addresses.
+#
+# Some examples follow:
+#
+# RBNB Server Default 
+#   This is the equivalent of the default setup (this can also be accomplished
+#   by having no allowed or denied entries in this file).
+#
+# ALLOW
+# *
+#
+#
+# Lockdown access to the local machine only (equivalent of -l switch)
+#
+# ALLOW
+# localhost
+#
+#
+# Allow people from "my-domain.com" to access the server, but deny people at
+# "their-subdomain.my-domain.com" to access the server.
+#
+# ALLOW
+# *.my-domain.com
+# DENY
+# *.their-subdomain.my-domain.com
+#
+#
+# Allow people from "my-domain.com" all access except for control, allow
+# "my-computer.my-domain.com" full access, and allow everyone else read and
+# routing.
+#
+# ALLOW
+# *.my-domain.com=RWTP
+# my-computer.my-domain.com=RWXTP
+# *=RT

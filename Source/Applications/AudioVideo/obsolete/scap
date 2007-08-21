@@ -1,0 +1,1 @@
+java -cp CLASSES:/Volumes/sdp.creare.com/RBNB/Dev/Build/Lib/rbnb.jar JPEGCapture -R2 -d MEDIUM -C 100

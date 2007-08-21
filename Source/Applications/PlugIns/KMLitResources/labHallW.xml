@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Meta>
+    <name>Lab Hallway W</name>
+    <LookAt>
+	    <longitude>-72.23292245643374</longitude>
+	    <latitude>43.6843863564641</latitude>
+	    <altitude>10</altitude>
+	    <range>114.574558397546</range>
+	    <tilt>58.40047248925013</tilt>
+	    <heading>84.34753756282289</heading>
+    </LookAt>
+    <Camera>
+	<coordinates>-72.23301325384745,43.68444186039624,5</coordinates>
+	<roll>0</roll>
+	<tilt>0</tilt>
+	<heading>-86</heading>
+	<zoom>1</zoom>
+    </Camera>
+    <Image>
+	<distance>1700</distance>
+	<height>800</height>
+	<aspect>1.333</aspect>
+	<zoffset>50</zoffset>
+	<zskew>0</zskew>
+    </Image>
+</Meta>

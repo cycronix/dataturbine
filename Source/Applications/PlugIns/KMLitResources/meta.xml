@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Meta>
+    <name>Creare</name>
+    <LookAt>
+	<longitude>-72.233058</longitude>
+	<latitude>43.684748</latitude>
+	<altitude>10</altitude>
+	<range>51</range>
+	<tilt>58</tilt>
+	<heading>23</heading>
+    </LookAt>
+    <Camera>
+    	<coordinates>-72.233105,43.684655,8</coordinates>
+	<roll>0</roll>
+	<tilt>0</tilt>
+	<heading>-22</heading>
+	<zoom>1</zoom>
+    </Camera>
+    <Image>
+	<distance>700</distance>
+	<height>500</height>
+	<aspect>1.333</aspect>
+	<zoffset>-175</zoffset>
+	<zskew>-30</zskew>
+    </Image>
+</Meta>

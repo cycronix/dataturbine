@@ -1,0 +1,59 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Author" content="Eric Friets">
+   <meta name="GENERATOR" content="Mozilla/4.77 [en] (WinNT; U) [Netscape]">
+   <title>RBNB Servlet Deployment Guide</title>
+</head>
+<body>
+
+<h1>
+RBNB Servlet Deployment Guide</h1>
+This guide outlines the process by which additional applications and PlugIns
+may be added to the servlet-based web configuration and deployment system.&nbsp;
+Operationally, from the displayed list of available servlets, a user clicks
+to a configuration page.&nbsp; Once the configuration is complete, the
+user clicks to start.&nbsp; The HTML document invokes a Javaserver Page,
+which in turn invokes the appropriate Java class.
+<br>&nbsp;
+<h3>
+Getting Started</h3>
+There are three steps to deploying a new servlet.&nbsp; First, copy the
+class file into the appropriate directory.&nbsp; Second, create a HTML
+document to configure and start it.&nbsp; Third, edit the HTML document
+which lists and links the available servlets.
+<p>You will need a Java class file for the servlet you are adding to the
+system, and knowledge of the configuration parameters for it.&nbsp; Source
+code for the VSourcePlugIn and VChansPlugIn is provided, but you will need
+a <i>javac</i> compiler.&nbsp; A version is available at no charge from
+<a href="http://java.sun.com/j2se/1.3/">Sun</a> as part of the JDK.
+<p>All directories and files mentioned here are relative to the RBNB install
+directory.
+<br>&nbsp;
+<h3>
+Copy Class File</h3>
+Copy the servlet class file into the
+<br>&nbsp;&nbsp;&nbsp; <b>jakarta-tomcat-4.0.1\webapps\webTurbine\WEB-INF\classes</b>
+<br>directory.&nbsp; This directory contains the class files for all servers,
+applications, and PlugIns deployed by the system.
+<br>&nbsp;
+<h3>
+Create HTML Document</h3>
+In the
+<br>&nbsp;&nbsp;&nbsp; <b>jakarta-tomcat-4.0.1\webapps\webTurbine</b>
+<br>directory, copy <i>StartVSourcePI.html</i> and rename for your servlet.&nbsp;
+Edit this file, tailoring the names and configuration options to your servlet.
+<p>For most servlets, using the provided Javaserver Page, <i>StartPlugIn.jsp</i>,
+is recommended.&nbsp; If there are unusually complex configuration options,
+a specialized Javaserver Page may be written.
+<br>&nbsp;
+<h3>
+Edit List of Available Servlets</h3>
+Edit the
+<br>&nbsp;&nbsp;&nbsp; <b>jakarta-tomcat-4.0.1\webapps\webTurbine\index.html</b>
+<br>file, adding a link to and brief description of your servlet.
+<br>&nbsp;
+<br>&nbsp;
+</body>
+</html>

@@ -1,0 +1,41 @@
+<!-- Paste this file after webPrefix.xml and the Jasper generated web.xml -->
+
+    <servlet-mapping>
+        <servlet-name>
+            rbnbBinaryDataServlet
+        </servlet-name>
+        <url-pattern>
+            /rbnbServlet/*
+        </url-pattern>
+    </servlet-mapping>
+ 
+  <mime-mapping>
+    <extension>BMP</extension>
+    <mime-type>image/bmp</mime-type>
+  </mime-mapping>
+  <mime-mapping>
+    <extension>JPEG</extension>
+    <mime-type>image/jpeg</mime-type>
+  </mime-mapping>
+  <mime-mapping>
+    <extension>JPG</extension>
+    <mime-type>image/jpeg</mime-type>
+  </mime-mapping>
+  <mime-mapping>
+    <extension>TIF</extension>
+    <mime-type>image/tiff</mime-type>
+  </mime-mapping>
+  <mime-mapping>
+    <extension>TIFF</extension>
+    <mime-type>image/tiff</mime-type>
+  </mime-mapping>
+  <mime-mapping>
+    <extension>PSD</extension>
+    <mime-type>image/x-photoshop</mime-type>
+  </mime-mapping>
+   <mime-mapping>
+    <extension>PDF</extension>
+    <mime-type>application/pdf</mime-type>
+  </mime-mapping>    
+
+</web-app>

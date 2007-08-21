@@ -1,0 +1,57 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>Start Thumb Nail PlugIn</title>
+  <link rel="STYLESHEET" href="/stylesheets/rbnbstyles.css"
+ type="text/css">
+</head>
+<body>
+<h1 style="text-align: center;">Thumb Nail PlugIn</h1>
+<p style="text-align: center;">Convert a JPEG to a smaller thumbnail
+image.</p>
+<form action="StartPlugIn.jsp" method="get"> <input type="hidden"
+ name="className" value="ThumbNailPlugIn"> <input type="hidden"
+ name="plugInName" value="Thumb Nail PlugIn">
+  <div class="centered">
+  <table celpadding="5" class="leftjustified"
+ style="height: 154px; text-align: left; margin-left: auto; margin-right: auto; width: 70%;">
+    <tbody>
+      <tr>
+        <td>RBNB Server Address</td>
+        <td><input type="hidden" name="arg" value="-a"> <input
+ type="text" name="arg" value="localhost:3333" size="30"></td>
+      </tr>
+      <tr>
+        <td>PlugIn Name</td>
+        <td><input type="hidden" name="arg" value="-n"> <input
+ type="text" name="arg" value="ThumbNail" size="30"></td>
+      </tr>
+      <tr>
+        <td>JPEG Source/Channel (optional)</td>
+        <td><input type="hidden" name="arg" value="-c"> <input
+ type="text" name="arg" value="" size="30"></td>
+      </tr>
+      <tr>
+        <td>Image Scale Factor (0 - 4)</td>
+        <td><input type="hidden" name="arg" value="-s"> <input
+ type="text" name="arg" value="0.5" size="30"></td>
+      </tr>
+      <tr>
+        <td>Image Quality (0 - 1)</td>
+        <td><input type="hidden" name="arg" value="-q"> <input
+ type="text" name="arg" value="0.5" size="30"></td>
+      </tr>
+      <tr>
+        <td>Maximum Number of Images (for a multi-image request)</td>
+        <td><input type="hidden" name="arg" value="-m"> <input
+ type="text" name="arg" value="10" size="30"></td>
+      </tr>
+    </tbody>
+  </table>
+  <p><input type="submit" value="Start PlugIn"></p>
+  </div>
+</form>
+<p class="footer"><a href="/documentation/PlugIns/ThumbNailPlugIn.html">
+Help</a> - <a href="/webTurbine">Home</a></p>
+</body>
+</html>

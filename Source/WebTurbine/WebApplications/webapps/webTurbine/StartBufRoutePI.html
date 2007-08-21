@@ -1,0 +1,56 @@
+<html>
+<head>
+	<title>Buffered Route PlugIn</title>
+	<LINK REL=STYLESHEET HREF="/stylesheets/rbnbstyles.css" TYPE="text/css">
+</head>
+<body>
+<h1>RBNB Cache PlugIn</h1>
+<p>Requests made via the RBNB Cache PlugIn are buffered in a local cache 
+for efficient subsequent retrieval.
+</p>
+<form action="StartPlugIn.jsp" method="GET">
+	<input type="hidden" name="className" 
+		value="com.rbnb.bufferedRoute.BufferedRoutePI" />
+	<input type="hidden" name="plugInName" 
+		value="Buffered Route PlugIn" />
+	
+	<div class="centered">
+	<table celpadding=5 class="leftjustified">
+	<tr>
+		<td>RBNB Server Address:</td>
+		<td><input type="hidden" name="arg" value="-a"/>
+		<input type="TEXT" name="arg" 
+			value="localhost:3333" size=40/></td>
+	</tr><tr>
+		<td>RBNB Client Name:</td>
+		<td><input type="hidden" name="arg" value="-n"/>
+		<input type="TEXT" name="arg" value="rbnbCache" 
+			size=40/></td>
+	</tr><tr>
+		<td>Cache frames:</td>
+		<td><input type="hidden" name="arg" value="-c"/>
+		<input type="TEXT" name="arg" value="1000" 
+			size=6/></td>
+	</tr><tr>
+		<td>Archive frames:</td>
+		<td><input type="hidden" name="arg" value="-k"/>
+		<input type="TEXT" name="arg" value="0" 
+			size=6/></td>
+	</tr><tr>
+		<td>New archive:</td>
+		<td><input type="checkbox" name="arg" value="-w"
+			size=6/></td>
+
+	</tr><!-- <tr>
+		<td>Debug level:</td>
+		<td><input type="hidden" name="arg" value="-d"/>
+		<input type="TEXT" name="arg" value="0" size=5/></td>
+	</tr>  -->
+	</table>
+	<p><input type="submit" value="Start PlugIn" /></p></div>
+</form>
+<p class="footer"><a href="/documentation/PlugIns/BufferedRoutePlugIn.html">
+	Help</a> - <a href="/webTurbine">Home</a></p>
+</body>
+</html>
+

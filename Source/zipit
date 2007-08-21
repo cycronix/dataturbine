@@ -1,0 +1,5 @@
+:
+cd ..
+zip -r Distribute/Source.zip Source
+zip -r Distribute/Third_Party.zip Third_Party
+cp Source/ReleaseNotes.html Distribute

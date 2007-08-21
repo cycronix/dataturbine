@@ -1,0 +1,37 @@
+	<Placemark id="##id##">
+		<name>##name##</name>
+		<TimeSpan>
+			<begin>##begin##</begin>
+			<end>##end##</end>
+		</TimeSpan>
+		<LookAt>
+			<longitude>##llongitude##</longitude>
+			<latitude>##llatitude##</latitude>
+			<range>##lrange##</range>
+			<tilt>##ltilt##</tilt>
+			<heading>##lheading##</heading>
+		</LookAt>
+		<Style id="default">
+		</Style>
+		<Model>
+			<altitudeMode>relativeToGround</altitudeMode>
+			<Location>
+				<longitude>##clongitude##</longitude>
+			        <latitude>##clatitude##</latitude>
+				<altitude>##caltitude##</altitude>
+			</Location>
+			<Orientation>
+				<heading>##cheading##</heading>
+				<tilt>##ctilt##</tilt>
+				<roll>##croll##</roll>
+			</Orientation>
+			<Scale>
+				<x>##zoom##</x>
+				<y>##zoom##</y>
+				<z>##zoom##</z>
+			</Scale>
+			<Link>
+				<href>##href-dae##</href>				
+			</Link>
+		</Model>
+	</Placemark>

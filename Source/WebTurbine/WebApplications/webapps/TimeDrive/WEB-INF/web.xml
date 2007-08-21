@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE web-app
+    PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+    "http://java.sun.com/dtd/web-app_2_3.dtd">
+<web-app>
+<!-- kml/kmz mappings for Google Earth: -->
+	<mime-mapping>
+		<extension>kml</extension>
+		<mime-type>application/vnd.google-earth.kml+xml</mime-type>
+	</mime-mapping>
+	<mime-mapping>
+		<extension>kmz</extension>
+		<mime-type>application/vnd.google-earth.kmz</mime-type>
+	</mime-mapping>
+
+	<servlet>
+		<servlet-name>TimeDriveServlet</servlet-name>
+		<servlet-class>com.rbnb.web.HttpForwardServlet</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+
+	<!-- The mapping for the webdav servlet -->
+	<servlet-mapping>
+		<servlet-name>TimeDriveServlet</servlet-name>
+		<url-pattern>/</url-pattern>
+	</servlet-mapping>
+
+	<!-- Use this area for configuration options:  -->
+	
+	<!-- A fully qualified URL prefix which replaces the incoming URL
+			up to and including the name of this servlet.  
+			Thus, if the destination is http://foo:4000/ and a request comes in
+			for http://bar/TimeDrive/fluff it will be forwarded to 
+			http://foo:4000/fluff
+		
+		JPW 11/21/2006: Changed default destination address from
+		                http://foo:4000 to http://localhost:4000
+	-->
+	<env-entry>
+		<env-entry-name>com.rbnb.web.destination</env-entry-name>
+		<env-entry-value>http://localhost:4000/</env-entry-value>
+		<env-entry-type>java.lang.String</env-entry-type>
+	</env-entry>
+
+	<env-entry>
+		<env-entry-name>com.rbnb.web.debug</env-entry-name>
+		<env-entry-value>false</env-entry-value>
+		<env-entry-type>java.lang.Boolean</env-entry-type>
+	</env-entry>
+</web-app>

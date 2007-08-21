@@ -1,0 +1,170 @@
+<html>
+<head>
+	<title>RBNB Web Access Portal Help</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<meta http-equiv="Window-target" content="_top">
+	<meta name="Author" content="Bill Finger">
+	<meta name="GENERATOR" content="Jedit 4.0pre8">
+	<LINK REL=STYLESHEET HREF="/stylesheets/rbnbstyles.css" TYPE="text/css">
+</head>
+<body>
+
+<hr class="sectionbreak">
+<h1>RBNB&#8482; Web Access Portal Help</h1>
+<h2>May 21st, 2002</h2>
+<h2>Copyright <a href="http://www.creare.com">Creare</a>, Inc.</h2>
+
+<hr class="sectionbreak">
+<h2><a NAME="TOC"></a>Table of Contents</h2>
+
+<ul class="leftpad">
+	<li><a href="#Introduction">Introduction</a></li>
+	<li><a href="#ServerAddress">Server/Channel Selection</a></li>
+	<li><a href="#RequestOptions">Request Options</a></li>
+	<li><a href="#ReleaseNotes">Release Notes</a></li>
+</ul>
+
+<hr class="sectionbreak">
+<h2><a NAME="Introduction"></a>Introduction</h2>
+<p class="justified">
+Welcome to Creare's Web Access Portal!&nbsp; This software
+allows you to view RBNB channels via your webbrowser.&nbsp; Simply click on
+the channel you are interested in, and it will be displayed.&nbsp; If the 
+channel has an extension with a MIME type (such as .jpg), the channel will be 
+shown by that type; otherwise, plain text is used.&nbsp; This technology is
+powered by JSP and Servlets running on a Tomcat servlet host.</p>
+<p class="justified">
+For more information on RBNB technology, visit <a href=
+"http://outlet.creare.com/rbnb">RBNB Home</a>.&nbsp; For more information about
+servlets, please see Sun's informative white papers located <a href=
+"http://java.sun.com/products/servlet/index.html">here</a>.&nbsp; For JSP, 
+<a href="http://java.sun.com/products/jsp/index.html">here</a>.&nbsp; Lastly,
+for more information about the Tomcat project, a subset of the Jakarta effort,
+visit their homepage,
+<a href="http://jakarta.apache.org">jakarta.apache.org</a>.
+</p>
+<hr class="sectionbreak">
+<h2><a NAME="ServerAddress"></a>Server/Channel Selection</h2>
+<p class="justified">
+	The options in this portion of the form determine what entries are 
+displayed in the list to the right of the form.
+</p>
+
+<h3>RBNB Address</h3>
+<p class="justified">
+The header form has a field that allows you to enter the Internet 
+Address of the RBNB to which you wish to connect.&nbsp; Be aware that the 
+server which your browser is talking to determines the connectivity of this
+form; that is, if a webserver is running the WebAccess servlet at Creare, it
+will not be able to see an RBNB running behind your firewall.</p>
+
+<h3>Channel Match</h3>
+<p class="justified">
+	The Channel Match field specifies which channels available on the connected
+server are listed in the summary to the left.&nbsp; The default is the ellipsis, 
+"...", which means to include all channels recursively from the root.&nbsp; You 
+may specify "[Source]/...", where [Source] is the name of a data source 
+connected to the RBNB.&nbsp; As of this writing, the use of "..." on lower 
+channel levels is not implemented.
+</p>
+
+<h3>Keyword Match</h3>
+<p class="justified">
+	The keyword match allows the user to specify that only channels which 
+contain the specified keywords, separated by spaces, within their meta-data
+should be displayed.&nbsp; This implies that the meta-data needs to be text.
+</p>
+<p class="justified">
+	If this field is blank, no search is performed.
+</p>
+
+<hr class="sectionbreak">
+
+<h2><a NAME="RequestOptions"></a>Request Options</h2>
+<p class="justified">
+	The options within this section of the form determine which data the server
+fetches when the user presses a link.</p>
+
+<h3>Meta or Source Data</h3>
+<p class="justified">
+	This field allows you to select between Meta Data, static data stored on the
+server in its registration map, or Source Data, dynamic data stored in the ring
+buffer.&nbsp; If meta data is selected, the next three options (Start, Duration,
+and Reference) do not apply.
+</p>
+
+<h3>Start</h3>
+<p class="justified">
+	The Start field allows you to enter a time value at which the data 
+should be acquired. The default units for time is seconds, but can be whatever
+ the data source specified (e.g. incremental counts).&nbsp; The "Reference" 
+ value further modifies how time is interpreted (see below). </p>
+
+<h3>Duration</h3>
+<p class="justified">
+	The Duration field determines the amount of data to fetch, in source-units
+(e.g. in seconds).&nbsp; A value of 0 is a special case, signifying that the 
+single last point (object) of data is to be returned.</p>
+
+<h3>Reference</h3>
+<p class="justified">
+	The Reference field determines how the Start and Duration fields are 
+interpreted, as follows:
+<ul>
+	  	<li>"absolute" -- The start time is interpreted as given by the source 
+		without modification.&nbsp; The default is absolute time in seconds from
+	  	midnight, Jan 1st, 1970 UTC.</li>
+	  	<li>"newest" -- The start parameter is measured relative to the 
+	  	most recent data available in the server.&nbsp; Therefore, start = 0
+		means current data.</li>
+	  	<li>"oldest" -- The start parameter is measured relative to the oldest
+		data available in the server.&nbsp; Therefore, start = 0 means the
+		beginning of the data.</li>
+	  	<li>"after" -- Return the newest data available, but only the portion
+		after the specified start time.&nbsp; This means you may get a fraction
+		of the duration amount.
+				
+<!--		A combination between "absolute" and "newest",
+	  		this flag causes the server to return the newest
+	  		data available after the specified start time.  Unlike
+	  		"newest", you do not have to request the data to 
+	  		find out that you already have it.  Unlike "absolute",
+	  		a gap may be inserted in the data to provide you with 
+	  		the freshest data.
+			--></li>
+	  	<li>"modified" -- Similar to "after", but it will return a full 
+		duration amount of data if any part of the data is after the specified 
+		start time. 
+
+		<!--  Similar to "after", but attempts to return
+	  	a <i>duration's</i> worth of data in a contiguous block.
+	  	If the data is not available after the <code>start</code>
+	  	time, it will be taken from before the start time.  --> </li>
+</ul></p>
+
+<h3>Via PlugIn</h3>
+<p class="justified">
+	This field allows you to filter through a PlugIn any channels you select.
+&nbsp;A popular selection is the PNGPlugIn, which displays time domain vector
+data as a plot in the Portable Network Graphic format.</p>
+
+<hr class="sectionbreak">
+<h2><a NAME="ReleaseNotes"></a>Release Notes</h2>
+<div class="justified">
+<h3>Updates and Fixes</h3>
+<h4>Version 0.1, December 5th, 2001</h4>
+<p>	First release.</p>
+<h4>Version 0.2, December 5th, 2001</h4>
+<p>	Removed version field; no longer supports V1.0 RBNBs.</p>
+<h4>Version 0.5, May 21st, 2002</h4>
+<p> Added folder display, keyword matching options.
+<h3>Known Bugs</h3>
+<p>	Currently, RBNB channels with question marks, ampersands, 
+percent signs, or other characters with special meaning in URLs are not 
+correctly displayed by this Servlet.</p>
+</div>
+<hr class="sectionbreak">
+<p class="footer"><a href="/webTurbine">Home</a></p>
+</body>
+</html>
+

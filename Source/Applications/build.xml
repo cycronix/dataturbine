@@ -1,0 +1,41 @@
+<!-- Name: build.xml
+     By:   Ian Brown
+     Date: 06/18/2004
+
+     Description:
+         This file is the primary Ant build file for the RBNB applications.  It
+	 runs all of the RBNB application builds.
+-->
+
+<project name="APPLICATIONS" default="library" basedir=".">
+
+ <!-- Import the standard definitions (properties). -->
+ <import file="../definitions.xml" />
+
+ <!-- Initialize the application build directory. -->
+ <target name="init">
+  <mkdir dir="${rbnb.classesdir}/Applications" />
+ </target>
+
+ <!-- Compile all of the applications, but don't build any libraries. -->
+ <target name="compile" depends="init">
+  <subant target="compile">
+   <fileset dir="." includes="*/build.xml" excludes="PlugIns/build.xml" />
+   <fileset dir="." includes="PlugIns/build.xml" />
+  </subant>
+ </target>
+
+ <!-- Compile and make libraries for all of the applications. -->
+ <target name="library">
+  <subant target="library">
+   <fileset dir="." includes="*/build.xml" excludes="PlugIns/build.xml" />
+   <fileset dir="." includes="PlugIns/build.xml" />
+  </subant>
+ </target>
+
+ <!-- Cleans out all compiled and library files for the applications. -->
+ <target name="clean">
+  <delete dir="${rbnb.classesdir}/Applications" />
+ </target>
+
+</project>

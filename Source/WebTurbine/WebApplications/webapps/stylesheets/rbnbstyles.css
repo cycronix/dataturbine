@@ -1,0 +1,161 @@
+/*
+	rbnbstyles.css
+	Cascading Stylesheets for the RBNB WebTurbine.
+	
+	2005/12/15  WHF  Added styles for the 'RBNB Routing Console'.
+*/
+BODY
+{
+	color:black;
+	background-color:white;
+	font-family:Sans-serif;
+	margin:0.5in;
+}
+.form  /* BODY doesn't work on Netscape 4.6 */
+{
+	color:black;
+	background-color:white;
+	font-family:Sans-serif;
+	margin:0in 0.1in 0.1in 0in; 
+}	
+H1,H2,H3
+{
+	text-align:center;
+}
+.form H1,H2,H3
+{
+	text-align:center;
+	font-size: 14pt;
+}
+H4,H5,H6
+{
+	text-align:left;
+	font-style:italic;
+}
+CAPTION
+{
+	font-weight:bold;
+	font-size:smaller;
+}
+SUP
+{
+	font-size:smaller;
+}
+/* For TABLE to work, the enclosing region must be of the matching class. */ 
+TABLE,TD,TH
+{
+	color:black;
+	text-align:justify;
+/*	width:90%; */
+}
+.routing TABLE
+{
+	text-align:center;
+	width:99%;
+	/* border:20; */
+}
+.routing TD
+{
+	text-align:center;
+	background-color: rgb(255, 255, 204);	
+}
+.routing TH
+{
+	text-align:center;
+	background-color: white;
+}
+/**** Links  ****/
+A:link{color:blue}
+A:visited{color:AAAAFF}
+
+/**** Tables  ****/
+.justified, .justified TD, .justified TH {text-align:justify;}
+.centered, .centered TD, .centered TH {text-align:center;}
+.leftjustified, .leftjustified TD, .leftjustified TH {text-align:left;}
+.codestyle, .codestyle TD, .codestyle TH, CODE, CODE TD, CODE TH 
+{
+	font-family:Monospace;
+	/* font-size:75%; this makes the font tiny in some browsers. */
+}
+.highlight, .highlight TD, .highlight TH
+{
+	color:white;
+	background-color:black;
+	text-align:center;
+}
+.units, .units TD, .units TH
+{
+	font-weight:normal;
+	font-size:smaller;
+}
+.featuretable
+{
+	width: 100%;
+	text-align:center;
+}
+
+/**** General Text  ****/
+.padded
+{
+	line-height: 1.5;
+}
+.nowrap
+{
+	white-space: nowrap;
+}
+.leftpad
+{
+	padding-left:40%;
+}
+.leftfloat  /* Margins and padding don't seem to work. */
+{
+	float:left;
+}
+.leftclear
+{
+	clear:left;
+}
+.rightfloat  /* Margins and padding don't seem to work. */
+{
+	float:right;
+}
+.rightclear
+{
+	clear:right;
+}
+.codequote
+{
+	padding-left:0.5in;
+	white-space:pre;
+	font-family:Monospace;
+	font-size:75%;
+}
+.smaller
+{
+	font-size:smaller;
+}
+.bigger
+{
+	font-size:larger;
+}
+.larger
+{
+	font-size:larger;
+}
+.sectionbreak /* Specify the width of this element by specifying its margins */
+/* Well, we needed to do that for Netscape 4.7, but Opera wants the width set.
+	IE4 listens to both, so we'll leave the width parameter. */
+{
+	clear: both;
+/*	margin-left: 25%;	
+	margin-right: 25%;  */
+	width: 50%;
+}
+.application /* Used to indicate the name of an RBNB application */
+{
+	font-style:italic;	
+}
+.footer
+{
+	text-align:center;
+}

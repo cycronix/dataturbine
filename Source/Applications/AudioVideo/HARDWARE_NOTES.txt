@@ -1,0 +1,17 @@
+
+The file relates experiences with specific hardware/software drivers.
+
+***  Creative Labs WebCam NX Ultra  *** 
+
+The device works will in WDM Image Capture mode
+(the second device).  In normal mode, many modes cause the Creative driver
+to crash when used with JMF.  The following modes have been tested:
+
+YUV, 320x240 works.
+YUV, 352x288 crashes.
+YUV, 160x120 works.
+
+RGB, 320x240 works.
+RGB, 160x120 works.
+
+Other formats supported by the camera are not supported by JMF. 

@@ -1,0 +1,23 @@
+<html>
+<head>
+	<title>rbnbPlayer</title>
+	<LINK REL=STYLESHEET HREF="/stylesheets/rbnbstyles.css" TYPE="text/css">
+</head>
+<body>
+<h1><span class="application">rbnbPlayer</span> Application</h1>
+<p><span class="application">rbnbPlayer</span> is a Java application which 
+connects to a DataTurbine and allows the user to  time synchronize
+and control the playback of one or more RBNB channels.&nbsp; This
+application is started on the webserver's machine.</p>
+<form action="StartPlugIn.jsp" method="GET">
+	<div class="centered">
+	<input type="hidden" name="className" value="rbnbPlayer" />
+	<input type="hidden" name="plugInName" value="RBNB Player" />
+	<p><input type="submit" value="Start rbnbPlayer" /></p></div>
+	<input type="hidden" name="arg" value="" />
+</form>
+<p class="footer"><a href="/documentation/Player/rbnbPlayer.html">Help</a> -
+	<a href="/webTurbine">Home</a></p>
+</body>
+</html>
+

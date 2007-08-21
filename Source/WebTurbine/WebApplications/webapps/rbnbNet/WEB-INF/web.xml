@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!DOCTYPE web-app
+    PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+    "http://java.sun.com/dtd/web-app_2_3.dtd">
+
+<web-app>
+
+  <servlet>
+    <servlet-name>rbnbWebdav</servlet-name>
+    <servlet-class>org.apache.catalina.rbnb.RBNBWebDAVServlet</servlet-class>
+    <init-param>
+      <param-name>debug</param-name>
+      <param-value>0</param-value>
+    </init-param>
+    <init-param>
+      <param-name>listings</param-name>
+      <param-value>true</param-value>
+    </init-param>
+
+    <init-param>
+      <param-name>readonly</param-name>
+      <param-value>false</param-value>
+    </init-param>
+    <!--load-on-startup>1</load-on-startup-->
+  </servlet>
+
+  <!-- The mapping for the webdav servlet -->
+  <servlet-mapping>
+    <servlet-name>rbnbWebdav</servlet-name>
+    <url-pattern>/</url-pattern>
+  </servlet-mapping>
+
+	<resource-env-ref>
+		<description>
+		Object factory for RBNBDirContext instances.
+		</description>
+		<resource-env-ref-name>
+			com/rbnb/web/RBNBDirFactory
+		</resource-env-ref-name>
+		<resource-env-ref-type>
+			com.rbnb.web.RBNBDirContext
+		</resource-env-ref-type>
+	</resource-env-ref>
+	
+	<env-entry>
+		<env-entry-name>com.rbnb.web.sinkname</env-entry-name>
+		<env-entry-value>rbnbNetSink</env-entry-value>
+		<env-entry-type>java.lang.String</env-entry-type>
+	</env-entry>
+	
+ 	<env-entry>
+		<env-entry-name>com.rbnb.web.defaultcache</env-entry-name>
+		<env-entry-value>10000</env-entry-value>
+		<env-entry-type>java.lang.Integer</env-entry-type>
+	</env-entry>
+
+ 	<env-entry>
+		<env-entry-name>com.rbnb.web.defaultarchive</env-entry-name>
+		<env-entry-value>10000</env-entry-value>
+		<env-entry-type>java.lang.Integer</env-entry-type>
+	</env-entry>
+	
+ 	<env-entry>
+		<env-entry-name>com.rbnb.web.defaultarchivemode</env-entry-name>
+		<env-entry-value>none</env-entry-value>
+		<env-entry-type>java.lang.String</env-entry-type>
+	</env-entry>
+
+</web-app>

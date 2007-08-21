@@ -1,0 +1,227 @@
+<!DOCTYPE html PUBLIC "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=iso-8859-1">
+  <meta name="Author" content="Matt Miller">
+  <meta name="GENERATOR"
+ content="Mozilla/4.75 [en] (WinNT; U) [Netscape]">
+  <title>rbnbUDPCaster</title>
+</head>
+<body>
+&nbsp;
+<center>
+<h1>DataTurbine UDP Caster<br>
+</h1>
+</center>
+<center>
+<h1><i>rbnbUDPCaster</i></h1>
+</center>
+<center>
+<h1>User Manual</h1>
+</center>
+<center>
+<h2>V1.0</h2>
+</center>
+<center>
+<h2>June 6, 2005</h2>
+</center>
+<center>
+<h2>Copyright, Creare Inc.</h2>
+</center>
+<p><br>
+</p>
+<hr width="100%">
+<h1>Table Of Contents</h1>
+<blockquote>
+  <h3><a href="#intro">Introduction</a></h3>
+  <blockquote><b><a href="#overview">Overview</a></b> <br>
+    <b><a href="#setup">Setup and Startup</a></b></blockquote>
+  <h3><a href="#pulldowncontrols">Menu Bar</a></h3>
+  <blockquote><b><a href="#pulldowncontrols">F</a><a href="#file">ile</a></b><br>
+  </blockquote>
+  <h3> <a href="#UserInterfaceFields">User Interface Fields<br>
+  </a></h3>
+  <blockquote><b><a href="#rbnbaddress">RBNB address</a></b><b><br>
+    <a href="#rbnbchannel">RBNB channel</a></b><b><br>
+    <a href="#selectchan">Select Chan...</a><br>
+    </b><b><a href="#recipientaddress">Recipient address</a></b><b><br>
+    <a href="#streamrbnbdata">Stream RBNB data</a></b><b><br>
+    <a href="#numframes">Number of RBNB frames fetched</a></b><b><br>
+    <a href="#timestamp">Timestamp of last RBNB frame</a></b><br>
+  </blockquote>
+  <h3><a href="#UserInterfaceFields"> </a></h3>
+</blockquote>
+<hr width="100%">
+<h1><a name="intro"></a>Introduction</h1>
+<h2>
+<a name="overview"></a>Overview</h2>
+<i>rbnbUDPCaster</i> is a Java application which fetches data from a
+DataTurbine channel and writes the
+data out as UDP packets to a particular host and port.&nbsp; The
+following figure
+illustrates a sample <i>rbnbUDPCaster</i> user interface window:<br>
+<center>
+<p><img alt="UDPCaster user interface" src="UDPCaster.JPG"
+ style="width: 687px; height: 232px;"><br>
+</p>
+</center>
+<h2>
+<a name="setup"></a>Setup and Startup</h2>
+<i>rbnbUDPCaster</i> needs to be run under a Java Virtual Machine
+(JVM). <i>rbnbUDPCaster</i>
+has the following optional command-line arguments:<br>
+<br>
+<center>
+<table style="width: 881px; height: 256px;" border="1">
+  <tbody>
+    <tr>
+      <td style="width: 35%;"><b>Option</b></td>
+      <td><b>Description</b></td>
+    </tr>
+    <tr>
+      <td style="width: 35%;"><tt>-a &lt;DataTurbine host:port&gt;<br>
+      </tt></td>
+      <td>Specifies DataTurbine to which to connect; defaults to
+"localhost:3333".</td>
+    </tr>
+    <tr>
+      <td style="width: 35%;"><tt>-c &lt;DataTurbine channel&gt;<br>
+      </tt></td>
+      <td>Specifies the DataTurbine channel to which to subscribe; no
+default value.<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; width: 35%;">-h<br>
+      </td>
+      <td style="vertical-align: top;">Print a help message displaying
+the command-line options.<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; width: 35%;"><tt>-r
+&lt;recipient's host:port&gt;<br>
+      </tt></td>
+      <td style="vertical-align: top;">Specifies where to send the UDP
+packets; defaults to "localhost:5555".<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="width: 35%;"><tt>-s &lt;local socket port&gt;<br>
+      </tt></td>
+      <td>Specifies the local socket
+port to use to send out UDP packets; defaults to 3456.&nbsp; In most
+cases, it is
+best to allow the system to automatically select the local socket
+port.&nbsp; If a local port is specified on the command line, the
+system will attempt to use that port.&nbsp; However, if that port is
+already in use, the system will automatically select a different
+port.</td>
+    </tr>
+  </tbody>
+</table>
+</center>
+<br>
+<br>
+Here is a sample command line:<tt><br>
+<br>
+</tt>
+<div style="text-align: center;"><tt>java -jar udpcaster.jar -a
+"localhost:3333" -c "mySource/foo" -r "bighost:5555" -s 3456</tt><br>
+<tt> </tt></div>
+<p>
+</p>
+<hr width="100%">
+<h1><a name="pulldowncontrols"></a>Menu Bar</h1>
+<i>rbnbUDPCaster</i> has the following pull-down menu.
+<h2><a name="file"></a>File</h2>
+The <b>File</b> pull-down menu provides selections for opening and
+closing the DataTurbine connection and for exiting
+the
+application.<br>
+&nbsp;
+<center>
+<table style="width: 638px; height: 242px;" border="1">
+  <tbody>
+    <tr>
+      <td><b>&nbsp;Open &nbsp;&nbsp;</b></td>
+      <td>The following actions are performed:<br>
+1. <span style="font-weight: bold;"></span> Open a connection to the
+DataTurbine at the address specified in the <span
+ style="font-weight: bold;">RBNB address</span> field.<br>
+2.&nbsp; Subscribe to data stored in the channel specified by the <span
+ style="font-weight: bold;">RBNB channel</span> field.<br>
+3. Fetch data from the DataTurbine either <span
+ style="font-weight: bold;">From oldest</span> or <span
+ style="font-weight: bold;">From newest</span> as spec<span
+ style="font-weight: bold;"></span>ified<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; by the radio button
+selection..<br>
+4. Each data block fetched from the DataTurbine will be sent as a UDP
+packet to the<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; address specified in the <span
+ style="font-weight: bold;">Recipient address</span> field.<br>
+      </td>
+    </tr>
+    <tr>
+      <td><b>&nbsp;Close</b></td>
+      <td>The following actions are performed:<br>
+1. Stop fetching data from the DataTurbine.<br>
+2. Close the connection to the DataTurbine.</td>
+    </tr>
+    <tr>
+      <td><b>&nbsp;Exit</b></td>
+      <td>Close the DataTurbine connection and
+exit program.</td>
+    </tr>
+  </tbody>
+</table>
+</center>
+<hr width="100%">
+<h1><a name="UserInterfaceFields"></a>User Interface Fields</h1>
+<h2><a name="rbnbaddress"></a>RBNB address</h2>
+Specify the host and port of the DataTurbine to which to connect.&nbsp;
+For example, enter "localhost:3333" (without the quotes) to specify to
+connect the DataTurbine running on the local machine at port 3333.<br>
+<h2><a name="rbnbchannel"></a>RBNB channel</h2>
+Specify the DataTurbine channel to which to subscribe - that is, which
+channel to fetch data from.&nbsp; As a convenience, the <a
+ href="#selectchan">Select Chan...</a> button may be used to help
+select the appropriate channel.<br>
+<h2><a name="selectchan"></a>Select Chan...</h2>
+A convenient method of selecting a DataTurbine channel is provided with
+the <span style="font-weight: bold;">Select Chan...</span>
+button.&nbsp; Pressing this button pops up a dialog similar to the one
+shown below.&nbsp; The pull-down list is populated with channels
+available from the DataTurbine specified in the <span
+ style="font-weight: bold;">RBNB address</span> field.&nbsp; Selecting
+a channel and clicking the <span style="font-weight: bold;">OK</span>
+button copies the desired channel name to the <span
+ style="font-weight: bold;">RBNB channel</span> field on the user
+interface.
+<center>
+<p><img alt="Select Channel Dialog" src="SelectChannel.JPG"
+ style="width: 268px; height: 133px;"></p>
+</center>
+<br>
+<h2><a name="recipientaddress"></a>Recipient address</h2>
+Specify the host and port where to send the UDP packets.&nbsp; For
+example, enter "localhost:5555" (without the quotes) to specify to send
+UDP packets to the local machine's socket port 5555.<br>
+<h2><a name="streamrbnbdata"></a>Stream RBNB data</h2>
+Specify the starting point for fetching data from the DataTurbine
+channel.&nbsp; There are two options: <span style="font-weight: bold;">From
+oldest</span> and <span style="font-weight: bold;">From newest</span>.&nbsp;
+Selecting <span style="font-weight: bold;">From oldest</span> begins
+fetching at the oldest available data in the DataTurbine channel.&nbsp;
+Selecting <span style="font-weight: bold;">From newest</span> will
+start fetching data with the next frame put into the specified channel.<br>
+<h2><a name="numframes"></a>Number of RBNB frames fetched</h2>
+Displays the number of data fetches that have been completed since the
+user opened the DataTurbine connection.<br>
+<h2><a name="timestamp"></a>Timestamp of last RBNB frame</h2>
+Displays the timestamp of the last frame fetched from the DataTurbine.<br>
+<br>
+</body>
+</html>

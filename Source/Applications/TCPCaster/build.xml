@@ -1,0 +1,53 @@
+<!-- Name: build.xml
+     By:   John Wilson
+     Date: 05/04/2005
+
+     Description:
+         This file is the primary Ant build file for the TCPCaster
+         application.  This application subscribes to an RBNB channel and
+	 sends the data (one frame at a time) to all connected client TCP
+	 sockets.
+-->
+
+<project name="APPLICATION.TCPCASTER" default="library" basedir=".">
+ <!-- Import the standard definitions (properties). -->
+ <import file="../../definitions.xml" />
+ <!-- Initialize by setting the timestamp. -->
+ <target name="init">
+  <tstamp />
+  <buildnumber />
+  <mkdir dir="${rbnb.builddir}" />
+  <mkdir dir="${rbnb.classesdir}" />
+  <mkdir dir="${rbnb.classesdir}/Applications" />
+  <mkdir dir="${rbnb.classesdir}/Applications/TCPCaster" />
+  <mkdir dir="${rbnb.librarydir}" />
+ </target>
+
+ <!-- Compile the TCPCaster Java source code and place the results in the
+      classes directory.  References the Core library and the TCPCaster classes
+      for dependencies.
+  -->
+ <target name="compile" depends="init">
+  <javac destdir="${rbnb.classesdir}/Applications/TCPCaster"
+         deprecation="on">
+   <src path="${rbnb.sourcedir}/Applications/TCPCaster" />
+   <classpath path="${rbnb.classesdir}/Applications/TCPCaster" />
+   <classpath path="${rbnb.librarydir}/rbnb.jar" />
+  </javac>
+ </target>
+
+ <!-- Create the TCPCaster jar file using the TCPCaster classes. -->
+ <target name="library" depends="compile">
+  <jar destfile="${rbnb.librarydir}/tcpcaster.jar"
+       basedir="${rbnb.classesdir}/Applications/TCPCaster"
+       manifest="Manifest"
+   />
+ </target>
+
+ <!-- Cleans out all compiled and library files for the TCPCaster project. -->
+ <target name="clean">
+  <delete dir="${rbnb.classesdir}/Applications/TCPCaster" />
+  <delete file="${rbnb.librarydir}/tcpcaster.jar" />
+ </target>
+
+</project>

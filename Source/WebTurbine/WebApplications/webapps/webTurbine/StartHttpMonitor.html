@@ -1,0 +1,25 @@
+<html>
+<head>
+	<title>Start HttpMonitor</title>
+	<LINK REL=STYLESHEET HREF="/stylesheets/rbnbstyles.css" TYPE="text/css">
+</head>
+<body>
+<h1><span class="application">HttpMonitor</span> Application</h1>
+<p>This form allows you to start <span class="application">HttpMonitor</span>, 
+which copies files from any URL to any WebDAV server.  It monitors the remote
+site for changes, and updates the destination whenever a change occurs.
+<span class="application">HttpMonitor</span> runs on the same machine as the
+webserver.</p>
+<form action="StartPlugIn.jsp" method="GET">
+	<div class="centered">
+	<input type="hidden" name="className" value="com.rbnb.web.HttpMonitor" />
+	<input type="hidden" name="plugInName" value="HttpMonitor" />
+	Configuration File Path: <input type="text" name="arg" value="" size=40 />
+	<p><input type="submit" value="Start HttpMonitor" /></p></div>
+</form>
+<p class="footer">
+	<a href="/documentation/HttpMonitor/HttpMonitor.html">Help</a> -
+	<a href="/webTurbine">Home</a></p>
+</body>
+</html>
+

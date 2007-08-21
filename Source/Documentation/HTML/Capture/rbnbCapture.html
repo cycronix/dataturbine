@@ -1,0 +1,298 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Author" content="U. C. Bergstrom">
+   <meta name="GENERATOR" content="Mozilla/4.77 [en] (Windows NT 5.0; U) [Netscape]">
+   <title>rbnbCapture</title>
+</head>
+<body>
+
+<center>
+<h1>
+<font size=+3>DataTurbine Capture Utility</font></h1></center>
+
+<center>
+<h1>
+<b><i><font size=+3>rbnbCapture</font></i></b></h1></center>
+
+<center>
+<h1>
+<font size=+3>User Manual</font></h1></center>
+
+<center>
+<h2>
+V1.3</h2></center>
+
+<center>
+<h2>
+April 10, 2002</h2></center>
+
+<center>
+<h2>
+Copyright, Creare Inc.</h2></center>
+
+<p>&nbsp;
+<br>&nbsp;
+<br>
+<p>
+<hr WIDTH="100%">
+<h2>
+<font size=+3>Table of Contents</font></h2>
+
+<blockquote>
+<h3>
+&nbsp;<a href="#Introduction">Introduction</a></h3>
+
+<blockquote>&nbsp;<a href="#Overview">Overview</a>
+<br>&nbsp;<a href="#Setup_and_Startup">Setup and Startup</a></blockquote>
+
+<h3>
+<a href="#Command_Line_Arguments">Command Line Arguments</a></h3>
+
+<blockquote><a href="#RBNB">DataTurbine</a>
+<br><a href="#Data_Path">Data Path</a>
+<br><a href="#Channel">Channel</a>
+<br><a href="#Cache_Size">Cache Size</a>
+<br><a href="#Archive_Size">Archive Size</a>
+<br><a href="#Input_Socket">Input Socket</a>
+<br><a href="#Autorun">Autorun</a>
+<br><a href="#UseSettingsFile">Use Settings File</a>
+<br><a href="#Usage_Info">Usage Information</a></blockquote>
+
+<h3>
+<a href="#UserInterfaceFields">User Interface Fields</a></h3>
+
+<blockquote><a href="#StartButton">Start Button</a>
+<br><a href="#StopButton">Stop Button</a>
+<br><a href="#MenuBar">MenuBar</a>
+<blockquote><a href="#FileMenu">File</a>
+<blockquote><a href="#FileOpen">Open</a>
+<br><a href="#FileSocket">Socket</a>
+<br><a href="#FileClose">Close</a>
+<br><a href="#FileExit">Exit</a></blockquote>
+<a href="#DataMenu">Data</a>
+<blockquote><a href="#DataTarget">Target</a>
+<br><a href="#DataSettings">Settings</a></blockquote>
+</blockquote>
+</blockquote>
+</blockquote>
+
+<hr WIDTH="100%">
+<h1>
+<a NAME="Introduction"></a>Introduction</h1>
+
+<h2>
+<a NAME="Overview"></a>Overview</h2>
+The <i>rbnbCapture</i> utility acquires unicast or multicast UDP datagram
+packets (not TCP streams) and puts them into one or more DataTurbines.
+One use for this is to acquire live video from a digital camera attached
+to a computer.
+<p>The <i>rbnbCapture</i> application provides a simple command line interface
+and displays acquisition statistics in a pop-up window.
+<p>The following figure shows an example <i>rbnbCapture</i> statistics
+display.
+<center>
+<p><a NAME="User_Interface"></a><img SRC="rbnbCapture.JPG" height=219 width=400>
+<p><b>Example <i>rbnbCapture</i> Statistics Display</b></center>
+
+<h2>
+<a NAME="Setup_and_Startup"></a>Setup and Startup</h2>
+The <i>rbnbCapture</i> application needs to be run under a Java Virtual
+Machine (JVM). Different flavors of Java come by different names (e.g.
+<i>java,
+jre, jview</i>).
+<p>The user may initialize <i>rbnbCapture's </i>settings and start the
+utility from the command line, or the user may start <i>rbnbCapture</i>
+with default settings from the Applications menu of <i><a href="../Manager/rbnbManager.html">rbnbManager</a></i>.&nbsp;
+If a file named "CaptureSettings.dat" exists in the directory from which
+<i>rbnbManager</i>
+is run, <i>rbnbCapture</i> will use it to store and retrieve its settings
+from one session to the next.
+<br>
+<hr WIDTH="100%">
+<h1>
+<a NAME="Command_Line_Arguments"></a>Command Line Arguments</h1>
+
+<h2>
+<a NAME="RBNB"></a>DataTurbine</h2>
+<b>-r [<i>RBNB host</i>][:<i>RBNB</i> <i>port</i>]</b>
+<p>The data is sent to the specified DataTurbine.
+<p>The default DataTurbine is localhost:3333.
+<h2>
+<a NAME="Data_Path"></a>Data Path</h2>
+<b>-D <i>datapath</i></b>
+<p>The data is stored in the data path. The data path is the name of a
+directory (UNIX) or folder (Windows/Mac) under the DataTurbine's home directory.
+<p>The default data path is automatically assigned by the DataTurbine.
+It consists of the host name of the machine running the <i>rbnbCapture</i>
+program, a dot, and a uniquely assigned number: "&lt;host server>.&lt;unique
+number>".
+<h2>
+<a NAME="Channel"></a>Channel</h2>
+<b>-c <i>name</i></b>
+<p>The data is stored in the DataTurbine under the specified channel name.
+<p>The default channel name is "VIDEO".
+<h2>
+<a NAME="Cache_Size"></a>Cache Size</h2>
+<b>-C <i>cachesize</i></b>
+<p>Specifies the maximum number of frames of data stored in the DataTurbine's
+ring buffer cache. The DagtaTurbine frames are built from one or more datagram
+packets, with each packet being assigned an interval in the frame time-stamp
+with a start time equal to the time the packet was acquired by <i>rbnbCapture</i>.
+<p>The default is 10,000 frames.
+<h2>
+<a NAME="Archive_Size"></a>Archive Size</h2>
+<b>-A <i>archivesize</i></b>
+<p>Specifies the maximum number of frames of data stored in the DataTurbine's
+ring buffer archive.&nbsp; The DataTurbine frames are built from one or
+more datagram packets, with each packet being assigned an interval in the
+frame time-stamp with a start time equal to the time the packet was acquired
+by <i>rbnbCapture</i>.
+<p>By default archiving is on, and the archive is 100,000 frames.
+<h2>
+<a NAME="Input_Socket"></a>Input Socket</h2>
+<b>-p [<i>IP address</i>][:<i>port</i>]</b>
+<p>Specifies the UDP address of the input datagram packet socket.&nbsp;
+See <a href="#FileSocket">below</a> for more details.
+<h2>
+<a NAME="Autorun"></a>Autorun</h2>
+<b>-a</b>
+<p>Causes <i>rbnbCapture</i> to begin capturing UDP packets immediately
+upon start-up.
+<h2>
+<a NAME="UseSettingsFile"></a>Use Settings File</h2>
+<b>-f</b>
+<p>This argument signals <i>rbnbCapture</i> to use the file named "CaptureSettings.dat"
+to store and retrieve its settings.&nbsp; The file must already exist in
+the directory from which <i>rbnbCapture</i> is run.
+<h2>
+<a NAME="Usage_Info"></a>Usage Information</h2>
+<b>-?</b>
+<p>Does not start the <i>rbnbCapture</i> application, but causes it to
+display its command line usage information.
+<p>
+<hr WIDTH="100%">
+<h1>
+<a NAME="UserInterfaceFields"></a>User Interface Fields</h1>
+
+<h2>
+<a NAME="StartButton"></a>Start Button</h2>
+The Start Button serves to begin the capture of data into a DataTurbine.
+<h2>
+<a NAME="StopButton"></a>Stop Button</h2>
+The Stop button halts the capture of data.
+<h2>
+<a NAME="MenuBar"></a>MenuBar</h2>
+
+<h3>
+<a NAME="FileMenu"></a>File Menu</h3>
+The File menu contains buttons which permit the user to specify a DataTurbine
+to capture data into (<a href="#FileOpen">Open</a>), to designate a socket
+to capture data from (<a href="#FileSocket">Socket</a>), to close the open
+connection (<a href="#FileClose">Close</a>), and to exit the program (<a href="#FileExit">Exit</a>).
+<h4>
+<a NAME="FileOpen"></a>Open...</h4>
+The Open button displays a dialog in which the user may specify which DataTurbines
+to connect to and store data in.&nbsp; The user should enter the DataTurbine
+names in the format &lt;host>:&lt;port>.&nbsp; By default, the DataTurbine&nbsp;
+is "localhost:3333".
+<p>The following is an example of the hosts dialog:
+<dl>
+<center><img SRC="rbnbCapture_hostport.JPG" height=303 width=323></center>
+
+<center>
+<dt>
+<b>Example <i>rbnbCapture</i> Hosts Dialog</b></dt></center>
+</dl>
+
+<h4>
+<a NAME="FileSocket"></a>Socket</h4>
+The Socket button is used to configure the Socket from which <i>rbnbCapture</i>
+will receive its data.&nbsp; It pops the following dialog box in which
+the user may enter the IP address and port number.
+<center>
+<p><img SRC="rbnbCapture_socket.JPG" height=96 width=259></center>
+
+<dl>
+<center>
+<dt>
+<b>Example <i>rbnbCapture</i> Socket Dialog</b></dt></center>
+
+<p><br>
+<p>The input socket may have a unicast, broadcast, or multicast UDP address
+plus a port.
+<p><i>Unicast</i> addresses specify a single interface of a particular
+host for one-to-one communication. To listen on a unicast port, specify
+the local host, i.e. either 127.0.0.1 or a specific local interface IP
+address.&nbsp; A remote sender then opens this address to send data.&nbsp;
+Messages are delivered to the first receiver listening on that interface
+and port, so typically you will want to select a unique port.
+<p><i>Broadcast</i> addresses specify all hosts on a specific network.
+Messages are delivered to everyone listening on that network and port.
+Broadcast addresses have the form xxx.xxx.xxx.255, as described in RFC1122
+(they talk about host -1, which translates to 255 in the standard dotted
+IP address format used here).
+<p><i>Multicast</i> addresses specify all hosts in a specific multicast
+group. Messages are delivered to everyone listening to that multicast group
+and port. Multicast addresses are in the range 224.0.0.0 to 239.255.255.255
+as described in RFC1112.
+<p>The input address is parsed to determine if the socket is unicast, broadcast,
+or multicast.
+<br>&nbsp;
+<dt>
+The default IP address is the IP address of the host computer, a unicast
+address.&nbsp; The default port number is 4444.</dt>
+</dl>
+
+<h4>
+<a NAME="FileClose"></a>Close</h4>
+The Close button will close the current connection to the DataTurbine.
+<h4>
+<a NAME="FileExit"></a>Exit</h4>
+The Exit button stops <i>rbnbCapture</i>, closes all of its connections,
+and exits the program.
+<h3>
+<a NAME="DataMenu"></a>Data Menu</h3>
+The Data Menu gives the user opportunity to change the datapath and channel
+name where the data is being stored within the connected DataTurbine (<a href="#DataTarget">Target</a>),
+and to determine the cache and archive sizes and the rate of data transfer
+(<a href="#DataSettings">Settings</a>).
+<h4>
+<a NAME="DataTarget"></a>Target</h4>
+The Target button pops a dialog which lets the user specify the target
+locations for the captured data.&nbsp; The user may set the datapath and
+channel where the data will be stored within the DataTurbine. The same
+datapath and channel names are used on all of the <a href="#FileOpen">output
+servers</a>.&nbsp;&nbsp; By default, the datapath and channel are both
+set to "VIDEO".&nbsp; If no datapath is specified the DataTurbine will
+choose a unique datapath.
+<p>The following is an example of the Target Dialog.
+<center>
+<p><img SRC="rbnbCapture_target.JPG" height=96 width=459></center>
+
+<dl>
+<center>
+<dt>
+<b>Example <i>rbnbCapture</i> Target Dialog</b></dt></center>
+</dl>
+
+<h4>
+<a NAME="DataSettings"></a>Settings</h4>
+The Settings button pops a dialog with options for entering the cache and
+archive sizes and the rate for data transfer.&nbsp; The cache must be at
+least 1 frame in size. By default it is 10,000 frames.&nbsp; If the archive
+size is set to 0, then archiving will be turned off.&nbsp; By default,
+the archive size is 100,000 frames, and archiving is on.
+<p>The following is an example of the Settings Dialog.
+<center>
+<p><img SRC="rbnbCapture_settings.JPG" height=96 width=348></center>
+
+<dl>
+<center>
+<dt>
+<b>Example <i>rbnbCapture</i> Settings Dialog</b></dt></center>
+</dl>
+
+</body>
+</html>

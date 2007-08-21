@@ -1,0 +1,215 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Author" content="EMF">
+   <meta name="GENERATOR" content="Mozilla/4.77 [en] (Windows NT 5.0; U) [Netscape]">
+   <title>rbnbProxy</title>
+</head>
+<body>
+
+<center>
+<h1>
+DataTurbine Proxy PlugIn</h1></center>
+
+<center>
+<h1>
+<i>rbnbProxy</i></h1></center>
+
+<center>
+<h1>
+User Manual</h1></center>
+
+<center>
+<h2>
+V2 Beta</h2></center>
+
+<center>
+<h2>
+August 26, 2003</h2></center>
+
+<center>
+<h2>
+Copyright 2003, Creare Inc.</h2></center>
+
+<p><br>
+<hr WIDTH="100%">
+<h1>
+Table of Contents</h1>
+
+<blockquote>
+<h3>
+<a href="#intro">Introduction</a></h3>
+
+<blockquote><b><a href="#overview">Overview</a></b>
+<br><b><a href="#setup">Setup and Startup</a></b></blockquote>
+
+<h3>
+<b><a href="#examples">Examples</a></b></h3>
+
+<blockquote>
+<h4>
+<b><a href="#X1data">Mutiplexed by One Data</a></b></h4>
+<b><a href="#X5data">Multiplexed by Five Data</a></b></blockquote>
+</blockquote>
+
+<blockquote>
+<h3>
+</h3>
+</blockquote>
+
+<hr WIDTH="100%">
+<h1>
+<a NAME="intro"></a>Introduction</h1>
+
+<h2>
+<a NAME="overview"></a>Overview</h2>
+The <i>rbnbProxy</i> utility provides a way to send numerical data to the
+DataTurbine without the use of the Java or HTTP interfaces.&nbsp; Once
+configured, an application simply writes data to a socket, which <i>rbnbProxy</i>
+reads and configures into ChannelMaps that are sent to the DataTurbine.&nbsp;
+The utility is suitable for many data acquisition applications, offering
+high performance and modular system architectures.
+<h2>
+<a NAME="setup"></a>Setup and Startup</h2>
+The <i>rbnbProxy</i> PlugIn needs to be run under a Java Virtual Machine
+(JVM).&nbsp; Different flavors of Java come by different names (e.g. <i>java</i>,
+<i>jre</i>,
+<i>jview</i>).
+See the <i>Installation Guide</i> which came with your software for how
+to setup a script or shortcut to execute <i>rbnbProxy</i>.&nbsp; The utility
+may also be configured and started via the WebTurbine, in which case it
+runs under the WebTurbine's JVM.
+<p>The <i>rbnbProxy</i> application has the following optional command
+line arguments:
+<br>&nbsp;
+<center><table BORDER WIDTH="86%" >
+<tr>
+<td><b>Option</b></td>
+
+<td><b>Description</b></td>
+</tr>
+
+<tr>
+<td><tt>-h</tt></td>
+
+<td>Print usage guide on the console</td>
+</tr>
+
+<tr>
+<td><tt>-x proxyPort</tt></td>
+
+<td>Proxy server port to receive data on, default 3000</td>
+</tr>
+
+<tr>
+<td><tt>-a host:port</tt></td>
+
+<td>DataTurbine host and port to send data to, default is localhost:3333</td>
+</tr>
+
+<tr>
+<td><tt>-s sourceName</tt></td>
+
+<td>Source name for the data stream, default is "Proxy"</td>
+</tr>
+
+<tr>
+<td><tt>-c cacheFrames&nbsp;</tt></td>
+
+<td>Number of cache frames for the source, default 1000</td>
+</tr>
+
+<tr>
+<td><tt>-d diskArchiveFrames</tt></td>
+
+<td>Number of disk archive frames for the source, default 0</td>
+</tr>
+
+<tr>
+<td><tt>-n numberOfChannels</tt></td>
+
+<td>Number of channels of data, default 1</td>
+</tr>
+
+<tr>
+<td><tt>-t dataType&nbsp;</tt></td>
+
+<td>Type of the data (i8, i16, i32, i64, f32, f64), default i16</td>
+</tr>
+
+<tr>
+<td><tt>-w wordOrder</tt></td>
+
+<td>Word or byte order (MSB, LSB), default MSB</td>
+</tr>
+
+<tr>
+<td><tt>-b blockDuration</tt></td>
+
+<td>Block duration in seconds, default 1</td>
+</tr>
+
+<tr>
+<td><tt>-p blockSize</tt></td>
+
+<td>Block size in points per channel, default 1</td>
+</tr>
+
+<tr>
+<td><tt>-f frameFactor</tt></td>
+
+<td>Frame factor in blocks, default 1000</td>
+</tr>
+</table></center>
+
+<p>When starting <i>rbnbProxy</i> via the WebTurbine interface, simply
+configure these options directly on the form, as shown below.
+<center><img SRC="webStart.jpg" height=729 width=508></center>
+
+<p>
+<hr WIDTH="100%">
+<h1>
+<a NAME="examples"></a>Examples</h1>
+All examples here will assume 3 channels, 16 bit integer data (i16), MSB
+word order, and the default RBNB server address, proxy server port, source
+name, cache frames, and archive frames.&nbsp; The application of block
+duration, block size, and frame size will be illustrated.&nbsp; A block
+of data is defined as the smallest sample of data that includes all channels,
+which is repeated to form the data stream.&nbsp; Block size is defined
+in units of points per channel, and block duration is defined in units
+of seconds, which may be fractional.&nbsp; The frame factor defines how
+many blocks (of aggregate channels) to group into a single write to the
+DataTurbine server.
+<p>Larger frames are more efficiently handled by the DataTurbine server,
+but introduce a larger latency into the system and require larger intermediate
+data buffers.&nbsp; In general, 1 to 50 frames/second provides a good balance
+between efficiency and latency for many data acquisition systems.&nbsp;
+Note that the frame factor times the block duration is the update interval
+of data from rbnbProxy to the DataTurbine server.
+<h2>
+<a NAME="X1data"></a>Multiplexed by One Data</h2>
+Multiplexed by one data is written to the socket in a stream of the form
+123123123123123..., where the number represents the channel the sample
+is from.&nbsp; The block size is 1 point.&nbsp; Assume the acquisition
+were at 1000 Hz, and 1/2 second frames are to be sent to the DataTurbine
+server.&nbsp; The block duration is 0.001 second, and the frame factor
+is 500 blocks.&nbsp; The command line arguments for this example are
+<br><tt><font size=+1>&nbsp;&nbsp;&nbsp; -n 3 -b 0.001 -p 1 -f 500</font></tt>
+<p>If the acquisition were at 500 Hz, the block size would remain 1 point,
+but the block duration would increase to 0.002 seconds and the frame factor
+would decrease to 250 blocks.
+<h2>
+<a NAME="X5data"></a>Multiplexed by Five Data</h2>
+Multiplexed by five data is written to the socket in a stream of the form
+111112222233333111112222233333...&nbsp; The block size is 5 points.&nbsp;
+Again assume the acquisition were at 1000 Hz, and 1/2 second frames are
+to be sent to the DataTurbine server.&nbsp; The block duration is 0.005
+seconds, and the frame factor is 100 blocks.&nbsp; The command line arguments
+for this example are
+<br><tt><font size=+1>&nbsp;&nbsp;&nbsp; -n 3 -b 0.005 -p 5 -f 100</font></tt>
+<p>If the acquisition were at 500 Hz, the block size would remain 5 points,
+but the block duration would increase to 0.01 seconds and the frame factor
+would decrease to 50 blocks.
+</body>
+</html>

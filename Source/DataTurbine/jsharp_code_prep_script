@@ -1,0 +1,39 @@
+
+#
+# jsharp_code_prep_script
+#
+# Modification History:
+# 10/05/2004  JPW   Created
+#
+# Script to prepare files for compilation under J#.  DataTurbine source files
+# in the com directory are recursively copied to Build/JSharp_prep_dir/com.
+# Then, the "sed" preprocessor is selectively run on certain files to prepare
+# these files for compilation under J#.  The substitute commands for "sed" are
+# contained in the "sed_commands" file.
+#
+
+# start by deleting the old J# source files
+rm -f -r ../../Build/JSharp_prep_dir
+
+mkdir ../../Build/JSharp_prep_dir
+mkdir ../../Build/JSharp_prep_dir/com
+
+# copy source files to the J# staging area
+cp -r com ../../Build/JSharp_prep_dir
+
+# run a few files through sed
+sed -f sed_commands com/rbnb/api/BuildFile.java > ../../Build/JSharp_prep_dir/com/rbnb/api/BuildFile.java
+sed -f sed_commands com/rbnb/api/IndirectTimer.java > ../../Build/JSharp_prep_dir/com/rbnb/api/IndirectTimer.java
+sed -f sed_commands com/rbnb/api/IndirectTimerTask.java > ../../Build/JSharp_prep_dir/com/rbnb/api/IndirectTimerTask.java
+sed -f sed_commands com/rbnb/api/RBNB.java > ../../Build/JSharp_prep_dir/com/rbnb/api/RBNB.java
+sed -f sed_commands com/rbnb/api/TCP.java > ../../Build/JSharp_prep_dir/com/rbnb/api/TCP.java
+
+# delete files that should not be compiled with the J# version
+rm ../../Build/JSharp_prep_dir/com/rbnb/api/License.java
+rm ../../Build/JSharp_prep_dir/com/rbnb/api/RBNBSSLSocketFactory.java
+rm ../../Build/JSharp_prep_dir/com/rbnb/api/RBNBTrustManager.java
+rm ../../Build/JSharp_prep_dir/com/rbnb/utility/MulticastOutputStream.java
+rm ../../Build/JSharp_prep_dir/com/rbnb/api/SecurityProviderGSIImpl.java
+rm ../../Build/JSharp_prep_dir/com/rbnb/api/SecurityProviderKrb5Impl.java
+rm ../../Build/JSharp_prep_dir/com/rbnb/api/SecurityProviderFactoryGSIImpl.java
+rm ../../Build/JSharp_prep_dir/com/rbnb/api/SecurityProviderFactoryKrb5Impl.java

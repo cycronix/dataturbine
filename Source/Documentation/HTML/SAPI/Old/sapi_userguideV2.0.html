@@ -1,0 +1,665 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Author" content="Matt Miller">
+   <meta name="GENERATOR" content="Mozilla/4.75 [en] (WinNT; U) [Netscape]">
+   <title>Simple API (SAPI) User Guide</title>
+</head>
+<body>
+
+<center>
+<h1>
+
+<hr width="100%">RBNB DataTurbine V2.0B2</h1></center>
+
+<center>
+<h1>
+Simple API (SAPI)</h1></center>
+
+<center>
+<h1>
+User Manual</h1></center>
+
+<center>
+<h2>
+November 8, 2001</h2></center>
+
+<center>
+<h2>
+Copyright Creare Inc.</h2></center>
+
+<hr width="100%">
+<h2>
+Table of Contents</h2>
+
+<blockquote><b><a href="#Introduction">Introduction</a></b>
+<blockquote><b><a href="#Purpose">Purpose</a></b>
+<br><b><a href="#Source and Sink Clients">Source and Sink Clients</a></b>
+<br><b><a href="#Channel Structures">Channel Structures and Naming</a></b></blockquote>
+<b><a href="#Common Fields and Methods">Common Fields and Methods</a></b>
+<blockquote><b><a href="#Constructors">Constructors</a></b>
+<br><b><a href="#Connection Management">Connections</a></b>
+<br><b><a href="#Channel Lists">Channel Lists</a></b>
+<br><b><a href="#Data Types">Data Types</a></b></blockquote>
+<b><a href="#Source API">Source API</a></b>
+<blockquote><b><a href="#Source Define Channels">Define Channel List</a></b>
+<br><b><a href="#Time Stamps">Time Stamps</a></b>
+<br><b><a href="#Specify Channel Data">Specify Channel Data</a></b>
+<br><b><a href="#Flush Data">Send Data</a></b>
+<br><b><a href="#Source Code">Example Source Code</a></b></blockquote>
+<b><a href="#Sink API">Sink API</a></b>
+<blockquote><b><a href="#Sink Specify Channels">Specify Channel List</a></b>
+<br><b><a href="#Sink Modes">Sink Modes</a></b>
+<br><b><a href="#Fetch Data">Get Data</a></b>
+<br><b><a href="#Extract Data">Extract Data</a></b>
+<br><b><a href="#Sink Code">Example Sink Code</a></b></blockquote>
+</blockquote>
+
+<hr width="100%">
+<h2>
+<a NAME="Introduction"></a>Introduction</h2>
+
+<h3>
+<a NAME="Purpose"></a>Purpose</h3>
+This manual provides an overview of the RBNB Simple API (SAPI) for the
+V2.0 "RMap" based RBNB software. The SAPI is designed to provide maximum
+capability with minimum complexity. For a rigorous reference document,
+see the accompanying <i>SAPI Reference Manual</i>, generated directly from
+the source code with the <i>javadoc</i> utility.
+<p>The SAPI is implemented as a set of utility methods on top of the full
+RBNB Java API. Certain concessions are made to optimize portability, such
+as avoiding the use of overloaded methods.
+<p>Whereas this document most directly applies to the Java SAPI, the C/C++,
+Active X, Java Bean, and other APIs are directly layered on the Java SAPI.&nbsp;
+Thus, except for minor syntax differences, this documentation is generally
+applicable for these other APIs as well.
+<h3>
+<a NAME="Source and Sink Clients"></a>Source and Sink Clients</h3>
+An RBNB application is either a data Source or data Sink client (or both).&nbsp;
+A Source sends data to the RBNB Server.&nbsp; A Sink fetches data from
+an RBNB Server.&nbsp; There are separate Source and Sink classes associated
+with each type of client, but there are many common concepts and methods
+as well.
+<h3>
+<a NAME="Channel Structures"></a>Channel Structures and Naming</h3>
+The underlying RMap data structures are hidden from the SAPI user, but
+their presence is felt in several ways.
+<p>For both Source and Sink clients, data channels are individually identified
+and "staged" using the <tt><a href="#AddChannel">AddChannel</a></tt> method
+prior to being transferred (<tt><a href="#Fetch Data">Fetch</a></tt> or
+<tt><a href="#Flush Data">Flush</a></tt>).
+Behind the scenes, the SAPI incrementally builds up the corresponding RMap
+data structures.
+<p>Multi-tiered hierarchical channel structures can be created, requested,
+and referenced through a simple directory-like naming convention.&nbsp;
+A fully specified channel name consists of three main parts:
+<blockquote><tt>Server/Source/Channel</tt></blockquote>
+Where:
+<blockquote><tt>Server:&nbsp;&nbsp;&nbsp; serverName assigned at Server
+startup (command line argument)</tt>
+<br><tt>Source:&nbsp;&nbsp;&nbsp; clientName given by Source via OpenRBNBConnection
+method</tt>
+<br><tt>Channel:&nbsp;&nbsp; channelName given by Source via AddChannel
+method</tt></blockquote>
+Data Sources define channels (<tt>AddChannel</tt>) with the <tt>Server</tt>
+and <tt>Source</tt> parts implied. The channel name part may itself be
+multi-tiered, such as:
+<blockquote><tt>Chan0</tt>
+<br><tt>Test43/C0</tt>
+<br><tt>Test43/C1</tt>
+<br><tt>A/B/C</tt></blockquote>
+Data Sinks request channels (<tt>AddChannel</tt>) using either relative
+or absolute (full-path) names. For example:
+<blockquote><tt>/Server/MySource/Test43/C2&nbsp;&nbsp;&nbsp; # absolute
+path</tt>
+<br><tt>MySource/Test43/C2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+# relative path</tt></blockquote>
+Absolute paths start with a slash, and include the top level (parent) server
+all the way down to the channel name(s).&nbsp; Relative paths do not start
+with a slash, and begin with the Source name(s) on the local server.
+<p>For Sinks, and when requesting a list of available Server channels,
+wildcards can also be used, as in:
+<blockquote><tt>MySource/Test*/...</tt></blockquote>
+<b><i>Note</i></b>:&nbsp; As of the current release, the default Server
+name is "Server".
+<p>The following Table summarizes the wildcard syntax available to the
+<tt>AddChannel</tt>
+(Sink-only) and <tt>GetChannelList (Sink or Source) </tt>methods.
+<br>&nbsp;
+<center><table BORDER WIDTH="89%" >
+<tr>
+<td><b>Match String</b></td>
+
+<td><b>Description</b></td>
+</tr>
+
+<tr>
+<td><tt>"*"</tt></td>
+
+<td>All channels at this level (one deep)</td>
+</tr>
+
+<tr>
+<td><tt>"..."</tt></td>
+
+<td>All channels this level and down (recursive depth).&nbsp; Must be last
+part of multi-tiered name.</td>
+</tr>
+
+<tr>
+<td><i>more to come</i></td>
+
+<td></td>
+</tr>
+
+<caption ALIGN=BOTTOM>
+<center><b>SAPI Channel Naming Wildcard Notation</b></center>
+</caption>
+</table></center>
+
+<p><b><i>Note:</i></b>&nbsp; As of the current release, wildcards are not
+very well supported.&nbsp; The only supported use is the "..." notation
+used with the <tt>GetChannelList</tt> method.
+<p>
+<hr WIDTH="100%">
+<h2>
+<a NAME="Common Fields and Methods"></a>Common Fields and Methods</h2>
+The SAPI Source and Sink Classes are self-contained, i.e. you can develop
+a Sink application with no reference to the methods of the Source class,
+and vice versa.&nbsp; These two classes do have some logically equivalent
+fields and methods, however, as described in common below.
+<h3>
+<a NAME="Constructors"></a>Constructors</h3>
+
+<h4>
+<tt>Source (int cacheSize, String archiveMode, int archiveSize)</tt></h4>
+
+<h4>
+<tt>Sink&nbsp;&nbsp; (int cacheSize, String archiveMode, int archiveSize)</tt></h4>
+Both <tt>Source</tt> and <tt>Sink</tt> class constructors have a common
+set of arguments to set the ring buffer sizes and mode.&nbsp; The <tt>cacheSize</tt>
+and <tt>archiveSize</tt> parameters specify the sizes of the RAM and disk
+ring buffers (in frames), respectively.&nbsp; Each call to "Flush" by a
+Source constitutes one "frame".
+<p>The <tt>archiveMode</tt> parameter has one of the following values:
+<p><tt>&nbsp;&nbsp;&nbsp; "none"&nbsp;&nbsp; - </tt>No archive is to be
+used (default)
+<br><tt>&nbsp;&nbsp;&nbsp; "load"&nbsp;&nbsp; - </tt>Load the archive that
+matches this application <tt>clientName</tt>
+<br><tt>&nbsp;&nbsp;&nbsp; "create" - </tt>Create a new archive, delete
+an existing one if one is present
+<br><tt>&nbsp;&nbsp;&nbsp; "append" - </tt>Add to an existing archive,
+create a new one if necessary
+<p>For a <tt>Source</tt> client, these parameters have an obvious meaning
+and relate to the size and type of storage to be used for incoming source
+data.
+<p>By default, Sink clients have a single cache frame for storing its current
+data request.&nbsp; Note that even for Sinks, data requests are RMaps,
+and that multiple requests can be stored in sequence.&nbsp; This advanced
+sink request-buffer forms the foundation for future optimizations and the
+development of "Virtual RMaps".
+<h3>
+<a NAME="Connection Management"></a>Connections</h3>
+Both <tt>Source</tt> and <tt>Sink</tt> classes have methods to open and
+close connections between the client application and an RBNB server.
+<h4>
+<tt>void OpenRBNBConnection(String serverAddress, String clientName, String
+userName, String password)</tt></h4>
+To open a connection identify the server (<tt>serverAddress</tt>), and
+identify the client (<tt>clientName</tt>).&nbsp; The <tt>clientName</tt>
+is used for display in applications such as <i>rbnbAdmin</i>, and provides
+a handle for other applications to administer and access data from this
+client.
+<p>Clients optionally provide a <tt>userName</tt> and <tt>password</tt>
+as part of the connection process.&nbsp; If these are defaulted to NULL,
+there will be no user name by which you can be granted access to restricted
+data.
+<p><b><i>Note</i></b>:&nbsp; As of the current release, <tt>userName</tt>
+and <tt>password</tt> authorization is not implemented.
+<h4>
+<tt>void CloseRBNBConnection(boolean keepCache, boolean keepArchive)</tt></h4>
+Upon shutting down a connection, the client application can specify whether
+or not to maintain data in the cache and/or archive portions of the ring
+buffer.&nbsp; Specify <tt>keepArchive=false</tt> to delete the disk archive
+associated with this connection.
+<h3>
+<a NAME="Channel Lists"></a>Channel Lists</h3>
+To efficiently specify the channels to <tt>Fetch or Flush</tt>, use the
+<tt>AddChannel</tt>
+method to build up a local channel reference list.
+<h4>
+<a NAME="AddChannel"></a><tt>int AddChannel(String channelName)</tt></h4>
+Each call to <tt>AddChannel</tt> builds up the list of channels to be either
+sent or fetched by the Source or Sink, respectively.&nbsp; <tt>AddChannel</tt>
+returns an index that increments with the number of channels added.&nbsp;
+For Sources, this index can be used as the reference index for use in the
+<tt>PutChannel</tt>
+method.&nbsp; For Sinks, it is possible to get less or more channels than
+you specify (e.g. using wildcards), so you must inquire (with <tt>channelName</tt>
+or <tt>channelIndex</tt>) about which channels have been <tt><a href="#Fetch Data">Fetched</a></tt>.
+<h4>
+<a NAME="ChannelIndex"></a><tt>int ChannelIndex(String channelName)</tt></h4>
+This utility method provides a means to get the channel <tt>index</tt>
+given the <tt>channelName</tt>.&nbsp; For Sources, the return value of
+<tt>addChannel</tt>
+is a reliable channel index.&nbsp; For Sinks, you may need to use this
+method to determine the reference index of <tt><a href="#Fetch Data">Fetched</a></tt>
+channels.
+<h4>
+<a NAME="ChannelName"></a><tt>String ChannelName(int index)</tt></h4>
+This utility method provides a means to get the <tt>channelName</tt> given
+the channel <tt>index</tt>. For Sinks, you can use this method to discover
+which channels were successfully <tt><a href="#Fetch Data">Fetched</a></tt>.
+<h4>
+<tt>void ClearChannels()</tt></h4>
+This method clears out the channel list built by the <tt><a href="#AddChannel">AddChannel</a></tt>
+method, and frees associated memory.&nbsp; Use it when you want to build
+a new channel list from a "clean slate".
+<h4>
+<tt>String[] GetChannelList(String matchStr)</tt></h4>
+Both Source and Sink clients can request a list of all data channels known
+to the connected RBNB server.&nbsp; This list is returned in the full API
+as an RMap hierarchy, but in the SAPI it is parsed into a convenient array
+of <tt>Strings</tt>.&nbsp; The <tt>matchStr</tt> parameter restricts the
+returned channel list per a wildcard matching scheme.
+<p><b><i>Note:</i></b>&nbsp; The channel list may include channels from
+Sources other than the local application.&nbsp; I.e. this list can include
+more channels than those locally specified via the <tt>AddChannel</tt>
+method.
+<p><b><i>Memory allocation note for C/C++ programmers:</i></b>
+<br>The data buffers returned by <tt>ChannelName</tt> and <tt>GetChannelList</tt>
+are automatically allocated by the API, but are then "owned" and should
+be released by the client application. A special C/C++ utility function,
+<tt>rbnbFreeChannelList(clist,
+nchan)</tt> is provided for this purpose.
+<h3>
+<a NAME="Data Types"></a>Data Types</h3>
+Data sent and received from an RBNB Server (<tt><a href="#PutChannel">PutChannel</a></tt>,
+<tt><a href="#ChannelType">ChannelType</a></tt>)
+can be denoted as a particular primitive data type, per the following table.
+<br>&nbsp;
+<center><table BORDER WIDTH="89%" >
+<tr>
+<td><b>Data Type Code</b></td>
+
+<td><b>Description</b></td>
+</tr>
+
+<tr>
+<td><tt>TYPE_FLOAT32</tt></td>
+
+<td>Single precision (32 bit) floating point number</td>
+</tr>
+
+<tr>
+<td><tt>TYPE_FLOAT64</tt></td>
+
+<td>Double precision (64 bit) floating point number</td>
+</tr>
+
+<tr>
+<td><tt>TYPE_INT8</tt></td>
+
+<td>8-bit integer (byte)&nbsp;</td>
+</tr>
+
+<tr>
+<td><tt>TYPE_INT16</tt></td>
+
+<td>16-bit integer (short int)</td>
+</tr>
+
+<tr>
+<td><tt>TYPE_INT32</tt></td>
+
+<td>32-bit integer (int)</td>
+</tr>
+
+<tr>
+<td><tt>TYPE_INT64</tt></td>
+
+<td>64-bit integer (long)</td>
+</tr>
+
+<tr>
+<td><tt>TYPE_STRING</tt></td>
+
+<td>Variable length String (character array) object</td>
+</tr>
+
+<tr>
+<td><tt>TYPE_UNKNOWN</tt></td>
+
+<td>Unknown or unspecified (byte array)</td>
+</tr>
+
+<caption ALIGN=BOTTOM>
+<center><b>SAPI Data Type Codes</b></center>
+</caption>
+</table></center>
+
+<p>When specifying a primitive Data Type with a word length greater than
+8 bits (1 byte), the word order (MSB,LSB) is automatically set to match
+that of the local native CPU upon which the Source application runs.
+<p>
+<hr WIDTH="100%">
+<h2>
+<a NAME="Source API"></a>Source API</h2>
+A data Source client has the following tasks, which may be repeated as
+desired:
+<blockquote>
+<li>
+Define a channel list</li>
+
+<li>
+Set TimeStamp(s)</li>
+
+<li>
+Specify data for channel(s)</li>
+
+<li>
+Flush data to RBNB server</li>
+</blockquote>
+
+<h3>
+<a NAME="Source Define Channels"></a>Define Channel List</h3>
+Per the discussion above, a Source channel list is defined by calls to
+the <tt><a href="#AddChannel">AddChannel</a></tt> method.&nbsp; The <tt>AddChannel</tt>
+method associates channel names with channel indices, which in turn are
+used for efficient, potentially repeated references in the <tt><a href="#PutChannel">PutChannel</a></tt>
+method.
+<h3>
+<a NAME="Time Stamps"></a>Time Stamps</h3>
+A Source sets the timestamp for subsequent data transmittal using either
+a manual or automatic method.
+<h4>
+<a NAME="SetTime"></a><tt>void SetTime(double start, double duration)</tt></h4>
+This method manually sets the timestamp to the specified <tt>start</tt>
+time, with an interval of <tt>duration</tt>.&nbsp; Note that a <tt>duration</tt>
+of zero is legal, and indicates an "instantaneous" point in time for the
+associated data.
+<p>Each manual timestamp applies to the data specified by one or more subsequent
+calls to <tt>PutChannel, </tt>until a time-setting method is called again.&nbsp;
+Thus, you can choose to timestamp data point by point, channel by channel,
+or frame by frame depending on how you interleave your calls to <tt>SetTime</tt>
+and <tt>PutChannel</tt>.
+<p>RBNB timestamps must monotonically increase.&nbsp; Thus, if you are
+manually providing timestamps, be sure to always increase the value of
+the <tt>start</tt> time with each subsequent call to <tt>SetTime</tt>.
+<h4>
+<tt>void AutoTimeStamp(String timeMode)</tt></h4>
+This method sets the timestamp for subsequent data transmittals using one
+of the following automatic modes:
+<p>&nbsp;&nbsp;&nbsp;<tt> "next"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; - </tt>increment
+timestamp by one (1) each time
+<br>&nbsp;&nbsp;&nbsp;<tt> "timeofday" - </tt>set timestamp to system time-of-day
+at the point of each transmittal
+<p>Automatic time stamps are updated once upon each data <tt>Flush</tt>.&nbsp;
+Thus, automatic timestamps are always frame by frame.&nbsp; Use the <tt>SetTime
+method</tt> to timestamp data channel by channel or point by point.
+<h3>
+<a NAME="Specify Channel Data"></a>Specify Channel Data</h3>
+The <tt>PutChannel</tt> methods specify the channel data to send at the
+next call to the <tt>Flush</tt> method.&nbsp; These methods reference the
+channels by the index returned by <tt><a href="#AddChannel">AddChannel</a></tt>.
+They provide data either as a generic byte-array or as a particular data
+type.
+<p><tt>PutChannel</tt> may be called multiple times per channel per <tt>Flush</tt>,
+building up a many-point-per-channel data frame in a piecemeal manner as
+may be convenient to the application.&nbsp; The SAPI has sophisticated
+"Deep CVT" logic which automatically consolidates and organizes data into
+efficient RMap structures.&nbsp; It will always be somewhat more efficient
+to handle fewer, larger data buffers, however.
+<p><b><i>Memory allocation note for C/C++ programmers:</i></b>
+<br>The data buffers provided by a source to the API are "owned" by the
+client application.&nbsp; I.e. the client application is responsible to
+allocate and free its own data buffers.
+<h4>
+<a NAME="PutChannel"></a><tt>void PutChannel(int chanIndex, byte[] rawData,
+int typeID)</tt></h4>
+The generic <tt>PutChannel</tt> method sets the data to be sent as a byte-array
+plus an associated <tt>typeID</tt>.&nbsp; The <tt>typeID</tt> is one of
+the <a href="#Data Type Codes">Data Type Codes</a>.&nbsp; Use the channel
+index from the associated <tt><a href="#AddChannel">AddChannel</a></tt>
+method, or use the <tt><a href="#ChannelIndex">ChannelIndex</a></tt> method.
+<p><b><i>Note:</i></b>&nbsp; Mixing different Data Types in a single channel
+is not supported, and may cause difficulties for Sink applications that
+try to extract mixed-type data.
+<h4>
+<tt>void PutChannelAsXXX(int chanIndex, XXX[] data)</tt></h4>
+The family of <tt>PutChannelAsXXX</tt> methods specifies the primitive
+type of the supplied data array, where XXX corresponds to one of the <a href="#Data Type Codes">Data
+Type Codes</a>.&nbsp; For example, <tt>PutChannelAsFloat32</tt> lets you
+directly send a floating point data array with no need to first convert
+it to a byte array. (Overloaded methods are not used to enhance portability
+of the SAPI).
+<p><b><i>Note</i></b>:&nbsp; <tt>PutChannelAsString </tt>puts a <i>single
+</i><tt>String</tt>
+object, which is considered to be an indivisible data word.
+<h3>
+<a NAME="Flush Data"></a>Send Data</h3>
+Once things are set up, send the data to the server.
+<h4>
+<tt>int Flush(boolean blockingIO)</tt></h4>
+After staging information with the time setting (e.g. <tt><a href="#SetTime">SetTime</a></tt>)
+and <tt><a href="#Specify Channel Data">PutChannel</a></tt> methods, specified
+data channels are sent as a consolidated RMap with the <tt>Flush</tt> method.
+<p>Each call to <tt>Flush</tt> involves round-trip network communication,
+therefore staging larger data frames (with larger buffers and/or multiple
+calls to <tt>PutChannel</tt>) prior to flushing them may provide a significant
+performance advantage. Of course, you need to also consider the associated
+impact on memory use and latency when deciding how often to <tt>Flush</tt>
+your data.
+<p>If the <tt>blockingIO</tt> parameter is <tt>true</tt>, it will block
+until the data is sent.&nbsp; If there is no data to send, calling <tt>Flush(true)</tt>
+will synchronize your application with the server.&nbsp;&nbsp; It returns
+the number of channels sent.
+<p><b><i>Note</i></b>: Only channels with new data (via <tt>PutChannel</tt>)
+since the previous call to <tt>Flush</tt> are actually sent, not necessarily
+the entire <a href="#Channel Lists">Channel List</a>.
+<h3>
+<a NAME="Source Code"></a>Example Source Code</h3>
+The following code opens a connection to a local RBNB server and sends
+a message string to it.
+<br>&nbsp;
+<center><table BORDER COLS=1 WIDTH="95%" >
+<tr>
+<td>
+<br><tt>&nbsp;&nbsp; Source mySource = new Source();</tt>
+<br><tt>&nbsp;&nbsp; mySource.OpenRBNBConnection("localhost", "mySource");</tt>
+<br><tt>&nbsp;&nbsp; int index = mySource.AddChannel("myChan");</tt>
+<br><tt>&nbsp;&nbsp; mySource.AutoTimeStamp("timeofday");</tt>
+<br><tt>&nbsp;&nbsp; mySource.PutChannelAsString(index, "Hello World!");</tt>
+<br><tt>&nbsp;&nbsp; mySource.Flush(true);</tt>
+<br><tt>.&nbsp;</tt></td>
+</tr>
+
+<caption ALIGN=BOTTOM><b>Example Source Code Snippet</b></caption>
+</table></center>
+
+<p>
+<hr WIDTH="100%">
+<h2>
+<a NAME="Sink API"></a>Sink API</h2>
+A data Sink client has the following tasks, repeated as desired:
+<blockquote>
+<li>
+Specify a channel list to request</li>
+
+<li>
+Select a sink mode</li>
+
+<li>
+Fetch data from RBNB server</li>
+
+<li>
+Extract data and time from API buffer(s)</li>
+</blockquote>
+
+<h3>
+<a NAME="Sink Specify Channels"></a>Specify Channel List</h3>
+Per the discussion above, the Sink channel list is defined by calls to
+the <tt><a href="#AddChannel">AddChannel</a></tt> method.
+<h3>
+<a NAME="Sink Modes"></a>Sink Modes</h3>
+There are three types of sink data fetch modes:
+<ul>
+<li>
+<tt>Subscribe - </tt>All new data is to be streamed without gaps</li>
+
+<li>
+<tt>Monitor&nbsp;&nbsp; - </tt>"Current" up-to-date live information is
+to be sent best-effort.</li>
+
+<li>
+<tt>Request&nbsp;&nbsp; - </tt>A particular time-slice of data is requested</li>
+</ul>
+Each sink fetch mode applies to the group of channels specified by the
+current <a href="#Sink Specify Channels">Channel List</a>.&nbsp; The channel
+list must be specified prior to setting the Sink Mode, as these methods
+initiate the transfer of data from the server.
+<h4>
+<tt>void Subscribe()</tt></h4>
+This is the simplest data fetch mode.&nbsp; It takes no arguments and returns
+no value.&nbsp; It initiates a streaming "push" of data (from server to
+client) for all specified channels starting at the time of this call, and
+proceeding into the future.&nbsp; A single call to <tt>Subscribe</tt> can
+be followed by repeated calls to <tt>Fetch</tt>, where the next frame of
+data is received.&nbsp; Note that the frame size is determined by the source
+application(s).
+<p>Subscribe is the most efficient mode in that data frames are streamed
+from the server without waiting for acknowledgment from the sink client.&nbsp;
+If the client does not keep up, the data delivered will fall further and
+further behind until it falls off the beginning (oldest) data in the source
+ring buffer, at which point the stream aborts.
+<h4>
+<tt>void Monitor(int gapControl)</tt></h4>
+This provides a variation on the subscribe mode.&nbsp; It initiates a stream
+of "current" data that will skip-forward as necessary to stay up to date.&nbsp;
+Full source frames are returned each Fetch. The <tt>gapControl</tt> argument
+specifies how many frames behind it can get before it will jump ahead (and
+miss data) in order to stay current.
+<p>When<tt> Monitor</tt> mode keeps up, it is much like <tt>Subscribe</tt>,
+except that there is more round-trip traffic between the client and server
+for <tt>Monitor</tt> mode (to establish the <tt>gapControl</tt> criterion).&nbsp;
+Unlike <tt>Subscribe</tt> mode, the stream will not abort if the client
+doesn't keep up; but data can be dropped with resulting gaps.
+<h4>
+<tt>void Request(double start, double duration, String timeRef)</tt></h4>
+The basic <tt>Request</tt> mode asks for a time-slice of data beginning
+at <tt>start</tt> and running for a <tt>duration</tt> amount thereafter.&nbsp;
+The <tt>timeRef</tt> argument specifies the time-reference for <tt>start</tt>
+to be <i>absolute</i>, <i>oldest</i>, or <i>newest</i>.
+<p>When dealing with a <tt>timeRef</tt> of <i>newest</i>, there are some
+special notes:
+<ul>
+<li>
+To get the most recent time-slice of <i>existing</i> data, use zero <tt>start</tt>
+and negative <tt>duration</tt>.</li>
+
+<li>
+A <tt>duration</tt> of zero is a special case that returns a single "current
+value" for each channel.</li>
+</ul>
+
+<h4>
+<tt>void Request(double start, double duration, String timeRef, int fetchRepeat,
+double fetchInterval, boolean fetchByFrame)</tt></h4>
+The optional form of <tt>Request</tt> includes additional <i><tt>fetch</tt></i>
+parameters.&nbsp; You can specify the <tt>Request</tt> to be automatically
+repeated <tt>fetchRepeat</tt> times, with the timestamp <tt>start</tt>
+advanced by <tt>fetchInterval</tt> amount each request.
+<p>Normally (with the default <tt>fetchByFrame=false</tt> ), a single <tt>Request</tt>
+results in a single consolidated <tt><a href="#Fetch Data">Fetch</a></tt>
+response.&nbsp; Set <tt>fetchByFrame=true</tt> to cause the data returned
+by <tt>Fetch</tt> to be on a source frame-by-frame basis.&nbsp; This means
+the size of the data per <tt>Fetch</tt> matches the frame-size set by the
+respective Source.&nbsp; Thus, a single <tt>Request</tt> can require multiple
+calls to <tt>Fetch</tt>.&nbsp; Requesting data by frame may be more efficient
+or convenient, for example with indivisible video frames.
+<h3>
+<a NAME="Fetch Data"></a>Get Data</h3>
+After building the <a href="#Channel Lists">Channel List</a> and setting
+the <a href="#Sink Modes">Sink Mode</a> (in that order), get the RBNB data
+using the <tt>Fetch</tt> method.
+<h4>
+<tt>int Fetch(boolean blockingIO)</tt></h4>
+This method reads the data from the RBNB server for all channels in the
+current local Channel List (built by <tt><a href="#AddChannel">AddChannel</a></tt>).&nbsp;
+It returns the number of channels retrieved.
+<p>If the <tt>blockingIO</tt> parameter is <tt>true</tt>, it will block
+until the data is retrieved.&nbsp; Otherwise, it will either return a positive
+integer indicating data was ready and has been read, or a zero (0) indicating
+no data was yet available.
+<h3>
+<a NAME="Extract Data"></a>Extract Data</h3>
+Fetched <tt>data</tt> is stored in buffers that are accessed via the Extract
+methods.
+<p>The <tt>ChannelData</tt> and <tt>ChannelTime</tt> methods return the
+data associated with the given channel.&nbsp; Channels are denoted by <tt>chanIndex</tt>,
+which always runs from <tt>0</tt> to <tt>(N-1)</tt>, where <tt>N</tt> is
+the return value of <tt><a href="#Fetch Data">Fetch</a></tt>.&nbsp; The
+channel name can be determined from the channel index via the <a href="#ChannelName">channelName</a>
+method.&nbsp; Or, knowing the name, the chanIndex can be derived from the
+channel name via the <tt><a href="#ChannelIndex">ChannelIndex</a></tt>
+method.
+<br>&nbsp;
+<p><b><i>Memory allocation note for C/C++ programmers:</i></b>
+<br>The data buffers for the fetched data are automatically allocated by
+the API, but are then "owned" by the client application.&nbsp; I.e. the
+client application is responsible to free the extracted data and time buffers,
+using the standard system <tt>free()</tt> function.
+<h4>
+<tt>byte[] ChannelData(int chanIndex)</tt></h4>
+This generic extract data method gets data as a byte-array.
+<h4>
+<a NAME="ChannelDataAsXXX"></a><tt>XXX[] ChannelDataAsXXX(int chanIndex)</tt></h4>
+The family of <tt>ChannelAsXXX</tt> methods specifies the primitive data
+type of the returned data array, where XXX corresponds to one of the <a href="#Data Types">Data
+Type Codes</a>.&nbsp; For example, <tt>ChannelDataAsFloat32</tt> lets you
+retrieve a floating point data array with no need to convert it from a
+byte array.&nbsp; If the fetched data does not match the type, an exception
+will be thrown.&nbsp; You can check the type using the <tt>ChannelType</tt>
+method.
+<p><b><i>Note</i></b>:&nbsp; <tt>ChannelDataAsString </tt>gets an <i>array</i>
+of <tt>String</tt> objects, where each <tt>String</tt> is considered to
+be an indivisible, individually time-stamped, variable-length data word.
+<h4>
+<tt>double[] ChannelTimes(chanIndex)</tt></h4>
+This method returns an array of double precision RBNB time values for the
+specified channel index. There will be one time point per data point.
+<p>If necessary, the point times will be linearly interpolated from the
+underlying start time and duration of the corresponding data array.&nbsp;
+See <tt><a href="#SetTime">SetTime</a></tt>.
+<h4>
+<a NAME="ChannelType"></a><tt>int ChannelType(int chanIndex)</tt></h4>
+This method returns a <a href="#Data Types">Data Type Code</a> for the
+primitive data type of the fetched data for a given channel.&nbsp; It can
+be used to determine which of the <tt>ChannelDataAsXXX</tt> methods to
+call.
+<h3>
+<a NAME="Sink Code"></a>Example Sink Code</h3>
+The following code snippet will fetch the message sent to the local RBNB
+Server by the <a href="#Source Code">Example Source Code</a>.
+<br>&nbsp;
+<center><table BORDER COLS=1 WIDTH="95%" >
+<tr>
+<td>
+<br><tt>&nbsp;&nbsp; Sink mySink = new Sink();</tt>
+<br><tt>&nbsp;&nbsp; mySink.OpenRBNBConnection("localhost", "mySink");</tt>
+<br><tt>&nbsp;&nbsp; mySink.AddChannel("mySource/myChan");</tt>
+<br><tt>&nbsp;&nbsp; mySink.Request(0., 1., "oldest");</tt>
+<br><tt>&nbsp;&nbsp; mySink.Fetch(true);</tt>
+<br><tt>&nbsp;&nbsp; System.out.println( mySink.ChannelName(0) ": " + mySink.ChannelDataAsString(0)[0]
+);</tt>
+<br><tt>.&nbsp;</tt></td>
+</tr>
+
+<caption ALIGN=BOTTOM><b>Example Sink Code Snippet</b></caption>
+</table></center>
+
+<p>
+<hr WIDTH="100%">
+</body>
+</html>

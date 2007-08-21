@@ -1,0 +1,55 @@
+<!-- Name: build.xml
+     By:   Ian Brown
+     Date: 06/18/2004
+
+     Description:
+         This file is the primary Ant build file for the RBNB WebCache
+         application.  This application is used provide caching for remote
+	 web pages using the RBNB server.
+-->
+
+<project name="APPLICATION.WEBCACHE" default="library" basedir=".">
+
+ <!-- Import the standard definitions (properties). -->
+ <import file="../../definitions.xml" />
+
+ <!-- Initialize by setting the timestamp. -->
+ <target name="init">
+  <tstamp />
+  <buildnumber />
+  <mkdir dir="${rbnb.builddir}" />
+  <mkdir dir="${rbnb.classesdir}" />
+  <mkdir dir="${rbnb.classesdir}/Applications" />
+  <mkdir dir="${rbnb.classesdir}/Applications/WebCache" />
+  <mkdir dir="${rbnb.librarydir}" />
+ </target>
+
+ <!-- Compile the WebCache Java source code and place the results in the
+      WebCache classes directory.  References the Core library and the
+      WebCache classes for dependencies.
+  -->
+ <target name="compile" depends="init">
+  <javac destdir="${rbnb.classesdir}/Applications/WebCache"
+         deprecation="on">
+   <src path="${rbnb.sourcedir}/Applications/WebCache" />
+   <classpath path="${rbnb.classesdir}/Applications/WebCache" />
+   <classpath path="${rbnb.librarydir}/rbnb.jar" />
+  </javac>
+ </target>
+
+ <!-- Create the WebCache jar file using the WebCache classes. -->
+ <target name="library" depends="compile">
+  <jar destfile="${rbnb.librarydir}/webcache.jar"
+       basedir="${rbnb.classesdir}/Applications/WebCache"
+       manifest="Manifest"
+   />
+ </target>
+
+ <!-- Cleans out all compiled and library files for the WebCache project. -->
+ <target name="clean">
+  <delete dir="${rbnb.classesdir}/Applications/WebCache" />
+  <delete file="${rbnb.librarydir}/webcache.jar" />
+ </target>
+
+</project>
+

@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://earth.google.com/kml/2.1">
+<Document>
+	<name>SecureScan.kml</name>
+	<open>1</open>
+	<StyleMap id="m_ylw-pushpin_copy6">
+		<Pair>
+			<key>normal</key>
+			<styleUrl>#s_ylw-pushpin_copy7</styleUrl>
+		</Pair>
+		<Pair>
+			<key>highlight</key>
+			<styleUrl>#s_ylw-pushpin_hl_copy6</styleUrl>
+		</Pair>
+	</StyleMap>
+	<Style id="s_ylw-pushpin_copy6">
+		<IconStyle>
+			<scale>1.1</scale>
+			<Icon>
+				<href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+			</Icon>
+			<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+		</IconStyle>
+	</Style>
+	<Style id="s_ylw-pushpin_hl_copy6">
+		<IconStyle>
+			<scale>1.3</scale>
+			<Icon>
+				<href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+			</Icon>
+			<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+		</IconStyle>
+	</Style>
+	<Style id="s_ylw-pushpin_hl_copy5">
+		<IconStyle>
+			<scale>1.3</scale>
+			<Icon>
+				<href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+			</Icon>
+			<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+		</IconStyle>
+	</Style>
+	<StyleMap id="m_ylw-pushpin_copy5">
+		<Pair>
+			<key>normal</key>
+			<styleUrl>#s_ylw-pushpin_copy6</styleUrl>
+		</Pair>
+		<Pair>
+			<key>highlight</key>
+			<styleUrl>#s_ylw-pushpin_hl_copy5</styleUrl>
+		</Pair>
+	</StyleMap>
+	<Style id="s_ylw-pushpin_copy7">
+		<IconStyle>
+			<scale>1.1</scale>
+			<Icon>
+				<href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+			</Icon>
+			<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+		</IconStyle>
+	</Style>
+	<Folder>
+		<name>SecureScan</name>
+		<open>1</open>
+		<Style>
+		</Style>
+		<Folder>
+			<name>Models</name>
+			<Placemark>
+				<name>creare</name>
+				<open>1</open>
+				<description><![CDATA[Created with <a href="http://sketchup.google.com">Google SketchUp</a>]]></description>
+				<Style id="default_copy0">
+				</Style>
+				<Model>
+					<altitudeMode>relativeToGround</altitudeMode>
+					<Location>
+						<longitude>-72.232793988428</longitude>
+						<latitude>43.684588945068</latitude>
+						<altitude>0</altitude>
+					</Location>
+					<Orientation>
+						<heading>0</heading>
+						<tilt>0</tilt>
+						<roll>0</roll>
+					</Orientation>
+					<Scale>
+						<x>1</x>
+						<y>1</y>
+						<z>1</z>
+					</Scale>
+					<Link>
+						<href>creare.dae</href>
+					</Link>
+				</Model>
+				
+						
+				
+    <DocumentSource>SketchUp</DocumentSource>
+			</Placemark>
+		</Folder>
+		<Folder>
+			<name>Current Images</name>
+			<visibility>0</visibility>
+			<open>1</open>
+			<NetworkLink>
+				<name>Tower West</name>
+				<visibility>0</visibility>
+				<Url>
+					<href>http://rbnb.net/RBNB/sdp/SecureScan2/KMLit/WebCam/TowerW.jpg</href>
+					<refreshMode>onInterval</refreshMode>
+				</Url>
+			</NetworkLink>
+			<NetworkLink>
+				<name>Lab Hall West</name>
+				<visibility>0</visibility>
+				<Url>
+					<href>http://rbnb.net/RBNB/sdp/SecureScan2/KMLit/WebCam/LabHallW.jpg</href>
+					<refreshMode>onInterval</refreshMode>
+				</Url>
+			</NetworkLink>
+			<NetworkLink>
+				<name>Mill South</name>
+				<visibility>0</visibility>
+				<LookAt>
+					<longitude>-72.23298124563529</longitude>
+					<latitude>43.68485946676969</latitude>
+					<altitude>0</altitude>
+					<range>43.95244076966443</range>
+					<tilt>46.04775746783204</tilt>
+					<heading>-130.8462219238281</heading>
+				</LookAt>
+				<Url>
+					<href>http://rbnb.net/RBNB/sdp/SecureScan1/KMLit/WebCam/millS.jpg</href>
+					<refreshMode>onInterval</refreshMode>
+				</Url>
+			</NetworkLink>
+			<NetworkLink>
+				<name>Entry North</name>
+				<visibility>0</visibility>
+				<Url>
+					<href>http://rbnb.net/RBNB/sdp/SecureScan1/KMLit/WebCam/entryN.jpg?d=0</href>
+					<refreshMode>onInterval</refreshMode>
+				</Url>
+			</NetworkLink>
+		</Folder>
+		<Folder>
+			<name>Time Sequence Images</name>
+			<visibility>0</visibility>
+			<open>1</open>
+			<NetworkLink>
+				<name>Tower West</name>
+				<visibility>0</visibility>
+				<Url>
+					<href>http://rbnb.net/RBNB/sdp/SecureScan2/KMLit/WebCam/TowerW.jpg?d=150</href>
+				</Url>
+			</NetworkLink>
+			<NetworkLink>
+				<name>Lab Hall West</name>
+				<visibility>0</visibility>
+				<Url>
+					<href>http://rbnb.net/RBNB/sdp/SecureScan2/KMLit/WebCam/LabHallW.jpg?d=150</href>
+				</Url>
+			</NetworkLink>
+			<NetworkLink>
+				<name>Entry North</name>
+				<visibility>0</visibility>
+				<Url>
+					<href>http://rbnb.net/RBNB/sdp/SecureScan1/KMLit/WebCam/entryN.jpg?d=15000</href>
+				</Url>
+			</NetworkLink>
+			<NetworkLink>
+				<name>Mill South</name>
+				<visibility>0</visibility>
+				<LookAt>
+					<longitude>-72.23298124563529</longitude>
+					<latitude>43.68485946676969</latitude>
+					<altitude>0</altitude>
+					<range>43.95244076966443</range>
+					<tilt>46.04775746783204</tilt>
+					<heading>-130.8462219238281</heading>
+				</LookAt>
+				<Url>
+					<href>http://rbnb.net/RBNB/sdp/SecureScan1/KMLit/WebCam/millS.jpg?d=150</href>
+				</Url>
+			</NetworkLink>
+		</Folder>
+		<Folder>
+			<name>Cameras</name>
+			<open>1</open>
+			<Placemark>
+				<name>Tower West</name>
+				<LookAt>
+					<longitude>-72.23292245657051</longitude>
+					<latitude>43.68438635654502</latitude>
+					<altitude>0</altitude>
+					<range>114.5745558377438</range>
+					<tilt>0</tilt>
+					<heading>46.80170035838059</heading>
+				</LookAt>
+				<styleUrl>#m_ylw-pushpin_copy6</styleUrl>
+				<Point>
+					<altitudeMode>relativeToGround</altitudeMode>
+					<coordinates>-72.23306829714443,43.68420127877118,3</coordinates>
+				</Point>
+			</Placemark>
+			<Placemark>
+				<name>Lab Hall West</name>
+				<LookAt>
+					<longitude>-72.23292245643374</longitude>
+					<latitude>43.6843863564641</latitude>
+					<altitude>0</altitude>
+					<range>114.574558397546</range>
+					<tilt>58.40047248925013</tilt>
+					<heading>84.34753756282289</heading>
+				</LookAt>
+				<styleUrl>#m_ylw-pushpin_copy5</styleUrl>
+				<Point>
+					<coordinates>-72.23301325384745,43.68444186039624,0</coordinates>
+				</Point>
+			</Placemark>
+			<Placemark>
+				<name>Entry North</name>
+				<LookAt>
+					<longitude>-72.2331477659897</longitude>
+					<latitude>43.68483851083865</latitude>
+					<altitude>0</altitude>
+					<range>119.5939153249135</range>
+					<tilt>14.52185438058025</tilt>
+					<heading>-38.91303688135665</heading>
+				</LookAt>
+				<Style>
+					<IconStyle>
+						<scale>1.1</scale>
+						<Icon>
+							<href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+						</Icon>
+					</IconStyle>
+					<LabelStyle>
+						<scale>1.1</scale>
+					</LabelStyle>
+				</Style>
+				<Point>
+					<altitudeMode>relativeToGround</altitudeMode>
+					<coordinates>-72.23291283684088,43.68482493120781,1</coordinates>
+				</Point>
+			</Placemark>
+			<Placemark>
+				<name>Mill South</name>
+				<LookAt>
+					<longitude>-72.23298124563529</longitude>
+					<latitude>43.68485946676968</latitude>
+					<altitude>0</altitude>
+					<range>43.9524407689571</range>
+					<tilt>46.047757467832</tilt>
+					<heading>-130.8462219238281</heading>
+				</LookAt>
+				<Style>
+					<IconStyle>
+						<scale>1.1</scale>
+						<Icon>
+							<href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+						</Icon>
+					</IconStyle>
+					<LabelStyle>
+						<scale>1.1</scale>
+					</LabelStyle>
+				</Style>
+				<Point>
+					<altitudeMode>relativeToGround</altitudeMode>
+					<coordinates>-72.23297158537504,43.68486183619537,11</coordinates>
+				</Point>
+			</Placemark>
+		</Folder>
+	</Folder>
+</Document>
+</kml>

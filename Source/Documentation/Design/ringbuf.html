@@ -1,0 +1,195 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+   
+  <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+   
+  <meta name="author" content="Ian Brown">
+  <title>RBNB V2 Ring Buffer Structure</title>
+</head>
+  <body text="#000000" bgcolor="#ffffff" link="#0000ff" alink="#000088" vlink="#ff0000">
+ 
+<h1>RBNB V2 Ring Buffer Structure</h1>
+ 
+<p>This document describes the structure of the ring buffer in the V2.x RBNB 
+system.<br>
+ </p>
+ 
+<h2>Overview</h2>
+ One of the two main features of the RBNB - Ring Buffered Network Bus - is 
+the Ring Buffer.  The Ring Buffers function as virtual data servers, managing
+and archiving data from local and remote clients.
+<p><b>Dynamic Ring Buffers</b> link data source sources with the balance
+of the RBNB environment. Their critical "ring buffering" function enables
+downstream monitors to request contiguous segments of historical or "most
+recent" data for applications that require more than single-point "current
+value tables". &nbsp;This is shown in Figure 1.</p>
+<p> </p>
+<br>
+ 
+<div align="Center"> 
+<p><img src="ringbuf.gif" alt="Ring Buffer" width="245" height="236">
+ <br>
+<b> Figure 1. The Ring Buffer</b><br>
+</p>
+<div align="Left">
+<p>The Ring Buffers can be configured to provide a combination of RAM memory 
+for high-speed gapless access to a specified amount of most-recent data (termed
+the "Cache"), plus slower disk memory for playback of historical data (termed
+the "Archive"). In addition, the Ring Buffers can function as the primary
+long-term data storage mechanism simply by configuring an appropriately large
+disk file.&nbsp;</p>
+<p></p>
+<p>The Archive overlaps, rather than appends to, the Cache, providing additional
+storage for Frames that are not in memory.</p>
+<p>The implementation of the Ring Buffer entails additional objects, termed
+"FrameSets" and "FileSets". These objects, while not directly visible to
+the source application, determine the details of how the Ring Buffer is trimmed
+and the structure of the Archive disk directory hierarchy. The source application
+programmer often need not be concerned with these additional objects, but
+an understanding of them may be helpful.<br>
+</p>
+<h2>The Structure of the Ring Buffer</h2>
+<p>The Ring Buffer acts as a continuous ring from which old data is removed
+to make way for newer data. Data is sent to the RBNB server in the form of
+Frames - created when a Channel Map is flushed by the application to a simple
+API Source. The Ring Buffer consists of a hierarchy of objects, as shown
+in Figure 2.</p>
+<p></p>
+<blockquote>
+  <blockquote>
+    <blockquote>
+      <blockquote>
+        <blockquote>
+          <blockquote>
+            <blockquote>
+              <blockquote>
+                <blockquote><b>Ring Buffer</b><br>
+                  <blockquote><b>Cache<br>
+                    </b>
+                    <blockquote><b>FrameSets<br>
+                      </b></blockquote>
+                      <blockquote>
+                        <blockquote><b>Frames<br>
+                          </b></blockquote>
+                          </blockquote>
+                          <b>Archive<br>
+                          </b>
+                          <blockquote><b>FileSets<br>
+                            </b>
+                            <blockquote><b>FrameSets<br>
+                              </b>
+                              <blockquote><b>Frames</b><br>
+                                </blockquote>
+                                </blockquote>
+                                </blockquote>
+                                </blockquote>
+                                </blockquote>
+                                </blockquote>
+                                </blockquote>
+                                </blockquote>
+                                </blockquote>
+                                </blockquote>
+                                </blockquote>
+                                </blockquote>
+                                </blockquote>
+                                <div align="Left">
+                                <div align="Center"><b>Figure 2: The Ring
+Buffer Hierarchy</b><br>
+                                <div align="Left">
+                                <p>The simple API allows the source application
+to specify how many Frames should be stored in the Cache and Archive. However,
+because the simple API does not allow the application to specify the number
+of FrameSets in the Cache or FileSets in the Archive, the actual number of
+Frames stored may exceed the desired value.<br>
+                                </p>
+                                <h3>The Structure of the Cache<br>
+                                </h3>
+                                <p>The Cache consists of one or more FrameSets,
+each of which comprises one or more Frames. The Cache is a ring of slots
+for FrameSets. When a new FrameSet is added to the Cache, it is placed into
+a slot, replacing any previous FrameSet occupying that slot A FrameSet is
+a list of slots for Frames. When Frame is added to the FrameSet, it may fill
+up the last empty slot. At that time, the FrameSet is closed and a new FrameSet
+is created. Frames are always added to the newest FrameSet.</p>
+                                <p>Thus the Cache has a granularity of FrameSets,
+rather than Frames. The simple API allows the source application to set the
+number of Frames, but not the number of FrameSets, stored in the Cache.However,
+when the Cache is full, entire FrameSets are removed. This can result in
+a significant decrease in the number of Frames in the Cache whenever a FrameSet
+is filled up.<br>
+                                </p>
+                                <p>Once a FrameSet is closed, it cannot be
+reopened to add new Frames. This is true even if the FrameSet was closed
+because the source application shut down the Ring Buffer.<br>
+                                </p>
+                                <h3>The Structure of the Archive</h3>
+The Archive consists of one or more FileSets, each of which comprises one
+or more FrameSets, each comprising one or more Frames. The Archive is a ring
+of slots for FileSets. When a new FileSet is added to the Archive, it is
+placed into a slot, replacing any previous FileSet occupying that slot. A
+FileSet is a list of slots for FrameSets. When a FrameSet is added to the
+FileSet, it may fill up the last empty slot. At that time, the FileSet is
+closed and a new FileSet is created. FrameSets are always added to the newest
+FileSet.<br>
+                                <br>
+Thus the Archive has a granularity of FileSets, rather than either FrameSets
+or Frames. The simple API allows the source application to set the number
+of Frames, not the number of FileSets or FrameSets, stored in the Archive.
+However, when the Archive is full, entire FileSets are removed. This can
+result in a signiciant decrease in the number of Frames in the Archive whenever
+a FileSet is filled up.<br>
+                                <br>
+On the disk, an Archive consists of a single folder containing some files
+and additional folders representing the FileSets in the Archive. Each FileSet
+consists of a folder containing several files. When the FileSet is removed
+from the Archive, its associated folder and the contents of that folder are
+deleted.<br>
+                                <br>
+FrameSets are added to the FileSet when they are closed by the Cache. In
+effect, they exist in both the Archive and the Cache simultaneously. FrameSets
+placed into a FileSet are written to the disk. Each FileSet in the Archive
+is stored as a separate folder of several different files on the disk.<br>
+                                <br>
+As with FrameSets, once closed, a FileSet is not reopened to add new Frames
+(or FrameSets).<br>
+                                <h2>Configuration of the Ring Buffer</h2>
+The Ring Buffer is configured through the use of four values:<br>
+                                <ol>
+                                  <li>The number of Frames to be stored in
+the Cache (<i>FiC</i>),</li>
+                                  <li>The number of FrameSets to be stored
+in the Cache (<i>FSiC</i>),</li>
+                                  <li>The number of Frames to be stored in
+the Archive (<i>FiA</i>), and</li>
+                                  <li>The number of FileSets to be stored
+in the Archive (<i>FlSiA</i>).</li>
+                                </ol>
+The number of Frames in the Cache and the number of Frames in the Archive
+can be set by the source application via the simple API. At this time, the
+number of FrameSets in the Cache and the number of FileSets in the Archive
+are hardcoded to be 10.<br>
+                                <br>
+These four values are used to set the following values:<br>
+                                <ol>
+                                  <li>The number of Frames in a FrameSet,
+(<i>FiFS</i>) and</li>
+                                  <li>The number of FrameSets in a FileSet
+(<i>FSiFlS</i>).</li>
+                                </ol>
+These values are calculated using the following formulas:<br>
+                                <blockquote><i>FiFS</i> = ceiling(<i>FiC
+                                  </i>/ <i>FSiC</i>)<br>
+                                  <i>FSiFlS</i> = ceiling(<i>FiA</i> / <i>
+FiFS</i>) / <i>FlSiA</i><br>
+                                  </blockquote>
+                                  </div>
+                                  </div>
+                                  </div>
+                                  <h2></h2>
+                                  </div>
+                                  <p> </p>
+ </div>
+ 
+                                  </body>
+                                  </html>

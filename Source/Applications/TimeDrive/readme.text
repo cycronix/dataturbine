@@ -1,0 +1,30 @@
+
+Description of the content of TimeDrive directory:
+
+1. com
+	This directory contains the Source files for the TimeDrive application.
+
+2. Manifest
+	Manifest file for timedrive.jar
+
+3. timedrive.html
+	The TimeDrive Web interface file.  This file is included in timedrive.jar, and the TimeDrive server
+	accesses this file from timedrive.jar.
+
+4. timedrive_refchan.html
+	This is an older version of timedrive.html, but it contains an example of allowing the user
+	to enter a reference channel for setting absolute time.  The user can chose to set the current
+	TimeDrive time to the oldest or newest time available in the reference channel.  We no longer
+	use this feature in timedrive.html, but we could at some time reintroduce its use.
+
+5. rbnbTimeDrive.java
+	Contains the main() method for running TimeDrive.
+
+6. build.number
+	Contains the latest build date and number.
+
+7. readme.text
+	This file.
+
+8. build.xml
+	The Ant build file.

@@ -1,0 +1,429 @@
+<!DOCTYPE doctype PUBLIC "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+            
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=iso-8859-1">
+            
+  <meta name="Author" content="Ian Brown">
+            
+  <meta name="GENERATOR"
+ content="Mozilla/4.77 [en] (Windows NT 5.0; U) [Netscape]">
+  <title>rbnbChat</title>
+</head>
+  <body>
+      
+<center>   
+<h1> <font size="+3">DataTurbine Chat Utility</font></h1>
+  </center>
+      
+<center>   
+<h1> <b><i><font size="+3">rbnbChat</font></i></b></h1>
+  </center>
+      
+<center>   
+<h1> <font size="+3">User Manual</font></h1>
+  </center>
+      
+<center>   
+<h2> V2.4</h2>
+  </center>
+      
+<center>   
+<h2> January, 2003</h2>
+  </center>
+      
+<center>   
+<h2> Copyright, Creare Inc.</h2>
+  </center>
+      
+<p>&nbsp; <br>
+  &nbsp; <br>
+   </p>
+   
+<p> </p>
+   
+<hr width="100%">   
+<h2> <font size="+3">Table of Contents</font></h2>
+      
+<blockquote>       
+  <h3> &nbsp;<a href="#Introduction">Introduction</a></h3>
+          
+  <blockquote><a href="#Overview">Overview</a> <br>
+      <a href="#Setup_and_Startup">Setup and Startup</a></blockquote>
+          
+  <h3> <a href="#Command_Line_Arguments">Command Line Arguments</a></h3>
+          
+  <blockquote><a href="#RBNB">DataTurbine</a> <br>
+      <a href="#Fetch_All">Fetch All Messages</a> <br>
+      <a href="#GroupName">Group Name</a> <br>
+      <a href="#Name">User's Name</a> <br>
+      <a href="#PromptPassword">Prompt for Password</a>   </blockquote>
+          
+  <h3> <a href="#User%20Interface%20Fields">User Interface Fields</a></h3>
+          
+  <blockquote><a href="#MenuBar">Menu Bar</a>           
+    <blockquote><a href="#FileMenu">File Menu<br>
+        </a>               
+      <blockquote><a href="rbnbChat.html#FileMenuNew">New</a><br>
+          <a href="rbnbChat.html#FileMenuOpen">Open</a> <br>
+          <a href="#FileMenuClose">Close</a> <br>
+          <a href="#FileMenuExit">Exit</a></blockquote>
+   <a href="#ViewMenu">View Menu</a>               
+      <blockquote><a href="#ViewMenuClear">Clear</a> <br>
+          <a href="#ViewMenuDate">Date</a> <br>
+          <a href="#ViewMenuTime">Time</a> <br>
+          <a href="#ViewMenuMilitary">Military</a> <br>
+          <a href="#ViewMenuGMT">Greenwich Mean Time</a> <br>
+          <a href="#ViewMenuLocal">Local Time</a> <br>
+          <a href="#ViewMenuFontSize">Font Size</a></blockquote>
+   <a href="#RefreshMenu">Refresh Menu</a>               
+      <blockquote><a href="#RefreshMenuSome">10 seconds</a> <br>
+          <a href="#RefreshMenuSome">1 minute</a> <br>
+          <a href="#RefreshMenuSome">10 minutes</a> <br>
+          <a href="#RefreshMenuSome">1 hour</a> <br>
+          <a href="#RefreshMenuSome">10 hours</a> <br>
+          <a href="#RefreshMenuSome">1 day</a> <br>
+          <a href="#RefreshMenuSome">10 days</a> <br>
+          <a href="#RefreshMenuAll">All</a></blockquote>
+   <a href="#OptionsMenu">Options Menu</a>               
+      <blockquote><a href="#SettingsMenuBeep">Beep On New</a> <br>
+          <a href="#SettingsMenuLog">Log</a></blockquote>
+   <a href="#HelpMenu">Help Menu</a>               
+      <blockquote><a href="#HelpMenuAbout">About</a></blockquote>
+   </blockquote>
+   <a href="rbnbChat.html#Sidebar">Sidebar</a>
+    <blockquote><a
+ href="file:///S:/RBNB/V2Dev/Documentation/HTML/Chat/rbnbChat.html#SidebarHost">Host</a><a
+ href="file:///S:/RBNB/V2Dev/Documentation/HTML/Chat/rbnbChat.html#SidebarGroups"><br>
+Groups</a><br>
+      <a href="#SidebarUsers">Users</a><br>
+    </blockquote>
+    <a href="#Message_Display">Message Display</a> <br>
+   <a href="#Message_Entry">Message Entry</a>           
+    <blockquote><a href="#MessEntryAlert">Send Alert</a></blockquote>
+   </blockquote>
+   </blockquote>
+      
+<hr width="100%">   
+<h1> <a name="Introduction"></a>Introduction</h1>
+      
+<h2> <a name="Overview"></a>Overview</h2>
+   The <i>rbnbChat</i> application lets users communicate with each other 
+via the DataTurbine.   
+<p><i>rbnbChat</i> provides a <a href="#Command_Line_Arguments">command line</a>
+ for rapid establishment of a connection to the DataTurbine upon start-up.&nbsp;
+ The graphical interface shows received messages in a display screen and
+allows  the user to enter and send messages in a text entry field. <i>rbnbChat</i> 
+ has an array of customization options available, including options to secure 
+ a new <i>rbnbChat</i> session with a password, create <i>rbnbChat</i> groups, 
+ review old messages, log an on-going session, send alerts, and do many other
+ tasks. </p>
+   
+<p>The following figure shows an example <i>rbnbChat</i> session. </p>
+   
+<center>   
+<p><a name="User-Interface"></a><img src="rbnbChat.JPG"
+ alt="Example rbnbChat Session JPEG" width="700" height="500">
+  &gt;</p>
+  </center>
+      
+<dl>
+  <center> <dt> <b>Example <i>rbnbChat</i> Session</b></dt>
+    </center>
+  <h2> <a name="Setup_and_Startup"></a>Setup and Startup</h2>
+The <i>rbnbChat</i>application needs to be run under a Java Virtual Machine 
+ (JVM). Different flavors of Java come by different names (e.g. <i>java, jre,
+jview</i>).       
+  <p>At startup, the <i>rbnbChat</i> program allows the user to specify on 
+ the <a href="#Command_Line_Arguments">command line</a>: a DataTurbine to 
+connect to, whether or not to fetch all available messages, a user name, and
+whether or not <i>rbnbChat</i> should prompt the user for a password.&nbsp; 
+If the user does not specify their name at the command line, <i>rbnbChat</i> 
+will prompt the user for it at a later time. </p>
+  <p>The user may choose to start <i>rbnbChat</i> without any command line 
+ arguments.&nbsp; The user can select the <a href="#FileMenuNew">New</a> or
+the&nbsp; <a href="#FileMenuOpen">Open</a> buttons on the <a
+ href="#FileMenu">File</a> menu to establish an <i>rbnbChat</i> session via
+ the graphical interface. </p>
+  <p>Once <i>rbnbChat</i> is connected to the DataTurbine, the&nbsp; <a
+ href="#User-Interface">user interface screen</a> shows the messages received
+ (including those sent by the user) and allows the user to <a
+ href="#Message_Entry">enter</a> his or her own messages. </p>
+  <p> </p>
+  <hr width="100%">
+  <h1> <a name="Command_Line_Arguments"></a>Command Line Arguments</h1>
+Use of any command-line argument causes <i>rbnbChat</i>to attempt to connect 
+ to a DataTurbine and establish an <i>rbnbChat</i>session upon start-up. 
+     
+  <h2> <a name="RBNB"></a>DataTurbine</h2>
+  <b>-a [<i>host</i>][:<i>port</i>]</b>
+  <p>The address of the DataTurbine server to connect to. </p>
+  <p>The default is to set the DataTurbine to localhost:3333, but not open 
+ the connection. </p>
+  <h2> <a name="Fetch_All"></a>Fetch All Messages</h2>
+  <b>-f</b>
+  <p>Tells <i>rbnbChat</i> to fetch all of the messages available in the DataTurbine
+in the start-up group. </p>
+  <p>The default is not to fetch any messages from the DataTurbine when the 
+ connection is opened. </p>
+  <h2> <a name="Name"></a>User's Name</h2>
+  <b>-u &lt;user name&gt;</b>
+  <p>Specifies the <a href="#SettingsMenuUsers">name</a> the user is to be 
+ known by. This is the datapath of the DataTurbine channel used. </p>
+  <p>There is no default user name, and as needed, the <i>rbnbChat</i> application 
+ will display the <a href="#FileMenuOpen">Open Dialog</a> to ask the user
+ for a user name.</p>
+  <h2> <a name="PromptPassword"></a>Prompt for Password</h2>
+  <b>-p</b>
+  <p>Causes<i> rbnbChat</i> to display the <a href="#FileMenuOpen">Open Dialog</a> 
+at start-up, to allow the user to enter a password for the creation of a 
+ <a href="#MessDispSecure">private</a> session. </p>
+  <p>By default, no password is applied, and <i>rbnbChat</i> establishes
+a regular, public connection with the DataTurbine. </p>
+</dl>
+  <dt>        
+  <hr width="100%"></dt>
+      
+<h1> <a name="User Interface Fields"></a>User Interface Fields</h1>
+      
+<h2> <a name="MenuBar"></a>Menu Bar</h2>
+   At the top of the <a href="#User-Interface">user interface screen</a>
+is  the menu bar. The menu bar has five menus that control the connection
+(<a href="#FileMenu">File Menu</a>), the display (<a href="#ViewMenu">View
+Menu</a>),  refreshing (<a href="#RefreshMenu">Refresh Menu</a>), the settings
+(<a href="#SettingsMenu">Settings Menu</a>), and provide help (<a
+ href="#HelpMenu">Help Menu</a>).&nbsp;
+<h3> <a name="FileMenu"></a>File Menu</h3>
+   The file menu has buttons to create a new chat host and open a connection 
+to the DataTurbine (<a href="#FileMenuNew">New</a>), open connection to a 
+DataTurbine (<a href="#FileMenuOpen">Open</a>), to close the open connection 
+(<a href="#FileMenuClose">Close</a>), and to exit the program (<a
+ href="#FileMenuExit">Exit</a>). <br>
+   
+<h4><a name="FileMenuNew"></a>New</h4>
+   
+<div align="center">  
+<div align="left">The New button on the File Menu creates a new Chat Host
+ server and opens a connection to the DataTurbine. The <i>rbnbChat</i> program
+ pops up a dialog box to ask for the DataTurbine server address, the Chat
+Host server name, the username, the password for both the chat host and the
+client connection,&nbsp; the cache size in frames, and the archive size in
+frames.<br>
+ <br>
+ Entering a password creates a <a href="#Private_Mode">private </a>chat host.<br>
+  <br>
+  The cache size must be greater than zero. &nbsp;The archive size must be
+ either 0 (no archive) or greater than or equal to the cache size (in which
+ case, <i>rbnbChat</i> attempts to either append to an existing archive or
+ creates a new one).<br>
+  <br>
+  The following is an example of the New dialog.<br>
+  </div>
+  &nbsp;<img src="rbnbChat_newdlg.JPG"
+ alt="Example rbnbChat New Dialog JPEG" width="345" height="309">
+  <br>
+  <b>Example <i>rbnbChat</i> New Dialog</b><br>
+  </div>
+  <br>
+   
+<h4><a name="FileMenuOpen"></a>Open</h4>
+   The Open button on the&nbsp; File Menu opens a connection to a DataTurbine. 
+ The <i>rbnbChat</i> program pops up a dialog box to ask for the DataTurbine
+ server address, the Chat Host server name, the username, and the password 
+for the Chat client connection,.   
+<p>Entering a password creates a <a href="#Private_Mode">private </a>session.<br>
+ </p>
+ 
+<p>The following is an example of the Open dialog. </p>
+   
+<center>   
+<p><img src="rbnbChat_opendlg.JPG"
+ alt="Example rbnbChat Open Dialog JPEG" width="345" height="233">
+  <br>
+   </p>
+   
+<p><b>Example <i>rbnbChat</i> Open Dialog</b></p>
+  </center>
+      
+<h4> <a name="FileMenuClose"></a>Close</h4>
+   The Close button on the&nbsp; File Menu closes the open connection to
+a DataTurbine.   
+<h4> <a name="FileMenuExit"></a>Exit</h4>
+   The Exit button on the&nbsp; File Menu exits the <i>rbnbChat</i> program. 
+  
+<h3> <a name="ViewMenu"></a>View Menu</h3>
+   The view menu has options to clear the message display, to select or deselect 
+ displaying the server, date and time, or military time, and to choose whether 
+ the displayed times will be in Greenwich Mean or in Local Time.   
+<h4> <a name="ViewMenuClear"></a>Clear</h4>
+   The Clear button on the&nbsp; View Menu clears all of the messages out 
+of the&nbsp; <a href="#Message_Display">message display</a>.      
+<h4> <a name="ViewMenuDate"></a>Date</h4>
+   The Date checkbox on the View Menu toggles the inclusion of the date in 
+the <a href="#Message_Display">message display</a>, with the format dd-MMM-yyyy.&nbsp; 
+ (Example: 05-AUG-2001 is August 5, 2001.)   
+<h4> <a name="ViewMenuTime"></a>Time</h4>
+   The Time checkbox on the View Menu toggles the inclusion of messages'
+send  time in the <a href="#Message_Display">message display</a>, with the
+format  HH:mm:ss.&nbsp; (Example: 21:04:16 is 9:04:16 PM.)   
+<h4> <a name="ViewMenuMilitary"></a>Military</h4>
+   The Military checkbox on the View Menu overrides the use of either the 
+<a href="#ViewMenuDate">Date</a> or <a href="#ViewMenuTime">Time</a> options,
+ and displays message dates and times in the <a href="#Message_Display">message
+ display</a> with the format ddHHmmssZ MMM yy.&nbsp; (Example: 23153933Z
+JUL  01 is July 23, 2001 at 3:39:33 PM, GMT.)   
+<h4> <a name="ViewMenuGMT"></a>Greenwich Mean Time</h4>
+   The Greenwich Mean Time checkbox sets all displayed times to be in Greenwich 
+ Mean Time.   
+<h4> <a name="ViewMenuLocal"></a>Local Time</h4>
+   The Local Time checkbox sets all displayed times to be in Local Time.
+  
+<h4> <a name="ViewMenuFontSize"></a>Font Size</h4>
+   The Font Size submenu on the View Menu allows the user to change the size 
+ of the font in which the messages are displayed in the <a
+ href="#Message_Display">message display</a>.   
+<h3> <a name="RefreshMenu"></a>Refresh Menu</h3>
+   The Refresh Menu has options to refresh the <a
+ href="#Message_Display">message  display</a> by performing a clear and then
+fetching <a href="#RefreshMenuSome">some</a> or <a
+ href="#RefreshMenuAll">all</a> of  the messages available in the DataTurbine
+for the current <a href="#SidebarGroups">group</a>.   
+<h4> <a name="RefreshMenuSome"></a>10 seconds, 1 minute, 10 minutes, 1 hour, 
+ 10 hours, 1 day, 10 days</h4>
+   The 10 seconds, 1 minutes, 10 minutes, 1 hour, 10 hours, 1 day, and 10 
+days buttons on the Refresh Menu each clears the <a
+ href="#Message_Display">message  display</a> and then fetches the last 10 
+seconds, 1 minutes, etc. of messages  available in the DataTurbine for the 
+current <a href="#SettingsMenuGroups">group</a>.   
+<h4> <a name="RefreshMenuAll"></a>All</h4>
+   The All button on the Refresh Menu clears the <a
+ href="#Message_Display">message display</a> and then fetches all messages
+ available in the DataTurbine for the current <a
+ href="#SettingsMenuGroups">group</a>.   
+<h3> <a name="OptionsMenu"></a>Options Menu</h3>
+   The Options menu permits the user to choose whether to <a
+ href="#SettingsMenuBeep">beep</a> on receipt of new messages, and whether
+ to <a href="#SettingsMenuLog">log</a> the on-going <i>rbnbChat</i> session. 
+  
+<center>
+<p><b></b></p>
+  </center>
+      
+<center>  
+<p><b></b></p>
+  </center>
+      
+<h4> <a name="SettingsMenuBeep"></a>Beep on New</h4>
+   The Beep on New button on the Settings Menu toggles beeping on and off.&nbsp; 
+ When beeping is enabled, <i>rbnbChat</i> will beep upon the receipt of any
+ new message.&nbsp; Beeping is off by default. <a href="#RefreshMenu">Refreshed</a> 
+ messages will not cause beeps.   
+<h4> <a name="SettingsMenuLog"></a>Log</h4>
+   The Log button on the Settings Menu toggles logging on and off.   
+<p>When logging is on, all messages written to the display are appended to
+ the file "Chat.log" in the current directory.&nbsp; <a
+ href="#RefreshMenu">Refreshed</a> messages are not logged. </p>
+   
+<h3> <a name="HelpMenu"></a>Help Menu</h3>
+   The Help menu has a button to show information about the rbnbChat program. 
+  
+<h4> <a name="HelpMenuAbout"></a>About</h4>
+   The About button on the Help Menu pops up a dialog box showing information 
+ about the <i>rbnbChat</i> program.   
+<h2><a name="Sidebar"></a>Sidebar</h2>
+At the right side of the <a
+ href="file:///S:/RBNB/V2Dev/Documentation/HTML/Chat/rbnbChat.html#User-Interface">user
+interface screen</a> is the sidebar. The sidebar shows the current connection
+information and allows the user to select the chat <a
+ href="#SidebarGroups">group</a>.<br>
+<h3><a name="SidebarHost">Host</a></h3>
+The current host is shown at the top of the sidebar. This is the full pathname
+of the chat host to which messages are sent and from which messages are received.
+The host provides the ring buffer (cache and archive) for the chat discussions.
+See the <a href="#FileMenuNew">New</a> menu selection.<br>
+<h3><a name="SidebarGroups">Groups</a></h3>
+The current group is shown in the middle of the sidebar. The current group
+is shown.<br>
+<br>
+Clicking on the group pops up a list of the groups currently available in
+the chat host. Selecting any of the groups will switch you from your current
+group to the selected group.<br>
+<br>
+At the end of the list is the &lt;NEW&gt; selection, which allows you to
+create a new group. This pops up the new group menu. shown below. Enter the
+name of a new group and select OK to switch to create and switch to the new
+group. <br>
+<br>
+<div align="center"><img src="rbnbChat_groups.JPG" alt="New group menu"
+ width="370" height="119">
+<br>
+<b>Example <i>rbnbChat</i> new groups menu</b><br>
+</div>
+<h3><a name="SidebarUsers">Users</a></h3>
+The users in the current group are shown at the bottom of the sidebar.<br>
+<br>
+Immediately under the Users tag is your name. You can change this name by
+<a href="#FileMenuOpen">opening </a>a new connection.<br>
+<br>
+Below that is the list of users in the current group. This list is updated
+when you switch <a href="#SidebarGroups">groups</a>,
+<a href="#RefreshMenu>refresh</a> the messages list, or a message is received
+from a user not already in the list.
+<p>
+The users in the group are all of the users for which there are still messages
+listed in the ring buffer. This may not be the same as the current list of
+users as some may have left and some may not have said anything in a long
+time.<br>
+<h2><a name="Message_Display"></a>Message Display</h2>
+   In the middle of the <a href="#User-Interface">user interface screen</a> 
+ is the message display. As messages are received by <i>rbnbChat</i>, it places
+them into this window. Each message is preceeded by the name of the person
+sending the message and, optionally, some combination of the sender's server
+name, and the date and time at which the message was sent to the DataTurbine. 
+  
+<center>  
+<p><b></b></p>
+  </center>
+   
+<h3><a name="Private_Mode"></a> <a name="MessDispSecure"></a>Private Mode</h3>
+  The user may enter a password in the <a href="#FileMenuOpen">Open Dialog</a> 
+or <a href="#FileMenuNew">New Dialog</a> when establishing a connection.&nbsp; 
+The connection is then private and <i>rbnbChat</i> is in private mode.&nbsp;
+ 
+<p>If a new chat host is created, then all discussions using that host are
+ private and are protected by the password provided. All users must supply 
+the same password to gain access to that chat host.</p>
+   
+<p>If a session is simply opened, then the password must match the password 
+of the chat host, if any, or the user will be denied access.</p>
+ 
+<p> </p>
+ 
+<p>In private mode,<i>rbnbChat</i> places a red border around the message
+ display.&nbsp;    </p>
+ 
+<h2> <a name="Message_Entry"></a>Message Entry</h2>
+   Under the&nbsp; <a href="#Message_Display">message display</a> on the
+<a href="#User-Interface">user interface screen</a> is the message entry
+field.  The user can type his or her messages into this field. The field
+scrolls if the message is too long to fit. The message is sent when the user
+presses  the <i>Enter</i> key and the message entry field is cleared.   
+<h3> <a name="MessEntryAlert"></a>Send Alert</h3>
+   A user may type a message into the entry field and then press the Send 
+Alert button, on the right of the entry field, to send the message as an alert.&nbsp;
+Alerts are displayed in a pop-up alert message box, as well as in the regular
+message display area, and rbnbChat will beep upon receipt of any alert message.
+  
+<p>The following is an example of an alert message box: </p>
+   
+<center>   
+<p><img src="rbnbChat_alert.JPG" height="136" width="350">
+   <br>
+  <b>Example <i>rbnbChat</i> alert message box</b></p>
+  </center>
+    <br>
+  <br>
+ <br>
+</body>
+</html>

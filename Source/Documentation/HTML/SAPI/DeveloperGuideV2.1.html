@@ -1,0 +1,964 @@
+<!DOCTYPE doctype PUBLIC "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+            
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=iso-8859-1">
+            
+  <meta name="Author" content="Matt Miller">
+            
+  <meta name="GENERATOR"
+ content="Mozilla/4.75 [en] (WinNT; U) [Netscape]">
+  <title>Simple API (SAPI) User Guide</title>
+</head>
+  <body>
+      
+<center>   
+<h1>    
+<hr width="100%"></h1>
+  </center>
+      
+<center>   
+<h1> RBNB WebTurbine<sup>TM</sup></h1>
+  </center>
+      
+<center>   
+<h1> Software Developer Manual</h1>
+  </center>
+      
+<center>   
+<h1> V2.1</h1>
+  </center>
+      
+<center>   
+<h2> July 8, 2002</h2>
+  </center>
+      
+<center>   
+<h2> Copyright Creare Inc.</h2>
+  </center>
+      
+<hr width="100%">   
+<h1> Table of Contents</h1>
+      
+<blockquote><b><a href="#1%20Introduction">1 Introduction</a></b>       
+  <blockquote><b><a href="#1.1%20Purpose">1.1 Purpose</a></b> <br>
+      <b><a href="#1.2%20Object%20Overview">1.2 Object Overview</a></b> <br>
+      <b><a href="#1.3%20Programming%20Environments">1.3 Programming Environments</a></b></blockquote>
+   <b><a href="#2%20ChannelMap">2 ChannelMaps</a></b>       
+  <blockquote><b><a href="#2.1%20Channel%20Names">2.1 Channel Names</a></b> 
+     <br>
+      <b><a href="#2.2%20Channel%20DataTypes">2.2 Channel DataTypes</a></b> 
+     <br>
+      <b><a href="#2.3%20Channel%20TimeStamps">2.3 Channel TimeStamps</a></b> 
+     <br>
+    <a href="#ChannelMap_Registration" style="font-weight: bold;">2.4 ChannelMap
+Registration</a><br>
+      <b><a href="#2.4%20ChannelMap%20Methods">2.5 ChannelMap Methods</a></b></blockquote>
+   <b><a href="#3%20Clients">3 Clients</a></b>       
+  <blockquote><b><a href="#3.1%20Base%20Client">3.1 Base Client</a></b> <br>
+      <b><a href="#3.2%20Source%20Client">3.2 Source Client</a></b> <br>
+      <b><a href="#3.3%20Sink%20Client">3.3 Sink Client</a></b> <br>
+      <b><a href="#3.4%20PlugIn%20Client">3.4 PlugIn Client</a></b></blockquote>
+   </blockquote>
+      
+<hr width="100%">   
+<h1> <a name="1 Introduction"></a>1&nbsp;&nbsp;&nbsp; Introduction</h1>
+      
+<h2> <a name="1.1 Purpose"></a>1. 1&nbsp;&nbsp; Purpose</h2>
+   This manual provides an overview of the RBNB Simple Application Programming 
+ Interface (SAPI) for the WebTurbine software. The SAPI is designed to provide 
+ maximum capability with minimum complexity. This document is not necessarily
+ a complete reference for all available SAPI methods. &nbsp;For a rigorous
+ reference document, see the associated javadoc package <i>com.rbnb.sapi</i>
+ documentation.   
+<p>The SAPI is implemented as a set of methods on top of the RBNB Java "RMap"
+ API. Certain concessions are made to optimize portability, such as avoiding
+ the use of overloaded methods.&nbsp; As of this point, the full RMap API
+is not supported for third party access, but the SAPI is a highly functional,
+ self contained interface to the RBNB. </p>
+   
+<h2> <a name="1.2 Object Overview"></a>1.2&nbsp;&nbsp;&nbsp; Object Overview</h2>
+   There are two main types of objects in the Simple API:   
+<blockquote> <li> <tt>ChannelMap</tt></li>
+    <li> <tt>Client</tt></li>
+   </blockquote>
+   The <i>ChannelMap</i> object organizes data.&nbsp; ChannelMaps are used 
+by RBNB clients to send, request, and retrieve data from an RBNB server. 
+ 
+<p>A <i>Client</i> object can be one of the following sub-classes: </p>
+   
+<blockquote> <li> <tt>Source</tt></li>
+    <li> <tt>Sink</tt></li>
+    <li> <tt>PlugIn</tt></li>
+   </blockquote>
+   An RBNB software developer writes RBNB "clients".&nbsp; Clients communicate 
+ with an RBNB server to send and retrieve data. A <i>Source</i> client sends 
+ data to the RBNB Server.&nbsp; A <i>Sink</i> fetches data from an RBNB Server.&nbsp;
+ A <i>PlugIn</i> receives requests (from the server on behalf of a <i>Sink</i>)
+ and responds with data (thus acting like both a <i>Sink</i> and <i>Source</i>). 
+  
+<h3> Channel Map</h3>
+   All RBNB data is organized in "channel maps".&nbsp; A channel map consists 
+ of a collection of named channels, each with data and timestamp.&nbsp; RBNB
+ clients manipulate channel maps as a means to make requests (sinks) and
+submit  data (sources).   
+<p>A source client builds a channel map consisting of one or more named channels.&nbsp;
+ For each channel it provides data of a specified type and quantity.&nbsp;
+ It also specifies a&nbsp; timestamp for the channel map as a whole, or for
+ the various pieces (channels and data) separately.&nbsp; After being so
+built,  the channel map is sent from the source client to the RBNB server.&nbsp;
+This process can be repeated, adding new channels or new data to existing
+channels. </p>
+   
+<p>A sink client builds a channel map in order to request data.&nbsp; Here, 
+ the channel map consists of named channels and timestamps, which is sent 
+to the RBNB server as a request.&nbsp; The response to this request is another
+ channel map, this time with the data filled in for the various channels. 
+</p>
+   
+<h3> Source Client</h3>
+   Source clients are "active", that is they initiate data transmittal to 
+the server.&nbsp; Each time a source sends some data to the server, it is 
+called a "frame".&nbsp; A source can send a sequence of frames to the server.&nbsp;
+ Each frame can consist of one or more named "channels".&nbsp; Each channel
+ can consist of one or more data points per frame.   
+<p>Key to the idea of RBNB is that all data is time-stamped.&nbsp; Timestamps 
+ can be per frame, per channel, and/or per data point.&nbsp; Timestamps can
+ be explicit (provided by the source), or implicit (automatically provided 
+ by the client API or RBNB server). </p>
+   
+<h3> Sink Client</h3>
+   Sink clients are "active", that is they initiate data retrieval from the 
+ server.&nbsp; Just as for a source, each time a sink gets frames of data 
+from a server.&nbsp; Each frame consists of one or more named channels, with 
+each channel consisting of one or more data points.   
+<p>A sink requests data by both channel name(s) and timestamp.&nbsp; The data
+returned to a sink can consist of multiple or partial source frames, depending
+upon the requested time slice.&nbsp; There are three modes by which a sink
+can get data from a server: </p>
+   
+<blockquote> <li> Request</li>
+    <li> Subscribe</li>
+    <li> Monitor</li>
+   </blockquote>
+   Requests are for a particular time interval, for which there is a single 
+ response for each such request.&nbsp; It is also possible to make a single 
+ request that is automatically repeated over a specified number of time intervals. 
+  
+<p>Subscribe and Monitor modes are open-ended in that new data is automatically 
+ sent (from the server to the sink client) as it becomes available.&nbsp; 
+Subscribe mode fetches all data, even if this means falling behind real-time.&nbsp; 
+ Monitor mode skips data in order to stay current. </p>
+   
+<h3> PlugIn Client</h3>
+   PlugIn clients are "passive", that is they wait for data requests from 
+the server, and send data to the server in response to those requests. PlugIns
+ act like a kind of combined sink/source. The server passes to the PlugIn
+any requests for PlugIn channels.&nbsp; Upon receipt of a request, a PlugIn
+acts as a source and sends its response to the server.   
+<p>A PlugIn can optionally register the specific channels that it can provide. 
+ Registered channels do not have any data in them, they are a means of "advertising" 
+ available channels. With registered channels, only requests for those specific 
+ channels will be forwarded by the server to that PlugIn. Otherwise, any request
+(e.g. "Plugin/anychan") is forwarded to the PlugIn. </p>
+   
+<p>Thus, a PlugIn can provide "services" that can involve fetching and processing
+ other RBNB data on the demand of third party applications.&nbsp; PlugIns
+can process data from other PlugIns, thus cascading sequences of processing
+steps. </p>
+   
+<h2> <a name="1.3 Programming Environments"></a>1.3&nbsp; Programming Environments</h2>
+   The RBNB developer can use one of several programming environments. Whereas 
+ this document most directly applies to the Java SAPI, the C/C++, Active X,
+Java Bean, and other APIs are directly layered on the Java SAPI.&nbsp; Thus,
+except for minor syntax differences, this documentation is generally applicable
+for these other APIs as well.   
+<h3> Java</h3>
+   The RBNB server and its API are themselves developed using 100% pure Java.&nbsp; 
+ Thus, the core API and its documentation is Java based.   
+<h3> Java Beans</h3>
+   There are extensions to the core Java API to support Java Beans.   
+<h3> Active X</h3>
+   The Java Bean API is further extended via an Active X Bridge to support 
+an Active X interface.   
+<h3> C/C++</h3>
+   There is a C/C++ compatibility layer built on top of the underlying Java 
+ API using the "Java Native Interface" (JNI).&nbsp; Most methods follow one-for-one
+ with the underlying Java code.   
+<h3> MATLAB</h3>
+   With Version 6 and later of Matlab, direct calls to Java are supported 
+from the command line mode of Matlab.&nbsp; Thus, Matlab uses the native Java
+RBNB API directly.&nbsp; Several simple utility M-files are provided as examples.
+  
+<p>In order to access the RBNB API from Matlab, you must edit the Matlab classpath.txt
+file to include the rbnb.jar file.&nbsp; Also, the default Java used by Matlab
+may not be recent enough to support RBNB.&nbsp; If this is the case, set
+the MATLAB_JAVA environment variable to a suitable JVM (e.g. C:\JavaSoft\jdk1.3.1\jre).
+ </p>
+   
+<p> </p>
+   
+<hr width="100%">   
+<h1> <a name="2 ChannelMap"></a>2&nbsp;&nbsp;&nbsp; ChannelMap</h1>
+   Clients manipulate data via a "ChannelMap" object. A ChannelMap is comprised 
+ of one or more RBNB channels, each consisting of a name, timestamp, and (optional)
+data.   
+<p>Channels are individually identified and "staged" using the <a
+ href="#ChannelMap.Add">ChannelMap.Add</a> method prior to being transferred
+ (<a href="#Sink.Fetch">Fetch</a> or <a href="#Source.Flush">Flush</a>).
+Behind  the scenes, the SAPI incrementally builds up and maintains the underlying 
+ "RMap" data structures. </p>
+   
+<h2> <a name="2.1 Channel Names"></a>2.1&nbsp;&nbsp;&nbsp; Channel Names</h2>
+   Multi-tiered hierarchical channel structures can be created, requested, 
+and referenced through a simple directory-like naming convention.&nbsp; A 
+fully specified channel name consists of three main parts:   
+<blockquote><tt>Server/Source/Channel</tt></blockquote>
+   Where:   
+<blockquote><tt>Server:&nbsp;&nbsp;&nbsp; serverName assigned at Server startup
+ (command line argument)</tt> <br>
+    <tt>Source:&nbsp;&nbsp;&nbsp; clientName given by Source via OpenRBNBConnection 
+ method</tt> <br>
+    <tt>Channel:&nbsp;&nbsp; channelName given by Source via ChannelMap.Add 
+ method</tt></blockquote>
+   Data Sources define channels (<a href="#ChannelMap.Add">ChannelMap.Add</a>) 
+ with the Server and Source parts implied. The channel name part may itself 
+ be multi-tiered, such as:   
+<blockquote><tt>Chan0</tt> <br>
+    <tt>Test43/C0</tt> <br>
+    <tt>Test43/C1</tt> <br>
+    <tt>A/B/C</tt></blockquote>
+   Data Sinks request channels (<a href="#ChannelMap.Add">ChannelMap.Add</a>) 
+ using either relative or absolute (full-path) names. For example:   
+<blockquote><tt>/Server/MySource/Test43/C2&nbsp;&nbsp;&nbsp; # absolute path</tt> 
+   <br>
+    <tt>MySource/Test43/C2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+ # relative path</tt></blockquote>
+   Absolute paths start with a slash, and include the top level (parent)
+server  all the way down to the channel name(s).&nbsp; Relative paths do
+not start  with a slash, and begin with a Source name on the local server.
+  
+<p>For Sinks, and when requesting a list of available Server channels, wildcards
+ can also be used, as in: </p>
+   
+<blockquote><tt>MySource/Test/...</tt> <br>
+    <tt>*/c0</tt> <br>
+    <tt>/Server/*/_Msg/...</tt></blockquote>
+   The following Table summarizes the wildcard syntax available to the <a
+ href="#ChannelMap.Add">ChannelMap.Add</a> (Sink-only) and <a
+ href="#Client.GetList">Client.GetList</a> methods. <br>
+  &nbsp;   
+<center>  
+<table border="1" width="89%">
+   <tbody>
+      <tr>
+   <td><b>Match String</b></td>
+    <td><b>Description</b></td>
+   </tr>
+    <tr>
+   <td><tt>"*"</tt></td>
+    <td>All objects (servers/sources/channels) at this level (one deep)</td>
+   </tr>
+    <tr>
+   <td><tt>"..."</tt></td>
+    <td>All channels this level and down (recursive depth).&nbsp; Must be 
+last  part of multi-tiered name.</td>
+   </tr>
+    <tr>
+   <td><i>more to come</i></td>
+    <td><br>
+        </td>
+   </tr>
+          
+  </tbody><caption align="bottom">       
+  <center><b>SAPI Channel Naming Wildcard Notation</b></center>
+   </caption>   
+</table>
+  </center>
+      
+<p><b><i>Note:</i></b>&nbsp; As of the current release, wildcards are not 
+ completely supported. </p>
+   
+<h2> <a name="2.2 Channel DataTypes"></a>2.2&nbsp;&nbsp;&nbsp; Channel DataTypes</h2>
+   ChannelMap Data (<a href="#2.4.3%20Putting%20Data">PutData</a>) can be 
+specified  as a particular primitive data type, per the following table. <br>
+  &nbsp;   
+<center>  
+<table border="1" width="89%">
+   <tbody>
+      <tr>
+   <td><a name="DataType Codes"></a><b>DataType Code</b></td>
+    <td><b>Description</b></td>
+   </tr>
+    <tr>
+   <td><tt>TYPE_FLOAT32</tt></td>
+    <td>Single precision (32 bit) floating point number</td>
+   </tr>
+    <tr>
+   <td><tt>TYPE_FLOAT64</tt></td>
+    <td>Double precision (64 bit) floating point number</td>
+   </tr>
+    <tr>
+   <td><tt>TYPE_INT8</tt></td>
+    <td>8-bit integer (byte)&nbsp;</td>
+   </tr>
+    <tr>
+   <td><tt>TYPE_INT16</tt></td>
+    <td>16-bit integer (short int)</td>
+   </tr>
+    <tr>
+   <td><tt>TYPE_INT32</tt></td>
+    <td>32-bit integer (int)</td>
+   </tr>
+    <tr>
+   <td><tt>TYPE_INT64</tt></td>
+    <td>64-bit integer (long)</td>
+   </tr>
+    <tr>
+   <td><tt>TYPE_STRING</tt></td>
+    <td>Variable length String (character array) object</td>
+   </tr>
+    <tr>
+   <td><tt>TYPE_UNKNOWN</tt></td>
+    <td>Unknown or unspecified (byte array)</td>
+   </tr>
+          
+  </tbody><caption align="bottom">       
+  <center><b>SAPI DataType Codes</b></center>
+   </caption>   
+</table>
+  </center>
+      
+<p>When specifying a primitive DataType with a word length greater than 8
+ bits (1 byte), the word order (MSB,LSB) is automatically set to match that
+ of the local native CPU upon which the Source application runs. </p>
+   
+<h2> <a name="2.3 Channel TimeStamps"></a>2.3&nbsp;&nbsp;&nbsp; Channel TimeStamps</h2>
+   A Source sets the timestamp for subsequent data transmittal using either 
+ a manual (<a href="#ChannelMap.PutTime">PutTime</a>) or automatic (<a
+ href="#ChannelMap.PutTimeAuto">PutTimeAuto</a>) method.   
+<p>Each manual timestamp applies to the data specified by one or more subsequent 
+ calls to <a href="#ChannelMap.PutData">PutData</a>, until a time-setting 
+method is called again.&nbsp; Thus, you can choose to timestamp data point 
+by point, channel by channel, or frame by frame depending on how you interleave 
+your calls to PutTime and PutData. </p>
+   
+<p>Automatic time stamps are updated once upon each data <a
+ href="#Source.Flush">Flush</a>.&nbsp; Thus, automatic timestamps are always
+ frame by frame. </p>
+   
+<p>RBNB timestamps must monotonically increase.&nbsp; Thus, if you are manually
+ providing timestamps, be sure to never decrease the start time call-to-call.<br>
+  </p>
+   
+<h2><a name="ChannelMap_Registration"></a>2.4 &nbsp; &nbsp;ChannelMap Registration</h2>
+ When a Source puts ChannelMaps to a server, the channels are automatically 
+registered. &nbsp;See <a
+ href="file:///S:/RBNB/V2Dev/Documentation/HTML/SAPI/DeveloperGuideV2.1.html#Sink.RequestRegistration">Sink.RequestRegistration</a> 
+for how to get the ChannelMap from which a list of channel strings may be 
+obtained. &nbsp;<br>
+ <br>
+ A Source or PlugIn can also specifically register its channels, and in so 
+doing add "metadata" (descriptive information) about the channels.&nbsp; That
+is, the datablock in the registration ChannelMap is descriptive meta-data
+ about the corresponding Source channel. &nbsp;Since the registration information
+ is not part of the ring-buffer, this meta-data is static (i.e. does not
+change  with time, nor does it "drop off" the ring buffer). <br>
+<h2><a name="2.4 ChannelMap Methods"></a>2.5 &nbsp;&nbsp; ChannelMap  Methods</h2>
+      
+<h3> <a name="2.4.1 Construction"></a>2.5.1&nbsp;&nbsp;&nbsp; Construction</h3>
+   The following ChannelMap methods build, edit and access the list of channels. 
+  
+<h4> <a name="ChannelMap.Add"></a><tt>int Add(String channelName)</tt></h4>
+   Each call to ChannelMap.Add builds up the list of channels to be either 
+sent or fetched by the Source or Sink, respectively.&nbsp; ChannelMap.Add 
+returns an index that increments with the number of channels added.&nbsp; 
+For Sources, this index can be used as the reference index for use in the 
+PutData method.&nbsp; For Sinks, it is possible to get more or less channels 
+than you specify (e.g. using wildcards), so you must inquire (with GetName 
+or GetIndex) which channels have been <a href="#Fetch%20Data">Fetched</a>. 
+   
+<h4> <a name="ChannelMap.Clear"></a><tt>void Clear()</tt></h4>
+   This method clears out the channel map built by the <a
+ href="#AddChannel">ChannelMap.Add</a> method, and frees associated memory.&nbsp;
+ Use it when you want to build a new channel map from a "clean slate".   
+<h3> <a name="2.4.3 Putting Data"></a>2.5.2&nbsp;&nbsp;&nbsp; Putting Data
+ and Timestamps</h3>
+   The following methods put data in a ChannelMap.&nbsp; These are generally 
+ used by Data Sources (and PlugIns).   
+<p>Note that putting data into a ChannelMap does not send the data to an RBNB
+server, it builds a local ChannelMap.&nbsp; After building the ChannelMap, 
+ it is sent from the client to the RBNB server via the <a
+ href="#Source.Flush">Source.Flush</a> method. </p>
+   
+<h4> <a name="ChannelMap.PutData"></a><tt>void PutData(int chanIndex, byte[] 
+ rawData, int typeID)</tt></h4>
+   The generic PutData method sets the data to be sent as a byte-array plus 
+ an associated <tt>typeID</tt>.&nbsp; The <tt>typeID</tt> is one of the <a
+ href="#DataType%20Codes">DataTypeCodes</a>.&nbsp; Use the channel index
+from the associated <a href="#AddChannel">ChannelMap.Add</a> method, or use
+the <a href="#ChannelMap.Index">GetIndex</a> method.   
+<p><b><i>Note:</i></b>&nbsp; Mixing different DataTypes in a single channel 
+ is not supported, and may cause difficulties for Sink applications that try
+to extract mixed-type data. </p>
+   
+<h4> <a name="ChannelMap.PutDataAsXXX"></a><tt>void PutDataAsXXX(int chanIndex, 
+ XXX[] data)</tt></h4>
+   The family of PutDataAsXXX methods specifies the primitive type of the 
+supplied data array, where XXX corresponds to one of the <a
+ href="#Data%20Type%20Codes">DataType Codes</a>.&nbsp; For example, PutDataAsFloat32
+ lets you directly send a floating point data array with no need to first
+convert it to a byte array. (Overloaded methods are not used to enhance portability
+ of the SAPI).   
+<p><b><i>Note</i></b>:&nbsp; PutDataAsString puts a <i>single </i>String object,
+which is considered to be an indivisible data word. </p>
+   
+<h4> <a name="ChannelMap.PutTime"></a><tt>void PutTime(int chanIndex, double 
+ start, double duration)</tt></h4>
+      
+<h4> <a name="ChannelMap.PutTimes"></a><tt>void PutTimes(double[] times)</tt></h4>
+      
+<h4> <a name="ChannelMap.PutTimeAuto"></a><tt>void PutTimeAuto(String timeMode)</tt></h4>
+   <a name="ChannelMap.PutTimeRef"></a><b><tt>void PutTimeRef(ChannelMap
+sourceMap,  int channelIndex)</tt></b>   
+<p>These methods establish the time-stamping method for the ChannelMap.&nbsp; 
+ All PutData calls following a PutTime call will be timestamped accordingly.&nbsp; 
+ For example, you can call PutTime once for the whole ChannelMap, in which 
+ case all data for all channels share a common timestamp.&nbsp; Or you can 
+ PutTime separately before every PutData call, giving unique timestamps to
+ every data point for every channel. </p>
+   
+<h3> <a name="2.4.2 Getting Data"></a>2.5.3&nbsp;&nbsp;&nbsp; Getting Data
+ and Timestamps</h3>
+   The following methods access the data in a ChannelMap. These are generally 
+ used by Data Sinks (and PlugIns).   
+<p>Note that getting data from a ChannelMap does not fetch if from the RBNB
+ server, it extracts it from a local ChannelMap.&nbsp; Prior to getting data,
+ the ChannelMap is sent from the RBNB server to the client via the <a
+ href="#Sink.Fetch">Sink.Fetch</a> method. </p>
+   
+<h4> <tt>byte[] GetData(int chanIndex)</tt></h4>
+   This generic extract data method gets data as a byte-array from the ChannelMap. 
+  
+<h4> <a name="ChannelMap.GetDataAsXXX"></a><tt>XXX[] GetDataAsXXX(int chanIndex)</tt></h4>
+   The family of ChannelAsXXX methods specifies the primitive data type of 
+the returned data array, where XXX corresponds to one of the <a
+ href="#DataType%20Codes">DataType Codes</a>.&nbsp; For example, GetDataAsFloat32
+ lets you retrieve a floating point data array with no need to convert it
+from a byte array.&nbsp; If the fetched data does not match the type, an
+exception will be thrown.&nbsp; You can check the type using the ChannelType
+method.   
+<p><b><i>Note</i></b>:&nbsp; GetDataAsString gets an <i>array</i> of <tt>String</tt> 
+ objects, where each <tt>String</tt> is considered to be an indivisible, individually
+time-stamped, variable-length data word. </p>
+   
+<h4> <a name="ChannelMap.GetTimes"></a><tt>double[] GetTimes(chanIndex)</tt></h4>
+   This method returns an array of double precision RBNB time values for
+the  specified channel index. There will be one time point per data point.If
+necessary, the point times will be linearly interpolated from the underlying
+ start time and duration of the corresponding data array.&nbsp; See <a
+ href="#ChannelMap.PutTime">PutTime</a>.    
+<h3> <a name="2.4.4 ChannelMap Utilities"></a>2.5.4&nbsp;&nbsp; DataType
+Info</h3>
+   These methods provide information about the datatype of a channel.   
+<h4> <a name="ChannelMap.GetType"></a><tt>int GetType(int chanIndex)</tt></h4>
+   This method returns a <a href="#DataType%20Codes">DataType Code</a> for
+ the primitive data type of the fetched data for a given channel.&nbsp; It
+ can be used to determine which of the GetDataAsXXX methods to call.   
+<h4> <a name="ChannelMap.TypeID"></a><tt>int TypeID(String type)</tt></h4>
+      
+<h4> <a name="ChannelMap.TypeName"></a><tt>String TypeName(int typeID)</tt></h4>
+   These methods convert the datatype string to numerical constant, and vice 
+ versa. <br>
+     
+<h3><a name="ChannelLists"></a> 2.5.5&nbsp;&nbsp;&nbsp; Channel Lists</h3>
+   There are several methods to let you inspect and get the names of the
+channels  in a ChannelMap object.&nbsp; The methods are:<br>
+     
+<h4> <a name="ChannelMap.Name"></a><tt>String GetName(int index)</tt></h4>
+   This utility method provides a means to get the channel name given the 
+channel index. For Sinks, you can use this method to discover which channels 
+were successfully <a
+ href="file:///S:/RBNB/V2Dev/Documentation/HTML/SAPI/DeveloperGuideV2.1.html#Fetch%20Data">Fetched</a>.<br>
+   
+<h4> <a name="ChannelMap.Index"></a><tt>int GetIndex(String channelName)</tt></h4>
+    This utility method provides a means to get the channel <tt>index</tt> 
+given the <tt>channelName</tt>.&nbsp; For Sources, the return value of <a
+ href="#ChannelMap.Add">ChannelMap.Add</a> is a reliable channel index.&nbsp;
+ For Sinks, you may need to use this method to determine the reference index
+ of <a
+ href="file:///S:/RBNB/V2Dev/Documentation/HTML/SAPI/DeveloperGuideV2.1.html#Fetch%20Data">Fetched</a> 
+ channels.<br>
+   
+<h4> <a name="ChannelMap.GetChannelList"></a><tt>String[] GetChannelList()</tt></h4>
+  This convenience function is built upon the GetName method. &nbsp;It returns
+ a list of &nbsp;channel names from the channel map. &nbsp;Here, "channels"
+ are defined as RMap nodes that have data.<br>
+     
+<h4> <a name="ChannelMap.GetNodeList"></a><tt>String[] GetNodeList()</tt></h4>
+  This method is like GetChannelList, but it returns a separate entry for 
+every "node" in the ChannelMap. &nbsp;This includes every parent and child 
+node in the channel map tree, i.e. each item delimited by the slash (/) character.
+ &nbsp;For example, if a ChannelMap contains the channel "/Server/Source/Channel",
+ the return result would be "/Server", "/Server/ Source", and "/Server/Source/Channel".<br>
+ 
+<h4> <a name="ChannelMap.GetChannelList"></a><tt>int[] Search(String mimeType, 
+String keywords)</tt></h4>
+ This&nbsp; method returns an array of channel indices that match the specified 
+mimeType and keyword string. &nbsp;It is most useful for searching the Registration 
+ChannelMap for channels of interest.<br>
+ 
+<p> </p>
+   
+<hr width="100%">   
+<h1> <a name="3 Clients"></a>3&nbsp;&nbsp;&nbsp; Clients</h1>
+   Clients manipulate <i>ChannelMaps</i> to send and receive data from an 
+RBNB server.   
+<h2> <a name="3.1 Base Client"></a>3.1&nbsp;&nbsp;&nbsp; Base Client</h2>
+   The <i>Client</i> class is the base class of all simple clients (<i>Source</i>, 
+ <i>Sink</i>, <i>PlugIn</i>) to RBNB servers.&nbsp; The base <i>Client</i>
+ class encapsulates functionality common to all clients.   
+<h3> <a name="3.1.1 Client Connections"></a>3.1.1&nbsp;&nbsp;&nbsp; Client
+ Connections</h3>
+   Clients have methods to open and close connections between the client
+application  and an RBNB server.   
+<h4> <a name="OpenRBNBConnection"></a><tt>void OpenRBNBConnection(String
+serverAddress, String clientName, String userName, String password)</tt></h4>
+   To open a connection identify the server (<tt>serverAddress</tt>), and 
+identify the client (<tt>clientName</tt>).&nbsp; The <tt>clientName</tt> is
+used for display in applications such as <i>rbnbAdmin</i>, and provides a
+handle for other applications to administer and access data from this client. 
+  
+<p>Clients optionally provide a <tt>userName</tt> and <tt>password</tt> as
+ part of the connection process.&nbsp; If these are defaulted to NULL, there
+ will be no user name by which you can be granted access to restricted data. 
+ </p>
+   
+<p><b><i>Note</i></b>:&nbsp; As of the current release, <tt>userName</tt> 
+ and <tt>password</tt> authorization is not implemented. </p>
+   
+<h4> <a name="CloseRBNBConnection"></a><tt>void CloseRBNBConnection(boolean 
+ keepCache, boolean keepArchive)</tt></h4>
+   Upon shutting down a connection, the client application can specify whether 
+ or not to maintain data in the cache and/or archive portions of the ring 
+buffer.&nbsp; Specify <tt>keepArchive=false</tt> to delete the disk archive 
+associated with this connection.   
+<h3> <a name="3.1.2 Server Object Lists"></a>3.1.2&nbsp;&nbsp;&nbsp; Get
+Server Info</h3>
+   &nbsp;It is possible to get a the name of the connected server, and of 
+yourself (the connected client).    
+<h4> <a name="Client.GetServerName"></a><tt>String[] GetServerName()</tt></h4>
+      
+<h4> <a name="Client.GetClientName"></a><tt>String[] GetClientName()</tt></h4>
+   These methods return the name of the local RBNB server, and the name of 
+the connected client application, respectively.   
+<h4> </h4>
+<b><i>Memory allocation note for C/C++ programmers:</i></b> <br>
+The data strings returned by the GetName methods are automatically allocated
+ by the API, but are then "owned" and should be released by the client application.
+ A special C/C++ utility function, <tt>rbnbFreeStringList(slist, nitem)</tt>
+ is provided for this purpose.    
+<h3> <a name="3.1.3 Ring Buffer Properties"></a>3.1.3&nbsp;&nbsp;&nbsp; Ring 
+ Buffer Properties</h3>
+      
+<h4> <a name="Client.SetRingBuffer"></a><tt>SetRingBuffer (int cacheSize,
+ String archiveMode, int archiveSize)</tt></h4>
+   Clients can set the size of the RBNB server ring buffer associated with 
+its data.&nbsp; Normally, this only applies to Source clients.&nbsp; Sink 
+and PlugIn clients have no existing use for this method (although future enhancements
+may enable a Sink to manage multiple requests stored on the server).   
+<p>The <tt>cacheSize</tt> and <tt>archiveSize</tt> parameters specify the 
+ sizes of the RAM and disk ring buffers (in frames), respectively.&nbsp; Each
+call to "Flush" by a Source constitutes one "frame". </p>
+   
+<p>The <tt>archiveMode</tt> parameter has one of the following values: </p>
+   
+<p><tt>&nbsp;&nbsp;&nbsp; "none"&nbsp;&nbsp; - </tt>No archive is to be used
+ (default) <br>
+  <tt>&nbsp;&nbsp;&nbsp; "load"&nbsp;&nbsp; - </tt>Load the archive that
+matches  this application <tt>clientName</tt> <br>
+  <tt>&nbsp;&nbsp;&nbsp; "create" - </tt>Create a new archive, delete an
+existing  one if one is present <br>
+  <tt>&nbsp;&nbsp;&nbsp; "append" - </tt>Add to an existing archive, create
+ a new one if necessary </p>
+   
+<p> </p>
+   
+<hr width="100%">   
+<h2> <a name="3.2 Source Client"></a>3.2&nbsp;&nbsp;&nbsp; Source Client</h2>
+   An RBNB data source sends data to and RBNB server. A data Source client 
+has the following tasks, which may be repeated as desired:   
+<blockquote> <li> Define a ChannelMap</li>
+    <li> Set TimeStamp(s)</li>
+    <li> Specify data for channel(s)</li>
+    <li> Flush data to RBNB server</li>
+   </blockquote>
+      
+<h3> <a name="3.2.1 Define Channel Map"></a>3.2.1&nbsp;&nbsp;&nbsp; Define
+ Channel Map</h3>
+   A Source channel map is defined by calls to the <a
+ href="#ChannelMap.Add">ChannelMap.Add</a> method.&nbsp; This associates
+channel names with channel indices, which in turn are used for efficient,
+potentially repeated references in the <a href="#ChannelMap.PutData">ChannelMap.PutData</a> 
+ method.   
+<h3> <a name="3.2.2 Time Stamps"></a>3.2.2&nbsp;&nbsp;&nbsp; Time Stamps</h3>
+   ChannelMap timestamps are specified using the <a
+ href="#ChannelMap.PutTime">ChannelMap.PutTime</a> method(s).   
+<h3> <a name="3.2.3 Specify Channel Data"></a>3.2.3 Specify Channel Data</h3>
+   The <tt>PutData</tt> methods specify the channel data to send at the next 
+ call to the <tt>Flush</tt> method.&nbsp; These methods reference the channels 
+ by the index returned by <a href="#ChannelMap.Add">ChannelMap.Add</a>. They
+ provide data either as a generic byte-array or as a particular data type. 
+  
+<p>PutData may be called multiple times per channel per Flush, building up
+ a many-point-per-channel data frame in a piecemeal manner as may be convenient
+ to the application.&nbsp; The SAPI has sophisticated "Deep CVT" logic which
+ automatically consolidates and organizes data into efficient RMap structures.&nbsp;
+ It will always be somewhat more efficient to handle fewer, larger data buffers,
+ however. </p>
+   
+<p><b><i>Memory allocation note for C/C++ programmers:</i></b> <br>
+  The data buffers provided by a source to the API are "owned" by the client
+ application.&nbsp; I.e. the client application is responsible to allocate
+ and free its own data buffers. </p>
+   
+<h3> <a name="3.2.4 Flush Data"></a>3.2.4 Flush Data</h3>
+   Once things are set up, send the data to the server.   
+<h4> <a name="Source.Flush"></a><tt>int Source.Flush(ChannelMap cmap, boolean 
+ blockingIO)</tt></h4>
+   After staging information with the time and data setting methods (i.e. 
+<a href="#ChannelMap.PutTime">PutTime</a> and <a
+ href="#ChannelMap.PutData">PutData</a>), the specified channel map is sent
+ as a consolidated RMap with the Flush method.   
+<p>Each call to Flush involves round-trip network communication, therefore 
+ staging larger data frames (with larger buffers and/or multiple calls to 
+PutData) prior to flushing them may provide a significant performance advantage. 
+Of course, you need to also consider the associated impact on memory use and
+latency when deciding how often to Flush your data. </p>
+   
+<p>If the <tt>blockingIO</tt> parameter is <tt>true</tt>, it will block until
+ the data is sent.&nbsp; If there is no data to send, calling <tt>Flush(cmap,true)</tt> 
+ will synchronize your application with the server.&nbsp;&nbsp; It returns 
+ the number of channels sent. </p>
+   
+<p><b><i>Note</i></b>: Flushing the channel map clears the data.&nbsp; Thus,
+ only new data (via PutData) since the previous call to Flush are sent each
+ time. </p>
+   
+<h3> <a name="3.2.5 Example Source Code"></a>3.2.5 Source Example Code</h3>
+   The following code opens a connection to a local RBNB server and sends 
+a message string to it. <br>
+  &nbsp;   
+<center>  
+<table border="1" cols="1" width="95%">
+   <tbody>
+      <tr>
+   <td> <br>
+        <tt>&nbsp;&nbsp; Source mySource = new Source();</tt> <br>
+        <tt>&nbsp;&nbsp; mySource.OpenRBNBConnection("localhost", "mySource");</tt> 
+              
+      <p><tt>&nbsp;&nbsp; ChannelMap cmap = new ChannelMap();</tt> <br>
+        <tt>&nbsp;&nbsp; cmap.PutTimeAuto("timeofday");</tt> <br>
+        <tt>&nbsp;&nbsp; int index = cmap.Add("myChan");</tt> <br>
+        <tt>&nbsp;&nbsp; cmap.PutDataAsString(index, "Hello World!");</tt> 
+      </p>
+               
+      <p><tt>&nbsp;&nbsp; mySource.Flush(cmap, true);</tt> <br>
+        <tt>.&nbsp;</tt></p>
+        </td>
+   </tr>
+          
+  </tbody><caption align="bottom"><b>Source Example Code</b></caption>   
+</table>
+  </center>
+      
+<h2>    
+<hr width="100%"></h2>
+      
+<h2> <a name="3.3 Sink Client"></a>3.3&nbsp;&nbsp;&nbsp; Sink Client</h2>
+   An RBNB data sink fetches data from and RBNB server. A sink client has 
+the following tasks, repeated as desired:   
+<blockquote> <li> Specify request ChannelMap</li>
+    <li> Select sink mode</li>
+    <li> Fetch response ChannelMap</li>
+    <li> Extract data and time from response ChannelMap</li>
+   </blockquote>
+      
+<h3> <a name="3.3.1 Request ChannelMap"></a>3.3.1&nbsp;&nbsp;&nbsp; Request 
+ ChannelMap</h3>
+   A Sink clients formulates a request ChannelMap that defines the names
+and  timestamps of the data to be fetched.&nbsp; Channel names are defined
+by calls to the <a href="#ChannelMap.Add">ChannelMap.Add</a> method, and
+the associated channel times are defined by calls to the <a
+ href="#ChannelMap.PutTime">ChannelMap.PutTime</a>  method(s).   
+<h3> <a name="3.3.2 Sink Modes"></a>3.3.2&nbsp;&nbsp;&nbsp; Sink Modes</h3>
+   There are three types of sink data fetch modes:   
+<ul>
+   <li> <tt>Subscribe - </tt>All new data is to be streamed without gaps</li>
+    <li> <tt>Monitor&nbsp;&nbsp; - </tt>"Current" up-to-date live information
+ is to be sent best-effort.</li>
+    <li> <tt>Request&nbsp;&nbsp; - </tt>A particular time-slice of data is
+ requested</li>
+     
+</ul>
+   Each sink fetch mode applies to the group of channels specified by the 
+ChannelMap.   
+<h4> <a name="Sink.Subscribe"></a><tt>void Subscribe(ChannelMap cmap)</tt></h4>
+   This is the simplest data fetch mode.&nbsp; It takes a channel map as
+an  argument and returns no value.&nbsp; It initiates a streaming "push"
+of data (from server to client) for all specified channels starting at the
+time of this call, and proceeding into the future.&nbsp; A single call to
+Subscribe  can be followed by repeated calls to Fetch, where the next frame
+of data is received.&nbsp; Note that the frame size is determined by the
+source application(s).   
+<p>Subscribe is the most efficient mode in that data frames are streamed from
+the server without waiting for acknowledgment from the sink client.&nbsp; 
+ If the client does not keep up, the data delivered will fall further and 
+further behind until it falls off the beginning (oldest) data in the source 
+ring buffer, at which point the stream aborts. </p>
+   
+<h4> <a name="Sink.Monitor"></a><tt>void Monitor(ChannelMap cmap, int gapControl)</tt></h4>
+   This provides a variation on the subscribe mode.&nbsp; It initiates a
+stream  of "current" data that will skip-forward as necessary to stay up
+to date.&nbsp;  Full source frames are returned each Fetch. The <tt>gapControl</tt>
+argument  specifies how many frames behind it can get before it will jump
+ahead (and  miss data) in order to stay current.   
+<p>When Monitor mode keeps up, it is much like Subscribe, except that there 
+ is more round-trip traffic between the client and server for Monitor mode 
+ (to establish the <tt>gapControl</tt> criterion).&nbsp; Unlike Subscribe 
+mode, the stream will not abort if the client doesn't keep up; but data can 
+be dropped with resulting gaps. </p>
+   
+<p><b><i>Note:</i></b>&nbsp; As of the current release, the gapcontrol logic
+ is not fully implemented. </p>
+   
+<h4> <a name="Sink.Request"></a><tt>void Request(ChannelMap cmap, double
+start, double duration, String timeRef)</tt></h4>
+   The basic Request mode asks for a time-slice of data beginning at <tt>start</tt> 
+ and running for a <tt>duration</tt> amount.&nbsp; The <tt>timeRef</tt> 
+argument specifies the time-reference for <tt>start</tt>.&nbsp; The following
+table summarizes the various <span style="font-family: monospace;">timeRef</span>
+options. <br>
+  &nbsp;   
+<center>  
+<table border="1" width="90%">
+   <tbody>
+      <tr>
+   <td><b>&nbsp;timeRef</b></td>
+    <td><b>&nbsp;Description</b></td>
+   </tr>
+    <tr>
+   <td>&nbsp;"absolute"&nbsp;</td>
+    <td>Request a <tt>duration</tt> amount of data at a <tt>start</tt> time 
+ specified in absolute-seconds from midnight, Jan 1st, 1970 UTC.</td>
+   </tr>
+        <tr>
+   <td>&nbsp;"oldest"</td>
+    <td>Request a <tt>duration</tt> amount of data where <tt>start</tt> is 
+relative to the oldest available data.&nbsp;</td>
+   </tr>
+    <tr>
+      <td valign="top">"newest"<br>
+      </td>
+      <td valign="top">Request a <tt>duration</tt> amount of most recent
+data.&nbsp; Offset  the most recent point by <tt>start</tt> amount.&nbsp;
+E.g. to request "yesterday",  use <tt>Request(cmap, OneDay, OneDay, "newest")</tt><br>
+      </td>
+    </tr>
+    <tr>
+   <td>&nbsp;"after"</td>
+    <td>Request the newest <tt>duration</tt> amount of data, but trim the 
+result  to the part that is after the specified <tt>start</tt> time.&nbsp; 
+For example, "send newest data, but only the part newer than what I already 
+have".&nbsp;</td>
+   </tr>
+    <tr>
+   <td>&nbsp;"modified"</td>
+    <td>Request the newest <tt>duration</tt> amount of data, but only send 
+it if at least part of it is newer than the specified <tt>start</tt> time.&nbsp; 
+ For example, "send the whole request, but only if at least part of it has 
+ changed since the last time".&nbsp;</td>
+   </tr>
+         
+  </tbody>  
+</table>
+  </center>
+      <br>
+Note that both <span style="font-family: monospace;">start</span> and <span
+ style="font-family: monospace;">duration</span> are always positive numbers.
+&nbsp;For "absolute" and "oldest" time-references, <span
+ style="font-family: monospace;">duration</span> extends to right (future)
+of the <span style="font-family: monospace;">start</span> point. &nbsp;For
+all the other (e.g. "newest") time-references, <span
+ style="font-family: monospace;">duration </span>extends to the left (past)
+of the <span style="font-family: monospace;">start</span> point. For example, 
+ to get the most recent data, use a <span
+ style="font-family: monospace;">start</span> of zero:   <tt><br>
+ <br>
+ </tt> 
+<div style="margin-left: 40px;"><tt>sink.Request(cmap, 0, 1, "newest")</tt><br>
+ </div>
+<p>There is always one <tt>Fetch'</tt>d channel map returned for each <tt>Request</tt>, 
+ even if this is a <i>NULL</i> map for the cases where there is no data. A
+<span style="font-style: italic;">NULL</span> map can occur for the "after"
+or "modified" cases, or when there is simply no data at the requested time.
+</p>
+   
+<p> </p>
+   
+<h4> <a name="Sink.RequestRegistration"></a><tt>void RequestRegistration(ChannelMap 
+ cmap)</tt></h4>
+   Sends a request to the server for the current registration map for the 
+channels in the specified cmap.&nbsp; The channel map retrieved via the followup 
+<span style="font-family: monospace;">Fetch</span> call can be inspected
+using the <a href="#ChannelMap.GetChannelList">ChannelMap.ChannelList</a>
+ method to get a list of channels and other server objects (sources, sinks).
+ The Registration channel map will contain any source-provided metadata.&nbsp;
+<h3> <a name="3.3.3 Fetch Data"></a>3.3.3&nbsp;&nbsp;&nbsp; Fetch Response</h3>
+   After building the ChannelMap and setting the <a
+ href="#3.3.2%20Sink%20Modes">Sink Mode</a> (in that order), get the RBNB
+ data using the Fetch method.   
+<h4> <a name="Sink.Fetch"></a><tt>ChannelMap Fetch(boolean blockingIO)</tt></h4>
+   This method reads the data from the RBNB server for all channels in the 
+current local Channel List (built by <a href="#AddChannel">ChannelMap.Add</a>).&nbsp; 
+ It returns the number of channels retrieved.   
+<p>If the <tt>blockingIO</tt> parameter is <tt>true</tt>, it will block until
+ the data is retrieved.&nbsp; Otherwise, it will either return a positive 
+integer indicating data was ready and has been read, or a zero (0) indicating 
+no data was yet available. </p>
+   
+<h3> <a name="3.3.4 Extract Data"></a>3.3.4&nbsp;&nbsp;&nbsp; Extract Data</h3>
+   Fetched data is stored the ChannelMap returned by Fetch.&nbsp; Access
+to  the data and time is via the associated <a
+ href="#2.4.2%20Getting%20Data">ChannelMap.Get</a> methods.   
+<p><b><i>Memory allocation note for C/C++ programmers:</i></b> <br>
+  The data buffers for the fetched data are automatically allocated by the
+ API, but are then "owned" by the client application.&nbsp; I.e. the client
+ application is responsible to free the extracted data and time buffers,
+using  the standard system<i> free()</i> function. </p>
+   
+<h3> <a name="3.3.5 Example Sink Code"></a>3.3.5 Sink Example Code</h3>
+   The following code snippet will fetch the message sent to the local RBNB 
+ Server by the earlier <a href="#3.2.5%20Example%20Source%20Code">Data-Source</a> 
+ example. <br>
+  &nbsp;   
+<center>  
+<table border="1" cols="1" width="95%">
+   <tbody>
+      <tr>
+   <td> <br>
+        <tt>&nbsp;&nbsp; Sink mySink = new Sink();</tt> <br>
+        <tt>&nbsp;&nbsp; mySink.OpenRBNBConnection("localhost", "mySink");</tt> 
+              
+      <p><tt>&nbsp;&nbsp; ChannelMap reqmap = new ChannelMap();</tt> <br>
+        <tt>&nbsp;&nbsp; reqmap.Add("mySource/myChan");</tt> </p>
+               
+      <p><tt>&nbsp;&nbsp; mySink.Request(reqmap, 0., 1., "oldest");</tt> 
+     <br>
+        <tt>&nbsp;&nbsp; ChannelMap getmap = mySink.Fetch(1000);</tt> </p>
+               
+      <p><tt>&nbsp;&nbsp; System.out.println( getmap.GetName(0) ": " + getmap.GetDataAsString(0)[0] 
+ );</tt> <br>
+        <tt>.&nbsp;</tt></p>
+        </td>
+   </tr>
+          
+  </tbody><caption align="bottom"><b>Sink Example Code</b></caption>   
+</table>
+  </center>
+      
+<h2>    
+<hr width="100%"></h2>
+      
+<h2> <a name="3.4 PlugIn Client"></a>3.4&nbsp;&nbsp;&nbsp; PlugIn Client</h2>
+   An RBNB PlugIn is a special client that connects as a combination source/sink. 
+ When a third-party sink requests a channel from the PlugIn, this request 
+(via a ChannelMap object) is sent from the RBNB server to that PlugIn. The 
+PlugIn fills in the answer (puts data) into this request map and returns it,
+thus dynamically responding to data requests.   
+<p>A PlugIn client shares the <a href="#Sink.Fetch">Fetch</a> and <a
+ href="#Source.Flush">Flush</a> methods from the Sink and Source classes,
+ respectively. </p>
+   
+<h4> <a name="PlugIn.Register"></a><b><tt>void PlugIn.Register(ChannelMap
+ cmap)</tt></b></h4>
+   A PlugIn may (optionally) register the channels that it can provide.&nbsp;
+These channels become part of the ChannelList for the  PlugIn, i.e. they
+are a means of "advertising" available channels..&nbsp; Data contained in
+Registered channels are considered metadata.   
+<p>If <i>any</i> channels are registered by a PlugIn, <i>only</i> requests 
+ for those specific channels will be forwarded by the server to that PlugIn.&nbsp; 
+ If <i>no</i> channels are registered by a PlugIn, then <i>any</i> requests 
+ to that PlugIn (e.g. "Plugin/anychan") will be forwarded to the PlugIn, that
+must look at the channel name(s)&nbsp; and decided what to do. </p>
+   
+<h2> <a name="3.4.1 PlugIn ChannelMap"></a>3.4.1&nbsp;&nbsp;&nbsp; PlugInChannelMap</h2>
+   A PlugInChannelMap is a duel-purpose object. It is fetched to determine 
+a request, and filled in with data to be returned as a response.&nbsp; It 
+is required that the response ChannelMap is the same object as the fetched 
+(request) ChannelMap, as this ties the response to the request.   
+<p>PlugIns extend regular ChannelMaps to add a few methods unique to their 
+ needs. </p>
+   
+<h4> <tt>double GetRequestStart()</tt></h4>
+      
+<h4> <tt>double GetRequestDuration()</tt></h4>
+   The request start and duration indicate the time-slice to be processed.&nbsp; 
+ By default, these values constitute the start/duration of the response.&nbsp; 
+ That is, there is no need to call <a href="#ChannelMap.PutTime">PutTime</a> 
+ on the response map unless the response map time is different than the request
+ map.   
+<h4> <tt>String GetRequestReference()</tt></h4>
+   This method returns the type of request being made. The following correspond 
+ to the timeRef argument of the corresponding <a href="#Sink.Request">Sink.Request</a> 
+ call:   
+<blockquote><tt>"newest", "oldest", "absolute", "modified", "after"</tt></blockquote>
+   The following correspond to <a href="#Sink.Subscribe">Sink.Subscribe</a> 
+ and <a href="#Sink.Monitor">Sink.Monitor</a> data requests, respectively: 
+  
+<blockquote><tt>"subscribe", "monitor"</tt></blockquote>
+   <b><i>Note:</i></b>&nbsp; as of the current release, "subscribe" and "monitor" 
+ modes are not supported for PlugIns.   <br>
+  &nbsp;   
+<h3> <a name="3.3.5 Example Sink Code"></a>3.4.2 PlugIn Example Code</h3>
+   The following PlugIn code snippet returns a constant value in response 
+to any request. <br>
+  &nbsp;   
+<center>  
+<table border="1" cols="1" width="95%">
+   <tbody>
+      <tr>
+   <td> <br>
+        <tt>&nbsp;&nbsp; PlugIn myPlugIn = new PlugIn();</tt> <br>
+        <tt>&nbsp;&nbsp; myPlugIn.OpenRBNBConnection("localhost", "myPlugIn");</tt> 
+       <br>
+        <tt>&nbsp;&nbsp; PlugInChannelMap cmap = myPlugIn.Fetch(1000);</tt> 
+              
+      <p><tt>&nbsp;&nbsp; for (int i=0; i&lt;cmap.NumberOfChannels(); i++)
+ {</tt> <br>
+        <tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; double[] data = { 3.14 };</tt> 
+      <br>
+        <tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; cmap.PutDataAsFloat64(i,data);</tt> 
+       <br>
+        <tt>&nbsp;&nbsp; }</tt> </p>
+               
+      <p><tt>&nbsp;&nbsp; myPlugIn.Flush(cmap);</tt> <br>
+        <tt>.&nbsp;</tt></p>
+        </td>
+   </tr>
+          
+  </tbody><caption align="bottom"><b>PlugIn Example Code</b></caption>   
+</table>
+  </center>
+      
+<p> </p>
+   
+<hr width="100%"> <br>
+  &nbsp; <br>
+  &nbsp; <br>
+  &nbsp; <br>
+  <br>
+ <br>
+</body>
+</html>

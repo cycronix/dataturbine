@@ -1,0 +1,505 @@
+<!DOCTYPE html PUBLIC "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=iso-8859-1">
+  <meta name="Author" content="Matt Miller">
+  <meta name="GENERATOR"
+ content="Mozilla/4.75 [en] (WinNT; U) [Netscape]">
+  <title>rbnbAdmin</title>
+</head>
+<body>
+&nbsp;
+<center>
+<h1>DataTurbine Administrator</h1>
+</center>
+<center>
+<h1><i>rbnbAdmin</i></h1>
+</center>
+<center>
+<h1>User Manual</h1>
+</center>
+<center>
+<h2>V2.4</h2>
+</center>
+<center>
+<h2>March 8, 2002</h2>
+</center>
+<center>
+<h2>Copyright, Creare Inc.</h2>
+</center>
+<p><br>
+</p>
+<hr width="100%">
+<h1>Table Of Contents</h1>
+<blockquote>
+  <h3><a href="#intro">Introduction</a></h3>
+  <blockquote><b><a href="#overview">Overview</a></b>
+    <br>
+    <b><a href="#setup">Setup and Startup</a></b></blockquote>
+  <h3>
+  <a href="#treeviewinfo">Tree View Information</a></h3>
+  <blockquote><b><a href="#RBNBConnection">DataTurbine</a></b>
+    <br>
+    <b><a href="#ControlConnection">Control Connection</a></b>
+    <br>
+    <b><a href="#SinkConnection">Data Sink</a></b>
+    <br>
+    <b><a href="#SourceConnection">Data Source</a></b>
+    <br>
+    <b><a href="#MirrortoConnection">Mirror (To)</a></b>
+    <br>
+    <b><a href="#MirrorFromConnection">Mirror (From)</a></b></blockquote>
+  <h3>
+  <a href="#pulldowncontrols">Menu Bar</a></h3>
+  <blockquote><b><a href="#pulldowncontrols">F</a><a href="#file">ile</a></b>
+    <br>
+    <b><a href="#view">View</a></b></blockquote>
+  <h3>
+  <a href="#PopUpFunctions">Pop-Up Menus</a></h3>
+  <blockquote><b><a href="#dt_mirrorfrompopup">Mirror from...</a></b>
+    <br>
+    <b><a href="#mirrortopopup">Mirror to...</a></b>
+    <br>
+    <b><a href="#terminatepopup">Terminate...</a></b>
+    <p><b><a href="#mirrordialogs">Mirror Dialog</a></b></p>
+  </blockquote>
+  <h3>
+  <b><a href="#Routing">Routing</a></b></h3>
+</blockquote>
+<hr width="100%">
+<h1><a name="intro"></a>Introduction</h1>
+<h2>
+<a name="overview"></a>Overview</h2>
+<i>rbnbAdmin</i> is a Java application which connects to a DataTurbine,
+displays a "tree view" of its current connections, and allows the user
+to perform certain administrative functions.&nbsp; The following figure
+illustrates a sample <i>rbnbAdmin</i> user interface window:
+<center>
+<p><img src="rbnbAdmin.JPG" height="234" width="298"></p>
+</center>
+<p>Each object in the tree view has a representative icon.&nbsp; These
+are shown and discussed in the section which follows.
+</p>
+<p>In addition to displaying the connected hierarchy of objects, <i>rbnbAdmin</i>
+provides a variety of administrative control capabilities, which are
+described
+in following sections.&nbsp; These include:
+</p>
+<blockquote>&nbsp;
+  <table width="75%">
+    <tbody>
+      <tr>
+        <td><b><a href="#pulldowncontrols">Pull-Down Menu Controls</a></b></td>
+        <td>to set connection and view options</td>
+      </tr>
+      <tr>
+        <td><b><a href="#PopUpFunctions">Pop-Up Menu Controls</a></b></td>
+        <td>to set object-related status and execute object-related
+functions</td>
+      </tr>
+    </tbody>
+  </table>
+</blockquote>
+<h2>
+<a name="setup"></a>Setup and Startup</h2>
+<i>rbnbAdmin</i> needs to be run under a Java Virtual Machine (JVM). <i>rbnbAdmin</i>
+has two optional command-line arguments which specify the server to
+connect
+to.&nbsp; The format of the command line looks like the following:
+<blockquote><tt>java -jar admin.jar -n &lt;Server name&gt; -a
+&lt;host&gt;:&lt;port&gt; -u &lt;user ID&gt;<br>
+  </tt></blockquote>
+If you start without the "-n", "-a", and "-u" arguments, use the
+<a href="#file">File/Open</a>
+selection to initiate a connection.
+<p></p>
+<hr width="100%">
+<h1><a name="treeviewinfo"></a>Tree View Information</h1>
+The main panel of the <i>rbnbAdmin</i> window shows a hierarchical
+tree-view
+of the DataTurbine.&nbsp; The root node of the tree view (the node at
+the
+top) is the DataTurbine to which <i>rbnbAdmin</i> is connected.&nbsp;
+Below
+that, other connections of various types are shown, as described below.
+<h2><img src="rbnb.gif" height="19" width="20">&nbsp;<a
+ name="RBNBConnection"></a>DataTurbine</h2>
+The root-level DataTurbine (i.e. the one to which you have connected)
+is
+shown as the top line of the tree-view display.&nbsp; The contents of
+this
+Server's registration map is added as a series of child nodes in the
+tree
+structure.
+<p>The name shown for a DataTurbine object is of the form "&lt;<i>name&gt;
+&lt;address&gt;</i>", where
+<i>name</i> identifies the DataTurbine and <i>address</i>
+describes how to connect to this DataTurbine.
+</p>
+<h2><img src="rco.gif" height="16" width="18">&nbsp;<a
+ name="ControlConnection"></a>Control
+Connection</h2>
+Control connections exist for administrative functions.&nbsp; You
+should
+always be able to see the control connection created by <i>rbnbAdmin</i>
+itself.&nbsp; Control connections associated with source and sink
+connections
+are not explicitly shown.&nbsp; In RBNB object parlance, a control
+connection
+corresponds to an RCO (Ring buffer Control Object).
+<p>The name shown for a control connection is the name provided by the
+control application to the DataTurbine.&nbsp; For <i>rbnbAdmin</i>,
+this
+name is hardwired to "Admin".&nbsp; If this name is not unique in the
+DataTurbine,
+an underscore and unique identifier number will be appended to the name
+(for example, "Admin_3").
+</p>
+<h2><img src="nbo.gif" height="16" width="20">&nbsp;<a
+ name="SinkConnection"></a>Data
+Sink</h2>
+A data sink connection exists for each connected application open for
+"reading".&nbsp;
+Data flows from the DataTurbine to data sink applications.&nbsp; In
+RBNB
+parlance, a sink connection corresponds to an NBO (Network Bus
+Object).&nbsp;
+The contents of this Sink's registration map are added as children to
+this
+Sink's node in the tree structure.
+<p>The name shown for a sink connection is the name provided by the
+sink
+application to the DataTurbine.&nbsp; If this name is not unique in the
+DataTurbine, an underscore and unique identifier number will be
+appended
+to the name.
+</p>
+<h2><img src="rbo.gif" height="17" width="20">&nbsp;<a
+ name="SourceConnection"></a>Data
+Source</h2>
+A data source connection exists for each application which is "writing"
+data to the DataTurbine.&nbsp; Data flows from a source application to
+the DataTurbine.&nbsp; In RBNB parlance, a source connection
+corresponds
+to an RBO (Ring Buffer Object).&nbsp; The contents of this Source's
+registration
+map are added as children to this Source's node in the tree structure.
+<p>It is also possible to have an data source (RBO) object for a data
+source
+which has disconnected (leaving data in the RBO), or for an archive
+which
+was loaded.
+</p>
+<p>The name shown for a source connection is the name provided by the
+source
+application to the DataTurbine.&nbsp; If this name is not unique in the
+DataTurbine, an underscore and unique identifier number will be
+appended
+to the name.
+</p>
+<h2><img src="mirnbo.gif" height="16" width="20">&nbsp;<a
+ name="MirrortoConnection"></a>Mirror
+(To)</h2>
+A data Mirror (To) object is associated with a data mirror which
+streams
+data from a Source in the local DataTurbine to a new RBO in either the
+local or a remote DataTurbine.&nbsp; It may have been established by a
+connected application, or by <i>rbnbAdmin</i> itself (see <a
+ href="#mirrortopopup">below</a>).
+<h2><img src="mirrbo.gif" height="16" width="20">&nbsp;<a
+ name="MirrorFromConnection"></a>Mirror
+(From)</h2>
+A data Mirror (From) object is associated with a data mirror which
+streams
+data from a Source located in either the local or a remote DataTurbine
+to an RBO in the local DataTurbine.&nbsp; It may have been established
+by an application or by <i>rbnbAdmin</i> itself (see <a
+ href="#dt_mirrorfrompopup">below</a>).
+<h1>
+<hr width="100%"></h1>
+<h1>
+<a name="pulldowncontrols"></a>Menu Bar</h1>
+<i>rbnbAdmin</i> has the following pull-down menus.
+<h2><a name="file"></a>File</h2>
+The <b>File</b> pull-down menu provides the following selections.
+<br>
+&nbsp;
+<center>
+<table border="1" width="85%">
+  <tbody>
+    <tr>
+      <td><b>Open...&nbsp;</b></td>
+      <td>Open a connection between <i>rbnbAdmin</i> and a
+DataTurbine.&nbsp;
+Provide the host (name or IP address) and port number of the
+DataTurbine
+to which you would like to connect as well as your username and
+password.&nbsp;
+An example of the connection dialog is shown below.</td>
+    </tr>
+    <tr>
+      <td><b>Close</b></td>
+      <td>Close the current connection between <i>rbnbAdmin</i> and
+the DataTurbine.</td>
+    </tr>
+    <tr>
+      <td><b>Exit</b></td>
+      <td>Exit the <i>rbnbAdmin</i> program.</td>
+    </tr>
+  </tbody>
+</table>
+</center>
+<center>
+<h2><img src="connectionDialog.JPG" height="270" width="283"></h2>
+</center>
+<center><b>Dialog used to connect to a DataTurbine.</b></center>
+<h2>
+<a name="view"></a>View</h2>
+The <b>Refresh (F5)</b> selection causes <i>rbnbAdmin</i> to obtain
+and
+display an updated registration map from the DataTurbine. The <b>Hidden</b>
+check box will hide administrative objects (those starting with
+underscore
+"_").
+<p></p>
+<hr width="100%">
+<h1><a name="PopUpFunctions"></a>Pop-Up Menus</h1>
+Several objects in the tree view provide a pop-up menu accessed by
+right-clicking
+the mouse over the object.&nbsp; The following selections are
+available:
+<br>
+&nbsp;
+<center>
+<table border="1" width="95%">
+  <tbody>
+    <tr>
+      <td>
+      <center><b>Item</b></center>
+      </td>
+      <td width="25%">
+      <center><b>Applicable Objects</b></center>
+      </td>
+      <td width="100%">
+      <center><b>Description</b></center>
+      </td>
+    </tr>
+    <tr>
+      <td><a name="dt_mirrorfrompopup"></a><b>Mirror from...</b></td>
+      <td><img src="rbnb.gif" border="0" height="19" width="20">&nbsp;
+DataTurbine
+(top level)</td>
+      <td>Available from the top level DataTurbine's Pop-Up menu (the
+DataTurbine
+to which the user is connected).&nbsp; This menu item establishes a
+"Pull"
+mirror, which requests a Source in the local or a remote DataTurbine to
+mirror itself to a new RBO in the local DataTurbine. See <a
+ href="#mirrordialogs">Mirror
+Dialog </a>below.</td>
+    </tr>
+    <tr>
+      <td><a name="mirrortopopup"></a><b>Mirror to...</b></td>
+      <td><img src="rbo.gif" height="17" width="20">&nbsp; Source
+(local)</td>
+      <td>Mirrors data from the selected local Source to a new RBO in
+either
+the local or a remote DataTurbine.&nbsp; This establishes a "Push"
+mirror.
+See <a href="#mirrordialogs">Mirror Dialog </a>below.</td>
+    </tr>
+    <tr>
+      <td><a name="terminatepopup"></a><b>Terminate...</b></td>
+      <td><img src="rco.gif" height="16" width="18">&nbsp; Control
+      <br>
+      <img src="rbnb.gif" border="0" height="19" width="20">&nbsp;
+DataTurbine
+(top level)
+      <br>
+      <img src="mirrbo.gif" height="16" width="20">&nbsp; Mirror (From)
+      <br>
+      <img src="mirnbo.gif" height="16" width="20">&nbsp; Mirror (To)
+      <br>
+      <img src="nbo.gif" height="16" width="20">&nbsp; Sink
+      <br>
+      <img src="rbo.gif" height="17" width="20">&nbsp; Source (local)</td>
+      <td>Close associated object.</td>
+    </tr>
+  </tbody>
+</table>
+</center>
+<h3>
+<a name="mirrordialogs"></a><b>Mirror Dialog</b></h3>
+<b><i>Mirrors</i></b> cause data from a designated source (RBO) to be
+automatically
+sent to a different RBO in either the local or a remote
+DataTurbine.&nbsp;
+Thus, a copy of the selected source data is available at both the
+original
+source and the destination RBO.&nbsp; Mirrors differ from routing in
+that
+data is automatically sent without waiting for a sink request. The
+mirror
+is established in one of two ways:
+<ul>
+  <li>
+"Pull" mirror: A request is made to one or more Sources (located in
+either
+the local or a remote DataTurbine) to establish a mirror with the local
+DataTurbine.&nbsp; In <i>rbnbAdmin</i> this can be done by selecting
+the
+"Mirror from..." Pop-Up menu item on the top level DataTurbine.&nbsp;
+Selecting
+this menu item pops up a dialog in which the user can enter multiple
+Sources
+from which to mirror data (see dialog below).</li>
+</ul>
+<ul>
+  <li>
+"Push" mirror: A mirror is established between a local Source and a new
+RBO located in either the local or a remote DataTurbine.&nbsp; In <i>rbnbAdmin</i>
+this can be done by selecting "Mirror to..." on a local Source's Pop-Up
+menu.</li>
+</ul>
+A sample "Mirror Data" dialog is shown below.&nbsp; This dialog was
+obtained
+by selecting the "Mirror from..." Pop-Up menu item on the top level
+DataTurbine
+(which allows the entry of multiple "From" Sources).
+<center>
+<p><img src="mirrorDialog.jpg" height="558" width="446"></p>
+</center>
+<p>A description of the dialog items follows:
+</p>
+<ul>
+  <li>
+"<i>To</i>" description: This defines the new RBO that will receive the
+mirrored data.&nbsp; Specify the "<b>Name</b>" and "<b>Address</b>"
+required
+to connect to the DataTurbine and the "<b>Data Path</b>" of the new
+RBO.&nbsp;
+For a "Pull" mirror, the "<b>Name</b>" and "<b>Address</b>" text fields
+are filled in and desensitized (non-editable) since the target
+DataTurbine
+in this case is always the local DataTurbine.</li>
+</ul>
+<ul>
+  <li>
+"<i>From</i>" description: This defines the Source(s) from which data
+will
+be mirrored.&nbsp; Specify the "<b>Name</b>" and "<b>Address</b>"
+required
+to connect to the DataTurbine and the "<b>Data Path</b>" to the
+existing
+Source.&nbsp; When establishing a "Push" mirror from a local Source the
+"<b>Name</b>", "<b>Address</b>" and "<b>Data Path</b>" text fields are
+filled in and desensitized (non-editable) since these fields are
+specified
+by the user's selection.&nbsp; Selecting the "Mirror from..." Pop-Up
+menu
+item on the top level DataTurbine yields the dialog shown above, which
+allows the entry of multiple "From" Sources.&nbsp; In this case, each
+Source
+is specified by its "<b>Name</b>", "<b>Address</b>" and "<b>Data Path</b>"
+text fields.&nbsp; Source "<b>Name</b>", "<b>Address</b>" and "<b>Data
+Path</b>" fields are added and removed using the provided <b>Add</b>
+and
+    <b>Remove</b>
+buttons.&nbsp; If there are multiple "From" Sources then multiple
+mirrors
+will be created with Data Paths of the form &lt;specified "To" Data
+Path&gt;.&lt;index&gt;
+(for example, for the dialog shown above, the Data Paths of the mirrors
+created will be "newSource.1", "newSource.2", "newSource.3", etc.).</li>
+</ul>
+<ul>
+  <li>
+"<i>Start</i>" time: Specify the earliest data to mirror.&nbsp; Choices
+are:</li>
+  <ul>
+    <li>
+      <b>Now</b>: start mirroring data from this point in time,</li>
+    <li>
+      <b>Oldest</b>: mirror starting from the oldest available data.</li>
+  </ul>
+</ul>
+<ul>
+  <li>
+"<i>Stop</i>" time: Specify when to stop mirroring data.&nbsp; Choices
+are:</li>
+  <ul>
+    <li>
+      <b>Now</b>: stop mirroring data at this point in time (this
+option is not
+currently available),</li>
+    <li>
+      <b>Continuous</b>: continuously mirror data (no designated stop
+time).</li>
+  </ul>
+</ul>
+<ul>
+  <li>
+"<i>Buffer Size</i>": Specify the number of <b>Cache Frames, Archive
+Frames,</b>
+and <b>Archive Mode</b> in the new source.&nbsp; Automatically match
+the
+"From" Source's cache size, archive size, and archive mode by selecting
+the "<b>Match Source</b>" checkbox.</li>
+</ul>
+Note:&nbsp; If the "To" server matches the "From" server (i.e. their
+address
+and name matches), the new RBO is created on the same DataTurbine as
+the
+existing Source.&nbsp; In this case, the "To" data path must not be the
+same as the "From" data path (that is, a DataTurbine cannot have two
+identically
+named RBOs).
+<p></p>
+<hr width="100%">
+<h1><a name="Routing"></a>Routing</h1>
+RBNB Servers can be routed in one of two ways:
+<ul>
+  <li>
+Parent/Child Routing</li>
+  <li>
+Routing Shortcuts</li>
+</ul>
+The former is a hierarchical routing in which RBNB servers are
+connected
+via a strict topology.&nbsp; The fully qualified name of any server is
+its full-path, as in:
+<blockquote>/grandparent/parent/child</blockquote>
+The parent of a server is specified at the time an RBNB server is
+launched
+(via a <i>rbnbServer</i> startup flag).&nbsp; Shortcuts can be started
+at run time via <i>rbnbAdmin</i>, using the pop-up <b>Start
+shortcut...</b>
+option by right clicking the connected RBNB server icon (i.e.the server
+to which <i>rbnbAdmin</i> has an open connection).&nbsp; The following
+figure shows the shortcut pop up configuration menu.
+<center>
+<p><img src="shortcut.jpg" height="197" width="389"></p>
+</center>
+<p>Sources and channels on a routed shortcut are addressed via the<b>
+Shortcut
+Name</b>.&nbsp; For example:
+</p>
+<blockquote>/MyServer/ShortcutName/remoteSource/chan1</blockquote>
+The <b>Cost</b> associated with a shortcut is used to select the best
+path
+to fetch data when there is more than one way available (e.g. when
+there
+are parent/child routes and shortcut routes both available to the
+target
+server).
+<p>To see the sources and channels in a routed RBNB server, you may
+need
+to click the <b>Refresh</b> option from the right-click popup menu on
+that
+server.
+<br>
+&nbsp;
+</p>
+</body>
+</html>

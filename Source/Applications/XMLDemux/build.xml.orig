@@ -1,0 +1,38 @@
+<!-- Name: build.xml
+     By:   John Wilson
+     Date: 07/10/2006
+
+     Description:
+         Ant build file for XMLDemux application.
+-->
+
+<project name="XMLDemux" default="compile" basedir=".">
+ 
+ <!-- Load environment variables -->
+ <property environment="env"/>
+ 
+ <!-- Compile the XMLDemux source code; put class files in the same directory
+      as the source code files.
+  -->
+ <target name="compile">
+  <javac destdir="." deprecation="on">
+   <src path="." />
+   <classpath path="." />
+   <!-- NOTE: In order to use the RBNBBIN, this environment variable cannot
+        have any quotes enclosed in its definition. -->
+   <classpath path="${env.RBNBBIN}/rbnb.jar" />
+  </javac>
+  <echo>Compiled XMLDemux</echo>
+ </target>
+ 
+ <!-- Cleans out all compiled files. -->
+ <target name="clean">
+  <delete>
+    <!-- Delete all files with ".class" extension from -->
+    <!-- the current directory and any subdirectories. -->
+    <fileset dir="." includes="**/*.class"/>
+  </delete>
+ </target>
+ 
+</project>
+

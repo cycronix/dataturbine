@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Meta>
+    <name>Farmhouse N</name>
+    <LookAt>
+	    <longitude>-72.23253599705313</longitude>
+	    <latitude>43.68474930391498</latitude>
+	    <altitude>0</altitude>
+	    <range>111.5151221539927</range>
+	    <tilt>75.55616799347015</tilt>
+	    <heading>103.7227178288358</heading>
+    </LookAt>
+    <Camera>
+	<coordinates>-72.23310277628266,43.6849132542066,5</coordinates>
+	<roll>0</roll>
+	<tilt>0</tilt>
+	<heading>5</heading>
+	<zoom>1</zoom>
+    </Camera>
+    <Image>
+	<distance>1000</distance>
+	<height>500</height>
+	<aspect>1.333</aspect>
+	<zoffset>0</zoffset>
+	<zskew>0</zskew>
+    </Image>
+</Meta>

@@ -1,0 +1,27 @@
+:
+# prepend OS License statement
+
+
+if test $# -lt 1
+then
+    echo "usage: $0 file1,file2,filen,..."
+    exit
+fi
+
+TEMP_FILE=tmprep$$
+
+while test $# -gt 0
+do
+    SOURCE_FILE=$1 
+    cat Apache.License $SOURCE_FILE > $TEMP_FILE
+
+    if test -s $TEMP_FILE
+	then :
+	else	echo "Almost lost source file"
+		exit
+    fi
+
+    /bin/cp $TEMP_FILE $SOURCE_FILE
+    /bin/rm $TEMP_FILE
+    shift
+done

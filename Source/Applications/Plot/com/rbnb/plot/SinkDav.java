@@ -1,0 +1,234 @@
+/*
+Copyright 2007 Creare Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License"); 
+you may not use this file except in compliance with the License. 
+You may obtain a copy of the License at 
+
+http://www.apache.org/licenses/LICENSE-2.0 
+
+Unless required by applicable law or agreed to in writing, software 
+distributed under the License is distributed on an "AS IS" BASIS, 
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+See the License for the specific language governing permissions and 
+limitations under the License.
+*/
+
+// SinkDav - quick hack to use webdav to fetch data, for testing purposes
+// EMF 11/19/02
+// 
+// LIMITATIONS - uses SAPI connection to get channel list
+//             - assumes float32 data
+//             - assumes times linearly spaced
+//             - retrieves data for multiple channels sequentially, with
+//               no multithreading
+//
+// Sink - wrapper for com.rbnb.sapi.Sink that implements some methods
+//        in COM.Creare.RBNB.API.Connection
+
+// 10/07/2002  INB  Save the server address.
+
+// 04/16/2002  WHF  Removed infinite timeout in call to 
+//						com.rbnb.sapi.Sink.Fetch().
+
+package com.rbnb.plot;
+
+import com.rbnb.sapi.SAPIException;
+import com.rbnb.sapi.ChannelMap;
+import org.apache.webdav.lib.WebdavResource;
+import org.apache.util.HttpURL;
+import org.apache.commmons.httpclient.HttpClient;
+
+public class SinkDav {
+
+private com.rbnb.sapi.Sink sink=null;
+private boolean connected=false;
+private String saveaddress=null;
+private String urlStart=null;
+
+public SinkDav() {
+  sink=new com.rbnb.sapi.Sink();
+  //System.err.println("Sink: "+sink);
+}
+
+public Map getTimeLimits(Map inMap) {
+  //if (!connected) return new Map();
+  return inMap; // should return Map with times filled in...
+}
+
+public void OpenRBNBConnection() {
+  try {
+    saveaddress = "localhost:3333";
+    sink.OpenRBNBConnection();
+    connected=true;
+  } catch (SAPIException se) {
+    se.printStackTrace();
+  }
+}
+
+public void OpenRBNBConnection(String address, String client) {
+  try {
+    saveaddress = address;
+    sink.OpenRBNBConnection(address,client);
+    connected=true;
+  } catch (SAPIException se) {
+    se.printStackTrace();
+  }
+}
+
+public void OpenRBNBConnection(String address, String client, String user, String pw) {
+  try {
+    saveaddress = address;
+    sink.OpenRBNBConnection(address,client,user,pw);
+    connected=true;
+  } catch (SAPIException se) {
+    se.printStackTrace();
+  }
+}
+
+public Object isActive() {
+  if (connected) return this;
+  else return null;
+}
+
+public void getInformation(Map mapIO) {
+  //put info into channels in map
+}
+
+public void terminateRBNB() {
+  if (sink != null) {
+    try {
+      com.rbnb.api.Server server = com.rbnb.api.Server.newServerHandle
+	(null,
+	 saveaddress);
+      server.stop();
+    } catch (Exception e) {
+    }
+  }
+}
+
+public void disconnect(boolean that, boolean otherThing) {
+    // INB 12/13/2001 - eliminated SAPIException handling.
+    sink.CloseRBNBConnection();
+}
+
+public String[] getChannelList(String match) {
+  try {
+    // EMF 5/16/02: use new RequestRegistration method
+    ChannelMap cm=new ChannelMap();
+    cm.Add(sink.GetServerName()+"/...");
+    sink.RequestRegistration(cm);
+    cm=sink.Fetch(-1);
+    return cm.GetChannelList();
+    // INB 11/05/2001 - use absolute path names and then eliminate the extra slash.
+    //String[] chanList=sink.GetChannelList("/...");
+/*
+//EMF test code only
+    String[] chanListPlus=null;
+    if (chanList!=null) {
+      chanListPlus=new String[chanList.length+1];
+      chanListPlus[0]="/parent/RmapSource/c0";
+      System.err.println("added /parent/RmapSource/c0");
+      for (int i=0;i<chanList.length;i++) {
+        chanListPlus[i+1]=chanList[i];
+      }
+    } else {
+      chanListPlus=new String[1];
+      chanListPlus[0]="/parent/RmapSource/c0";
+      System.err.println("added /parent/RmapSource/c0");
+    }
+    chanList=chanListPlus;
+//end EMF test code
+*/
+    //System.err.println("Sink.getChannelList: "+chanList.length+" channels");
+    //return chanList;
+  } catch (SAPIException se) {
+    se.printStackTrace();
+    return null;
+  }
+}
+
+public void setSinkMode(String mode) {
+}
+
+public void setReadTimeOut(Time timeOut) {
+}
+
+public void streamSetMap(Map map,Time start,Time duration,int flags) {
+}
+
+public Map streamGetMap() {
+  return null;
+}
+
+public void synchronizeSink() {
+}
+
+public Map getData(Map m,Time s, Time d, int f) {
+  return getMap(m,s,d,f);
+}
+
+// 04/19/2002  WHF  Added int8 support.
+// EMF 11/21/02 - completely rewritten to use webdav instead of SAPI
+public Map getMap(Map map,Time startT,Time durationT,int flags) {
+  ChannelMap cm=null;
+  int retVal=0;
+//  long begin=System.currentTimeMillis();
+  int numChan=0;
+  double start=0;
+  double duration=0;
+  if (startT!=null) start=startT.getDoubleValue();
+  if (durationT!=null) duration=durationT.getDoubleValue();
+
+  if (urlStart==null) {
+    urlStart=saveaddress.substring(0,saveaddress.indexOf(':'));
+System.err.println("urlStart "+urlStart);
+  }
+
+  String munge=null;
+
+  //determine appropriate timeRef
+  if ((flags&DataRequest.newest) == DataRequest.newest) {
+    munge=new String("@r=newest&t=0&d="+duration);
+    //start=-1*duration;
+    start=0;
+  } else if ((flags&DataRequest.oldest) == DataRequest.oldest) {
+    munge=new String("@r=oldest&t=0&d="+duration);
+    start=0;
+  } else {
+    munge=new String("@r=absolute&t="+start+"&d="+duration);
+  }
+System.err.println("munge "+munge);
+
+  //loop through channels, fetching data and putting into cm
+  Channel[] chan = map.channelList();
+  for (int i=0;i<chan.length;i++) {
+    //fetch data from server
+    HttpURL hu=new HttpURL(urlStart+chan[i].getName()+munge);
+    WebdavResource wdr=new WebdavResource(hu);
+
+    //extract data, convert to float32, put in channel
+    int contentLength=(int)wdr.getGetContentLength()/4;
+    if (contentLength>0) {
+      java.io.InputStream is=wdr.getMethodData();
+      byte[] data=new byte[contentLength*4];
+      is.read(data);
+      chan[i].setDataFloat32(com.rbnb.utility.ByteConvert.byte2Float(data,false));
+      //interpolate times
+      start=wdr.getLastModified(); //always current time, not right...
+                                   //actual time is not available...
+      double[] times=new double[contentLength];
+      for (int j=0;j<times.length;j++) {
+        times[i]=start + duration*i/contentLength;
+      }
+      DataTimeStamps dts=new DataTimeStamps(times);
+      chan[i].setTimeStamp(dts);
+    }
+  }
+
+
+  return map;
+}
+
+}
+

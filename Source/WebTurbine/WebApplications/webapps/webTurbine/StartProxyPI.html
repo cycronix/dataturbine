@@ -1,0 +1,70 @@
+<html>
+<head>
+	<title>Start Proxy PlugIn</title>
+	<LINK REL=STYLESHEET HREF="/stylesheets/rbnbstyles.css" TYPE="text/css">
+</head>
+<body>
+<h1>RBNB Proxy PlugIn</h1>
+<p>This PlugIn Launches a Data Source Proxy</p>
+<form action="StartPlugIn.jsp" method="GET">
+	<input type="hidden" name="className" value="ProxyPlugIn" />
+	<input type="hidden" name="plugInName" 
+		value="Proxy PlugIn" />
+	
+	<div class="centered">
+	<table celpadding=5 class="leftjustified">
+	<tr>
+		<td>RBNB Server Address:</td>
+		<td><input type="hidden" name="arg" value="-a"/>
+		<input type="TEXT" name="arg" 
+			value="localhost:3333" size=30/></td>
+	</tr><tr>
+		<td>Proxy Server Port</td>
+		<td><input type="hidden" name="arg" value="-x"/>
+		<input type="TEXT" name="arg" value="3000" size=10/></td>
+	</tr><tr>
+		<td>Source Name</td>
+		<td><input type="hidden" name="arg" value="-s"/>
+		<input type="TEXT" name="arg" value="Proxy" size=30/></td>
+	</tr><tr>
+		<td>Cache Frames</td>
+		<td><input type="hidden" name="arg" value="-c"/>
+		<input type="TEXT" name="arg" value="1000" size=10/></td>
+	</tr><tr>
+		<td>Archive Frames</td>
+		<td><input type="hidden" name="arg" value="-d"/>
+		<input type="TEXT" name="arg" value="0" size=10/></td>
+	</tr><tr>
+		<td>Number of Channels</td>
+		<td><input type="hidden" name="arg" value="-n"/>
+		<input type="TEXT" name="arg" value="1" size=10/></td>
+	</tr><tr>
+		<td>Data Type</td>
+		<td><input type="hidden" name="arg" value="-t"/>
+		<input type="TEXT" name="arg" value="i16" size=5/></td>
+        </tr>
+	</tr><tr>
+		<td>Word Order</td>
+		<td><input type="hidden" name="arg" value="-w"/>
+		<input type="TEXT" name="arg" value="MSB" size=5/></td>
+	</tr><tr>
+		<td>Block Duration (Sec)</td>
+		<td><input type="hidden" name="arg" value="-b"/>
+		<input type="TEXT" name="arg" value="1" size=10/></td>
+	</tr><tr>
+		<td>Block Size (Points per Channel)</td>
+		<td><input type="hidden" name="arg" value="-p"/>
+		<input type="TEXT" name="arg" value="1" size=10/></td>
+	</tr><tr>
+		<td>Frame Factor (Blocks)</td>
+		<td><input type="hidden" name="arg" value="-f"/>
+		<input type="TEXT" name="arg" value="1000" size=10/></td>
+        </tr>
+	</table>
+	<p><input type="submit" value="Start PlugIn" /></p></div>
+</form>
+<p class="footer"><a href="/documentation/PlugIns/rbnbProxy.html">Help</a> -
+	<a href="/webTurbine">Home</a></p>
+</body>
+</html>
+

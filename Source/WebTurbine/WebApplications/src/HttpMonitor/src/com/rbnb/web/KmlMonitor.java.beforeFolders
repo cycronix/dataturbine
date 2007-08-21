@@ -1,0 +1,457 @@
+/*
+	KmlMonitor.java
+	
+	Monitors one or more KML files, associated images, and linked children.
+	
+	***  History  ***
+	2006/08/15  WHF  Created.
+	2006/08/28  WHF  Trims names used in names in child KMLs.
+*/
+
+package com.rbnb.web;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+
+
+import java.net.MalformedURLException;
+import java.net.URL;
+
+import java.util.ArrayList;
+import java.util.Stack;
+
+import org.xml.sax.*;
+
+public class KmlMonitor extends HttpMonitor
+{
+	/**
+	  * Reads KmlMonitor configuration files.
+	  */
+	protected static class KmlConfigParser extends ConfigParser
+	{
+		KmlConfigParser(String file) throws IOException, SAXException
+		{
+			super(file);
+			// Don't put anything here, as it won't have any effect on parsing.
+		}
+		
+		public void startElement(String uri, String localName,
+				String qName, Attributes attributes)
+			throws SAXException
+		{
+			if ("monitor".equals(qName)) {
+				String temp;
+				
+				// Process monitor attributes:
+				if ((temp = attributes.getValue("refreshOverride")) != null) {
+					int ro = Integer.parseInt(temp);
+					if (ro > 0) {
+						ro = (int) Math.ceil(ro / 1000.0);
+						refreshOverride = String.valueOf(ro);
+					} else refreshOverride = temp;
+				}
+				
+				if ((temp = attributes.getValue("requestURLPath")) != null) {
+					requestURL = temp;
+					if (!requestURL.endsWith("/")) requestURL += '/';					
+				}
+			}
+			
+			super.startElement(uri, localName, qName, attributes);
+		}		
+		
+		public void endElement(String uri, String localName, String qName)
+			throws SAXException
+		{
+			if ("skipName".equals(qName)) {
+				skippedNames.add(getCharacters().toString());
+			} else if ("disableName".equals(qName)) {
+				disabledNames.add(getCharacters().toString());
+			} else super.endElement(uri, localName, qName);
+		}
+	}
+	
+	/**
+	  * Reads the KML itself.
+	  */
+	protected static class KmlParser extends RootParser
+	{
+		KmlParser(byte[] kml) throws IOException, SAXException
+		{
+			parse(new InputSource(new java.io.ByteArrayInputStream(kml)));
+		}
+		
+		public byte[] getOutputBytes() throws IOException
+		{
+			writer.flush();
+			return output.toByteArray();
+		}
+		
+		public void startElement(String uri, String localName,
+				String qName, Attributes attributes)
+		{			
+			sbuffer.setLength(0);
+			if ("NetworkLink".equals(qName)) {
+				netLink = true;
+				cacheTag = true;
+			} else if ("GroundOverlay".equals(qName) 
+					|| "ScreenOverlay".equals(qName)) {
+				overlay = true;
+				cacheTag = true;				
+			} else if ("Folder".equals(qName)) {
+				++folderDepth;
+				cacheTag = true;
+			} else if ("Placemark".equals(qName)) {
+				inPlacemark = true;
+			}
+
+			if (!outputDisabled) {			
+				if (cacheTag) {
+					cache.append('<');
+					cache.append(qName);
+					cache.append('>');
+				} else {
+					try {
+						// Copy element to output:
+						writer.write('<');
+						writer.write(qName);
+						writer.write('>');
+					} catch (IOException ioe) { ioe.printStackTrace(); }
+				}
+			}
+		}
+		
+		public void characters(char[] ch, int start, int length)
+		{ if (!outputDisabled) sbuffer.append(ch, start, length); }
+		
+		/**
+		  * Replace all instances of character c in the string buffer 
+		  *    with spaces.
+		  *
+		  * @return The StringBuffer as a convenience.
+		  */
+		private static StringBuffer replace(StringBuffer sb, char c)
+		{
+			for (int ii = 0; ii < sb.length(); ++ii)
+				if (sb.charAt(ii) == c) sb.setCharAt(ii, ' ');
+			
+			return sb;
+		}
+		
+		public void endElement(String uri, String localName, String qName)
+		{
+			try {
+				boolean writeChars = true;
+			
+				if ("Folder".equals(qName)) {
+					--folderDepth;
+					if (!folderStack.empty()) folderStack.pop();
+					if (outputDisabled && disableDepth == folderDepth) {
+						outputDisabled = false;
+						return;
+					}
+				} else if ("NetworkLink".equals(qName)) {
+					netLink = false;
+					if (outputDisabled && disableDepth == -1) {
+						outputDisabled = false;
+						return;
+					}						
+				} else if ("GroundOverlay".equals(qName) 
+						|| "ScreenOverlay".equals(qName)) {
+					overlay = false;
+					if (outputDisabled && disableDepth == -1) {
+						outputDisabled = false;
+						return;
+					}						
+				} else if ("Placemark".equals(qName)) {
+					inPlacemark = false;
+				}
+				
+				if (outputDisabled) return;
+				
+				if ("name".equals(qName) && !inPlacemark) {
+					try {
+						String originalName = sbuffer.toString();
+						String newName = java.net.URLEncoder.encode(
+								replace(sbuffer, '/').toString().trim(),
+								"UTF-8");
+						// 2006/08/16  WHF  Workaround for Google Earth, which
+						//  as of version 4.0.1693 (beta) does not support the
+						//  '+' symbol in URLs, but yet does support %20.
+						newName = newName.replaceAll("\\+", "%20");
+						if (!netLink && !overlay) {
+							// I hope its a folder:
+							folderStack.push(newName);
+						}
+						if (!skippedNames.contains(originalName)) {
+							name = newName;
+							skipName = null;
+						} else skipName = newName;
+						if (disabledNames.contains(originalName)) {
+							if (netLink || overlay) disableDepth = -1;
+							else disableDepth = folderDepth - 1; // dec for comp
+							outputDisabled = true;
+						} else { // name is not on list, flush cache:
+							writer.write(cache.toString());
+						}
+						// Either way, empty cache:
+						cache.setLength(0);
+						cacheTag = false;
+					} catch (Throwable t) {}
+				} else if ("href".equals(qName)) {
+					if (cacheTag) {
+						// 2006/09/01  WHF  We got here without hitting 
+						//   a name tag.  Write and clear the cache.
+						writer.write(cache.toString());
+						cache.setLength(0);
+						cacheTag = false;
+					}
+					//String qualname = 
+					//		(skipName == null ? name : name + '_' + skipName);
+					String qualname;
+					if (skipName == null) qualname = name;
+					else if (folderStack.size() >= 2) {
+						qualname = folderStack.get(
+								folderStack.size() - 2).toString()
+								+ '_' + name + '_' + skipName;
+					} else qualname = name + '_' + skipName;
+					
+					if (netLink) {
+						try {
+							String destFile = qualname+".kml";
+							Resource res = makeResource(
+									new URL(sbuffer.toString()),
+									destFile,
+									kmlQueue
+							);
+							res.setAuthorization(parentResource.getAuthorization());
+							lastRes = res;
+							writeChars = false;
+							if (requestURL != null)
+								writer.write(requestURL + destFile);
+							else
+								writer.write(res.getDestination().toString());
+						} catch (MalformedURLException mue) {
+							System.err.println("WARNING: "+mue);
+						}						
+					} else if (overlay) {
+						try {
+							URL url = new URL(sbuffer.toString());
+							String path = url.getPath(), destFile;
+							int dotIndex = path.lastIndexOf('.');
+							if (dotIndex != -1)
+								destFile = qualname + path.substring(dotIndex);
+							else destFile = qualname;
+							Resource res = makeResource(url, destFile, childQueue);
+							// Children inherit parent authorization:
+							res.setAuthorization(parentResource.getAuthorization());
+							lastRes = res;
+							writeChars = false;
+							if (requestURL != null)
+								writer.write(requestURL + destFile);
+							else
+								writer.write(res.getDestination().toString());
+						} catch (MalformedURLException mue) {
+							System.err.println("WARNING: "+mue);
+						}						
+					}
+				} else if ("refreshInterval".equals(qName)) {
+					if ((netLink || overlay) && lastRes != null) {
+						// Convert seconds to millis:
+						lastRes.setMinimumInterval(
+								Long.parseLong(sbuffer.toString())*1000L);
+						// Although we monitor at the suggested interval, 
+						//  we print the recommended value into the 
+						//  KML file in case of FFwd or Rewind viewing:
+						if (refreshOverride != null) {
+							writer.write(refreshOverride);
+							writeChars = false;
+						}
+					}
+				} else if ("refreshMode".equals(qName)) {
+					if ("once".equals(sbuffer.toString()) && 
+							(netLink || overlay) && lastRes != null) {
+						// Update in one year (in millis):
+						lastRes.setMinimumInterval(365*24*3600*1000);
+					}
+				}
+				
+				if (outputDisabled) return;
+				
+				if (writeChars && sbuffer.length() != 0){
+					String trimmed = sbuffer.toString().trim();
+					if (trimmed.length() != 0) {
+						if (cacheTag) {
+							cache.append("<![CDATA[");
+							cache.append(trimmed);
+							cache.append("]]>");
+						} else {
+							writer.write("<![CDATA[");
+							writer.write(trimmed);
+							writer.write("]]>");
+						}
+					}
+				}
+				
+				sbuffer.setLength(0);  // need to set in case another tag
+						// ends before the next one starts.
+				
+				// Write closing tag:
+				if (cacheTag) {
+					cache.append("</");
+					cache.append(qName);
+					cache.append('>');
+				} else {
+					writer.write("</");
+					writer.write(qName);
+					writer.write('>');
+				}
+			} catch (IOException ioe) { ioe.printStackTrace(); }
+		} // end endElement
+		
+		public void error(SAXParseException e)
+		{ System.err.println("Parse error: "); e.printStackTrace(); }
+		
+		public void warning(SAXParseException e)
+		{ System.err.println("Parse warning: "); e.printStackTrace(); }
+		
+		//****************************  Data  ********************************//
+		private final StringBuffer sbuffer = new StringBuffer(),
+				cache = new StringBuffer();
+		private String name, skipName;
+		
+		// State variables:
+		private boolean netLink = false, overlay = false, cacheTag = false,
+				outputDisabled = false, inPlacemark = false;
+		private int folderDepth, disableDepth = -1;
+		private final Stack folderStack = new Stack();
+		
+		/**
+		  * For setting properties after the resource has been created.
+		  */
+		private Resource lastRes;
+		
+		private final ByteArrayOutputStream output 
+				= new ByteArrayOutputStream();
+		private final OutputStreamWriter writer = new OutputStreamWriter(output);
+	}		
+	
+	private static byte[] parseKml(byte[] kml) throws IOException, SAXException
+	{
+		if (kml != null) {
+			KmlParser kp = new KmlParser(kml);
+			return kp.getOutputBytes();
+		}
+		return null;
+	}
+	
+	public static void main(String[] args)
+	{
+		if (args.length < 1) {
+			System.err.println("Insufficient arguments.");
+			System.err.println("KmlMonitor config-file\n");
+			
+			return;
+		}
+				
+		try {
+			new KmlConfigParser(args[0]);
+			if (getResourceQueue().size() == 0) {
+				System.err.println("ERROR: No source files specified.");
+				return;
+			}
+			
+			makeDestination();
+			
+/* {			
+			// Try to load KML files, and parse for their children.
+			// The Kmls may have siblings which will also be parsed.
+			//  Thus we do not use iterators.
+			for (int ii = 0; ii < getResourceQueue().size(); ++ii) {
+				byte[] newKml = null, kml;
+				
+				parentResource = (Resource) getResourceQueue().get(ii);
+				// Set to one year:
+				parentResource.setMinimumInterval(31536000000L);
+				parentResource.setMaximumInterval(
+						parentResource.getMinimumInterval());
+				kml = parentResource.get(false); // do not write yet
+				try {					
+					newKml = parseKml(kml);
+//System.err.println(""+newKml.length+" bytes");
+				} catch (Exception e) {
+					e.printStackTrace();
+					System.err.println("WARNING: the children of \""
+							+getResourceQueue().get(ii)
+							+"\" will not be available."
+					);
+					continue;
+				}
+				if (newKml != null) parentResource.write(newKml);
+			}
+			// Because the children have not yet been downloaded, their
+			//  request times are zero.  The others have non-zero times.
+			//  So, the children should be placed first.
+			//getResourceQueue().addAll(children);
+			getResourceQueue().addAll(0, children);
+			
+			loadResources();
+} */
+			// Move the elements of the resource queue into the kmlQueue:
+			kmlQueue.addAll(getResourceQueue());
+			getResourceQueue().clear();
+			
+			while (true) {
+				assert(getResourceQueue().size() == 0);
+
+				if (childQueue.isEmpty() || ((Comparable) kmlQueue.get(0))
+						.compareTo(childQueue.get(0)) < 1) {
+					// Do not write the resource yet:
+					parentResource = loadNextResource(kmlQueue, false);
+					if (parentResource != null) {
+						byte[] newKml = null;
+						try {
+							newKml = parseKml(parentResource.getLastRead());
+						} catch (Exception e) {
+							e.printStackTrace();
+							System.err.println("WARNING: the children of \""
+									+parentResource+"\" will not be available."
+							);
+							continue;
+						}
+						if (newKml != null) parentResource.write(newKml);
+					} else break;
+				} else {
+					loadNextResource(childQueue, true);
+				}
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+//*********************************  Data  **********************************//
+	private static final ArrayList
+		kmlQueue = new ArrayList(),
+		childQueue = new ArrayList(),
+		skippedNames = new ArrayList(),// cheesy workaround for non-unique names
+		disabledNames = new ArrayList();// cheesier non-monitor feature
+		
+	private static Resource parentResource;
+	/**
+	  * Overrides refreshIntervals in KML files, if non-null.  String 
+	  *  representation of the interval in seconds.  Should be specified
+	  *   as milliseconds in config.xml file to be consistent.
+	  */
+	private static String refreshOverride;
+	/**
+	  * The prefix to use for KML network links and resources.
+	  *  If null, the destination URL is used.  The value is in milliseconds
+	  *  to be consistent with other attributes.
+	  */
+	private static String requestURL;
+}
+
+

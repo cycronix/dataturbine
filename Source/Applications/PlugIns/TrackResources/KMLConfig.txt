@@ -1,0 +1,91 @@
+
+#
+# This file specifies GUI options for TrackKMLPlugIn
+#
+# Blank lines or lines that start with '#' will be skipped
+#
+
+#
+# Display parameter options
+# Parameter	Options
+# --------------------------------------------------------------------------------------------------
+# labelBy	id/type/class/alt/latlon/altlatlon/none; any other entry will be treated as the constant label
+# sortBy	id/type/class
+# iconBy	type/class/dot/square/airplane/3d_airplane/none
+# icon_scale	<floating point number greater than zero>
+# colorBy	type/class/red/green/blue/yellow/purple/aqua; any other entry will be treated as the constant color (must be HEX number in format bbggrr)
+#
+
+labelBy		id
+sortBy		id
+iconBy		type
+iconScale	1.0
+colorBy		class
+
+#
+# Custom color mapping
+#
+# These color parameters can have any of the following predefined colors:
+#     black
+#     white
+#     blue
+#     green
+#     red
+#     yellow
+#     purple
+#     orange
+#     dark green
+#     dark purple
+#     dark orange
+#     aqua
+#     blue aqua
+#     dark aqua
+#     pink
+# Alternatively, you may use any HEX number in the format bbggrr
+#
+# Parameters for coloring tracks by Type, along with their default colors
+# Parameter			Default color
+# -------------------------------------------
+# TYPE_AIR_COLOR		blue
+# TYPE_SPECIAL_POINT_COLOR	green
+# TYPE_EMERGENCY_POINT_COLOR	red
+# TYPE_FORWARDED_COLOR		purple
+# TYPE_GROUND_COLOR		orange
+# TYPE_MUNITION_COLOR		dark green
+# TYPE_SPACE_COLOR		dark orange
+# TYPE_REFERENCE_POINT_COLOR	yellow
+# TYPE_SURFACE_COLOR		dark purple
+# TYPE_SUBSURFACE_COLOR		blue aqua
+# TYPE_ELECTRONIC_WARFARE_COLOR	dark aqua
+# TYPE_UNKNOWN_COLOR		white
+# TYPE_DEFAULT_COLOR		pink
+#
+# Parameters for coloring tracks by Classification, along with their default colors
+# Parameter			Default color
+# -------------------------------------------
+# CLASS_ASSUMED_FRIEND_COLOR	aqua
+# CLASS_FRIEND_COLOR		aqua
+# CLASS_HOSTILE_COLOR		red
+# CLASS_NEUTRAL_COLOR		green
+# CLASS_PENDING_COLOR		yellow
+# CLASS_SUSPECT_COLOR		red
+# CLASS_UNKNOWN_COLOR		yellow
+# CLASS_DEFAULT_COLOR		orange
+#
+# Examples:
+# TYPE_FORWARDED_COLOR	black
+# CLASS_SUSPECT_COLOR	00ffaa
+#
+
+
+#
+# To add current values as part of the label:
+# label_chan	<chan1>=<nickname1>,<chan2>=<nickname2>,etc.
+#
+# - "chan" specifies a relative channel within the same Source as the track data is fetched from.
+#   In other words, "chan" cannot be an absolute Source/Channel name.
+# - The "nickname" specifies the string that will be displayed in Google Earth with the data value.
+#
+# Example:
+# label_chan	Altitude=Alt,Latitude=Lat,Longitude=Lon
+#

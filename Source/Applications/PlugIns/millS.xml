@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Meta>
+    <name>Tech W</name>
+<LookAt>
+	<longitude>-72.23298124563529</longitude>
+	<latitude>43.68485946676968</latitude>
+	<altitude>0</altitude>
+	<range>43.9524407689571</range>
+	<tilt>46.047757467832</tilt>
+	<heading>-130.8462219238281</heading>
+</LookAt>
+    <Camera>
+	<coordinates>-72.23297158537504,43.68486183619537,11</coordinates>
+	<roll>0</roll>
+	<tilt>0</tilt>
+	<heading>-125</heading>
+	<zoom>1</zoom>
+    </Camera>
+    <Image>
+	<distance>900</distance>
+	<height>750</height>
+	<aspect>1.333</aspect>
+	<zoffset>0</zoffset>
+	<zskew>0</zskew>
+    </Image>
+</Meta>

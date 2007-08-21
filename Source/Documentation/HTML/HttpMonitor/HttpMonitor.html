@@ -1,0 +1,110 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="Author" content="WHF">
+	<title>HttpMonitor User Manual</title>
+	<link rel="STYLESHEET" href="/stylesheets/rbnbstyles.css" type="text/css">
+</head>
+<body>
+	<h1>HttpMonitor</h1>
+	<h2>User Manual</h2>
+	<h3>V3.0</h3>
+	<h3>June 2007</h3>
+	<h3>Copyright, Creare Inc.</h3>
+
+	<h4>Introduction</h4>
+	<p><span class="application">HttpMonitor</span> is an application which
+	copies files from any URL to any WebDAV server.  It monitors the
+	remote site for changes, and updates the destination whenever a change
+	occurs.</p>
+	<h4>Usage</h4>
+	<p><span class="application">HttpMonitor</span> may be started from the 
+	command line using the following syntax:</p>
+	<div class="codestyle" style="text-align: center;">
+		java -jar HttpMonitor.jar <b>config-file</b></div>
+	<p>It can also be started from the WebTurbine interface.</p>
+	
+	<h4>Configuration File</h4>
+	<p>The configuration file is an XML file which specifies where the source
+	files are located, and where to place them.  As an example:</p>
+	<pre class="codestyle">
+&lt;monitor destURLPath=&quot;http://whf/RBNB/Video/&quot; minimumInterval=&quot;250&quot;
+		deltaFraction=&quot;0.5&quot;
+		mkcolQuery=&quot;?archive=25000&amp;amp;cache=100&quot; debug=&quot;true&quot;&gt;
+	&lt;resource&gt;
+		&lt;url&gt;http://wrbv1.creare.com/cgi-bin/camera.jpg&lt;/url&gt;
+		&lt;destFile&gt;farmhouse.jpg&lt;/destFile&gt;
+	&lt;/resource&gt;
+&lt;/monitor&gt;
+	</pre>
+	<p>The configuration file has the following elements:</p>
+	<ul><li><b>monitor</b>.  Root element.  Children: resource, configMonitor,
+			gate, auth.  Attributes: <ul>
+		<li>destURLPath - the URL folder where the files will be copied.</li>
+		<li>destPrefix  - if specified, filenames will be automatically 
+		generated at the destination using this prefix and an integer.</li>
+		<li>mkcolQuery - the query string used with the MKCOL WebDAV command
+		to create the destination folder.</li>
+		<li>deltaFraction - the fraction of the calculated delay
+		interval to use
+		until the next update.  Values smaller than 1.0 cause more requests 
+		than necessary but guarantee that resource updates are not missed.</li>
+		<li>minimumInterval - the smallest allowed interval between updates.</li>
+		<li>maximumInterval - the largest allowed interval between updates.</li>
+		<li>successCountToMin - the number of consecutive successes which
+			set the delay interval to the minimum value.</li>
+		<li>failCountToMax - the number of consecutive failures which 
+			set the delay interval to the maximum value.</li>
+		<li>tcpListenPort - TCP port to listen to, to stream data to connected
+			sockets.</li>
+		<li>udpDestAddr - Internet address to send data packets to when 
+			files are downloaded.  Must be used with</li>
+		<li>udpDestPort - UDP port to send packets to.</li>
+		<li>readTimeout - Time to wait for a resource read, in ms.</li>
+		<li>staggerStartup - Time between the start of consecutive downloads
+			of resources for the first time during process startup, in ms.</li>
+		<li>debug - if set to "true", text is spewed to the 
+		console as files are downloaded.</li></ul></li>
+		
+		<li><b>resource</b>.  Parent: monitor.  Children: url, destFile, 
+				user, password, minimumInterval, maximumInterval.  
+				Attributes: none.  </li>
+		<li><b>url</b>.  Parent: resource.  Children: none.  Attributes: none.
+			Contains the url to use to find this resource.</li>
+		<li><b>destFile</b>.  Parent: resource.  Children: none.  Attributes: none.
+			Contains the filename to use at the destination.  Overrides the
+			destPrefix feature.</li>
+		<li><b>initialSleep</b>.  Parent: resource.  Children: none.  Attributes: none.
+			Specifies a time to wait in millseconds after HttpMonitor startup,
+			before copying the resource for the first time.</li>
+		<li><b>user</b>.  Parent: resource, auth.  Children: none.  Attributes: none.
+			Contains the authorization username.
+		<li><b>password</b>.  Parent: resource, auth.  Children: none.  Attributes: none.
+			Contains the authorization password.
+		<li><b>minimumInterval</b>.  Parent: resource.  Children: none.
+			Attributes: none.  The smallest allowed interval between updates
+			for this resource.</li>
+		<li><b>maximumInterval</b>.  Parent: resource.  Children: none.
+			Attributes: none. 	The largest allowed interval between updates
+			for this resource.</li>
+		<li><b>configMonitor</b>.  Parent: monitor.  Children: as resource.
+			When this URL is updated, a new configuration is loaded for
+			the monitor, and the old resource list is discarded.</li>
+		<li><b>gate</b>.  Parent: monitor.  Children: as resource.
+			This URL must be continuously updated, or else downloading will 
+			stop.</li>
+		<li><b>auth</b>.  Parent: monitor.  Children: user, password.
+			This provides global authorization for all resources.</li>
+		<li><b>putAuth</b>.  Parent: monitor.  Children: user, password.
+			This provides authorization for all PUTs.  If not used and 
+			&lt;auth&gt; appears it will be used instead.</li>
+	</ul>
+	<p>If neither destPrefix is set globally, nor destFile used on a particular
+	resource, the resource will be copied using its source filename.</p>
+
+	<p class="footer"><a href="/webTurbine">Home</a></p>
+</body>
+</html>
+

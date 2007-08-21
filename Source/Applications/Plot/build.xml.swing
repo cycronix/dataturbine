@@ -1,0 +1,60 @@
+<!-- Name: build.xml
+     By:   Ian Brown
+     Date: 06/18/2004
+
+     Description:
+         This file is the primary Ant build file for the RBNB Plot
+         application.  This application allows the user to display numeric data
+         in the RBNB server in strip chart form.  Multiple channels can be
+         displayed, with a single time base.
+-->
+
+<project name="APPLICATION.PLOT_SWING" default="library" basedir=".">
+
+ <!-- Import the standard definitions (properties). -->
+ <import file="../../definitions.xml" />
+
+ <!-- Initialize by setting the timestamp. -->
+ <target name="init">
+  <tstamp />
+  <buildnumber />
+  <mkdir dir="${rbnb.builddir}" />
+  <mkdir dir="${rbnb.classesdir}" />
+  <mkdir dir="${rbnb.classesdir}/Applications" />
+  <mkdir dir="${rbnb.classesdir}/Applications/Plot.swing" />
+  <mkdir dir="${rbnb.librarydir}" />
+ </target>
+
+ <!-- Compile the Plot Java source code and place the results in the Plot
+      classes directory.  References the Core library and the Plot classes for
+      dependencies.
+  -->
+ <target name="compile" depends="init">
+  <javac destdir="${rbnb.classesdir}/Applications/Plot.swing"
+         deprecation="on"
+         excludes="**/SinkDav.java"
+		 debug="${rbnb.compiledebug}"
+		 source="${rbnb.javaver}"
+		 target="${rbnb.javaver}">
+   <src path="${rbnb.sourcedir}/Applications/Plot.swing" />
+   <classpath path="${rbnb.classesdir}/Applications/Plot.swing" />
+   <classpath path="${rbnb.librarydir}/rbnb.jar" />
+  </javac>
+ </target>
+
+ <!-- Create the Plot jar file using the Plot classes. -->
+ <target name="library" depends="compile">
+  <jar destfile="${rbnb.librarydir}/plot_swing.jar"
+       basedir="${rbnb.classesdir}/Applications/Plot.swing"
+       manifest="Manifest"
+   />
+ </target>
+
+ <!-- Cleans out all compiled and library files for the Plot project. -->
+ <target name="clean">
+  <delete dir="${rbnb.classesdir}/Applications/Plot.swing" />
+  <delete file="${rbnb.librarydir}/plot_swing.jar" />
+ </target>
+
+</project>
+

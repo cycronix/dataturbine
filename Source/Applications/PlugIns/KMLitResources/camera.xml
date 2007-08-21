@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Projection>
+  <Name>Farmhouse East</Name>  <!-- Required -->
+  <Camera>
+    <longitude>-72.23308802085094</longitude>  <!-- Required -->
+    <latitude>43.68489775319439</latitude>     <!-- Required -->
+    <altitude>203.819085108989</altitude>      <!-- Required -->
+  </Camera>
+  <View>
+    <range>20</tange>      <!-- Default to 20 -->
+    <tilt>70</tilt>        <!-- Defaults to 60 -->
+    <heading>90</heading>    <!-- Defaults to 0 -->
+  </View>
+  <ViewScreen>
+    <LL>156.000000 145.500000 500.102458</LL>
+    <UR>156.000000 1.500000 590.102458</UR>
+    <LR>156.000000 1.500000 500.102458</LR>
+    <UL>156.000000 145.500000 590.102458</UL>
+    <TextureLL>0.247 0.173</TextureLL> <!-- Defaults to 0 0 -->
+    <TextureUR>0.982 0.890</TextureUR> <!-- Defaults to 1 1 -->
+    <TextureLR>0.958 0.079</TextureLR> <!-- Defaults to 1 0 -->
+    <TextureUL>0.247 0.827</TextureUL> <!-- Defaults to 0 1 -->
+  </ViewScreen>
+</Projection>
+

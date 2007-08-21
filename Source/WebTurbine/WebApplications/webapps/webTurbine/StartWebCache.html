@@ -1,0 +1,58 @@
+<html>
+<head>
+	<title>WebCache</title>
+	<LINK REL=STYLESHEET HREF="/stylesheets/rbnbstyles.css" TYPE="text/css">
+</head>
+<body>
+<h1>RBNB webCache</h1>
+<p>A caching web proxy server.  Saves Web content in RBNB for fast local access.</p>
+<form action="StartPlugIn.jsp" method="GET">
+	<input type="hidden" name="className" 
+		value="com.rbnb.webCache.WebCache" />
+	<input type="hidden" name="plugInName" 
+		value="WebCache" />
+	
+	<div class="centered">
+	<table celpadding=5 class="leftjustified">
+	<tr>
+		<td>RBNB server:</td>
+		<td><input type="hidden" name="arg" value="-r"/>
+		<input type="TEXT" name="arg" value="localhost:3333" 
+			size=60/></td>
+	</tr><tr>
+		<td>Web proxy:</td>
+		<td><input type="hidden" name="arg" value="-p"/>
+		<input type="TEXT" name="arg" value="" 
+			size=60/></td>
+	</tr><tr>
+		<td>Server socket:</td>
+		<td><input type="hidden" name="arg" value="-s"/>
+		<input type="TEXT" name="arg" 
+			value="6677" size=6/></td>
+	</tr><tr>
+		<td>Cache frames:</td>
+		<td><input type="hidden" name="arg" value="-c"/>
+xo		<input type="TEXT" name="arg" value="1000" 
+			size=6/></td>
+	</tr><tr>
+		<td>Archive frames:</td>
+		<td><input type="hidden" name="arg" value="-a"/>
+		<input type="TEXT" name="arg" value="10000" 
+			size=6/></td>
+	</tr><tr>
+		<td>New archive:</td>
+		<td><input type="checkbox" name="arg" value="-n"
+			size=6/></td>
+	</tr><tr>
+		<td>Debug level:</td>
+		<td><input type="hidden" name="arg" value="-d"/>
+		<input type="TEXT" name="arg" value="0" 
+			size=2/></td>
+	</table>
+	<p><input type="submit" value="Start WebCache" /></p></div>
+</form>
+<p class="footer"><a href="/documentation/WebCache/webCache.html">Help</a> -
+	<a href="/webTurbine">Home</a></p>
+</body>
+</html>
+

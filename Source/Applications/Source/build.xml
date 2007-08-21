@@ -1,0 +1,65 @@
+<!-- Name: build.xml
+     By:   Ian Brown
+     Date: 06/18/2004
+
+     Description:
+         This file is the primary Ant build file for the RBNB Source
+         application.  This application puts simple waveform data into the RBNB
+         server.
+-->
+
+<project name="APPLICATION.SOURCE" default="library" basedir=".">
+
+ <!-- Import the standard definitions (properties). -->
+ <import file="../../definitions.xml" />
+
+ <!-- Initialize by setting the timestamp. -->
+ <target name="init">
+  <tstamp />
+  <buildnumber />
+  <mkdir dir="${rbnb.builddir}" />
+  <mkdir dir="${rbnb.classesdir}" />
+  <mkdir dir="${rbnb.classesdir}/Applications" />
+  <mkdir dir="${rbnb.classesdir}/Applications/Source" />
+  <mkdir dir="${rbnb.classesdir}/Applications/Source/images" />
+  <mkdir dir="${rbnb.librarydir}" />
+ </target>
+
+ <!-- Compile the Source Java source code and place the results in the Source
+      classes directory.  References the Core library and the Source classes
+      for dependencies.
+  -->
+ <target name="compile" depends="init">
+  <javac destdir="${rbnb.classesdir}/Applications/Source"
+         deprecation="on">
+   <src path="${rbnb.sourcedir}/Applications/Source" />
+   <classpath path="${rbnb.classesdir}/Applications/Source" />
+   <classpath path="${rbnb.librarydir}/rbnb.jar" />
+  </javac>
+ </target>
+
+ <!-- Copy the directory of images to the classes directory so that they will
+      available.
+  -->
+ <target name="images" depends="init">
+  <copy todir="${rbnb.classesdir}/Applications/Source/images">
+   <fileset dir="${rbnb.sourcedir}/Applications/Source/images" />
+  </copy>
+ </target>
+
+ <!-- Create the Source jar file using the Source classes. -->
+ <target name="library" depends="compile,images">
+  <jar destfile="${rbnb.librarydir}/source.jar"
+       basedir="${rbnb.classesdir}/Applications/Source"
+       manifest="Manifest"
+   />
+ </target>
+
+ <!-- Cleans out all compiled and library files for the Source project. -->
+ <target name="clean">
+  <delete dir="${rbnb.classesdir}/Applications/Source" />
+  <delete file="${rbnb.librarydir}/source.jar" />
+ </target>
+
+</project>
+

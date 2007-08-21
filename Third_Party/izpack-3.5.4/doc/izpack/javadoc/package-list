@@ -1,0 +1,10 @@
+com.izforge.izpack
+com.izforge.izpack.ant
+com.izforge.izpack.compiler
+com.izforge.izpack.gui
+com.izforge.izpack.installer
+com.izforge.izpack.panels
+com.izforge.izpack.uninstaller
+com.izforge.izpack.util
+com.izforge.izpack.util.os
+net.n3.nanoxml

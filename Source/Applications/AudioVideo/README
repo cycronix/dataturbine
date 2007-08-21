@@ -1,0 +1,40 @@
+MJM 8/26/04
+
+This is work in progress.
+
+Open issues:
+
+Partially folded into regular RBNB build - silly *.jpg files still under symbolic link folder
+	one ref says jar them up under /Video/*.jpg, but cant get ant to do that
+
+Mac problems:
+Can't find JMF on Mac running rbnbAVview.jar   
+(runs if -cp JMF explicitly, but doesnt find via environment var)
+(works if install in java ext folder, see JMF_on_Mac)
+button jpegs corrupted (word-order issue?)
+
+- JMF fails to set framerate for some rates on some hardware.  Handler code downsamples video frames when it can to match rate.  This is after all the work of converting BMP to JPG, but before transmission to RBNB
+
+- Because of above problem, cant get audio and video frame rates equal, which would be nice
+
+- With separate ring buffers for audio and video, and different frame rates, audio can "expire" before video.  
+- Long lag sometimes but not always with pegged CPU on start up of play mode (dual-subscriptions)
+
+- No user-flag control of audio rate/mode
+
+- Multi-channel video support is broke. (Don't need?).
+
+- Should integrate vidcap and vidview into same app, with dual (or more) vid windows for local + remote, audio only on remote.
+
+
+
+Notes on getting audio/video into same number of frames:
+
+Build a master "datamap".  PutData audio and/or video as it arrives.  
+Flush the map whenever both audio and video both in map (e.g. multiple audio "points" per video image).
+
+Clean up the register-after data arrives to *before* data arrives, or at least separate "first_time" logic
+Dump the bufferswaiting, keyframe, dataready etc etc logic.
+
+Remember to trim video (but not audio) frames that arrive faster than spec
+May need to use JMF timestamps vs time-of-day to pace it correctly on viewer side

@@ -1,0 +1,84 @@
+<!-- Name: build.xml
+     By:   Bill Finger
+     Date: 2004/06/22
+-->
+
+<project name="WebServer" default="library" basedir=".">
+	<description>
+	Builds add-on components for the Jakarta web server required for
+	RBNB-to-WebDAV support.
+	</description>
+
+	<!-- Import the standard definitions (properties). -->
+	<import file="../../definitions.xml" />
+	
+	<!-- Properties specific to this build file: -->
+	<property name="rbnb.wsclassesdir"
+			value="${rbnb.classesdir}/WebTurbine/WebServer" />
+	<property name="rbnb.wssourcedir" 
+			value="${rbnb.sourcedir}/WebTurbine/WebServer" />
+	<property name="rbnb.wsjarfile" value="${rbnb.librarydir}/rbnbwebdav.jar"/>
+	
+	<property name="rbnb.jakartadir" 
+			value="${rbnb.thirdpartydir}/jakarta-tomcat-4.1.21" />			
+	<property name = "servletcp" 
+			value = "${rbnb.jakartadir}/common/lib/servlet.jar" />
+	<property name = "catalinajarpath"
+			value = "${rbnb.jakartadir}/server/lib/catalina.jar" />
+	<path id = "corecp" >
+		<pathelement location = "${rbnb.obfuscatedir}/rbnb.jar" />
+	</path>
+	<path id = "webservercp" >
+		<pathelement location = 
+				"${rbnb.jakartadir}/server/lib/servlets-webdav.jar" />
+		<pathelement location = 
+				"${rbnb.jakartadir}/server/lib/servlets-default.jar" />
+		<pathelement location = 
+				"${rbnb.jakartadir}/server/lib/servlets-common.jar" />
+		<pathelement location = 
+				"${catalinajarpath}" />
+		<pathelement location = 
+				"${rbnb.jakartadir}/common/lib/naming-resources.jar" />
+	</path>
+
+	<!--*****  Targets *****-->
+	<target name="init" description="Initialize build environment.">
+		<tstamp />
+		<buildnumber />
+		<mkdir dir="${rbnb.builddir}" />
+		<mkdir dir="${rbnb.classesdir}" />
+		<mkdir dir="${rbnb.wsclassesdir}" />
+		<mkdir dir="${rbnb.librarydir}" />
+	</target>
+
+	<target name="compile" depends="init"
+			description = "Compile source files.">
+		<javac destdir="${rbnb.wsclassesdir}"
+				deprecation = "on"
+				debug = "${rbnb.compiledebug}"
+				srcdir = "${rbnb.wssourcedir}" 
+				includes = "*.java, com/rbnb/web/*.java" 
+				source = "${rbnb.javaver}" target = "${rbnb.javaver}" >
+			<classpath refid = "corecp" />
+			<classpath path="${servletcp}" />
+			<classpath refid="webservercp" />
+		</javac>
+		<!-- Extract a file needed by servlets: -->
+		<unjar src = "${catalinajarpath}" dest = "${rbnb.wsclassesdir}" >
+			<patternset includes = "org/apache/catalina/util/RequestUtil*" />
+		</unjar>
+	</target>
+
+	<target name="library" depends="compile"
+			description = "Build necessary jar files.">
+		<jar destfile="${rbnb.wsjarfile}"
+			   basedir="${rbnb.wsclassesdir}" />
+	</target>
+
+	<target name="clean" description = "Delete binary files.">
+		<delete dir="${rbnb.wsclassesdir}" />
+		<delete file="${rbnb.wsjarfile}" />
+	</target>
+ 
+</project>
+

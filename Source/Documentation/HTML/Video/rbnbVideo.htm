@@ -1,0 +1,183 @@
+<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=windows-1252">
+<META NAME="Generator" CONTENT="Microsoft Word 97">
+<TITLE>Creare Document</TITLE>
+<META NAME="Template" CONTENT="\\Dilbert\documents\Templates\Creare 2001.2.dot">
+</HEAD>
+<BODY>
+
+<h1><B><FONT FACE="Times New Roman Bold">RBNB V2 JPEG Video Package</h1>
+<h2>OVERVIEW</h2>
+</B></FONT><P ALIGN="JUSTIFY">The RBNB V2 JPEG video package provides the capability of capturing and displaying video using M-JPEG (a series of JPEG images) through the V2 RBNB server.</P>
+<P ALIGN="JUSTIFY">The package consists of two applications:
+<OL>
+<P ALIGN="JUSTIFY"><LI>JPEGCapture – to capture the video, and</LI></P>
+<P ALIGN="JUSTIFY"><LI>JPEGViewer – to display one or more time-synchronized video capture streams.</LI></P></OL>
+</P>
+
+<P ALIGN="CENTER"><IMG SRC="rbnbVideo.jpg" WIDTH=780 HEIGHT=585></P>
+<B><FONT FACE="Times New Roman Bold"><P ALIGN="CENTER">Figure 1. JPEGViewer Display</P>
+<h2>JPEGCapture</h2>
+</B></FONT><P ALIGN="JUSTIFY">The JPEGCapture application provides the capability of capturing a video stream off a video card or video camera as a series of JPEG images. The captured images are placed into the V2 RBNB server, each image representing a single data point.</P>
+
+<B><FONT FACE="Times New Roman Bold"><h3>Requirements</h3>
+
+</B></FONT><P ALIGN="JUSTIFY">The JPEGCapture application uses the Java Media Framework&trade; (JMF) API to capture the video off the first card or camera that it can locate.</P>
+<P ALIGN="JUSTIFY">To be able to use the software, you must place the following into your classpath:</P>
+
+<UL>
+<P ALIGN="JUSTIFY"><LI>The directory containing the <I>rbnbjcap.jar</I> file,</LI></P>
+<P ALIGN="JUSTIFY"><LI>The <I>rbnb.jar</I> file, and</LI></P>
+<P ALIGN="JUSTIFY"><LI>The <I>jmf.jar</I> file.</LI></P></UL>
+
+<P ALIGN="JUSTIFY">Use the operating system specific JMF library, rather than the generic Java version of the JMF library. The JMF library can be found at http://java.sun.com/products/java-media/jmf/.</P>
+
+<B><FONT FACE="Times New Roman Bold"><h3>Command Line Arguments</h3>
+
+</B></FONT><P ALIGN="JUSTIFY">The JPEGCapture application takes the following command line arguments to control its operation:</P>
+<TABLE BORDER CELLSPACING=1 BORDERCOLOR="#000080" CELLPADDING=9 WIDTH=798>
+<TR><TD WIDTH="28%" VALIGN="TOP" BGCOLOR="#000080">
+<B><FONT COLOR="#ffffff"><P ALIGN="JUSTIFY">Command Line Switch</B></FONT></TD>
+<TD WIDTH="44%" VALIGN="TOP" BGCOLOR="#000080">
+<B><FONT COLOR="#ffffff"><P ALIGN="JUSTIFY">Meaning</B></FONT></TD>
+<TD WIDTH="27%" VALIGN="TOP" BGCOLOR="#000080">
+<B><FONT COLOR="#ffffff"><P ALIGN="JUSTIFY">Default</B></FONT></TD>
+</TR>
+<TR><TD WIDTH="28%" VALIGN="TOP">
+<P ALIGN="JUSTIFY">-a &lt;server address&gt;</TD>
+<TD WIDTH="44%" VALIGN="TOP">
+<P ALIGN="JUSTIFY">Specifies the address of the V2 RBNB server to store the captured video.</TD>
+<TD WIDTH="27%" VALIGN="TOP">
+<P ALIGN="JUSTIFY">-a localhost:3333</TD>
+</TR>
+<TR><TD WIDTH="28%" VALIGN="TOP">
+<P ALIGN="JUSTIFY">-A &lt;archive frames&gt;</TD>
+<TD WIDTH="44%" VALIGN="TOP">
+<P ALIGN="JUSTIFY">Specifies the number of frames to store in a permanent archive. A value of zero (0) means no archive is created.</TD>
+<TD WIDTH="27%" VALIGN="TOP">
+<P ALIGN="JUSTIFY">-A 0</TD>
+</TR>
+<TR><TD WIDTH="28%" VALIGN="TOP">
+<P ALIGN="JUSTIFY">-C &lt;cache frames&gt;</TD>
+<TD WIDTH="44%" VALIGN="TOP">
+<P ALIGN="JUSTIFY">Specifies the number of frames to store in high-speed RAM memory.</TD>
+<TD WIDTH="27%" VALIGN="TOP">
+<P ALIGN="JUSTIFY">-C 100</TD>
+</TR>
+<TR><TD WIDTH="28%" VALIGN="TOP">
+<P ALIGN="JUSTIFY">-d &lt;capture dimensions&gt;</TD>
+<TD WIDTH="44%" VALIGN="TOP">
+<P ALIGN="JUSTIFY">Specifies the size of the captured video. The valid sizes are:</P>
+
+<UL>
+<P ALIGN="JUSTIFY"><LI>SMALL – the smallest supported size,</LI></P>
+<P ALIGN="JUSTIFY"><LI>MEDIUM – the mean supported size, or</LI></P>
+<P ALIGN="JUSTIFY"><LI>LARGE – the largest supported size.</LI></P>
+<P ALIGN="JUSTIFY"><LI># - selects the numbered format (see –I).</LI></P>
+<P ALIGN="JUSTIFY"><LI>&lt;width&gt;x&lt;height&gt; - attempts to use the specified size, if it is available.</UL>
+</TD>
+<TD WIDTH="27%" VALIGN="TOP">
+<P ALIGN="JUSTIFY">-d SMALL</TD>
+</TR>
+<TR><TD WIDTH="28%" VALIGN="TOP">
+<P ALIGN="JUSTIFY">-D &lt;device&gt;</TD>
+<TD WIDTH="44%" VALIGN="TOP">
+<P ALIGN="JUSTIFY">Specifies the device to use (see –I).</TD>
+<TD WIDTH="27%" VALIGN="TOP">
+<P ALIGN="JUSTIFY">-D 1</TD>
+</TR>
+<TR><TD WIDTH="28%" VALIGN="TOP">
+<P ALIGN="JUSTIFY">-I x</TD>
+<TD WIDTH="44%" VALIGN="TOP">
+<P ALIGN="JUSTIFY">Requests information about the available devices or the specified device, if used in combination with the –D switch.</P>
+<P ALIGN="JUSTIFY">The information consists of the devices and their supported formats. The formats are numbered. The numbers determine the valid capture dimension selections.</TD>
+<TD WIDTH="27%" VALIGN="TOP">&nbsp;</TD>
+</TR>
+<TR><TD WIDTH="28%" VALIGN="TOP">
+<P ALIGN="JUSTIFY">-n &lt;capture name&gt;</TD>
+<TD WIDTH="44%" VALIGN="TOP">
+<P ALIGN="JUSTIFY">Specifies the name of the captured video within the server.</TD>
+<TD WIDTH="27%" VALIGN="TOP">
+<P ALIGN="JUSTIFY">-n rbnbVideo</TD>
+</TR>
+<TR><TD WIDTH="28%" VALIGN="TOP">
+<P ALIGN="JUSTIFY">-q &lt;JPEG quality&gt;</TD>
+<TD WIDTH="44%" VALIGN="TOP">
+<P ALIGN="JUSTIFY">The quality of the captured JPEGs, ranging from 0 to 100.</TD>
+<TD WIDTH="27%" VALIGN="TOP">
+<P ALIGN="JUSTIFY">-q 50</TD>
+</TR>
+<TR><TD WIDTH="28%" VALIGN="TOP">
+<P ALIGN="JUSTIFY">-R &lt;frame rate&gt;</TD>
+<TD WIDTH="44%" VALIGN="TOP">
+<P ALIGN="JUSTIFY">The nominal rate at which frames should be captured, in frames per second. This value may be less than one if the rate should be in seconds per frame.</TD>
+<TD WIDTH="27%" VALIGN="TOP">
+<P ALIGN="JUSTIFY">-R 1</TD>
+</TR>
+</TABLE>
+
+<B><FONT FACE="Times New Roman Bold"><P ALIGN="CENTER">Table 1. JPEGCapture Command Line Arguments</P>
+
+<h2>JPEGViewer</h2>
+</B></FONT><P ALIGN="JUSTIFY">The JPEGViewer application provides the capability of displaying one or more time-synchronized M-JPEG video streams retrieved from the V2 RBNB server. It can display the data as it arrives in real-time or the user can scroll through the images in the stream using a simple slider interface.</P>
+
+<B><FONT FACE="Times New Roman Bold"><h3>Requirements</h3>
+
+</B></FONT><P ALIGN="JUSTIFY">The JPEGViewer application uses the standard Java AWT to display the images.</P>
+<P ALIGN="JUSTIFY">To be able to use the software, you must place the following into your classpath:</P>
+
+<UL>
+<P ALIGN="JUSTIFY"><LI>The directory containing the <I>rbnbjview.jar</I> file, and</LI></P>
+<P ALIGN="JUSTIFY"><LI>The <I>rbnb.jar</I> file.</LI></P></UL>
+
+<B><FONT FACE="Times New Roman Bold"><h3>Command Line Arguments</h3>
+</B></FONT><P ALIGN="JUSTIFY">The JPEGViewer application takes the following command line arguments to control its operation:</P>
+<TABLE BORDER CELLSPACING=1 BORDERCOLOR="#000080" CELLPADDING=9 WIDTH=798>
+<TR><TD WIDTH="28%" VALIGN="TOP" BGCOLOR="#000080">
+<B><FONT COLOR="#ffffff"><P ALIGN="JUSTIFY">Command Line Switch</B></FONT></TD>
+<TD WIDTH="44%" VALIGN="TOP" BGCOLOR="#000080">
+<B><FONT COLOR="#ffffff"><P ALIGN="JUSTIFY">Meaning</B></FONT></TD>
+<TD WIDTH="27%" VALIGN="TOP" BGCOLOR="#000080">
+<B><FONT COLOR="#ffffff"><P ALIGN="JUSTIFY">Default</B></FONT></TD>
+</TR>
+<TR><TD WIDTH="28%" VALIGN="TOP">
+<P ALIGN="JUSTIFY">-a &lt;server address&gt;</TD>
+<TD WIDTH="44%" VALIGN="TOP">
+<P ALIGN="JUSTIFY">Specifies the address of the V2 RBNB server to store the captured video.</TD>
+<TD WIDTH="27%" VALIGN="TOP">
+<P ALIGN="JUSTIFY">-a localhost:3333</TD>
+</TR>
+<TR><TD WIDTH="28%" VALIGN="TOP">
+<P ALIGN="JUSTIFY">-c &lt;channel list&gt;</TD>
+<TD WIDTH="44%" VALIGN="TOP">
+<P ALIGN="JUSTIFY">Specifies a comma-separated list of RBNB channels to be displayed.</TD>
+<TD WIDTH="27%" VALIGN="TOP">
+<P ALIGN="JUSTIFY">-c rbnbVideo/Video.jpg</TD>
+</TR>
+<TR><TD WIDTH="28%" VALIGN="TOP">
+<P ALIGN="JUSTIFY">-d &lt;display dimensions&gt;</TD>
+<TD WIDTH="44%" VALIGN="TOP">
+<P ALIGN="JUSTIFY">Specifies the dimensions of the viewer display, using the format &lt;width&gt;x&lt;height&gt;.</TD>
+<TD WIDTH="27%" VALIGN="TOP">
+<P ALIGN="JUSTIFY">-d 220x250</TD>
+</TR>
+</TABLE>
+
+<B><FONT FACE="Times New Roman Bold"><P ALIGN="CENTER">Table 2. JPEGViewer Command Line Arguments</P>
+User Interface Controls
+
+</B></FONT><P ALIGN="JUSTIFY">The JPEGViewer application has a few very simple controls. Figure 1 shows the application in operation. The controls are:</P>
+
+<UL>
+<P ALIGN="JUSTIFY"><LI>The Quit button,</LI></P>
+<P ALIGN="JUSTIFY"><LI>The Monitor toggle, and</LI></P>
+<P ALIGN="JUSTIFY"><LI>The time selection slider.</LI></P></UL>
+
+<U><P ALIGN="JUSTIFY">Quit Button</P>
+</U><P ALIGN="JUSTIFY">The Quit button simply exits the application.</P>
+<U><P ALIGN="JUSTIFY">Monitor Toggle</P>
+</U><P ALIGN="JUSTIFY">The Monitor toggle turns on and off real-time monitoring mode. In this mode, the display updates as new data arrives in the server on any of the displayed channels.</P>
+<U><P ALIGN="JUSTIFY">Time Selection Slider</P>
+</U><P ALIGN="JUSTIFY">The time selection slider allows the user to scroll through the available data, one frame at a time. The slider selects times between the oldest time on any channel and the newest time on any channel (the channels may be different). It has a range of 0 (oldest time) to 1000 (newest time).</P></BODY>
+</HTML>

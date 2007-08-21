@@ -1,0 +1,21 @@
+<html>
+<head>
+	<title>Start rbnbSource</title>
+	<LINK REL=STYLESHEET HREF="/stylesheets/rbnbstyles.css" TYPE="text/css">
+</head>
+<body>
+<h1><span class="application">rbnbSource</span> Application</h1>
+<p>This form allows you to start <span class="application">rbnbSource</span>, 
+the RBNB signal generator application, on the same machine as the webserver.</p>
+<form action="StartPlugIn.jsp" method="GET">
+	<div class="centered">
+	<input type="hidden" name="className" value="com.rbnb.source.rbnbSource" />
+	<input type="hidden" name="plugInName" value="RBNB Source" />
+	<p><input type="submit" value="Start rbnbSource" /></p></div>
+	<input type="hidden" name="arg" value="-noexit" />
+</form>
+<p class="footer"><a href="/documentation/Source/rbnbSource.html">Help</a> -
+	<a href="/webTurbine">Home</a></p>
+</body>
+</html>
+

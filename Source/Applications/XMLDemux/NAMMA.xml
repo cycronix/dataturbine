@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<!-- DC-8 NAMMA 2006 mission - IWG1 streaming data for Creare -->
+<!-- Note this has IWG1 parameters in order, but has different cookie and is binary -->
+<config xmlns="urn:xmlns:reveal"><label>Creare</label><info>DC-8 NAMMA 2006 Mission - 1 Hz data for Creare</info><rate>1.000000</rate><host>reveal-006</host><start>Sun Jul 16 01:57:16 2006</start>
+  <target>udp://216.204.34.154:5000</target>
+  <parameter id="Marker"><type>marker</type><format>DC-8_NAMMA_IWG1a</format><label>Frame Header</label><info xmlns="urn:xmlns:reveal">Frame Header Text</info></parameter>
+  <parameter id="TimeStamp"><type>double</type><label>Time (UTC)</label><info xmlns="urn:xmlns:reveal">Timestamp for data frame: UTC seconds past Unix epoch</info></parameter>
+  <parameter id="Latitude"><type>double</type><label>Latitude (deg)</label><info xmlns="urn:xmlns:reveal">UNS-1B Latitude: +/- 180 degrees</info></parameter>
+  <parameter id="Longitude"><type>double</type><label>Longitude (deg)</label><info xmlns="urn:xmlns:reveal">UNS-1B Longitude: +/- 180 degrees</info></parameter>
+  <parameter id="GPS_Altitude"><type>float</type><label>GPS Altitude (m)</label><info xmlns="urn:xmlns:reveal">MIDG-II GPS Altitude: +/- 30000 meters</info></parameter>
+  <parameter id="Pressure_Altitude"><type>float</type><label>Pressure Altitude (ft)</label><info xmlns="urn:xmlns:reveal">ADS-85 Pressure Altitude: 0-131072 ft</info></parameter>
+  <parameter id="RADAR_Altitude"><type>float</type><label>RADAR Altitude (ft)</label><info xmlns="urn:xmlns:reveal">Data is not available</info></parameter>
+  <parameter id="Ground_Speed"><type>float</type><label>Ground Speed (m/s)</label><info xmlns="urn:xmlns:reveal">UNS-1B Ground Speed: 0-2107 meter/sec</info></parameter>
+  <parameter id="True_Air_Speed"><type>float</type><label>True Air Speed (m/s)</label><info xmlns="urn:xmlns:reveal">ADS-85 True Air Speed: 0-1054 meter/sec</info></parameter>
+  <parameter id="Indicated_Air_Speed"><type>float</type><label>Indicated Air Speed (m/s)</label><info xmlns="urn:xmlns:reveal">ADS-85 Indicated Air Speed: 0-527 meter/sec</info></parameter>
+  <parameter id="Mach_Number"><type>float</type><label>Mach Number</label><info xmlns="urn:xmlns:reveal">ADS-85 Mach Number: 0-4.096</info></parameter>
+  <parameter id="Vertical_Speed"><type>float</type><label>Vertical Speed (m/s)</label><info xmlns="urn:xmlns:reveal">ADS-85 Vertical Speed: 0-9988 m/sec</info></parameter>
+  <parameter id="True_Heading"><type>float</type><label>True Heading (deg)</label><info xmlns="urn:xmlns:reveal">UNS-1B True Heading: +/- 180 degrees</info></parameter>
+  <parameter id="Track_Angle"><type>float</type><label>Track Angle (deg)</label><info xmlns="urn:xmlns:reveal">UNS-1B Track Angle: +/- 180 degrees</info></parameter>
+  <parameter id="Drift_Angle"><type>float</type><label>Drift Angle (deg)</label><info xmlns="urn:xmlns:reveal">UNS-1B Drift Angle: +/- 180 degrees</info></parameter>
+  <parameter id="Pitch_Angle"><type>float</type><label>Pitch Angle (deg)</label><info xmlns="urn:xmlns:reveal">MIDG-II Pitch Angle: +/- 180 degrees</info></parameter>
+  <parameter id="Roll_Angle"><type>float</type><label>Roll Angle (deg)</label><info xmlns="urn:xmlns:reveal">MIDG-II Roll Angle: +/- 180 degrees</info></parameter>
+  <parameter id="Slip_Angle"><type>float</type><label>Slip Angle (deg)</label><info xmlns="urn:xmlns:reveal">Data is not available</info></parameter>
+  <parameter id="Attack_Angle"><type>float</type><label>Angle of Attack (deg)</label><info xmlns="urn:xmlns:reveal">Data is not available</info></parameter>
+  <parameter id="Static_Air_Temp"><type>float</type><label>Static Air Temp (C)</label><info xmlns="urn:xmlns:reveal">ADS-85 Static Air Temperature: +/-512 deg C</info></parameter>
+  <parameter id="Dew_Point"><type>float</type><label>Dew Point (C)</label><info xmlns="urn:xmlns:reveal">Data is not available</info></parameter>
+  <parameter id="Total_Air_Temp"><type>float</type><label>Total Air Temp (C)</label><info xmlns="urn:xmlns:reveal">ADS-85 Total Air Temperature: +/-512 deg C</info></parameter>
+  <parameter id="Static_Pressure"><type>float</type><label>Static Pressure (mbar)</label><info xmlns="urn:xmlns:reveal">ADS-85 Static Pressure: 0-1013.25 mbar</info></parameter>
+  <parameter id="Dynamic_Pressure"><type>float</type><label>Dynamic Pressure (mbar)</label><info xmlns="urn:xmlns:reveal">Data is not available</info></parameter>
+  <parameter id="Cabin_Pressure"><type>float</type><label>Cabin Pressure (mbar)</label><info xmlns="urn:xmlns:reveal">Omega Cabin Pressure: 0-2070 mbar (Caveat: poor accuracy)</info></parameter>
+  <parameter id="Wind_Speed"><type>float</type><label>Wind Speed (m/s)</label><info xmlns="urn:xmlns:reveal">UNS-1B Wind Speed: 0-132 meters/second</info></parameter>
+  <parameter id="Wind_Direction"><type>float</type><label>Wind Direction (deg)</label><info xmlns="urn:xmlns:reveal">UNS-1B Wind Direction: +/- 180 degrees</info></parameter>
+  <parameter id="Vert_Wind_Speed"><type>float</type><label>Vertical Wind Speed (m/s)</label><info xmlns="urn:xmlns:reveal">Data is not available</info></parameter>
+  <parameter id="Solar_Zenith_Angle"><type>float</type><label>Solar Zenith Angle (deg)</label><info xmlns="urn:xmlns:reveal">Solar Zenith Angle: degrees</info></parameter>
+  <parameter id="Aircraft_Sun_Elevation"><type>float</type><label>Aircraft Sun Elevation (deg)</label><info xmlns="urn:xmlns:reveal">Sun Elevation in Aircraft Reference Frame: degrees</info></parameter>
+  <parameter id="Sun_Azimuth"><type>float</type><label>Solar Azimuth Angle (deg)</label><info xmlns="urn:xmlns:reveal">Solar Azimuth Angle: degrees</info></parameter>
+  <parameter id="Aircraft_Sun_Azimuth"><type>float</type><label>Aircraft Sun Azimuth (deg)</label><info xmlns="urn:xmlns:reveal">Sun Azimuth in Aircraft Reference Frame: degrees</info></parameter>
+  <parameter id="GPS_Vertical_Speed"><type>float</type><label>GPS Vertical Speed (m/s)</label><info xmlns="urn:xmlns:reveal">MIDG-II GPS Vertical Velocity: +/- 500 meters/sec</info></parameter>
+  <parameter id="ADC_Baro_Altitude"><type>float</type><label>Baro Altitude (ft)</label><info xmlns="urn:xmlns:reveal">ADS-85 Barometric Altitude: 0-131072 ft</info></parameter>
+  <parameter id="Potential_Temp"><type>float</type><label>Potential Temp (K)</label><info xmlns="urn:xmlns:reveal">Potential Temperature: degrees K</info></parameter>
+  <parameter id="Cabin_Temp"><type>float</type><label>Cabin Temp (C)</label><info xmlns="urn:xmlns:reveal">Vaisala Humitter50Y Temperature: -40 to 60 C. Accuracy: +/-0.6 above -10</info></parameter>
+  <parameter id="Cabin_Humidity"><type>float</type><label>Cabin Relative Humidity (%)</label><info xmlns="urn:xmlns:reveal">Vaisala Humitter50Y Relative Humidity: 0-100 %RH. Accuracy: 3%</info></parameter>
+  <parameter id="Acceleration_X"><type>float</type><label>Acceleration Lateral (G)</label><info xmlns="urn:xmlns:reveal">MIDG-II X-Axis Acceleration: +/- 30 g</info></parameter>
+  <parameter id="Acceleration_Y"><type>float</type><label>Acceleration Longitudinal (G)</label><info xmlns="urn:xmlns:reveal">MIDG-II Y-Axis Acceleration: +/- 30 g</info></parameter>
+  <parameter id="Acceleration_Z"><type>float</type><label>Acceleration Vertical (G)</label><info xmlns="urn:xmlns:reveal">MIDG-II Z-Axis Acceleration: +/- 30 g</info></parameter>
+</config>

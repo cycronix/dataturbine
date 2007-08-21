@@ -1,0 +1,56 @@
+<!-- Name: build.xml
+     By:   Ian Brown
+     Date: 06/18/2004
+
+     Description:
+         This file is the primary Ant build file for the RBNB Proxy
+         application.  This application allows the user to connect legacy
+         applications to the RBNB.  By properly configuring the proxy, any
+         application capable of sending data out via TCP can be connected.
+-->
+
+<project name="APPLICATION.PROXY" default="library" basedir=".">
+
+ <!-- Import the standard definitions (properties). -->
+ <import file="../../definitions.xml" />
+
+ <!-- Initialize by setting the timestamp. -->
+ <target name="init">
+  <tstamp />
+  <buildnumber />
+  <mkdir dir="${rbnb.builddir}" />
+  <mkdir dir="${rbnb.classesdir}" />
+  <mkdir dir="${rbnb.classesdir}/Applications" />
+  <mkdir dir="${rbnb.classesdir}/Applications/Proxy" />
+  <mkdir dir="${rbnb.librarydir}" />
+ </target>
+
+ <!-- Compile the Proxy Java source code and place the results in the Proxy
+      classes directory.  References the Core library and the Proxy classes for
+      dependencies.
+  -->
+ <target name="compile" depends="init">
+  <javac destdir="${rbnb.classesdir}/Applications/Proxy"
+         deprecation="on">
+   <src path="${rbnb.sourcedir}/Applications/Proxy" />
+   <classpath path="${rbnb.classesdir}/Applications/Proxy" />
+   <classpath path="${rbnb.librarydir}/rbnb.jar" />
+  </javac>
+ </target>
+
+ <!-- Create the Proxy jar file using the Proxy classes. -->
+ <target name="library" depends="compile">
+  <jar destfile="${rbnb.librarydir}/proxy.jar"
+       basedir="${rbnb.classesdir}/Applications/Proxy"
+       manifest="Manifest"
+   />
+ </target>
+
+ <!-- Cleans out all compiled and library files for the Proxy project. -->
+ <target name="clean">
+  <delete dir="${rbnb.classesdir}/Applications/Proxy" />
+  <delete file="${rbnb.librarydir}/proxy.jar" />
+ </target>
+
+</project>
+

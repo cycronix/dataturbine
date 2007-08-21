@@ -1,0 +1,39 @@
+<html>
+<head>
+	<title>Start Routing PlugIn</title>
+	<LINK REL=STYLESHEET HREF="/stylesheets/rbnbstyles.css" TYPE="text/css">
+</head>
+<body>
+<h1>Robust Routing PlugIn</h1>
+<p>Routes one RBNB server to another, making child server look like a data source on parent.  Incorporates robust reconnect logic for disruption tolerance.</p>
+<form action="StartPlugIn.jsp" method="GET">
+	<input type="hidden" name="className" 
+		value="RoutingPlugIn" />
+	<input type="hidden" name="plugInName" 
+		value="Routing PlugIn" />
+	
+	<div class="centered">
+	<table celpadding=5 class="leftjustified">
+	<tr>
+		<td>Parent RBNB Server:</td>
+		<td><input type="hidden" name="arg" value="-a"/>
+		<input type="TEXT" name="arg" 
+			value="localhost:3333" size=60/></td>
+	</tr><tr>
+		<td>Child RBNB Server:</td>
+		<td><input type="hidden" name="arg" value="-b"/>
+		<input type="TEXT" name="arg" 
+			value="localhost:3333" size=60/></td>
+	</tr><tr>
+		<td>Timeout (ms):</td>
+		<td><input type="hidden" name="arg" value="-t"/>
+		<input type="TEXT" name="arg" value="60000" 
+			size=60/></td>
+	</table>
+	<p><input type="submit" value="Start PlugIn" /></p></div>
+</form>
+<p class="footer"><a href="/documentation/PlugIns/RoutingPlugIn.html">
+	Help</a> - <a href="/webTurbine">Home</a></p>
+</body>
+</html>
+

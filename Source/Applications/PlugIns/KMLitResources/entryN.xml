@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Meta>
+    <name>Entry N</name>
+    <LookAt>
+	    <longitude>-72.2331477659897</longitude>
+	    <latitude>43.68483851083865</latitude>
+	    <altitude>0</altitude>
+	    <range>119.5939153249135</range>
+	    <tilt>14.52185438058025</tilt>
+	    <heading>-38.91303688135665</heading>
+    </LookAt>
+    <Camera>
+	<coordinates>-72.23291283684088,43.68482493120781,1</coordinates>
+	<roll>0</roll>
+	<tilt>0</tilt>
+	<heading>7</heading>
+	<zoom>1</zoom>
+    </Camera>
+    <Image>
+	<distance>500</distance>
+	<height>400</height>
+	<aspect>1.333</aspect>
+	<zoffset>250</zoffset>
+	<zskew>0</zskew>
+    </Image>
+</Meta>

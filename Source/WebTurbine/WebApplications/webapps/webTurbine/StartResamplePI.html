@@ -1,0 +1,48 @@
+<html>
+<head>
+	<title>Start Resample PlugIn</title>
+	<LINK REL=STYLESHEET HREF="/stylesheets/rbnbstyles.css" TYPE="text/css">
+</head>
+<body>
+<h1>Resample PlugIn</h1>
+<p>This PlugIn limits or reduces the length of RBNB data requests.</p>
+<form action="StartPlugIn.jsp" method="GET">
+	<input type="hidden" name="className" value="ResamplePlugIn" />
+	<input type="hidden" name="plugInName" value="Resample PlugIn" />
+	
+	<div class="centered">
+	<table celpadding=5 class="leftjustified">
+	<tr>
+		<td>RBNB server address:</td>
+		<td><input type="hidden" name="arg" value="-a"/>
+		<input type="TEXT" name="arg" 
+			value="localhost:3333" size=30/></td>
+	</tr><tr>
+		<td>PlugIn client name:</td>
+		<td><input type="hidden" name="arg" value="-n"/>
+		<input type="TEXT" name="arg" value="Resample" size=30/></td>
+	</tr><tr>
+		<td>Downsample factor:</td>
+		<td><input type="hidden" name="arg" value="-m"/>
+		<input type="TEXT" name="arg" value="1" size=6/></td>
+	</tr><tr>
+		<td>Max points per request:</td>
+		<td><input type="hidden" name="arg" value="-s"/>
+		<input type="TEXT" name="arg" value="2000000000" size=10/></td>
+	</tr><tr>
+		<td>Anti-alias:</td>
+		<td><input type="hidden" name="arg" value="-f"/>
+		<select name="arg">
+			<option value="true">true</option>
+			<option selected value="false">false</option>
+		</select></td>
+	</tr>
+	</table>
+	<p><input type="submit" value="Start PlugIn" /></p></div>
+</form>
+<p class="footer"><a href=
+	"/documentation/PlugIns/ResamplePlugIn.html">Help</a> -
+	<a href="/webTurbine">Home</a></p>
+</body>
+</html>
+

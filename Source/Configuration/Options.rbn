@@ -1,0 +1,28 @@
+#
+# Options file for Creare's RBNB server.
+#
+# This file provides an administrator, who is using the Web interface to
+# launch RBNB servers, access to all of the RBNB server switches. The full
+# list is documented in the file:
+#
+#     <installation directory>/Documentation/Server/rbnbServer.html
+#
+# Some switches that can be set in this file include:
+#
+# -l <period>,<cache>,<archive>,<access>
+# -m <period>,<cache>,<archive>,<access>
+#
+#
+# Some examples:
+#
+# Turn off logging (minimal information is displayed on the screen only):
+# -l Off
+#
+#
+# Turn on metrics to run once a second, stored in a cache of 100 frames and
+# a new archive of 10000 frames:
+# -m 1.0,100,10000
+#
+#
+# Use a security file.
+# -A http://localhost:8080/Security.rbn

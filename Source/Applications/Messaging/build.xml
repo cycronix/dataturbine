@@ -1,0 +1,55 @@
+<!-- Name: build.xml
+     By:   Ian Brown
+     Date: 06/18/2004
+
+     Description:
+         This file is the primary Ant build file for the RBNB Messaging
+         library.  It allows general applications to send messages to a central
+         host.
+-->
+
+<project name="APPLICATION.MESSAGING" default="library" basedir=".">
+
+ <!-- Import the standard definitions (properties). -->
+ <import file="../../definitions.xml" />
+
+ <!-- Initialize by setting the timestamp. -->
+ <target name="init">
+  <tstamp />
+  <buildnumber />
+  <mkdir dir="${rbnb.builddir}" />
+  <mkdir dir="${rbnb.classesdir}" />
+  <mkdir dir="${rbnb.classesdir}/Applications" />
+  <mkdir dir="${rbnb.classesdir}/Applications/Messaging" />
+  <mkdir dir="${rbnb.librarydir}" />
+ </target>
+
+ <!-- Compile the Messaging Java source code and place the results in the
+      Messaging classes directory.  References the Core library and the
+      Messaging classes for dependencies.
+  -->
+ <target name="compile" depends="init">
+  <javac destdir="${rbnb.classesdir}/Applications/Messaging"
+         deprecation="on">
+   <src path="${rbnb.sourcedir}/Applications/Messaging" />
+   <classpath path="${rbnb.classesdir}/Applications/Messaging" />
+   <classpath path="${rbnb.librarydir}/rbnb.jar" />
+  </javac>
+ </target>
+
+ <!-- Create the Messaging jar file using the Messaging classes. -->
+ <target name="library" depends="compile">
+  <jar destfile="${rbnb.librarydir}/messaging.jar"
+       basedir="${rbnb.classesdir}/Applications/Messaging"
+       manifest="Manifest"
+   />
+ </target>
+
+ <!-- Cleans out all compiled and library files for the Messaging project. -->
+ <target name="clean">
+  <delete dir="${rbnb.classesdir}/Applications/Messaging" />
+  <delete file="${rbnb.librarydir}/messaging.jar" />
+ </target>
+
+</project>
+

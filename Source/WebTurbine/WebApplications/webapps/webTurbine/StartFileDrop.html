@@ -1,0 +1,47 @@
+<html>
+<head>
+	<title>Start FileDrop PlugIn</title>
+	<LINK REL=STYLESHEET HREF="/stylesheets/rbnbstyles.css" TYPE="text/css">
+</head>
+<body>
+<h1>FileDrop</h1>
+<p>Monitors channel(s) and writes them as files to disk</p>
+<form action="StartPlugIn.jsp" method="GET">
+	<input type="hidden" name="className" 
+		value="FileDrop" />
+	<input type="hidden" name="plugInName" 
+		value="FileDrop PlugIn" />
+	
+	<div class="centered">
+	<table celpadding=5 class="leftjustified">
+	<tr>
+		<td>RBNB Server:</td>
+		<td><input type="hidden" name="arg" value="-a"/>
+		<input type="TEXT" name="arg" 
+			value="localhost:3333" size=60/></td>
+	</tr>
+	<tr>
+		<td>Pickup Channel(s):</td>
+		<td><input type="hidden" name="arg" value="-p"/>
+		<input type="TEXT" name="arg" 
+			value="Folder/*" size=60/></td>
+	</tr>
+	<tr>
+		<td>Drop Folder:</td>
+		<td><input type="hidden" name="arg" value="-d"/>
+		<input type="TEXT" name="arg" 
+			value="/tmp/DropFolder" size=60/></td>
+	</tr>
+	<tr>
+		<td>Timeout (ms):</td>
+		<td><input type="hidden" name="arg" value="-w"/>
+		<input type="TEXT" name="arg" value="5000" 
+			size=60/></td>
+	</table>
+	<p><input type="submit" value="Start PlugIn" /></p></div>
+</form>
+<p class="footer"><a href="/documentation/PlugIns/FileDrop.html">
+	Help</a> - <a href="/webTurbine">Home</a></p>
+</body>
+</html>
+

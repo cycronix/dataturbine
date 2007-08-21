@@ -1,0 +1,35 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Mozilla/4.77 [en] (Windows NT 5.0; U) [Netscape]">
+   <title>RBNB V2 Installation Notes</title>
+</head>
+<body>
+
+<h1>
+RBNB V2 Installation Notes</h1>
+If you have downloaded a version with a bundled JVM, it is located in a
+"jre" subdirectory off of the installation root directory.&nbsp; This version
+will be used to run the webserver and its child processes.*&nbsp; If a
+JVM has not been installed, one will be found according to the following:
+<ol>
+<li>
+The JAVA_HOME environment variable, if set. (* This will override the installed
+JVM, also).</li>
+
+<li>
+A JRE which is installed with its root as "<i>InstallDir</i>/jre".</li>
+
+<li>
+In Windows, the contents of the Registry, specifically the keys:</li>
+<tt><font size=-1></font></tt>
+<p><br><tt><font size=-1>HKEY_LOCAL_MACHINE\SOFTWARE\JavaSoft\Java Runtime
+Environment\CurrentVersin\JavaHome</font></tt>
+<p>&nbsp;&nbsp;&nbsp; and
+<p><tt><font size=-1>HKEY_LOCAL_MACHINE\SOFTWARE\JavaSoft\Java Development
+Kit\CurrentVersion\JavaHome</font></tt></ol>
+
+<p>The Jakarta-Tomcat Web Server (which provides the Web interface for the RBNB system) requires a full JDK, rather than a JRE, installation on Unix machines.
+</body>
+</html>

@@ -1,0 +1,63 @@
+<!-- Name: build.xml
+     By:   Ian Brown
+     Date: 06/18/2004
+
+     Description:
+         This file is the primary Ant build file for the RBNB Admin
+         application.  This program allows an RBNB administrator to perform
+	 control tasks, such as:
+
+	 - Terminate the server
+	 - Start and terminate short cuts to other servers
+	 - Terminate application connections to the server
+	 
+	 Note: This application uses the so-called "full" API, which is a
+	 low-level that is not intended for general use.  At some point, the
+	 functionality needed by this program should be added to the simple
+	 API.
+-->
+
+<project name="APPLICATION.ADMIN" default="library" basedir=".">
+
+ <!-- Import the standard definitions (properties). -->
+ <import file="../../definitions.xml" />
+
+ <!-- Initialize by setting the timestamp. -->
+ <target name="init">
+  <tstamp />
+  <buildnumber />
+  <mkdir dir="${rbnb.builddir}" />
+  <mkdir dir="${rbnb.classesdir}" />
+  <mkdir dir="${rbnb.classesdir}/Applications" />
+  <mkdir dir="${rbnb.classesdir}/Applications/Admin" />
+  <mkdir dir="${rbnb.librarydir}" />
+ </target>
+
+ <!-- Compile the Admin Java source code and place the results in the Admin
+      classes directory.  References the Core library and the Admin classes for
+      dependencies.
+  -->
+ <target name="compile" depends="init">
+  <javac destdir="${rbnb.classesdir}/Applications/Admin"
+         deprecation="on">
+   <src path="${rbnb.sourcedir}/Applications/Admin" />
+   <classpath path="${rbnb.classesdir}/Applications/Admin" />
+   <classpath path="${rbnb.librarydir}/rbnb.jar" />
+  </javac>
+ </target>
+
+ <!-- Create the Admin jar file using the Admin classes. -->
+ <target name="library" depends="compile">
+  <jar destfile="${rbnb.librarydir}/admin.jar"
+       basedir="${rbnb.classesdir}/Applications/Admin"
+       manifest="Manifest"
+   />
+ </target>
+
+ <!-- Cleans out all compiled and library files for the Admin project. -->
+ <target name="clean">
+  <delete dir="${rbnb.classesdir}/Applications/Admin" />
+  <delete file="${rbnb.librarydir}/admin.jar" />
+ </target>
+
+</project>

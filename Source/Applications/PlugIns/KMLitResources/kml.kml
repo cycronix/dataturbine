@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://earth.google.com/kml/2.1">
+<Document>
+<Folder>
+    <name>##docname##</name>				   <!-- Fill from Name -->
+    <visibility>0</visibility>
+    <open>0</open>
+    <LookAt>
+	<longitude>##llongitude##</longitude>  <!--Fill from Camera -->
+	<latitude>##llatitude##</latitude>     <!--Fill from Camera -->
+	<range>##lrange##</range>                          <!--Fill from View -->
+	<tilt>##ltilt##</tilt>                            <!--Fill from View -->
+	<heading>##lheading##</heading>		           <!--Fill from View -->
+    </LookAt>
+##placemark##
+</Folder>
+</Document>
+</kml>

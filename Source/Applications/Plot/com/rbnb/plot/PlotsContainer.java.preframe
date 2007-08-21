@@ -1,0 +1,342 @@
+// PlotsContainer.java
+// Copyright 2000 Creare Incorporated
+
+//EMF 11/8/00: added Environment parameter to constructor, to avoid 
+//             collisions between multiple instances of rbnbPlot running
+//             in the same JVM
+
+//EMF 10/15/04: added new PlotContainerImage, if channel is JPEG or PNG
+//              Need to deal with Table mode and Config save/load.
+
+// JPW 04/07/2005: Convert to Swing
+
+package com.rbnb.plot;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.BorderLayout;
+// import java.awt.Button;
+import java.awt.CardLayout;
+import java.awt.Color;
+import java.awt.Component;
+// import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.GridLayout;
+import java.awt.Image;
+import java.util.Hashtable;
+
+import javax.swing.JButton;
+import javax.swing.JComponent;
+
+// public class PlotsContainer extends Container implements ActionListener {
+public class PlotsContainer extends JComponent implements ActionListener {
+   private RBNBCubby rbnbCubby=null; //for passing changes in display group
+   private PosDurCubby posDurCubby=null;
+   private Dimension size;
+   private int dg=0;
+   private LWContainer buttons=null;
+   private LWContainer top=null;
+   private TableContainer table=null;
+   private boolean tableIn=false;
+   private JButton[] button=null;
+   private LWContainer card = null; //cardlayout outer display
+   private LWContainer[] group = null; //display groups
+   private CardLayout tf = null; //poor man's tabbed folders
+   private int displayMode=LayoutCubby.PlotMode;
+   private int displayGroup=0;
+   //EMF 11/8/00
+   private Environment environment=null;
+	
+   public PlotsContainer(RBNBCubby rbc,PosDurCubby pdc, Environment e) {
+        
+        // JPW 04/12/2005: Set the font
+	setFont(new Font("Dialog", Font.PLAIN, 12));
+        
+	rbnbCubby=rbc;
+	posDurCubby=pdc;
+        environment=e;
+
+        //EMF 3/27/02: set SCROLLGRIDLINES to true; may have set by GUI later
+	//EMF 1/13/04: now set by command line argument g, do not reset here
+        //e.SCROLLGRIDLINES=false;
+
+        button=new JButton[environment.DISPLAYGROUPS];
+        group=new LWContainer[environment.DISPLAYGROUPS];
+	setLayout(new BorderLayout());
+	top=new LWContainer();
+	top.setLayout(new GridLayout(0,1));
+	buttons = new LWContainer();
+	buttons.setLayout(new GridLayout(1,0));	//single row, multiple columns
+	for (int i=0;i<environment.DISPLAYGROUPS;i++) {
+	   button[i]=new JButton(Integer.toString(i+1));
+	   button[i].setBackground(Environment.BGCOLOR);
+	   button[i].addActionListener(this);
+	   buttons.add(button[i]);
+	   }
+	button[0].setBackground(Environment.BGCOLOR.darker());
+	top.add(buttons);
+	table=new TableContainer();
+	add(top,BorderLayout.NORTH);
+	//add(buttons,"North");
+	card=new LWContainer();
+	tf=new CardLayout();
+	card.setLayout(tf);
+	for (int i=0;i<environment.DISPLAYGROUPS;i++) {
+	   group[i]=new LWContainer();
+	   group[i].setLayout(new GridLayout(0,1)); //plots in single column, multiple rows
+	   card.add(group[i],Integer.toString(i));
+	   }
+	add(card,BorderLayout.CENTER);
+	tf.show(card,"0");
+	}
+	
+	//getConfig method - adds relevent key/value pairs to provided hashtable
+	public synchronized void getConfig(Hashtable ht) {
+		ht.put("mode",String.valueOf(displayMode));
+		ht.put("dg.num",String.valueOf(environment.DISPLAYGROUPS));
+		ht.put("dg.current",String.valueOf(displayGroup));
+		for (int i=0;i<environment.DISPLAYGROUPS;i++) {
+			int num=group[i].getComponentCount();
+			ht.put("dg["+i+"].chans",String.valueOf(num));
+			if (num>0) {
+				for (int j=0;j<num;j++)
+					((PlotContainer)group[i].getComponent(j)).getConfig(ht,"dg["+i+"]["+j+"].");
+				}
+			}
+		}
+	
+	//setConfig method - extracts and applies configuration information from hashtable
+	public synchronized void setConfig(Hashtable ht) {
+		//System.out.println("PlotsContainer.setConfig: "+ht.toString());
+		for (int i=0;i<environment.DISPLAYGROUPS;i++) {
+			int num=group[i].getComponentCount();
+			if (num>0) for (int j=0;j<num;j++) {
+				((PlotContainer)group[i].getComponent(j)).setConfig(ht,"dg["+i+"]["+j+"].");
+				}
+			}
+		}
+   
+   //actionPerformed method - sets appropriate display group in card layout
+   public void actionPerformed(ActionEvent e) {
+		JButton hit = (JButton)e.getSource();
+		for (int i=0;i<button.length;i++) {
+			if (button[i].equals(hit)) setDisplayGroup(i);
+			}
+		}
+	
+	//setDisplayGroup method
+	public void setDisplayGroup(int i) {
+		for (int j=0;j<environment.DISPLAYGROUPS;j++) button[j].setBackground(Environment.BGCOLOR);
+		button[i].setBackground(Environment.BGCOLOR.darker());
+		rbnbCubby.setGroup(i);
+		displayGroup=i;
+		tf.show(card,(new Integer(i)).toString());
+		}
+	
+	//setMode method - sets display mode
+	public void setDisplayMode(int dm) {
+		displayMode=dm;
+		if (displayMode==LayoutCubby.TableMode && !tableIn) {
+			top.add(table);
+			tableIn=true;
+			}
+		else if (displayMode!=LayoutCubby.TableMode && tableIn) {
+			top.remove(table);
+			tableIn=false;
+			}
+		for (int i=0;i<group.length;i++) {
+			//set display mode in plotcontainers
+			Component[] comp = group[i].getComponents();
+			for (int j=0; j<comp.length; j++) {
+			    ((PlotContainer)comp[j]).setDisplayMode(displayMode);
+			    }
+			//set number of columns in plotscontainer
+			GridLayout gl=(GridLayout)group[i].getLayout();
+			int numCol=gl.getColumns();
+			// For Table mode, numColumns() returns 1
+			int reqCol=numColumns(group[i].getComponentCount());
+			if (numCol != reqCol) gl.setColumns(reqCol);
+			}
+		validateTree();
+		}
+	
+	//labelDisplayGroups method - sets labels on buttons
+	public void labelDisplayGroups(String[] dgLabel) {
+		if (dgLabel.length!=button.length) {
+			System.out.println("PlotsContainer.labelDisplayGroups: input array length incorrect!");
+			return;
+			}
+		for (int i=0;i<button.length;i++) {
+			if (dgLabel[i]!=null) {
+				button[i].setText(dgLabel[i]);
+				button[i].invalidate();
+				}
+			}
+		validate();
+		}
+	
+	// numColumns method - heuristic to determine the appropriate number of columns to display
+	// the specified number of plots
+	private int numColumns(int p) {
+		if (displayMode==LayoutCubby.TableMode) return 1;
+		if (p<=25) return (p-1)/5 + 1;
+		else if (p<=36) return (p-1)/6 + 1;
+		else if (p<=49) return (p-1)/7 + 1;
+		else if (p<=64) return (p-1)/8 + 1;
+		else if (p<=81) return (p-1)/9 + 1;
+		else return (p-1)/10 + 1;
+		}
+
+   //EMF 10/15/04: add PlotContainerImage if appropriate
+   public PlotContainer addPlot(RegChannel regChan,int dg) {
+	   PlotContainer pc=null;
+	   //key off channel name
+	   if (regChan.name!=null
+	   	&& (regChan.name.toLowerCase().endsWith("jpg")
+	   	||regChan.name.toLowerCase().endsWith("jpeg"))) {
+		   pc = (PlotContainer) (new PlotContainerImage(regChan,displayMode,posDurCubby,environment));
+	   } else if (regChan.name!=null
+	   	&& ((regChan.name.toLowerCase().endsWith("txt")
+		||regChan.name.toLowerCase().endsWith("text"))
+                ||(regChan.getMime()!=null
+                &&regChan.getMime().toLowerCase().startsWith("text")))) {
+			pc = (PlotContainer) (new PlotContainerText(regChan,displayMode,posDurCubby,environment));
+	   } else {
+		   pc = new PlotContainer(regChan,displayMode,posDurCubby,environment);
+	   }
+		int n=numColumns(group[dg].getComponentCount()+1);
+		GridLayout gl=(GridLayout)group[dg].getLayout();
+		if (n != gl.getColumns()) gl.setColumns(n);
+      group[dg].add(pc);
+		invalidate();
+		validate();
+		repaint();
+      return(pc);
+   }
+
+   public void removePlot(PlotContainer pc,int dg) {
+		group[dg].remove(pc);
+      //int n=numColumns(group[dg].getComponentCount()-1);
+		int n=numColumns(group[dg].getComponentCount());
+		GridLayout gl=(GridLayout)group[dg].getLayout();
+		if (n != gl.getColumns()) gl.setColumns(n);
+      //if (group[dg].getComponentCount()==0) {
+		//	Dimension size = getSize();
+		//	group[dg].getGraphics().clearRect(0,0,size.width,size.height);
+		//	}
+		invalidate();
+		validate();
+		repaint();
+		}
+   
+   public void update(Graphics g) {
+      System.out.println("PlotsContainer.update()");
+      paint(g);
+      }
+   
+   //EMF 12/15/04: note PlotsContainer need only paint areas not covered by individual plots,
+   //              namely the gap at the bottom and right, and any empty spots in the grid
+   public void paint(Graphics g) {
+		// layout manager does not clear residue from unused areas of available space, so need
+		// to clean up manually...Fortunately, Sun normally does better than this.
+		Dimension contS=getSize();
+		int topH=top.getSize().height;
+		Dimension groupS=group[displayGroup].getSize();
+		int nComp=group[displayGroup].getComponentCount();
+		if (nComp==0) {
+			//g.setColor(Color.magenta);
+			g.clearRect(0,contS.height-groupS.height-1,groupS.width,groupS.height);
+			}
+		else {
+			GridLayout gl=(GridLayout)group[displayGroup].getLayout();
+			int nCols=gl.getColumns();
+			//rows reported by gl.getRows() as zero, so must infer from nComp and nCol
+			int nRows=nComp/nCols;
+			if (nComp%nCols>0) nRows++;
+			//clear bottom edge
+			//g.setColor(Color.red);
+			g.clearRect(0,contS.height-groupS.height%nRows,contS.width,groupS.height%nRows);
+			//clear right edge
+			//g.setColor(Color.green);
+			g.clearRect(contS.width-groupS.width%nCols,contS.height-groupS.height,
+						  groupS.width%nCols,groupS.height);
+			//clear any slots not filled
+			int nHoles=nRows*nCols - nComp;
+			//g.setColor(Color.blue);
+			if (nHoles>0) g.clearRect((contS.width/nCols)*(nCols-nHoles),
+												contS.height-(groupS.height%nRows)-(groupS.height/nRows),
+												nHoles*(contS.width/nCols),
+												groupS.height/nRows);
+			}
+		super.paint(g);
+   }
+   
+// cannot create a Container with new, so extend - need multiple containers
+// to do nested layout of user controls
+// class LWContainer extends Container {
+class LWContainer extends JComponent {
+
+   public LWContainer() {
+   }
+   
+   public void paint(Graphics g) {
+	if (getComponentCount()==0) { //some systems to not clear screen properly
+	   //size=getSize();
+	   //g.clearRect(0,0,size.width-1,size.height-1);
+	   }
+      super.paint(g);
+   }
+}
+
+// class TableContainer - handles column labels for table mode
+// class TableContainer extends Container {
+class TableContainer extends JComponent {
+	Dimension oldSize=new Dimension(0,0);
+	boolean newSize=false;
+	Image bufferImage=null;
+
+	public TableContainer() {
+		}
+	
+	public void paint(Graphics g) {
+		Dimension size=getSize();
+		if (size.width!=oldSize.width || size.height!=oldSize.height) {
+			newSize=true;
+			oldSize.width=size.width;
+			oldSize.height=size.height;
+			}
+		if (newSize) {
+			bufferImage=createImage(size.width,size.height);
+			Graphics bi=bufferImage.getGraphics();
+			int block=size.width/8;
+			//make alternate columns white
+			bi.setColor(Color.white);
+			for (int i=1;i<8;i+=2) {
+				bi.fillRect(i*block,0,block,size.height);
+				}
+			//make alternate columns light gray
+			bi.setColor(Color.lightGray);
+			for (int i=0;i<8;i+=2) {
+				bi.fillRect(i*block,0,block,size.height);
+				}
+			bi.setColor(Color.black);
+			bi.setFont(Environment.FONT12B);
+			FontMetrics fm=getFontMetrics(Environment.FONT12B);
+			int fh=fm.getHeight();
+			bi.drawString("Name",0,fh);
+			bi.drawString("Units",block,fh);
+			bi.drawString("First",2*block,fh);
+			bi.drawString("Last",3*block,fh);
+			bi.drawString("Min",4*block,fh);
+			bi.drawString("Max",5*block,fh);
+			bi.drawString("Ave",6*block,fh);
+			bi.drawString("StdDev",7*block,fh);
+			}
+		g.drawImage(bufferImage,0,0,null);
+		super.paint(g);
+		} //end method paint
+	} //end class TableContainer
+}

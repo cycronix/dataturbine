@@ -1,0 +1,35 @@
+<html>
+<head>
+	<title>Start FileDrop PlugIn</title>
+	<LINK REL=STYLESHEET HREF="/stylesheets/rbnbstyles.css" TYPE="text/css">
+</head>
+<body>
+<h1>SQL PlugIn</h1>
+<p>This PlugIn drops the supplied file to the target directory. 
+<form action="StartPlugIn.jsp" method="GET" 
+		onSubmit="this.arg[5].value=this.arg[3].value; return true;" >
+	<input type="hidden" name="className" value="FileDropPlugIn" />
+	<input type="hidden" name="plugInName" 
+		value="FileDrop PlugIn" />
+	
+	<div class="centered">
+	<table celpadding=5 class="leftjustified">
+	<tr>
+		<td>RBNB Server Address:</td>
+		<td><input type="hidden" name="arg" value="-a"/>
+		<input type="TEXT" name="arg" 
+			value="localhost:3333" size=30/></td>
+	</tr>
+	<tr>
+		<td>PlugIn Name:</td>
+		<td><input type="hidden" name="arg" value="-n"/>
+		<input type="TEXT" name="arg" 
+			value="FileDrop" size=30/></td>
+	</tr>
+	</table>
+	<p><input type="submit" value="Start PlugIn" /></p></div>
+</form>
+<p class="footer"><a href="/webTurbine">Home</a></p>
+</body>
+</html>
+

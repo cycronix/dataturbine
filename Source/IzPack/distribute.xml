@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<installation version="1.0">
+
+ <locale>
+  <langpack iso3="eng" />
+ </locale>
+
+ <native type="izpack" name="ShellLink.dll" />
+
+ <variables>
+ </variables>
+
+ <resources>
+  <res id="HTMLLicencePanel.licence" src="Lib/Documentation/EULA.html" />
+  <res id="shortcutSpec.xml" src="IzPack/shortcutSpec.xml" />
+  <res id="XInfoPanel.info" src="IzPack/InstallNotes.txt" />
+  <res id="TargetPanel.dir.windows" src="IzPack/windowsDir.txt" />
+  <res id="TargetPanel.dir.unix" src="IzPack/unixDir.txt" />
+  <res id="TargetPanel.dir.maxosx" src="IzPack/macosxDir.txt" />
+ </resources>
+
+ <info>
+  <appname>RBNB</appname>
+  <appversion>@__RBNB.VERSION__@</appversion>
+  <url>http://rbnb.creare.com</url>
+  <!--
+  <authors>
+   <author name="Matthew J. Miller" email="mjm@creare.com" />
+   <author name="Ian A. Brown" email="inb@creare.com" />
+   <author name="Eric M. Friets" email="emf@creare.com" />
+   <author name="William H. Finger" email="whf@creare.com" />
+   <author name="John P. Wilson" email="whitemountain@charter.net" />
+  </authors>
+  -->
+  <uninstaller write="yes" />
+ </info>
+
+ <guiprefs resizable="yes" width="800" height="600" />
+
+ <packs>
+  <pack name="RBNB" required="yes">
+   <description>The RBNB DataTurbine and WebTurbine System</description>
+   <file src="IzPack/InstallNotes.txt" targetdir="$INSTALL_PATH" />
+   <file src="Lib/ReleaseNotes.html" targetdir="$INSTALL_PATH" />
+   <file src="Lib/EULA.html" targetdir="$INSTALL_PATH" />
+   <file src="Lib/Documentation" targetdir="$INSTALL_PATH" />
+   <file src="Lib/Examples" targetdir="$INSTALL_PATH" />
+   <file src="Lib/Matlab" targetdir="$INSTALL_PATH" />
+   <file src="Obfuscate/rbnb.jar" targetdir="$INSTALL_PATH/bin" />
+   <fileset dir="Lib"
+            targetdir="$INSTALL_PATH/bin">
+    <include name="*.jar" />
+    <exclude name="rbnb.jar" />
+   </fileset>
+   <fileset dir="Lib/Scripts/OtherUnixScripts"
+            targetdir="$INSTALL_PATH/bin">
+    <include name="*.sh" />
+    <os family="unix" />
+   </fileset>
+   <fileset dir="Lib/Scripts/LinuxScripts"
+            targetdir="$INSTALL_PATH/bin"
+	    override="yes">
+    <include name="*.sh" />
+    <os name="Linux" />
+   </fileset>
+<!--
+   <file src="Third_Party/apache-tomcat-5.5.12"
+         targetdir="$INSTALL_PATH" />
+   <file src="Lib/Configuration" targetdir="$INSTALL_PATH/apache-tomcat-5.5.12/webapps/ROOT" />
+   <file src="IzPack/RBNB.ico"
+         targetdir="$INSTALL_PATH/apache-tomcat-5.5.12/bin" />
+   <fileset dir="Lib/WebServerImage"
+            targetdir="$INSTALL_PATH/apache-tomcat-5.5.12"
+	    override="yes">
+    <include name="**" />
+   </fileset>  -->
+   
+   <file src="Third_Party/apache-tomcat-5.5.12"
+         targetdir="$INSTALL_PATH" />
+   <file src="Lib/Configuration" targetdir="$INSTALL_PATH/apache-tomcat-5.5.12/webapps/ROOT" />
+   <file src="IzPack/RBNB.ico"
+         targetdir="$INSTALL_PATH/apache-tomcat-5.5.12/bin" />
+   <fileset dir="Lib/WebServerImage"
+            targetdir="$INSTALL_PATH/apache-tomcat-5.5.12"
+	    override="yes">
+    <include name="**" />
+   </fileset>
+   
+<!--   <executable targetfile="$INSTALL_PATH/bin/Start_Webserver.sh"
+               os="unix"
+               stage="never"
+	       keep="true" />
+   <executable targetfile="$INSTALL_PATH/bin/Stop_Webserver.sh"
+               os="unix"
+	       stage="never"
+	       keep="true" />   -->
+   <executable targetfile="$INSTALL_PATH/apache-tomcat-5.5.12/bin/catalina.sh"
+               os="unix"
+	       stage="never"
+	       keep="true" />
+   <executable targetfile="$INSTALL_PATH/apache-tomcat-5.5.12/bin/digest.sh"
+               os="unix"
+	       stage="never"
+	       keep="true" />
+<!--   <executable targetfile="$INSTALL_PATH/apache-tomcat-5.5.12/bin/jasper.sh"
+               os="unix"
+	       stage="never"
+	       keep="true" />  -->
+   <executable targetfile="$INSTALL_PATH/apache-tomcat-5.5.12/bin/JavaEnvStart.sh"
+               os="unix"
+	       stage="never"
+	       keep="true" />
+   <executable targetfile="$INSTALL_PATH/apache-tomcat-5.5.12/bin/JavaEnvStop.sh"
+               os="unix"
+	       stage="never"
+	       keep="true" />
+<!--   <executable targetfile="$INSTALL_PATH/apache-tomcat-5.5.12/bin/jspc.sh"
+               os="unix"
+	       stage="never"
+	       keep="true" /> -->
+   <executable targetfile="$INSTALL_PATH/apache-tomcat-5.5.12/bin/setclasspath.sh"
+               os="unix"
+	       stage="never"
+	       keep="true" />
+   <executable targetfile="$INSTALL_PATH/apache-tomcat-5.5.12/bin/shutdown.sh"
+               os="unix"
+	       stage="never"
+	       keep="true" />
+   <executable targetfile="$INSTALL_PATH/apache-tomcat-5.5.12/bin/startup.sh"
+               os="unix"
+	       stage="never"
+	       keep="true" />
+   <executable targetfile="$INSTALL_PATH/apache-tomcat-5.5.12/bin/tool-wrapper.sh"
+               os="unix"
+	       stage="never"
+	       keep="true" />
+   <executable targetfile="$INSTALL_PATH/apache-tomcat-5.5.12/bin/version.sh"
+               os="unix"
+	       stage="never"
+	       keep="true" />
+  </pack>
+ </packs>
+
+ <panels>
+  <panel classname="HelloPanel" />
+  <panel classname="HTMLLicencePanel" />
+  <panel classname="TargetPanel" />
+  <panel classname="InstallPanel" />
+  <panel classname="ShortcutPanel" />  
+  <panel classname="XInfoPanel" />
+  <panel classname="FinishPanel" />
+ </panels>
+
+</installation>

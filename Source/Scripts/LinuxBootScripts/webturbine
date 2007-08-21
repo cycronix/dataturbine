@@ -1,0 +1,81 @@
+#!/bin/sh
+#
+# Startup/shutdown script for the WebTurbine.
+#
+# Launches or terminates the Creare RBNB V2 WebTurbine at system startup or
+# shutdown.  This script can be placed in the /etc/rc.d directory hierarchy.
+#
+# Author Ian Brown
+#
+# Since V2.3.2
+# Version 06/22/2004
+
+# The DISPLAY variable is necessary for running GUI applications.
+DISPLAY=:0
+export DISPLAY
+
+# The install path of the RBNB V2 system.  Change this to match your
+# installation.
+RBNB_HOME=/home/rbnb/RBNB/Current
+
+# The install path of the Java Virtual Machine (JVM).  This must be a full
+# J2 SDK installation.
+JAVA_HOME=/usr/local/j2sdk1.4.1_02
+export JAVA_HOME
+
+# Source the standard init function library.
+. /etc/rc.d/init.d/functions
+
+# Ensure that the RBNB server is installed.
+[ -f ${RBNB_HOME}/bin/rbnb.jar ] || exit 0
+
+start() {
+    echo -n $"Starting WebTurbine: "
+    cd ${RBNB_HOME}/bin
+    #XAUTHORITY=/root/.Xauthority
+    #export XAUTHORITY
+    ./Start_Webserver.sh
+    RETVAL=$?
+    [ ${RETVAL} -eq 0 ] && touch /var/lock/subsys/webturbine
+    echo
+    return ${RETVAL}
+}
+
+stop() {
+    echo -n $"Stopping WebTurbine: "
+    cd ${RBNB_HOME}/bin
+    ./Stop_Webserver.sh
+    RETVAL=$?
+    [ ${RETVAL} -eq 0 ] && rm -f /var/lock/subsys/webturbine
+    return ${RETVAL}
+}
+
+case "$1" in
+	start)
+	    start
+	    ;;
+	
+	stop)
+	    stop
+	    ;;
+	
+	status)
+	    ;;
+
+	restart)
+	    stop
+	    start
+	    ;;
+
+	condrestart)
+	    stop
+	    start
+	    ;;
+	
+	*)
+	    echo $"Usage: $0 {start|stop|restart|condrestart|status}"
+	    exit 1
+
+esac
+
+exit 0

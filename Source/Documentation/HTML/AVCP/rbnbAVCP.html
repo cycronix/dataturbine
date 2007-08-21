@@ -1,0 +1,401 @@
+<!DOCTYPE html PUBLIC "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=iso-8859-1">
+  <meta name="Author" content="John Wilson">
+  <meta name="GENERATOR"
+ content="Mozilla/4.75 [en] (WinNT; U) [Netscape]">
+  <title>rbnbAVCP</title>
+</head>
+<body>
+<h1 style="text-align: center;">DataTurbine Audio-Video Capture and
+Display</h1>
+<center>
+</center>
+<center>
+<h1><i>rbnbAVCP</i></h1>
+</center>
+<center>
+<h1>User Manual</h1>
+</center>
+<center>
+<h2>V1.0</h2>
+</center>
+<center>
+<h2>&nbsp; December 16, 2004</h2>
+</center>
+<center>
+<h2>Copyright, Creare Inc.</h2>
+</center>
+<hr width="100%">
+<h1>Table Of Contents</h1>
+<blockquote>
+  <h3><a href="#intro">Introduction</a></h3>
+  <blockquote><b><a href="#overview">Overview</a></b> <br>
+    <b><a href="#setup">Setup and Startup</a></b></blockquote>
+  <h3><a href="#menu">Menu Bar</a></h3>
+  <blockquote><b><a href="#pulldowncontrols">F</a><a href="#file">ile</a><br>
+    </b></blockquote>
+  <h3><a href="#capture">Capture Parameters<br>
+  </a></h3>
+  <h3> <b><a href="#viewcontrols">Operation Controls</a></b></h3>
+  <div style="margin-left: 40px;"><b><a href="#playbackbuttons">Playback
+Buttons</a></b> <br>
+  <b><a href="#positionslider">Position Slider</a></b> <br>
+  </div>
+</blockquote>
+<hr width="100%">
+<h1><a name="intro"></a>Introduction</h1>
+<h2>
+<a name="overview"></a>Overview</h2>
+<i>rbnbAVCP</i> is a Java application which connects to a DataTurbine,
+and is capable of both capturing and displaying audio-video
+information.&nbsp; The video is a series of JPEG images.&nbsp; <span
+ style="font-style: italic;">rbnbAVCP</span> can either just capture
+audio-video information, just display audio-video information, or else
+simultaneously capture and display audio-video information.&nbsp; <span
+ style="font-style: italic;">rbnbAVCP</span> lets you move back and
+forth between live and playback display 
+in Tivo-like fashion.&nbsp; The
+following figure
+illustrates a sample <i>rbnbAVCP</i> user interface window:
+<center>
+<p><a name="rbnbavcpwindow"></a><img src="rbnbAVCP.jpg" title=""
+ alt="rbnbAVCP screenshot" style="width: 551px; height: 374px;"><br>
+</p>
+<p><span style="font-weight: bold;">Screencapture of the </span><span
+ style="font-style: italic; font-weight: bold;">rbnbAVCP </span><span
+ style="font-weight: bold;">application.</span><br>
+</p>
+</center>
+<h2><a name="setup"></a>Setup and Startup</h2>
+<i>rbnbAVCP</i> needs to be run under a Java Virtual Machine
+(JVM).&nbsp; It uses the Java Media
+Framework&#8482; (JMF) API to capture the audio-video off an audio-video
+camera connected to the computer.&nbsp; To register devices with JMF
+under the Windows operating system (so they can in turn be located by <span
+ style="font-style: italic;">rbnbAVCP</span>) run "jmfregistry.exe",
+which comes with the JMF distribution.&nbsp; To run <span
+ style="font-style: italic;">rbnbAVCP</span>, the JMF libraries need to
+be in your classpath.&nbsp; Alternatively, they may be located in the
+"lib\ext" directory under the Java JRE installation.&nbsp; Use the
+operating system specific JMF library,
+rather than the generic Java version of the JMF library. The JMF
+library can be found at <a
+ href="http://java.sun.com/products/java-media/jmf/">http://java.sun.com/products/java-media/jmf/</a>.<br>
+<br>
+<hr width="100%">
+<h1><a name="menu"></a>Menu Bar</h1>
+<i>rbnbAVCP</i> has a File pull-down menu described in the next
+section.
+<h2><a name="file"></a>File</h2>
+The <b>File</b> pull-down menu provides the following selections.
+<br>
+&nbsp;
+<center>
+<table border="1" style="width: 85%;">
+  <tbody>
+    <tr>
+      <td><b>Connect...&nbsp;</b></td>
+      <td>Open a connection between <i>rbnbAVCP</i> and a
+DataTurbine.&nbsp;
+Provide the host (name or IP address) and port number of the
+DataTurbine
+to which you would like to connect.&nbsp;
+An example of the connection dialog is shown below.</td>
+    </tr>
+    <tr>
+      <td><span style="font-weight: bold;">Disconnect...</span><br>
+      </td>
+      <td>Close the current connection between <i>rbnbAVCP</i> and
+the DataTurbine.</td>
+    </tr>
+    <tr>
+      <td><span style="font-weight: bold;">View...</span><br>
+      </td>
+      <td>Specify the name of the DataTurbine source from which to
+request audio-video data.&nbsp; An example of the dialog box is shown
+below.&nbsp; The "Play Audio" checkbox allows the optional playing of
+the sound channel from the source.&nbsp; In the specified DataTurbine
+source, the video data will come from a channel with the name
+"Video.jpg" and the audio data will come from a channel with the name
+"Audio".<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; font-weight: bold;">Close<br>
+      </td>
+      <td style="vertical-align: top;">Close the audio-video
+display.&nbsp; This will not effect the current capture mode (if data
+is currently being captured).&nbsp; This operation only effects the
+display of the video and audio data.<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;"><span style="font-weight: bold;"><a
+ name="capturemenuitem"></a>Capture...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      </span><br>
+      </td>
+      <td style="vertical-align: top;">Capture audio and video data
+from a connected device and send the data to the connected
+DataTurbine.&nbsp; You must already have established the DataTurbine
+connection using the "Connect..." menu item.&nbsp; A dialog pops up
+allowing the user to configure the capture parameters.&nbsp; The
+parameters on this dialog are discussed <a href="#capture">below</a>.<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; font-weight: bold;">Stop Capture<br>
+      </td>
+      <td style="vertical-align: top;">Stop a currently active capture.<br>
+      </td>
+    </tr>
+    <tr>
+      <td><b>Exit</b></td>
+      <td>Exit the <i>rbnbAVCP</i> program.</td>
+    </tr>
+  </tbody>
+</table>
+</center>
+<center>
+<br>
+<img src="connect.GIF" title="" alt="DataTurbine connection dialog"
+ style="width: 297px; height: 128px;"><br>
+<br>
+<b>Connect dialog used to connect to a DataTurbine.</b><br>
+<br>
+<br>
+<img src="view.GIF" title="" alt="View dialog"
+ style="width: 245px; height: 101px;"><br>
+<br>
+<span style="font-weight: bold;">View dialog used to request the
+display of audio-video data from a given source in the DataTurbine.</span><br>
+<div style="text-align: left;"><br>
+<hr width="100%">
+<h1><a name="viewcontrols"></a>Operation Controls</h1>
+The top part of the <i>rbnbAVCP</i> window contains a variety of
+operation
+controls.&nbsp; Refer to the example <i>rbnbAVCP</i> screen <a
+ href="#rbnbavcpwindow">above</a>
+for reference.
+<h2><a name="playbackbuttons"></a>Playback Buttons</h2>
+When viewing audio and video data from a DataTurbine, a series of
+tapedeck-like controls along the top of the <span
+ style="font-style: italic;">rbnbAVCP</span> window allow the user
+to&nbsp; control the data being viewed.<br>
+&nbsp;
+<br>
+<center>
+<table border="1" style="height: 212px; width: 347px;">
+  <tbody>
+    <tr>
+      <td style="text-align: center; vertical-align: middle;"><b><tt><img
+ src="bof.jpg" title="" alt="|&lt;" style="width: 28px; height: 28px;"
+ align="middle"><br>
+      </tt></b></td>
+      <td>Go to beginning (oldest) of data.</td>
+    </tr>
+    <tr>
+      <td style="text-align: center; vertical-align: middle;"><b><tt><img
+ src="rplay.jpg" title="" alt="&lt;" style="width: 28px; height: 28px;"
+ align="middle"><br>
+      </tt></b></td>
+      <td>Play continuously backwards.<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align: center; vertical-align: middle;"><tt><img
+ src="rstep.jpg" title="" alt="&lt;|" style="width: 28px; height: 28px;"
+ align="middle"><br>
+      </tt></td>
+      <td>Single-step one interval backwards.</td>
+    </tr>
+    <tr>
+      <td style="text-align: center; vertical-align: middle;"><img
+ src="stop.jpg" title="" alt="||" style="width: 28px; height: 28px;"
+ align="middle"><br>
+      </td>
+      <td>Pause (stop) playback.</td>
+    </tr>
+    <tr>
+      <td style="text-align: center; vertical-align: middle;"><img
+ src="step.jpg" title="" alt="|&gt;" style="width: 28px; height: 28px;"><br>
+      </td>
+      <td>Single-step one interval forwards.</td>
+    </tr>
+    <tr>
+      <td style="text-align: center; vertical-align: middle;"><img
+ src="play.jpg" title="" alt="&gt;" style="width: 28px; height: 28px;"
+ align="middle"><br>
+      </td>
+      <td>Play continuously forwards.</td>
+    </tr>
+    <tr>
+      <td style="text-align: center; vertical-align: middle;"><img
+ src="eof.jpg" title="" alt="&gt;|" style="width: 28px; height: 28px;"
+ align="middle"><br>
+      </td>
+      <td>Go to end (newest) of data.</td>
+    </tr>
+    <tr>
+      <td style="text-align: center; vertical-align: middle;"><img
+ src="rtOn.jpg" title="" alt="realtime mode"
+ style="width: 28px; height: 28px;"><br>
+      </td>
+      <td>Real-time (continuous) update.</td>
+    </tr>
+  </tbody>
+</table>
+</center>
+<br>
+<h2><a name="positionslider"></a>Position Slider</h2>
+The slider bar just below the tapedeck-like position controls is an
+alternate way to set the data
+position
+(time).&nbsp; Pull it left or right until the desired time-stamp is
+displayed
+above the video image.<br>
+<br>
+</div>
+<div style="text-align: left;">
+<hr width="100%">
+<h1><a name="capture"></a>Capture Parameters<br>
+</h1>
+The parameters used by <span style="font-style: italic;">rbnbAVCP</span>
+to capture audio and video data are specified in the "Capture Options"
+dialog box, acessed from the <a href="#capturemenuitem">"Capture..."
+menu item</a> under the File menu.&nbsp; A sample dialog is shown below.<br>
+<br>
+</div>
+<br>
+<img src="capture.GIF" title="" alt="Capture dialog"
+ style="width: 369px; height: 445px;"><br>
+<br>
+<span style="font-weight: bold;">Capture dialog to specify parameters
+for capturing audio and video data.</span><br>
+<b><br>
+</b></center>
+The Output parameters specified in this dialog box are described below.<br>
+<br>
+<div style="text-align: center;">
+<center>
+<table border="1" style="width: 752px; height: 130px;">
+  <tbody>
+    <tr>
+      <td style="width: 25%;">RBNB Source Name<br>
+      </td>
+      <td>Desired name of the source in the connected DataTurbine where
+audio-video data should be stored.<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="width: 25%;">Cache (frames)<br>
+      </td>
+      <td>Specifies the size of the in-memory cache in terms of number
+of frames.<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="width: 25%;">Archive (frames)&nbsp;&nbsp;&nbsp;&nbsp; <br>
+      </td>
+      <td>Specifies the size of the data archive in frames.&nbsp; This
+can be set to 0, in which case no archive will be created.<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</center>
+</div>
+<br>
+The Video parameters specified in this dialog box are described below.<br>
+<br>
+<center>
+<table border="1" style="width: 752px; height: 115px;">
+  <tbody>
+    <tr>
+      <td style="width: 25%;">Device<br>
+      </td>
+      <td>Specify the device from which to capture video data.<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="width: 25%;">Format<br>
+      </td>
+      <td>Specify the format of the captured video image.&nbsp; The
+selections in this list are dependent on the capabilities of the
+selected video device. </td>
+    </tr>
+    <tr>
+      <td style="width: 25%;">Resolution<br>
+      </td>
+      <td>Specify the number of pixels per captured image.&nbsp; The
+selections in this list are dependent on the capabilities of the
+selected video device.<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="width: 25%;">Frame Rate<br>
+      </td>
+      <td>Specify the number of video frames sent to the DataTurbine
+per second.<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</center>
+<br>
+The Audio parameters specified in this dialog box are described below.<br>
+<br>
+<center>
+<table border="1" style="width: 752px; height: 173px;">
+  <tbody>
+    <tr>
+      <td style="width: 25%;">Capture Audio<br>
+      </td>
+      <td>Specify if you would like to capture audio data along with
+the video data by selecting (capture audio data) or unselecting (do not
+capture audio data) this checkbox.<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="width: 25%;">Device<br>
+      </td>
+      <td>Specify the device from which to capture audio data.<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="width: 25%;">Format<br>
+      </td>
+      <td>Specify the format of the captured sound data.&nbsp; The
+selections in this
+list are dependent on the capabilities of the selected audio device. </td>
+    </tr>
+    <tr>
+      <td style="width: 25%;">Sample Rate<br>
+      </td>
+      <td>Specify the sample rate, in samples per second.&nbsp; The
+selections in this
+list are dependent on the capabilities of the selected audio device. </td>
+    </tr>
+    <tr>
+      <td style="width: 25%;">Bits per Sample<br>
+      </td>
+      <td>Specify the number of bits per sample.&nbsp; The selections
+in this
+list are dependent on the capabilities of the selected audio device. </td>
+    </tr>
+    <tr>
+      <td style="width: 25%;">Mono/Stereo<br>
+      </td>
+      <td>Specify if you would like to capture a mono or stero audio
+signal.&nbsp; The selections in this
+list are dependent on the capabilities of the selected audio device. </td>
+    </tr>
+  </tbody>
+</table>
+</center>
+<br>
+<br>
+</body>
+</html>

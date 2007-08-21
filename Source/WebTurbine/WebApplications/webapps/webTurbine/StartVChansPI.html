@@ -1,0 +1,49 @@
+<html>
+<head>
+	<title>Virtual Channel PlugIn</title>
+	<LINK REL=STYLESHEET HREF="/stylesheets/rbnbstyles.css" TYPE="text/css">
+</head>
+<body>
+<h1>Virtual Channel PlugIn</h1>
+<p>This PlugIn allows you to map one or more remote channels to a channel on
+	the local server.&nbsp; The new alias for the original channel is 
+	otherwise indistinguishable from the original channel. 
+</p>	
+<form action="StartPlugIn.jsp" method="GET">
+	<input type="hidden" name="className" value="VChansPlugIn" />
+	<input type="hidden" name="plugInName" value="Virtual Channel PlugIn" />
+	<input type="hidden" name="arg" value="-a"/>
+	<div class="centered">
+	<table celpadding=5><tr>
+		<td colspan=2>RBNB Server Address:
+		<input type="TEXT" name="arg" 
+			value="localhost:3333" /></td>
+	<tr><td colspan=2></td></tr>
+	</tr><tr >
+		<th>Fully qualified remote channels </th>
+		<th>Virtual channel names</th>
+	</tr><tr>
+		<td><input type="TEXT" name="arg" value="" size=50/></td>
+		<td><input type="TEXT" name="arg" value="" size=30/></td>
+	</tr><tr>
+		<td><input type="TEXT" name="arg" value="" size=50/></td>
+		<td><input type="TEXT" name="arg" value="" size=30/></td>
+	</tr><tr>
+		<td><input type="TEXT" name="arg" value="" size=50/></td>
+		<td><input type="TEXT" name="arg" value="" size=30/></td>
+	</tr><tr>
+		<td><input type="TEXT" name="arg" value="" size=50/></td>
+		<td><input type="TEXT" name="arg" value="" size=30/></td>
+	</tr><tr>
+		<td><input type="TEXT" name="arg" value="" size=50/></td>
+		<td><input type="TEXT" name="arg" value="" size=30/></td>
+	</tr>
+	</table>
+	<p><input type="submit" value="Start PlugIn" /></p></div>
+</form>
+<p class="footer"><a href="/documentation/PlugIns/VirtualChannelPlugIn.html">
+	Help</a> -
+	<a href="/webTurbine">Home</a></p>
+</body>
+</html>
+

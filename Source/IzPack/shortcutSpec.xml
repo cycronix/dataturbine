@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<shortcuts>
+
+ <programGroup defaultName="RBNB-@__RBNB.VERSION__@" location="applications" />
+
+ <shortcut name="RBNB-@__RBNB.VERSION__@"
+           programGroup="no"
+	   desktop="yes"
+	   applications="no"
+	   startMenu="no"
+	   startup="no"
+	   target="$INSTALL_PATH\apache-tomcat-5.5.12\bin\JavaEnv.exe"
+           workingDirectory="$INSTALL_PATH\apache-tomcat-5.5.12\bin"
+	   commandLine="jre startup"
+	   description="RBNB @__RBNB.VERSION__@ WebTurbine Launcher"
+	   iconFile="$INSTALL_PATH\apache-tomcat-5.5.12\bin\RBNB.ico"
+	   initialState="normal"
+  />
+
+</shortcuts>

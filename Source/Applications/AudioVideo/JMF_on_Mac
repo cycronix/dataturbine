@@ -1,0 +1,8 @@
+To run on the Mac:
+
+Install the JMF jar files from $JMFHOME/lib to the java ext folder:
+
+/System/Library/Frameworks/JavaVM.framework/Versions/1.4.2/Home/lib/ext
+(jmf.properties may need to go in lib folder, but doesn't seem to matter)
+
+using explicit or environment CLASSPATH is dicey at best for some reason.

@@ -1,0 +1,145 @@
+Release Notes for the RC Scripts Zip File
+-----------------------------------------
+
+The RC scripts zip file contains the following:
+
+	- README			this file
+	- rbnb				the DataTurbine rc script
+	- webturbine			the WebTurbine rc script
+	- utility-apps.jar		RBNB utility applications
+
+
+The rbnb and webturbine scripts allow for the automatic starting of the
+DataTurbine and WebTurbine servers at system startup, and for the termination
+of those servers at system shutdown.
+
+The utility-apps.jar file contains a pair of RBNB applications used by the rbnb
+script:
+
+	1) ServerStatus			checks to see if the server is
+					running and sets the exit status as
+					follows:
+
+						0 - server is running and
+						    allowed a sink connection,
+						    or
+					       -1 - server is not running or
+						    did not allow a sink
+						    connection.
+
+	2) TerminateServer		terminates the RBNB server.
+
+Both of these take a single switch:
+
+	-a <server address>		specifies the address of the RBNB
+					server, default is localhost:3333.
+
+
+Installation
+------------
+
+To install and use the rbnb and webturbine startup/shutdown scripts, perform
+the following steps:
+
+1) Unpack the ZIP file into a temporary directory as the RBNB installation
+   owner:
+
+	% cd /tmp
+	% unzip rbnb-rc-scripts.zip
+
+2) Change to the superuser:
+
+	% su
+
+3) Move the rbnb and webturbine scripts to the /etc/rc.d/init.d directory:
+
+	% mv rbnb webturbine /etc/rc.d/init.d
+
+4) Create symbolic links to start/stop the DataTurbine and WebTurbine servers
+   at the proper init levels.  We use the following setup:
+
+	Single user mode:
+	% cd /etc/rc.d/rc1.d
+	% ln -s ../init.d/rbnb K70rbnb
+	% ln -s ../init.d/webturbine K70webturbine
+
+	Multiuser mode without graphics or networking:
+	% cd /etc/rc.d/rc2.d
+	% ln -s ../init.d/rbnb K70rbnb
+	% ln -s ../init.d/webturbine K70webturbine
+
+	Multiuser mode without graphics:
+	% cd /etc/rc.d/rc3.d
+	% ln -s ../init.d/rbnb S99rbnb
+	% ln -s ../init.d/webturbine S99webturbine
+
+	Multiuser mode with graphics:
+	% cd /etc/rc.d/rc5.d
+	% ln -s ../init.d/rbnb S99rbnb
+	% ln -s ../init.d/webturbine S99webturbine
+
+	Reboot:
+	% cd /etc/rc.d/rc6.d
+	% ln -s ../init.d/rbnb K70rbnb
+	% ln -s ../init.d/webturbine K70webturbine
+
+   Init level 4 is not used on our system.
+
+5) Change back to the RBNB installation owner (if not root):
+
+	% exit
+
+6) Move the utility-apps.jar file to the ${RBNB_HOME}/bin directory:
+
+	% mv utility-apps.jar ${RBNB_HOME}/bin
+
+   Where ${RBNB_HOME} should be replaced with the RBNB installation directory
+   (such as /home/RBNB_V2.3).
+
+Once these steps are done, the DataTurbine server and the WebTurbine server
+will automatically start whenever the system is booted and will terminate when
+the system goes down.
+
+
+Limitations
+-----------
+
+In order to run the GUI applications, the WebTurbine server needs to be able to
+access the console X server to be able to run properly.  We got this working,
+but with some limitations on what you can do on the console.  In particular,
+the webturbine script is tied to a particular user being logged into the
+console and running X (the default in the script is root).  The following notes
+describe how this limits the system:
+
+1) If no one ever logs into the console, then applications with GUIs (such as
+   rbnbAdmin, rbnbPlot, etc.) cannot be run via the WebTurbine,
+
+2) If the proper user (root by default) logs into the console, the GUI
+   applications will run
+
+3) Once a GUI application has been run, logging off the console (which causes
+   the X server to terminate and restart) terminates the WebTurbine.  You will
+   need to relaunch it by hand.  This can be done using the commands:
+
+	% cd ${RBNB_HOME}/bin
+	% ./Start_Webserver.sh
+
+These limitations make launching the WebTurbine at startup problematic and we
+have turned off the X capability in the script by default.  The GUI
+applications will not work (they will produce errors).
+
+Note: if you wish to be able to use the GUI applications with the limitations
+      described, then take out the comment (#) marker on the lines that say:
+
+	#XAUTHORITY=/root/.Xauthority
+	#export XAUTHORITY
+
+      if you wish to change which user the WebTurbine requires, edit the line
+      to:
+
+	XAUTHORITY=${user-home-directory}/.Xauthority
+
+     where:
+
+	${user-home-directory} is the path to the home directory of the user
+	you wish to control the WebTurbine server.

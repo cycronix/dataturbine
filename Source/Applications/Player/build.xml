@@ -1,0 +1,66 @@
+<!-- Name: build.xml
+     By:   John Wilson
+     Date: 10/06/2004
+
+     Description:
+         This file is the primary Ant build file for the RBNB Player
+         application.  This program allows the user to time-synchronize
+	 a series of channels from one RBNB Server and send the
+	 synchronized data to another RBNB Server.  The user can control
+	 the play of the data using VCR-like controls.
+-->
+
+<project name="APPLICATION.PLAYER" default="library" basedir=".">
+
+ <!-- Import the standard definitions (properties). -->
+ <import file="../../definitions.xml" />
+
+ <!-- Initialize by setting the timestamp. -->
+ <target name="init">
+  <tstamp />
+  <buildnumber />
+  <mkdir dir="${rbnb.builddir}" />
+  <mkdir dir="${rbnb.classesdir}" />
+  <mkdir dir="${rbnb.classesdir}/Applications" />
+  <mkdir dir="${rbnb.classesdir}/Applications/Player" />
+  <mkdir dir="${rbnb.classesdir}/Applications/Player/Video" />
+  <mkdir dir="${rbnb.librarydir}" />
+ </target>
+
+ <!-- Compile the Player Java source code and place the results in the Player
+      classes directory.  References the Core library and the Player classes
+      for dependencies.
+  -->
+ <target name="compile" depends="init">
+  <javac destdir="${rbnb.classesdir}/Applications/Player"
+         deprecation="on">
+   <src path="${rbnb.sourcedir}/Applications/Player" />
+   <classpath path="${rbnb.classesdir}/Applications/Player" />
+   <classpath path="${rbnb.librarydir}/rbnb.jar" />
+  </javac>
+ </target>
+ 
+ <!-- Copy the button images to the classes directory. -->
+ <target name="images">
+  <copy todir="${rbnb.classesdir}/Applications/Player/Video">
+   <fileset dir="Video" />
+  </copy>
+ </target>
+ 
+ <!-- Create the Player jar file using the Player classes. -->
+ <target name="library" depends="compile, images">
+  <jar destfile="${rbnb.librarydir}/player.jar"
+       basedir="${rbnb.classesdir}/Applications/Player"
+       manifest="Manifest"
+       compress="false"
+   />
+ </target>
+
+ <!-- Cleans out all compiled and library files for the Player project. -->
+ <target name="clean">
+  <delete dir="${rbnb.classesdir}/Applications/Player" />
+  <delete file="${rbnb.librarydir}/player.jar" />
+ </target>
+
+</project>
+

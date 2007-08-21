@@ -1,0 +1,48 @@
+<!-- Name: build.xml
+     By:   Ian Brown, Bill Finger
+     Date: 
+
+     Description:
+         This file is the primary Ant build file for the WebTurbine system  It
+	 runs all of the WebTurbine system builds.
+	 
+	 Modifications:
+	 06/23/2004  INB  Created.
+	 2005/10/12  WHF  Separate WebServer piece not needed for new RBNB WebDAV.
+-->
+
+<project name="WEBTURBINE" default="distribute" basedir=".">
+
+ <!-- Import the standard definitions (properties). -->
+ <import file="../definitions.xml" />
+
+ <!-- Compile all of the applications, but don't build any libraries. -->
+ <target name="compile">
+  <subant target="compile">
+<!--    <fileset dir="." includes="*/build.xml" /> -->
+		<fileset dir="." includes="WebApplications/build.xml" />
+  </subant>
+ </target>
+
+ <!-- Compile and make libraries for all of the applications. -->
+ <target name="library">
+  <subant target="library">
+<!--   <fileset dir="." includes="WebServer/build.xml" />  -->
+   <fileset dir="." includes="WebApplications/build.xml" />
+  </subant>
+ </target>
+
+ <!-- Build a distribution package. -->
+ <target name="distribute" depends="library">
+ </target>
+
+ <!-- Cleans out all compiled and library files for the applications. -->
+ <target name="clean">
+  <subant target="clean">
+   <fileset dir="." includes="*/build.xml" />
+  </subant>
+  <delete dir="${rbnb.classesdir}/Applications" />
+ </target>
+
+</project>
+
