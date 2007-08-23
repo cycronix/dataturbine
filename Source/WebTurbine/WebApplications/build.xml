@@ -3,6 +3,7 @@
      Date: 2005/12/08
 	 
 	 History
+	 2007/08/23  PFH  Removing references to proguard and obfuscation.
 	 2004/06/22  WHF  Created.
 	 2005/10/12  WHF  Made the leap to the new RBNB WebDav.
 	 2005/12/08  WHF  Cleaned up some old definitions.
@@ -57,7 +58,7 @@
 		<pathelement location="${rbnb.jakartadir}/common/lib/jsp-api.jar" />
 	</path>
 	<path id = "corecp" >
-		<pathelement location = "${rbnb.obfuscatedir}/rbnb.jar" />
+		<pathelement location = "${rbnb.librarydir}/rbnb.jar" />
 	</path>
 
 	<!--*****  Targets *****-->
@@ -244,7 +245,7 @@
 				<include name="webapps/ROOT/**" />
 			</fileset>
 		</copy>
-		<copy file = "${rbnb.obfuscatedir}/rbnb.jar"
+		<copy file = "${rbnb.librarydir}/rbnb.jar"
 				todir = "${rbnb.walibdir}/common/lib" />
 		
 		<!-- just copy files, do not war them up

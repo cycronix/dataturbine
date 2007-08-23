@@ -30,6 +30,8 @@
 
  <!-- The current RBNB version can be found from the name of our base
       directory.
+
+ TODO: Change this! Need a better method. Version number in a file? Hardcode here? pfh
   -->
  <basename property="rbnb.version" file="${rbnb.basedir}" />
 
@@ -65,10 +67,6 @@
  <property name="rbnb.documentationdir"
            value="${rbnb.librarydir}/Documentation" />
 
- <!-- The obfuscate directory contains the results of obfuscating the RBNB
-      server/API library. -->
- <property name="rbnb.obfuscatedir" value="${rbnb.builddir}/Obfuscate" />
-
  <!-- The distrubute directory contains a distributable (installable) version
       of the executable code.
   -->
@@ -88,13 +86,6 @@
  <available file="${rbnb.thirdpartydir}" type="dir" property="thirdparty.present"/>
  <fail unless="thirdparty.present" message="Missing ${rbnb.thirdpartydir}"/>
  
- <!-- ProGuard is a freely distributable obfuscator that integrates with
-      ant. -->
- <taskdef name="proguard"
-          classname="proguard.ant.ProGuardTask"
-	  classpath="${rbnb.thirdpartydir}/proguard2.1/lib/proguard.jar"
-  />
-
  <!-- IzPack is a freely distributable installer builder that integrates
       with ant. -->
  <taskdef name="izpack"

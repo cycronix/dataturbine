@@ -46,7 +46,7 @@
    <file src="Lib/Documentation" targetdir="$INSTALL_PATH" />
    <file src="Lib/Examples" targetdir="$INSTALL_PATH" />
    <file src="Lib/Matlab" targetdir="$INSTALL_PATH" />
-   <file src="Obfuscate/rbnb.jar" targetdir="$INSTALL_PATH/bin" />
+   <file src="Lib/rbnb.jar" targetdir="$INSTALL_PATH/bin" />
    <fileset dir="Lib"
             targetdir="$INSTALL_PATH/bin">
     <include name="*.jar" />

@@ -46,34 +46,6 @@
   </subant>
  </target>
 
- <!-- The proguard application requires the path to any standard JVM boot
-      classes and JAR files.  Unfortunately, the Java package delivered with
-      MacOSX uses a non-standard directory hierarchy, which requires us to have
-      two different configuration files that are OS dependent. -->
- <condition property="rbnb.obfuscate.configuration"
-            value="${rbnb.sourcedir}/macosx-proguard.conf">
-  <os family="mac" />
- </condition>
- <condition property="rbnb.obfuscate.configuration"
-            value="${rbnb.sourcedir}/standard-proguard.conf">
-  <not>
-   <os family="mac" />
-  </not>
- </condition> 
-
- <!-- DataTurbine obfuscation target. -->
- <target name="obfuscate-dataturbine" depends="library-dataturbine">
-  <mkdir dir="${rbnb.obfuscatedir}" />
-  <proguard configuration="${rbnb.obfuscate.configuration}"
-            printmapping="${rbnb.obfuscatedir}/mapping.out"
-            overloadaggressively="off"
-            shrink="off"
-            verbose="on">
-   <injar name="${rbnb.librarydir}/rbnb.jar" />
-   <outjar name="${rbnb.obfuscatedir}/rbnb.jar" />
-  </proguard>
- </target>
-
  <!-- The following paths are used by reference by Javadoc to locate its source
      files and classes. -->
  <path id="rbnb.javadoc.source.path">
@@ -82,12 +54,12 @@
   <pathelement path="${rbnb.sourcedir}/Applications/PlugIns" />
  </path>
  <path id="rbnb.javadoc.class.path">
-  <pathelement path="${rbnb.obfuscatedir}/rbnb.jar" />
+  <pathelement path="${rbnb.builddir}/rbnb.jar" />
   <pathelement path="${rbnb.basedir}/../LicensedSoftware/JMF-2.1.1e/lib/jmf.jar" />
  </path>
 
  <!-- Build the documentation directory. -->
- <target name="documentation" depends="obfuscate-dataturbine">
+ <target name="documentation" depends="library-dataturbine">
   <mkdir dir="${rbnb.documentationdir}" />
   <copy todir="${rbnb.librarydir}">
    <fileset dir="${rbnb.sourcedir}"
