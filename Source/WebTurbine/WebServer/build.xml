@@ -26,7 +26,7 @@
 	<property name = "catalinajarpath"
 			value = "${rbnb.jakartadir}/server/lib/catalina.jar" />
 	<path id = "corecp" >
-		<pathelement location = "${rbnb.obfuscatedir}/rbnb.jar" />
+		<pathelement location = "${rbnb.librarydir}/rbnb.jar" />
 	</path>
 	<path id = "webservercp" >
 		<pathelement location = 

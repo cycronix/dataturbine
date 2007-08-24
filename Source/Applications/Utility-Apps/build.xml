@@ -41,7 +41,7 @@
          deprecation="on">
    <src path="${rbnb.sourcedir}/Applications/Utility-Apps" />
    <classpath path="${rbnb.classesdir}/Applications/Utility-Apps" />
-   <classpath path="${rbnb.obfuscatedir}/rbnb.jar" />
+   <classpath path="${rbnb.librarydir}/rbnb.jar" />
   </javac>
  </target>
 
