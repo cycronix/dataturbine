@@ -1,0 +1,81 @@
+                Ant Task for doxygen
+                ====================
+
+1.What is this package ?
+   This package contains the  ant task to use the software doxygen.
+   
+2. What is doxygen ?
+    From the web-site of doxygen - 
+    
+"Doxygen is a documentation system for C++, C, Java, IDL
+(Corba, Microsoft, and KDE-DCOP flavors) and to some extend PHP.
+
+It can help you in three ways:
+
+It can generate an on-line documentation browser (in HTML) 
+and/or an off-line reference manual (in ) from a set of 
+documented source files. There is also support for generating output 
+in RTF (MS-Word), PostScript, hyperlinked PDF, compressed HTML,
+and Unix man pages. The documentation is extracted directly from the sources, 
+which makes it much easier to keep the documentation consistent with the source code.
+
+Doxygen can be configured to extract the code structure from undocumented 
+source files. This can be very useful to quickly find your way in large source
+distributions. The relations between the various elements are be visualized 
+by means of include dependency graphs, inheritance diagrams, and collaboration 
+diagrams, which are all generated automatically.
+
+You can even `abuse' doxygen for creating normal documentation (as I did for this manual).
+
+Doxygen is developed under Linux, but is set-up to be highly portable. 
+As a result, it runs on most other Unix flavors as well. Furthermore,
+executables for Windows 9x/NT and Mac OS X are available."
+
+3. Where can I get the distribution of doxygen ? 
+   Visit http://www.stack.nl/~dimitri/doxygen/ to get the latest release.
+
+4.What version of doxygen does this one support ? 
+   The task, rewritten as per v1.3 makes sure that , the task is independent of 
+the version of doxygen that you are running. 
+
+5.What is the license under which this is issued? 
+   This software is issued under The Apache Software License, Version 1.1. 
+Please see the file LICENSE for more details.
+
+6. Doxygen provides me a host of options. Does the task support all of them ?
+
+   Yeah. The task supports all of them. If not please log a bug / feature request 
+as appropriate. 
+
+7. How do I know of the latest releases of the ant-doxygen task ? 
+
+   The mailing list - ant-doxygen-release@lists.sourceforge.net is notified of latest 
+releases of the task . This is a low-traffic mailing list. 
+  To subscribe to the same, please visit - 
+
+  http://lists.sourceforge.net/lists/listinfo/ant-doxygen-release . 
+
+8. Enough is enough. Please let me know how to write a doxygen task. 
+   A sample task is provided in the file build.xml distributed along with this,
+   under target testtask.
+
+   <target name="tasktest" depends="makejar"   >
+        <taskdef name="doxygen" classname="org.doxygen.tools.DoxygenTask"
+            classpath="./lib/doxygen_ant.jar" />
+            
+        <mkdir dir="${testoutputdir}" />            
+        <doxygen>
+            <property name="INPUT" value="${testinputdir}" />
+            <property name="OUTPUT_DIRECTORY" value="{testoutputdir}" /> 
+        </doxygen>
+   </target>
+
+   
+ If you feel the task has a bug/feature requests please visit the following page 
+and log appropriate patches / bug requests . 
+
+   http://sourceforge.net/tracker/?group_id=62308.
+
+
+Cheers.
+Karthik Kumar  ( akkumar AT users DOT sourceforge DOT net )

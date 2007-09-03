@@ -1,0 +1,153 @@
+<!DOCTYPE html PUBLIC "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+  <title>Ant task for Doxygen - Documentation</title>
+
+  <meta http-equiv="content-type"
+ content="text/html; charset=ISO-8859-1">
+
+<meta name="author" content="Karthik Kumar" >
+<meta name="description" content="Ant task for doxygen" >
+<meta name="keywords" content="ant, external task, task, open source, Karthik Kumar, doxygen, Sourceforge, Apache licence, free software, doxygen 1.2.18, 1.2, Ant task" >
+</head>
+<body>
+<table style="text-align: left; width: 100%;" border="0" cellspacing="2"
+ cellpadding="2">
+  <tbody>
+    <tr>
+      <td style="vertical-align: top;" width="15%" bgcolor=#CFDC22>
+      	<font face=Arial size=2>
+      		<a href="index.html">Home</a><br><br>
+			<a href="usage.html">Usage</a><br><br>
+			<a href="download.html">Download</a><br><br>
+			<a href="change.html">Change History</a><br><br>
+			<a href="support.html">Support</a><br><br>
+	</font>
+      </td>
+      <td style="vertical-align: top;">
+<h2><a name="doxyge">doxygen</a></h2>
+<h3>Description</h3>
+<p>
+Generates documentation for source files, using the document generation utility <a href="http://www.doxygen.org">doxygen</a>.
+<h3>Dependency</h3>
+<p>
+The 'doxygen' binary need to be pre-installed on the system. If it is not in the PATH environment variable of your operating system, please see the attribute 'doxygenPath' as to how to use the same to invoke doxygen.
+
+</p>
+<h3>Parameters</h3>
+<table border="1" cellpadding="2" cellspacing="0">
+  <tr>
+    <td valign="top"><b>Attribute</b></td>
+    <td valign="top"><b>Description</b></td>
+    <td align="center" valign="top"><b>Required</b></td>
+  </tr>
+  <tr>
+    <td valign="top">versionCompatible</td>
+    <td valign="top">This is the version of doxygen for which the task is compatible. If set and the version of the doxygen installed on the system does not match with this version, the build would break</td>
+    <td valign="top" align="center">No.</td>
+  </tr>
+  <tr>
+    <td valign="top">doxygenPath</td>
+    <td valign="top">This is the full path to the doxygen executable that is to be used for executing this doxygen task. By default, the task expects the doxygen binary in the path.</td>
+    <td valign="top" align="center">No.</td>
+  </tr>
+  <tr>
+    <td valign="top">configFilename</td>
+    <td valign="top">If set, then the doxygen task would load the configuration properties from this file.</td>
+    <td valign="top" align="center">No.</td>
+  </tr>
+</table>
+<h3>Parameters specified as nested elements</h3>
+<h4>property</h4>
+<p>
+  doxygen task can have more than one 'property' nested elements as follows.
+  <br><Br>
+ <table border="1" cellpadding="2" cellspacing="0">
+  <tr>
+    <td valign="top"><b>Attribute</b></td>
+    <td valign="top"><b>Description</b></td>
+    <td align="center" valign="top"><b>Required</b></td>
+  </tr>
+  <tr>
+    <td valign="top">name</td>
+    <td valign="top">The name of the property in the Doxygen configuration file.</td>
+    <td valign="top" align="center">Yes.</td>
+  </tr>
+  <tr>
+    <td valign="top">value</td>
+    <td valign="top">The value of the property whose name is specified as 'name' attribute in the Doxygen configuration file.</td>
+    <td valign="top" align="center">Yes.</td>
+  </tr>
+</table>
+<h3>Defining Doxygen Task</h3>
+<p>
+The doxygen task could be defined as follows. 
+
+
+<pre>
+&lt;taskdef name="doxygen" classname="org.doxygen.tools.DoxygenTask"
+        	classpath="<b>&lt;path_to_ant_doxygen.jar_file&gt;</b>" /&gt;
+</pre>
+</p>
+<h3>Examples</h3>
+<p><b>1. To generate documentation by default in current directory, basic option.</b></p>
+<pre>
+&lt;doxygen&gt;
+	&lt;property name="INPUT" value="${inputdir}" /&gt;
+&lt;/doxygen&gt;
+</pre>
+<p><b>2. To generate html documentation
+  recursively for a given directory and suppress latex documentation.</b></p>
+<pre>
+&lt;doxygen&gt;
+	&lt;property name="INPUT" value="${inputdir}" /&gt;
+	&lt;property name="RECURSIVE" value="yes" /&gt;
+	&lt;property name="GENERATE_LATEX" value="false" /&gt;
+	&lt;property name="PROJECT_NAME" value="Ant-Doxygen" /&gt;
+&lt;/doxygen&gt;
+</pre>
+</p>
+<p><b>3. To launch doxygen that is not installed on the path.</b></p>
+<pre>
+&lt;doxygen doxygenPath="/usr/local/doxygen-1.2.5/doxygen" &gt;
+	&lt;property name="INPUT" value="${inputdir}" /&gt;
+	&lt;property name="PROJECT_NAME" value="Ant-Doxygen" /&gt;
+&lt;/doxygen&gt;
+</pre>
+</p>
+<p><b>4. To launch doxygen that should be run only with doxygen version 1.2.17.</b></p>
+<pre>
+&lt;doxygen versionCompatible="1.2.17" &gt;
+	&lt;property name="INPUT" value="${inputdir}" /&gt;
+	&lt;property name="PROJECT_NAME" value="Ant-Doxygen" /&gt;
+&lt;/doxygen&gt;
+</pre>
+</p>
+<p><b>4. To launch doxygen that should be run with doxygen versions 1.2.17 and above.</b></p>
+<pre>
+&lt;doxygen versionCompatible="1.2.17+" &gt;
+	&lt;property name="INPUT" value="${inputdir}" /&gt;
+	&lt;property name="PROJECT_NAME" value="Ant-Doxygen" /&gt;
+&lt;/doxygen&gt;
+</pre>
+</p>
+<p><b>5. To load the doxygen configuration properties from a given file.</b></p>
+<pre>
+&lt;doxygen configFilename="/home/myhome/doxygen.cfg" /&gt;
+</pre>
+</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p><center>
+<i>This project is hosted on <a
+ href="http://sourceforge.net"><img
+ src="http://sourceforge.net/sflogo.php?group_id=31100&amp;type=5"
+ width="210" height="62" border="0" alt="SourceForge Logo"></a>.  </i>
+</center>
+</p>
+<br>
+<br>
+</body>
+</html>

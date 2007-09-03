@@ -117,6 +117,11 @@
          offline="true"
          packagelistLoc="${rbnb.sourcedir}/Documentation/HTML/JavaDoc/java" />
   </javadoc>
+  <!-- pfh add doxygen here, as is also developer docs. 
+   See http://ant-doxygen.sourceforge.net/usage.php -->
+  <doxygen>
+      <property name="INPUT" value="." />
+  </doxygen>
  </target>
 
  <!-- Compile all of the applications, but don't build any libraries. -->

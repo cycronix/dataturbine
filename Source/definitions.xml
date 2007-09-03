@@ -93,5 +93,9 @@
           classname="com.izforge.izpack.ant.IzPackTask"
           classpath="${rbnb.thirdpartydir}/izpack-3.5.4/lib/compiler.jar"
    />
+ <!-- Doxygen is a freely distributable documentation generator that also parses javadoc. -->
+ <taskdef name="doxygen" classname="org.doxygen.tools.DoxygenTask"
+          classpath="${rbnb.thirdpartydir}/ant-doxygen/lib/ant_doxygen.jar"
+   />
 
 </project>
