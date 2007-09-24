@@ -62,6 +62,8 @@ public class LayoutCubby {
    //                data slice back to the DataTurbine as one
    //                or more new channels.
    public static final int ExportToDT=9;
+   //EMF 9/4/07: added export to Matlab .mat file
+   public static final int ExportToMatlab=10;
    private Boolean status = null;
 
 //get method - if has not been read, return new layout, else returns null

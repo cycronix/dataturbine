@@ -22,6 +22,7 @@ limitations under the License.
 	2007/03/22  WHF  Changed the default for forwarding request data to 'true'.
 			Improved handling of exceptions in the request slave.
 	2007/04/03  WHF  Added getRequestOptions().
+	2007/09/12  WHF  start() sends a notification in case someone needs it.
 */
 
 package com.rbnb.plugins;
@@ -81,7 +82,8 @@ public abstract class PlugInTemplate
 	
 	/**
 	  * Starts the PlugIn in another thread, returning execution 
-	  *  to the current thread.
+	  *  to the current thread.  Any threads waiting on <code>this</code>
+	  *  are notified.
 	  *
 	  * @throws SAPIException  if a connection error occurs.
 	  */
@@ -102,6 +104,10 @@ public abstract class PlugInTemplate
 		} */
 		if (registeredChannels.NumberOfChannels() != 0)
 			pi.Register(registeredChannels);
+		
+		synchronized (this) {
+			notifyAll();
+		}
 		
 		new Thread(slave, getClass().getName()+" Slave").start();		
 	}

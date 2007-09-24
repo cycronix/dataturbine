@@ -109,6 +109,9 @@ public class RBNBInterface implements Runnable {
     // JPW 11/29/2006: Dialog to handle exporting to RBNB
     private ExportToDT exportToDT = null;
     
+    //EMF 9/4/07: Dialog to handle exporting to Matlab
+    private ExportToMatlab exportToMatlab = null;
+    
     /********************
      *
      *  RBNBInterface() (Constructor)
@@ -1182,7 +1185,22 @@ public class RBNBInterface implements Runnable {
 		exportToDT.setVisible(true);
 	    }
 	    break;
-	    
+	//EMF 9/4/07: added Export to Matlab
+	case LayoutCubby.ExportToMatlab:
+	    // JPW 11/29/2006: Use ExportToDT to export data
+	    if (connection != null) {
+		if (exportToMatlab == null) {
+		    // Create non-modal ExportToDT dialog to handle exporting data to the RBNB
+		    exportToMatlab =
+			new ExportToMatlab(
+			    rbnbPlotMain.frame,
+			    false,
+			    connection,
+			    environment);
+		}
+		exportToMatlab.setVisible(true);
+	    } 
+	    break;	    
 	default:
 	    System.out.println("RBNBInterface.changeLayout: unknown layout "+layout);
 	    break;

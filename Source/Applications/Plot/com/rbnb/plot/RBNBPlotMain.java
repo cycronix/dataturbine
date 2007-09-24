@@ -618,6 +618,10 @@ public class RBNBPlotMain extends Applet implements ActionListener,Runnable,Prin
 	    else if (arg.equals("Export to DataTurbine")) {
 		loc.set(LayoutCubby.ExportToDT);
 	    }
+	    // EMF 9/4/07: added "Export to Matlab" feature
+	    else if (arg.equals("Export to Matlab")) {
+		loc.set(LayoutCubby.ExportToMatlab);
+	    }
 	    else if (arg.equals("Print")) {
 		printScreen();
 	    }
@@ -748,6 +752,13 @@ public class RBNBPlotMain extends Applet implements ActionListener,Runnable,Prin
         copyToDT.setEnabled(true);
 	copyToDT.addActionListener(this);
 	file.add(copyToDT);
+	// EMF 9/8/99: added Export
+	JMenuItem exportMatlab = new JMenuItem("Export to Matlab");
+	exportMatlab.setFont(Environment.FONT12);
+        //EMF 5/18/01: disable
+        exportMatlab.setEnabled(true);
+	exportMatlab.addActionListener(this);
+	file.add(exportMatlab);
 	JMenuItem print = new JMenuItem("Print");
 	print.setFont(Environment.FONT12);
 	// EMF 4/28/99 //try 1.2 printing 2/27/02
