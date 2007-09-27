@@ -50,7 +50,7 @@ public class rbnbUDPCaster {
      * @author John P. Wilson
      *
      * @param argsI  argument list
-     * @version 06/02/2005
+     * @version 09/26/2007
      */
     
     /*
@@ -58,6 +58,7 @@ public class rbnbUDPCaster {
      *   Date      By	Description
      * MM/DD/YYYY
      * ----------  --	-----------
+     * 09/26/2007  JPW  Added "-o" (stream from oldest) and "-x" (autostart)
      * 06/02/2005  JPW  Created.
      *
      */
@@ -69,6 +70,8 @@ public class rbnbUDPCaster {
 	String recipientHostL = null;
 	int recipientPortL = -1;
 	int senderPortL = -1;
+	boolean bStreamFromOldestL = false;
+	boolean bAutostartL = false;
 	
 	//parse args
 	try {
@@ -92,6 +95,10 @@ public class rbnbUDPCaster {
 	    
 	    if (ah.checkFlag('c')) {
 		chanNameL = ah.getOption('c');
+	    }
+	    
+	    if (ah.checkFlag('o')) {
+		bStreamFromOldestL = true;
 	    }
 	    
 	    if (ah.checkFlag('r')) {
@@ -123,6 +130,10 @@ public class rbnbUDPCaster {
 		senderPortL = Integer.parseInt(portStr);
 	    }
 	    
+	    if (ah.checkFlag('x')) {
+		bAutostartL = true;
+	    }
+	    
 	} catch (Exception e) {
 	    if ( (e.getMessage() != null) &&
 	    	 (!e.getMessage().equals("Print help message")) )
@@ -136,10 +147,13 @@ public class rbnbUDPCaster {
 	    System.err.println(" -a <server address>    : RBNB address");
 	    System.err.println("                default : localhost:3333");
 	    System.err.println(" -c <input chan>        : RBNB channel to subscribe to");
+	    System.err.println(" -o                     : stream from oldest");
+	    System.err.println("                default : stream from newest");
 	    System.err.println(" -r <recipient address> : address UDP packets are sent to");
 	    System.err.println("                default : localhost:5555");
 	    System.err.println(" -s <port>              : socket port for sending out UDP packets");
 	    System.err.println("                default : 3456");
+	    System.err.println(" -x                     : auto-start");
 	    RBNBProcess.exit(0);
 	}
 	
@@ -149,7 +163,9 @@ public class rbnbUDPCaster {
 		chanNameL,
 		senderPortL,
 		recipientHostL,
-		recipientPortL);
+		recipientPortL,
+		bStreamFromOldestL,
+		bAutostartL);
 	
     }
 }

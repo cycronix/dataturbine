@@ -9,22 +9,34 @@
   <title>RBNB Release Notes</title>
 </head>
 <body>
-<h1>RBNB 2007/09/24  Release Notes</h1>
-<ul>
-	<li>Added a com.rbnb.fie (File Import/Export) package to the RBNB Plot
-		area.  JMatStruct, an exporter for .MAT files, is the most significant
-		class in this package.</li>
-	<li>Support for JMatStruct was added to rbnbPlot.  The .MAT file is created
-		in the current directory.</li>
-	<li>A plug-in to compute the time derivative of a channel was added to the
-		PlugIn area.</li>
-	<li>Plot has support to change the font size through a JVM system parameter.
-	</li>
-</ul>
+<h1>RBNB Release Notes</h1>
 <h1>RBNB V3.1 Release Notes</h1>
 <h2>V3.1B1 to V3.1B2 Changes</h2>
 <li>Code is officially open source - hosted on NEESforge website.</li>
-<li>Removed obfuscation (no longer needed now that RBNB is open source); remove ProGuard files from Third_Party directory.</li>
+<li>Removed obfuscation (no longer needed now that RBNB is open source); remove
+	ProGuard files from Third_Party directory.
+</li>
+<li>A plug-in to compute the time derivative of a channel was added to the
+	PlugIn area.
+</li>
+<li>Add command line arguments to UDPCaster: autostart ("-x") and stream
+	from oldest ("-o").
+</li>
+<h3>rbnbPlot</h3>
+<ul>
+	<li>Added com.rbnb.fie (File Import/Export) package (added to Plot
+		area because that is where we are initially using it, and also
+		to keep the Server code Java 1.1.4 compliant).  JMatStruct,
+		an exporter for .MAT files, is the most significant class in
+		this package.
+	</li>
+	<li>Add MATLAB (".MAT") export support using JMatStruct.  The .MAT
+		file is created in the current directory.
+	</li>
+	<li>Plot has support to change the font size through a JVM system
+		parameter.
+	</li>
+</ul>
 <h2>V3.0 to V3.1B1 Changes</h2>
 Third_Party directory has been pulled out of Source directory; build files have been adjusted as appropriate. This is consistant with the folder structure at NEESforge and makes sense since the content of Third_Party isn't part of the RBNB open source.
 <h3>rbnbServer</h3>

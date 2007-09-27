@@ -216,7 +216,7 @@ public class UDPCaster extends JFrame implements ActionListener {
      * @author John P. Wilson
      *
      * @param argsI  argument list
-     * @version 06/03/2005
+     * @version 09/26/2007
      */
     
     /*
@@ -224,19 +224,22 @@ public class UDPCaster extends JFrame implements ActionListener {
      *   Date      By	Description
      * MM/DD/YYYY
      * ----------  --	-----------
+     * 09/26/2007  JPW  Add stream from oldest and autostart arguments.
      * 06/03/2005  JPW  Created.
      *
      */
     
     public UDPCaster() {
-	this(null, null, -1, null, -1);
+	this(null, null, -1, null, -1, false, false);
     }
     
     public UDPCaster(String serverAddressI,
                      String chanNameI,
 		     int senderPortI,
 		     String recipientHostI,
-		     int recipientPortI)
+		     int recipientPortI,
+		     boolean bStreamFromOldestI,
+		     boolean bAutostartI)
     {
 	
 	super("UDPCaster    disconnected");
@@ -256,6 +259,8 @@ public class UDPCaster extends JFrame implements ActionListener {
 	if (recipientPortI > 0) {
 	    recipientPort = recipientPortI;
 	}
+	
+	bStreamFromOldest = bStreamFromOldestI;
 	
 	createMenus();
 	
@@ -422,6 +427,50 @@ public class UDPCaster extends JFrame implements ActionListener {
 	    });
 	
 	setVisible(true);
+	
+	if (bAutostartI) {
+	    // Check to make sure we have all needed data
+	    if ( (serverAddress != null) && (!serverAddress.equals("")) &&
+	         (chanName != null) && (!chanName.equals(""))           &&
+	         (senderPort > 0)                                       &&
+		 (recipientHost != null) && (!recipientHost.equals("")) &&
+		 (recipientPort > 0) )
+	    {
+		System.err.println(
+		    "\nAuto start using the following parameters:");
+		System.err.println("Server address: " + serverAddress);
+		System.err.println("Channel name: " + chanName);
+		System.err.println("Local bind port: " + senderPort);
+		System.err.println(
+		    "Recipient address: " +
+		    recipientHost +
+		    ":" +
+		    recipientPort);
+		if (bStreamFromOldest) {
+		    System.err.println("Stream from oldest");
+		} else {
+		    System.err.println("Stream from newest");
+		}
+		System.err.println("\n");
+		// Start
+		openAction();
+	    }
+	    else
+	    {
+		System.err.print("\n\nCannot autostart: ");
+		if ( (serverAddress == null) || (serverAddress.equals("")) ) {
+		    System.err.println("Server address not initialized\n");
+		} else if ( (chanName == null) || (chanName.equals("")) ) {
+		    System.err.println("Input channel name not initialized\n");
+		} else if (senderPort > 0) {
+		    System.err.println("Local bind port less than or equal to 0\n");
+		} else if ( (recipientHost == null) || (recipientHost.equals("")) ) {
+		    System.err.println("Recipient host name not initialized\n");
+		} else if (recipientPort > 0) {
+		    System.err.println("Recipient port less than or equal to 0\n");
+		}
+	    }
+	}
 	
     }
     
