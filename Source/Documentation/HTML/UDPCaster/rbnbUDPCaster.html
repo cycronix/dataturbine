@@ -24,7 +24,7 @@
 <h2>V1.1</h2>
 </center>
 <center>
-<h2>September 26, 2007</h2>
+<h2>October 2, 2007</h2>
 </center>
 <center>
 <h2>Copyright, Creare Inc.</h2>
@@ -45,7 +45,7 @@
   <blockquote><b><a href="#rbnbaddress">RBNB address</a></b><b><br>
     <a href="#rbnbchannel">RBNB channel</a></b><b><br>
     <a href="#selectchan">Select Chan...</a><br>
-    </b><b><a href="#recipientaddress">Recipient address</a></b><b><br>
+    </b><b><a href="#recipientaddress">Recipients (comma-delim list)</a></b><b><br>
     <a href="#streamrbnbdata">Stream RBNB data</a></b><b><br>
     <a href="#numframes">Number of RBNB frames fetched</a></b><b><br>
     <a href="#timestamp">Timestamp of last RBNB frame</a></b><br>
@@ -58,7 +58,8 @@
 <a name="overview"></a>Overview</h2>
 <i>rbnbUDPCaster</i> is a Java application which fetches data from a
 DataTurbine channel and writes the
-data out as UDP packets to a particular host and port.&nbsp; The
+data out as UDP packets to one or more specified&nbsp; recipient
+addresses.&nbsp; The
 following figure
 illustrates a sample <i>rbnbUDPCaster</i> user interface window:<br>
 <center>
@@ -107,10 +108,11 @@ the command-line options.<br>
     </tr>
     <tr>
       <td style="vertical-align: top; width: 35%;"><tt>-r
-&lt;recipient's host:port&gt;<br>
+&lt;host:port list&gt;<br>
       </tt></td>
-      <td style="vertical-align: top;">Specifies where to send the UDP
-packets; defaults to "localhost:5555".<br>
+      <td style="vertical-align: top;">Comma-delimited list of
+host:port recipients (specifies where to send the UDP
+packets); defaults to "localhost:5555".<br>
       </td>
     </tr>
     <tr>
@@ -141,7 +143,8 @@ Here is a sample command line:<tt><br>
 <br>
 </tt>
 <div style="text-align: center;"><tt>java -jar udpcaster.jar -a
-"localhost:3333" -c "mySource/foo" -r "bighost:5555" -s 3456</tt><br>
+localhost:3333 -c mySource/foo -r bighost:5555,localhost:4444 -s
+3456</tt><br>
 <tt> </tt></div>
 <p>
 </p>
@@ -173,8 +176,8 @@ DataTurbine at the address specified in the <span
 selection..<br>
 4. Each data block fetched from the DataTurbine will be sent as a UDP
 packet to the<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; address specified in the <span
- style="font-weight: bold;">Recipient address</span> field.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; addresses specified in the <span
+ style="font-weight: bold;">Recipients </span>field.<br>
       </td>
     </tr>
     <tr>
@@ -218,10 +221,14 @@ interface.
  style="width: 268px; height: 133px;"></p>
 </center>
 <br>
-<h2><a name="recipientaddress"></a>Recipient address</h2>
-Specify the host and port where to send the UDP packets.&nbsp; For
+<h2><a name="recipientaddress"></a>Recipients (comma-delim list)<br>
+</h2>
+A comma-delimited list of hosts and ports where to send the UDP
+packets.&nbsp; For
 example, enter "localhost:5555" (without the quotes) to specify to send
-UDP packets to the local machine's socket port 5555.<br>
+UDP packets to the local machine's socket port 5555.&nbsp; As another
+example, enter "<tt>bighost:5555,localhost:4444" (without the quotes)
+to specify to send UDP packets to both bighost:5555 and localhost:4444.</tt>
 <h2><a name="streamrbnbdata"></a>Stream RBNB data</h2>
 Specify the starting point for fetching data from the DataTurbine
 channel.&nbsp; There are two options: <span style="font-weight: bold;">From
