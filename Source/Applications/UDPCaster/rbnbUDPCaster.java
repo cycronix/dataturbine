@@ -14,7 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+import java.util.StringTokenizer;
+import java.util.Vector;
 
+import com.rbnb.udpcaster.Recipient;
 import com.rbnb.udpcaster.UDPCaster;
 import com.rbnb.utility.ArgHandler;
 import com.rbnb.utility.RBNBProcess;
@@ -27,7 +30,7 @@ import com.rbnb.utility.RBNBProcess;
  *
  * @author John P. Wilson
  *
- * @version 06/02/2005
+ * @version 10/01/2007
  */
 
 /*
@@ -43,6 +46,8 @@ import com.rbnb.utility.RBNBProcess;
 
 public class rbnbUDPCaster {
     
+    public static final String defaultRecipient = "localhost:5555";
+    
     /**************************************************************************
      * Main method; parse command line arguments.
      * <p>
@@ -50,7 +55,7 @@ public class rbnbUDPCaster {
      * @author John P. Wilson
      *
      * @param argsI  argument list
-     * @version 09/26/2007
+     * @version 10/01/2007
      */
     
     /*
@@ -58,6 +63,8 @@ public class rbnbUDPCaster {
      *   Date      By	Description
      * MM/DD/YYYY
      * ----------  --	-----------
+     * 10/01/2007  JPW  Change "-r" from a single recipient to (optionally) a
+     *                  comma-delimited list of host:port recipients.
      * 09/26/2007  JPW  Added "-o" (stream from oldest) and "-x" (autostart)
      * 06/02/2005  JPW  Created.
      *
@@ -67,8 +74,7 @@ public class rbnbUDPCaster {
 	
 	String serverAddressL = null;
 	String chanNameL = null;
-	String recipientHostL = null;
-	int recipientPortL = -1;
+	Vector recipients = new Vector();
 	int senderPortL = -1;
 	boolean bStreamFromOldestL = false;
 	boolean bAutostartL = false;
@@ -102,27 +108,37 @@ public class rbnbUDPCaster {
 	    }
 	    
 	    if (ah.checkFlag('r')) {
-		// recipient address that packets are sent to
-		String recipientAddressL = ah.getOption('r');
-		// parse recipientAddressL into host and port
-		int colonIdx = recipientAddressL.indexOf(':');
-		if (colonIdx == -1) {
+		// Recipient addresses that packets are sent to; this can be
+		// one address or a comma-delimited list
+		String addresses = ah.getOption('r');
+		if ( (addresses == null) || (addresses.trim().equals("")) ) {
 		    throw new Exception(
-		    "The recipient address must be of the form <host>:<port>");
+			"When using the \"-r\" flag, must specify " +
+			"at least one valid host:port recipient address.");
 		}
-		String tempRecipientHost =
-		    recipientAddressL.substring(0,colonIdx);
-		String recipientPortStr =
-		    recipientAddressL.substring(colonIdx+1);
-		int tempRecipientPort = -1;
-		try {
-		    tempRecipientPort = Integer.parseInt(recipientPortStr);
-		} catch (Exception e) {
+		// Would be simpler to use String.split(), but this wouldn't
+		// keep the code at Java 1.1.4-compliant.
+		// String[] addrComponents = addresses.split(",");
+		StringTokenizer st = new StringTokenizer(addresses,",");
+		Recipient recipient = null;
+		while (st.hasMoreTokens()) {
+		    String nextAddr = st.nextToken();
+		    try {
+			recipient = new Recipient(nextAddr);
+			recipients.addElement(recipient);
+		    } catch (Exception excep) {
+			System.err.println(
+			    "Error with recipient address " +
+			    nextAddr +
+			    ":\n\t" +
+			    excep);
+		    }
+		}
+		if (recipients.isEmpty()) {
 		    throw new Exception(
-		        "The recipient port must be an integer.");
+			"When using the \"-r\" flag, must specify " +
+			"at least one valid host:port recipient address.");
 		}
-		recipientHostL = tempRecipientHost;
-		recipientPortL = tempRecipientPort;
 	    }
 	    
 	    if (ah.checkFlag('s')) {
@@ -143,18 +159,28 @@ public class rbnbUDPCaster {
 	    }
 	    // Print a help message
 	    System.err.println("UDPCaster");
-	    System.err.println(" -h                     : print this usage info");
-	    System.err.println(" -a <server address>    : RBNB address");
-	    System.err.println("                default : localhost:3333");
-	    System.err.println(" -c <input chan>        : RBNB channel to subscribe to");
-	    System.err.println(" -o                     : stream from oldest");
-	    System.err.println("                default : stream from newest");
-	    System.err.println(" -r <recipient address> : address UDP packets are sent to");
-	    System.err.println("                default : localhost:5555");
-	    System.err.println(" -s <port>              : socket port for sending out UDP packets");
-	    System.err.println("                default : 3456");
-	    System.err.println(" -x                     : auto-start");
+	    System.err.println(" -h                    : print this usage info");
+	    System.err.println(" -a <server address>   : RBNB address");
+	    System.err.println("               default : localhost:3333");
+	    System.err.println(" -c <input chan>       : RBNB channel to subscribe to");
+	    System.err.println(" -o                    : stream from oldest");
+	    System.err.println("               default : stream from newest");
+	    System.err.println(" -r <host:port list>   : comma-delimited list of host:port recipients to send the UDP packets to");
+	    System.err.println("               default : " + defaultRecipient);
+	    System.err.println(" -s <port>             : socket port for sending out UDP packets");
+	    System.err.println("               default : 3456");
+	    System.err.println(" -x                    : auto-start");
 	    RBNBProcess.exit(0);
+	}
+	
+	// Use default recipient if no others were specified on command line
+	if (recipients.isEmpty()) {
+	    try {
+		Recipient recipient = new Recipient(defaultRecipient);
+		recipients.addElement(recipient);
+	    } catch (Exception e) {
+		// Nothing to do
+	    }
 	}
 	
 	UDPCaster caster =
@@ -162,8 +188,7 @@ public class rbnbUDPCaster {
 	        serverAddressL,
 		chanNameL,
 		senderPortL,
-		recipientHostL,
-		recipientPortL,
+		recipients,
 		bStreamFromOldestL,
 		bAutostartL);
 	

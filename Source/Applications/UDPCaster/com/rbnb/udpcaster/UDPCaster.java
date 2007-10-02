@@ -35,6 +35,8 @@ import java.net.InetSocketAddress;
 import java.net.SocketException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Enumeration;
+import java.util.StringTokenizer;
 import java.util.Vector;
 
 import javax.swing.ButtonGroup;
@@ -63,16 +65,23 @@ import com.rbnb.utility.Utility;
  *
  * @author John P. Wilson
  *
- * @version 06/03/2005
+ * @version 10/02/2007
  */
 
 /*
- * Copyright 2005 Creare Inc.
+ * Copyright 2005 - 2007 Creare Inc.
  * All Rights Reserved
  *
  *   Date      By	Description
  * MM/DD/YYYY
  * ----------  --	-----------
+ * 10/02/2007  JPW	Replace the single recipient with a Vector of
+ *			Recipient objects (provided as an argument in the
+ *			constructor).  To do this, I removed the use of
+ *			recipientHost, recipientPort, and inetSocketAddress;
+ *			added Vector recipients.
+ * 09/26/2007  JPW	Add stream from oldest and autostart arguments
+ *			to the constructor.
  * 06/03/2005  JPW	Created.  Based on the TCPCaster class.
  *
  */
@@ -110,16 +119,17 @@ public class UDPCaster extends JFrame implements ActionListener {
     private int senderPort = 3456;
     
     /**
-     * Destination address of the UDP packets
+     * Destination addresses of the UDP packets
      * <p>
      *
      * @author John P. Wilson
      *
-     * @version 06/03/2005
+     * @version 10/02/2007
      */
-    private String recipientHost = "localhost";
-    private int recipientPort = 5555;
-    private InetSocketAddress inetSocketAddress = null;
+    // private String recipientHost = "localhost";
+    // private int recipientPort = 5555;
+    // private InetSocketAddress inetSocketAddress = null;
+    private Vector recipients = new Vector();
     
     /**
      * DatagramSocket, used to send out UDP packets
@@ -215,8 +225,14 @@ public class UDPCaster extends JFrame implements ActionListener {
      *
      * @author John P. Wilson
      *
-     * @param argsI  argument list
-     * @version 09/26/2007
+     * @param serverAddressI      RBNB server to connect to
+     * @param chanNameI           Channel to subscribe to
+     * @param senderPortI         The local bind port
+     * @param recipientsI         Where to send the UDP packets
+     * @param bStreamFromOldestI  Stream from oldest?
+     * @param bAutostartI         Autostart?
+     *
+     * @version 10/02/2007
      */
     
     /*
@@ -224,20 +240,17 @@ public class UDPCaster extends JFrame implements ActionListener {
      *   Date      By	Description
      * MM/DD/YYYY
      * ----------  --	-----------
+     * 10/02/2007  JPW  Remove recipientHostI and recipientPortI; add
+     *			Vector recipientsI.
      * 09/26/2007  JPW  Add stream from oldest and autostart arguments.
      * 06/03/2005  JPW  Created.
      *
      */
     
-    public UDPCaster() {
-	this(null, null, -1, null, -1, false, false);
-    }
-    
     public UDPCaster(String serverAddressI,
                      String chanNameI,
 		     int senderPortI,
-		     String recipientHostI,
-		     int recipientPortI,
+		     Vector recipientsI,
 		     boolean bStreamFromOldestI,
 		     boolean bAutostartI)
     {
@@ -253,11 +266,8 @@ public class UDPCaster extends JFrame implements ActionListener {
 	if (senderPortI > 0) {
 	    senderPort = senderPortI;
 	}
-	if ( (recipientHostI != null) && (!recipientHostI.equals("")) ) {
-	    recipientHost = recipientHostI;
-	}
-	if (recipientPortI > 0) {
-	    recipientPort = recipientPortI;
+	if (recipientsI != null) {
+	    recipients = recipientsI;
 	}
 	
 	bStreamFromOldest = bStreamFromOldestI;
@@ -288,13 +298,17 @@ public class UDPCaster extends JFrame implements ActionListener {
 	} else {
 	    chanNameTextField = new JTextField(30);
 	}
-	if ( (recipientHost != null) && (recipientPort > 0) ) {
-	    recipientAddressTextField =
-	        new JTextField(
-		    recipientHost + ":" + Integer.toString(recipientPort),
-		    30);
-	} else {
-	    recipientAddressTextField = new JTextField(30);
+	recipientAddressTextField = new JTextField(30);
+	if ( (recipients != null) && (!recipients.isEmpty()) ) {
+	    StringBuffer sb = new StringBuffer();
+	    for (int i = 0; i < recipients.size(); ++i) {
+		Recipient rec = (Recipient)recipients.elementAt(i);
+		if (i > 0) {
+		    sb.append(",");
+		}
+		sb.append(rec.toString());
+	    }
+	    recipientAddressTextField.setText(sb.toString());
 	}
 	streamOldestRB = new JRadioButton("From oldest", bStreamFromOldest);
 	streamNewestRB = new JRadioButton("From newest", !bStreamFromOldest);
@@ -341,11 +355,12 @@ public class UDPCaster extends JFrame implements ActionListener {
         Utility.add(guiPanel,selectChanButton,gbl,gbc,2,row,1,1);
 	row++;
 	
-	// Recipient address
+	// Recipient addresses
 	gbc.fill = GridBagConstraints.NONE;
         gbc.weightx = 0;
         gbc.weighty = 0;
-	tempLabel = new JLabel("Recipient address",SwingConstants.LEFT);
+	tempLabel =
+	    new JLabel("Recipients (comma-delim list)",SwingConstants.LEFT);
         gbc.insets = new Insets(5,15,0,5);
         Utility.add(guiPanel,tempLabel,gbl,gbc,0,row,1,1);
 	gbc.insets = new Insets(5,0,0,15);
@@ -433,19 +448,19 @@ public class UDPCaster extends JFrame implements ActionListener {
 	    if ( (serverAddress != null) && (!serverAddress.equals("")) &&
 	         (chanName != null) && (!chanName.equals(""))           &&
 	         (senderPort > 0)                                       &&
-		 (recipientHost != null) && (!recipientHost.equals("")) &&
-		 (recipientPort > 0) )
+		 (recipients != null) && (!recipients.isEmpty()) )
 	    {
 		System.err.println(
 		    "\nAuto start using the following parameters:");
 		System.err.println("Server address: " + serverAddress);
 		System.err.println("Channel name: " + chanName);
 		System.err.println("Local bind port: " + senderPort);
-		System.err.println(
-		    "Recipient address: " +
-		    recipientHost +
-		    ":" +
-		    recipientPort);
+		System.err.println("Recipient addresses:");
+		for (Enumeration e=recipients.elements(); e.hasMoreElements();)
+		{
+		    Recipient rec = (Recipient)e.nextElement();
+		    System.err.println("\t" + rec);
+		}
 		if (bStreamFromOldest) {
 		    System.err.println("Stream from oldest");
 		} else {
@@ -464,10 +479,8 @@ public class UDPCaster extends JFrame implements ActionListener {
 		    System.err.println("Input channel name not initialized\n");
 		} else if (senderPort > 0) {
 		    System.err.println("Local bind port less than or equal to 0\n");
-		} else if ( (recipientHost == null) || (recipientHost.equals("")) ) {
-		    System.err.println("Recipient host name not initialized\n");
-		} else if (recipientPort > 0) {
-		    System.err.println("Recipient port less than or equal to 0\n");
+		} else if ( (recipients == null) || (recipients.isEmpty()) ) {
+		    System.err.println("No recipients have been specified.\n");
 		}
 	    }
 	}
@@ -589,11 +602,10 @@ public class UDPCaster extends JFrame implements ActionListener {
     private void openAction() {
 	
 	// Check that the user has entered something in the server address,
-	// channel name, and port fields
+	// channel name, and recipients fields
 	String tempServerAddress = serverAddressTextField.getText().trim();
 	String tempChanName = chanNameTextField.getText().trim();
-	String tempRecipientAddress =
-	    recipientAddressTextField.getText().trim();
+	String recipientsStr = recipientAddressTextField.getText().trim();
 	
 	if ((tempServerAddress == null) || (tempServerAddress.length() == 0)) {
 	    JOptionPane.showMessageDialog(
@@ -613,39 +625,39 @@ public class UDPCaster extends JFrame implements ActionListener {
 		JOptionPane.ERROR_MESSAGE);
 	    return;
 	}
-	if ( (tempRecipientAddress == null) ||
-	     (tempRecipientAddress.length() == 0) ) {
+	if (recipientsStr.equals("")) {
 	    JOptionPane.showMessageDialog(
 		this,
-		"Must enter a recipient address in the " +
-		    "\"Recipient address\" field.",
+		"Must enter at least one recipient address in the " +
+		    "\"Recipients\" field.",
 		"Connect Error",
 		JOptionPane.ERROR_MESSAGE);
 	    return;
 	}
-	// parse tempRecipientAddress into host and port
-	int colonIdx = tempRecipientAddress.indexOf(':');
-	if (colonIdx == -1) {
-	    JOptionPane.showMessageDialog(
-		this,
-		"The recipient address in the " +
-		    "\"Recipient address\" field\n" +
-		    "must be of the form <host>:<port>",
-		"Connect Error",
-		JOptionPane.ERROR_MESSAGE);
-	    return;
+	// convert recipientsStr into Vector of Recipient objects
+	// Would be simpler to use String.split(), but this wouldn't
+	// keep the code at Java 1.1.4-compliant.
+	// String[] addrComponents = recipientsStr.split(",");
+	Vector tempRecipients = new Vector();
+	StringTokenizer st = new StringTokenizer(recipientsStr,",");
+	Recipient recipient = null;
+	while (st.hasMoreTokens()) {
+	    String nextAddr = st.nextToken();
+	    try {
+		recipient = new Recipient(nextAddr);
+		tempRecipients.addElement(recipient);
+	    } catch (Exception excep) {
+		System.err.println(
+		    "Error with recipient address " +
+		    nextAddr +
+		    ":\n" +
+		    excep);
+	    }
 	}
-	String tempRecipientHost = tempRecipientAddress.substring(0,colonIdx);
-	String recipientPortStr = tempRecipientAddress.substring(colonIdx+1);
-	int tempRecipientPort = -1;
-	try {
-	    tempRecipientPort = Integer.parseInt(recipientPortStr);
-	} catch (Exception e) {
+	if (tempRecipients.isEmpty()) {
 	    JOptionPane.showMessageDialog(
 		this,
-		"The recipient port in the " +
-		    "\"Recipient address\" field\n" +
-		    "must be an integer.",
+		"No valid recipient addresses in the \"Recipients\" field.",
 		"Connect Error",
 		JOptionPane.ERROR_MESSAGE);
 	    return;
@@ -655,8 +667,7 @@ public class UDPCaster extends JFrame implements ActionListener {
 	bStreamFromOldest = streamOldestRB.isSelected();
 	serverAddress = tempServerAddress;
 	chanName = tempChanName;
-	recipientHost = tempRecipientHost;
-	recipientPort = tempRecipientPort;
+	recipients = tempRecipients;
 	
 	try {
 	    setCursor(new Cursor(Cursor.WAIT_CURSOR));
@@ -730,19 +741,6 @@ public class UDPCaster extends JFrame implements ActionListener {
 	        "Could not find a port to bind the DatagramSocket to.");
 	}
 	System.err.println("DatagramSocket bound to local port " + senderPort);
-	
-	try {
-	    inetSocketAddress =
-	        new InetSocketAddress(recipientHost, recipientPort);
-	    if (inetSocketAddress.isUnresolved()) {
-		throw new IllegalArgumentException("");
-	    }
-	} catch (IllegalArgumentException iae) {
-	    throw new IOException(
-		"Error with recipient address.  Either:\n" +
-		"1. Host could not be resolved\n" +
-		"2. Port is not in the range 0 <= x <= 65535");
-	}
 	
 	sink = new Sink();
 	sink.OpenRBNBConnection(serverAddress,"CasterSink");
@@ -827,8 +825,6 @@ public class UDPCaster extends JFrame implements ActionListener {
 	    datagramSocket.close();
 	    datagramSocket = null;
 	}
-	
-	inetSocketAddress = null;
 	
 	// Reset the GUI fields
 	serverAddressTextField.setEnabled(true);
@@ -1075,7 +1071,7 @@ public class UDPCaster extends JFrame implements ActionListener {
      *
      * @author John P. Wilson
      *
-     * @version 06/03/2005
+     * @version 10/02/2007
      */
     
     /*
@@ -1083,6 +1079,7 @@ public class UDPCaster extends JFrame implements ActionListener {
      *   Date      By	Description
      * MM/DD/YYYY
      * ----------  --	-----------
+     * 10/02/2007  JPW  Send DatagramPacket to all recipients
      * 06/03/2005  JPW  Created.
      *
      */
@@ -1095,9 +1092,12 @@ public class UDPCaster extends JFrame implements ActionListener {
 	
 	DatagramPacket dp =
 	    new DatagramPacket( new byte[dataI.length], dataI.length );
-	dp.setSocketAddress(inetSocketAddress);
 	dp.setData(dataI);
-	datagramSocket.send(dp);
+	for (Enumeration e = recipients.elements(); e.hasMoreElements(); ) {
+	    Recipient rec = (Recipient)e.nextElement();
+	    dp.setSocketAddress(rec.getSocketAddr());
+	    datagramSocket.send(dp);
+	}
 	
     }
     
