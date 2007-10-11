@@ -1039,10 +1039,20 @@ class Registration
 							 dataArray,
 							 0,
 							 1);
-			index = dataArray[0].indexOf("</rbnb>");
+			// 2007/10/11  WHF  Replace old user data with new
+			//  user data:
+			/* 
 			// Merge user data with server-meta:
+			index = dataArray[0].indexOf("</rbnb>");
 			data = dataArray[0].substring(0, index)+"  "+userStr
 					+'\n'+dataArray[0].substring(index);
+			*/
+			String reg = dataArray[0]; // current registration
+			index = reg.indexOf("<user>");
+			index2 = reg.indexOf("</user>");
+			data = reg.substring(0, index) + userStr
+				+ reg.substring(index2 + "</user>".length());
+			
 			limits.setDblock(new DataBlock(data,
 						       1,
 						       data.length(),
