@@ -1050,8 +1050,13 @@ class Registration
 			String reg = dataArray[0]; // current registration
 			index = reg.indexOf("<user>");
 			index2 = reg.indexOf("</user>");
-			data = reg.substring(0, index) + userStr
-				+ reg.substring(index2 + "</user>".length());
+			if (index != -1 && index2 != -1)
+			    data = reg.substring(0, index) + userStr
+				    + reg.substring(index2 + "</user>".length());
+			else
+			    index = dataArray[0].indexOf("</rbnb>");
+			    data = dataArray[0].substring(0, index)+"  "+userStr
+					+'\n'+dataArray[0].substring(index);
 			
 			limits.setDblock(new DataBlock(data,
 						       1,
