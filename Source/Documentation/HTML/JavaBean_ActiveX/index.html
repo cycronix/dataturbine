@@ -1,2 +1,292 @@
-Unsupported Feature
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta http-equiv="Window-target" content="_top">
+   <meta name="Author" content="Bill Finger">
+   <meta name="GENERATOR" content="Jedit 4.2">
+   <title>JavaBean / ActiveX User Guide</title>
+<link REL=STYLESHEET HREF="/stylesheets/rbnbstyles.css" TYPE="text/css">
+</head>
+<body>
+<a NAME="TheTop"></a>
+<hr class="sectionbreak">
+<h1>RBNB DataTurbine</h1>
 
+<h1>JavaBean / ActiveX User Guide</h1>
+
+<h2>November 2007</h2>
+
+<h2>Copyright Creare, Inc.</h2>
+
+<hr class="sectionbreak">
+<h2><a NAME="TOC"></a>Table of Contents</h2>
+
+<ul class="leftpad">
+	<li><a href="#Introduction">Introduction</a></li>
+	<li><a href="#Objects">Objects</a>
+		<ul>
+			<li><a href="#ChannelMap">ChannelMap</a></li>
+			<li><a href="#Client">Client</a></li>
+			<li><a href="#Sink">Sink</a></li>
+			<li><a href="#Source">Source</a></li>
+			<li><a href="#PlugIn">PlugIn</a></li>
+		</ul>
+	</li>
+	<li><a href="#Installation">Installation</a></li>
+	<li><a href="#Examples">Examples</a></li>
+</ul>
+
+<hr class="sectionbreak">
+<h2><a NAME="Introduction"></a>Introduction</h2>
+
+<div class="justified">
+<p>	The JavaBean interface to the 
+  <a href="../Sapi/DeveloperGuideV2.1.html">RBNB
+Simple API (SAPI)</a> provides a persistent control which may be included
+in any container application to provide RBNB support.&nbsp; Most of the methods
+which are visible to the Java developer via the SAPI are also exported through
+the JavaBean interface.&nbsp; This document assumes familiarity with the 
+SAPI.</p>
+<p>	Via the JavaBean to ActiveX bridge provided by Sun Microsystems, it
+is possible to use this JavaBean anywhere one might use an ActiveX control.
+&nbsp;Now any ActiveX container may be used as an RBNB client: Microsoft Word,
+Microsoft Access, DataViews, LabVIEW, MATLAB, etc.&nbsp; The interface
+for the ActiveX control is identical to the JavaBean interface in the method
+names and number of parameters, but the data types involved vary depending
+on the interface used.&nbsp; Please consult your container's documentation
+for specifics on how to include ActiveX components, and Sun's ActiveX bridge
+<a href="http://java.sun.com/">user guide</a> and
+<a href="http://java.sun.com/products/javabeans/faq/faq.bridge.html">FAQ</a>
+for more information.</div>
+
+<hr class="sectionbreak">
+<h2>
+<a NAME="Objects"></a>Objects</h2>
+
+<div class="justified">
+<p>All of the classes available in the Simple API can be created as JavaBeans or
+ActiveX objects.&nbsp; There are some differences in available methods, because
+the JavaBean brdige does not support method overloading.&nbsp; The 
+following notes describe what those differences are.</p>
+<p>JavaBeans and ActiveX objects always use the default constructor for an 
+object.  Each object has methods for specifying any constructor parameters (if
+any exist) after the object has been created.</p>
+</div>
+<h3><a NAME="ChannelMap"></a>ChannelMap</h3>
+<p>	The ChannelMap object stores channel names and their associated data for
+posting to or retrieval from a server.&nbsp; See the 
+<a href="../api/com/rbnb/sapi/ChannelMap.html">SAPI ChannelMap JavaDoc</a>.</p>
+<table BORDER CELLSPACING=0 CELLPADDING=3 class="featuretable">
+<tr>
+	<th class="highlight">Method</th>
+	<th class="highlight">Difference from SAPI&nbsp;</th>
+</tr>
+<tr>
+	<td class="codestyle">PutData</td>
+	<td>The overloaded version which takes the byte order argument
+		is not available.&nbsp; Local byte order is assumed.</td>
+</tr>
+<tr>
+	<td class="codestyle">toString</td>
+	<td>This method, and the other <span class="codestyle">Object</span>
+		methods, are not exported.</td>
+</tr>
+</table>
+<h3><a NAME="Client"></a>Client</h3>
+<p>	Although instances of the Client object cannot be created, it serves
+as the base class for the Sink, Source, and PlugIn objects.&nbsp; See the 
+<a href="../api/com/rbnb/sapi/Client.html">SAPI Client JavaDoc</a>.</p>
+<table BORDER CELLSPACING=0 CELLPADDING=3 class="featuretable">
+<tr>
+	<th class="highlight">Method</th>
+	<th class="highlight">Difference from SAPI&nbsp;</th>
+</tr>
+<tr>
+	<td class="codestyle">OpenRBNBConnection</td>
+	<td>The versions of this method with zero and two parameters are not
+		available.</td>
+</tr>
+<tr>
+	<td class="codestyle">CloseRBNBConnection</td>
+	<td>The version of this method with zero parameters is not
+		available.</td>
+</tr>
+<tr>
+	<td class="codestyle">SetRingBuffer</td>
+	<td>This method exists to allow the cache size, archive mode, and
+		archive size to be specified after the object has been created.
+	</td>
+</tr>
+</table>
+<h3><a NAME="Sink"></a>Sink</h3>
+<p>	In addition to the changes listed above to its base object, a few other
+methods have been affected.&nbsp; Note that since the constructor takes no 
+parameters in the JavaBean/ActiveX world, the <span class="codestyle">
+	SetRingBuffer</span> method should be used.&nbsp; See the 
+<a href="../api/com/rbnb/sapi/Sink.html">SAPI Sink JavaDoc</a>.</p>
+<table BORDER CELLSPACING=0 CELLPADDING=3 class="featuretable">
+<tr>
+	<th class="highlight">Method</th>
+	<th class="highlight">Difference from SAPI&nbsp;</th>
+</tr>
+<tr>
+	<td class="codestyle">Fetch</td>
+	<td>Only the version with two parameters has been exported.&nbsp; Since
+	the JavaBean bridge to ActiveX does not allow objects to be returned,
+	you must pass a valid <span class="codestyle">ChannelMap</span> object 
+	to this method, which will be filled with the result.</td>
+</tr>
+<tr>
+	<td class="codestyle">Request</td>
+	<td>Only the version with four parameters is available.</td>
+</tr>
+</table>
+<h3><a NAME="Source"></a>Source</h3>
+<p>	In addition to the changes listed in <a href="#Client">Client</a>,
+the Flush method is changed.&nbsp; Note that since the constructor takes no 
+parameters in the JavaBean/ActiveX world, the <span class="codestyle">
+	SetRingBuffer</span> method should be used.&nbsp; See the 
+<a href="../api/com/rbnb/sapi/Sink.html">SAPI Sink JavaDoc</a>.</p>
+<table BORDER CELLSPACING=0 CELLPADDING=3 class="featuretable">
+<tr>
+	<th class="highlight">Method</th>
+	<th class="highlight">Difference from SAPI&nbsp;</th>
+</tr>
+<tr>
+	<td class="codestyle">Flush</td>
+	<td>Only the version with two parameters has been exported.</td>
+</tr>
+</table>
+<h3><a NAME="PlugIn"></a>PlugIn</h3>
+<p>	In addition to the changes listed for <a href="#Client">Client</a>, above,
+a few other methods have been affected.&nbsp; See the 
+<a href="../api/com/rbnb/sapi/Sink.html">SAPI Sink JavaDoc</a>.</p>
+<table BORDER CELLSPACING=0 CELLPADDING=3 class="featuretable">
+<tr>
+	<th class="highlight">Method</th>
+	<th class="highlight">Difference from SAPI&nbsp;</th>
+</tr>
+<tr>
+	<td class="codestyle">SetRingBuffer</td>
+	<td>This method is unsupported for PlugIns, and therefore is not exported.
+	</td>
+</tr>
+<tr>
+	<td class="codestyle">Fetch</td>
+	<td>Only the version with two parameters has been exported.&nbsp; Since
+	the JavaBean bridge to ActiveX does not allow objects to be returned,
+	you must pass a valid <span class="codestyle">PlugInChannelMap</span> 
+	object to this method, which will be filled with the result.</td>
+</tr>
+<tr>
+	<td class="codestyle">Flush</td>
+	<td>The version with one parameter is not available.</td>
+</tr>
+</table>
+<h3><a NAME="PlugInChannelMap"></a>PlugInChannelMap</h3>
+<p>	Other than the changes to its base class, the <a href="#ChannelMap">
+ChannelMap</a> class, the JavaBean/ActiveX interface for the PlugInChannelMap
+is identical to the SAPI interface.&nbsp; See the 
+<a href="../api/com/rbnb/sapi/Sink.html">SAPI Sink JavaDoc</a>.</p>
+
+<hr class="sectionbreak">
+<h2><a NAME="Installation"></a>Installation</h2>
+<div class="justified">
+<ol>
+<li> You will need a Microsoft compatible compiler, V 6.0 or later.  Run
+       VCVARS32.bat.  If you don't have one, have someone who does execute
+	   steps 1 and 2, and give you the results.  Then skip to step 3.</li>
+<li> Run pack.bat.  It should output 5 DLLs in the current directory.</li>
+<li> Run:<br/>
+	<p><center>reg.bat [path to your JRE]</center></p>
+	
+	<p>Note that the JRE should be the PUBLIC jre, not the one hidden inside a 
+	JDK installation.</p>
+</li>
+</ol>
+	
+<p>You should now be able to see the controls with any ActiveX control client or
+COM browser.</p>
+</div>
+
+<hr class="sectionbreak">
+<h2><a NAME="Examples"></a>Examples</h2>
+
+<div class="justified">In this section we will provide some examples of
+the usage of the JavaBean and the corresponding ActiveX control.&nbsp;
+The exact syntax for your application will vary depending on the container
+used, so these examples can only serve as a guide.</div>
+
+<h3>
+ActiveX via Visual Basic for Applications: Microsoft Excel&#8482;</h3>
+
+<div class="justified">In this example, one second's worth of data and
+its corresponding time values will be pulled from an RBNB server and placed
+in two columns of an Excel&#8482; spreadsheet.&nbsp; The worksheet appears as
+below.
+<center>
+<p><a href="ExcelDemo.png">
+	<img SRC="ExcelDemo.png" /> <!--height=475 width=447 --></a></p></center>
+</div>
+
+<h4>
+Creating the example</h4>
+<div class="justified">
+<p>	The first step is to create a button
+to perform the task.&nbsp; This is most easily done using the Control 
+Toolbar.&nbsp; You can change the button text by right clicking and selecting
+"Properties", then changing the "Name" property.&nbsp;
+To associate code with the button, right click and select 
+"View Code".&nbsp; This will open up Visual Basic for Applications&#8482;.
+&nbsp;The code below performs the task we seek to perform.</p>
+</div>
+
+<div class="codequote">
+<pre><!-- Necessary due to lack of support in IE -->
+Private Sub FetchButton_Click()
+    Dim index As Long, ii As Long
+    Set Sink1 = CreateObject("Sink.Bean")
+    Set ChannelMap1 = CreateObject("ChannelMap.Bean")
+    Set ChannelMap2 = CreateObject("ChannelMap.Bean")
+
+    Sink1.OpenRBNBConnection "localhost:3333", "ExcelDemo", "", ""
+    Sheet1.Cells(1, 1) = "Times"
+    Sheet1.Cells(1, 2) = "rbnbSource/c0"
+    ChannelMap1.Clear
+    ChannelMap1.Add ("rbnbSource/c0")
+    Sink1.Request ChannelMap1, 0, 1, "newest"
+    Sink1.Fetch -1, ChannelMap2
+    If (ChannelMap2.NumberOfChannels > 0) Then
+        times = ChannelMap2.GetTimes(0)
+        result = ChannelMap2.GetDataAsFloat32(0)
+        For ii = 1 To UBound(result)
+            Sheet1.Cells(ii + 1, 1) = times(ii - 1) - times(0)
+            Sheet1.Cells(ii + 1, 2) = result(ii - 1)
+        Next ii
+    Else
+        MsgBox "No data."
+    End If
+    Sink1.CloseRBNBConnection
+    
+    ' Clean up objects:
+    Set Sink1 = Nothing
+    Set ChannelMap1 = Nothing
+    Set ChannelMap2 = Nothing
+End Sub</pre>
+</div>
+
+<div class="justified">Now exit Design Mode by pressing the icon in the 
+Control Toolbar which contains a ruler, a square, and a pencil.
+You need to start an RBNB server and RBNB source.
+If everything has been set up correctly, pressing the "Fetch Data" button should
+now fill the first two columns with time values and data, from
+the channel "rbnbSource/c0".&nbsp; The plot may be added
+using the Chart Wizard.</div>
+
+<hr class="sectionbreak">
+<div class="footer">
+<a href="#TheTop">Top</a> &middot; <a href="/webTurbine">Home</a></div>
+
+</body>
+</html>
