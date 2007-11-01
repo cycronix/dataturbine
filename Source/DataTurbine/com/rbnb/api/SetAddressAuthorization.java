@@ -17,27 +17,6 @@ limitations under the License.
 package com.rbnb.api;
 
 /**
-  * A Command to download the server's Access Control List.
-  *
-  * @author WHF
-  * @since V3.0
-  * @version 2007/07/23
-  */
-class GetAddressAuthorization extends Command
-{
-	GetAddressAuthorization(ServerInterface si)
-	{ super(si); }
-	
-	GetAddressAuthorization(InputStream isI, DataInputStream disI)
-	throws com.rbnb.api.AddressException,
-	       com.rbnb.api.SerializeException,
-	       java.io.EOFException,
-	       java.io.IOException,
-	       java.lang.InterruptedException
-	{ super(isI, disI); }
-}
-
-/**
   * A Command to upload the server's Access Control List.
   *
   * @author WHF

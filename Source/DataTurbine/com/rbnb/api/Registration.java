@@ -954,7 +954,7 @@ class Registration
 	       java.lang.InterruptedException
     {
 	boolean changedR = false;
-
+//Rmap c = (Rmap) this.clone(), cI = (Rmap) rmapI.clone();
 	if ((getName() == null) && (rmapI.getName() != null)) {
 	    // Special case: at the top of the <code>Registration</code>
 	    // hierarchy, there is always an unnamed entry. If the input
@@ -978,7 +978,20 @@ class Registration
 					  null,
 					  null);
 	}
-
+/*try {
+Rmap r = this.getChildAt(0).getChildAt(0);
+DataBlock db = r.getDblock();
+if (db.getPtsize() != 92) {
+System.err.println("\nFOO: "+db.getPtsize());
+(new Exception()).printStackTrace();
+String[] dataArray = new String[1];
+db.getDataPoints(0, dataArray, 0, 1); System.err.println(dataArray[0]);
+System.err.println(r);
+System.err.println("Before: "+c);
+System.err.println("After: "+this);
+System.err.println("Input: "+rmapI + "\n(Clone) "+cI);
+}
+} catch (Throwable t) {} */
 	return (changedR);
     }
     
@@ -998,7 +1011,7 @@ class Registration
 
     private void updateLimitsFromKeptInput(Registration limits, Rmap input)
     {
-//System.err.println("Registration.updateLimitsFromKeptInput: limits "+limits.getDblock().getData().firstElement());
+//System.err.println("limits "+limits.getDblock().getData().firstElement());
 //System.err.println("input ************************ "+input.getDblock().getData().firstElement());
 
         //EMF 3/24/06: if input is of type USER, change it to xml format
@@ -1049,15 +1062,15 @@ class Registration
 			*/
 			String reg = dataArray[0]; // current registration
 			index = reg.indexOf("<user>");
-			index2 = reg.indexOf("</user>");
+			index2 = reg.lastIndexOf("</user>");
 			if (index != -1 && index2 != -1)
 			    data = reg.substring(0, index) + userStr
 				    + reg.substring(index2 + "</user>".length());
-			else
+			else {
 			    index = dataArray[0].indexOf("</rbnb>");
 			    data = dataArray[0].substring(0, index)+"  "+userStr
 					+'\n'+dataArray[0].substring(index);
-			
+			}
 			limits.setDblock(new DataBlock(data,
 						       1,
 						       data.length(),
@@ -1068,6 +1081,7 @@ class Registration
 						       0,
 						       data.length())
 			);
+			
 			return;
 		    }
 		}
