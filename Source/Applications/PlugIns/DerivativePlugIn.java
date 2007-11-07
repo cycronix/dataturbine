@@ -82,16 +82,18 @@ public class DerivativePlugIn extends com.rbnb.plugins.PlugInTemplate
 	{
 		double duration = picm.GetRequestDuration();
 		ChannelMap response = null;
+		String ref = picm.GetRequestReference();
 		
 		for (int ntries = 0; ntries < 2; ++ntries) {
 			if (duration == 0) duration = zeroOverride;
-			else duration *= preFetchFactor;
+			else if ("newest".equals(ref))
+				duration *= preFetchFactor;
 			
 			sink.Request(
 					toFwd,
 					picm.GetRequestStart(),
 					duration,
-					picm.GetRequestReference()
+					ref
 			); 
 			response = sink.Fetch(getTimeout());
 			// Check the response to see if we got a decent result on all
@@ -159,13 +161,21 @@ public class DerivativePlugIn extends com.rbnb.plugins.PlugInTemplate
 			// Will add if necessary, otherwise just a lookup:
 			int outIndex = out.Add(fwdData.GetName(index));
 			
-			// Perform derivative.  This bit assumes 'newest'.
-			//       |<--------------------->|  original PI request
-			//   |<------------------------->|  extended request
-			// We want the absolute start of the original request.
-			double duration = out.GetRequestDuration(), 
+			// Perform derivative.
+			double duration, start;
+			if ("newest".equals(out.GetRequestReference())) {
+				//  Calculate absolute start of the original, newest request.
+				//       |<--------------------->|  original PI request
+				//   |<------------------------->|  extended request
+				duration = out.GetRequestDuration();
 				start = fwdData.GetTimeStart(index) 
-					+ fwdData.GetTimeDuration(index) - duration;
+						+ fwdData.GetTimeDuration(index) - duration;
+			} else {
+				// For other requests, no extending performed.  Just use
+				//  the time we have.
+				start = fwdData.GetTimeStart(index);
+				duration = fwdData.GetTimeDuration(index);
+			}
 				 
 			double[] result = derivative(
 					fwdData.GetTimeDuration(index) / npts,

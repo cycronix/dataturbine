@@ -989,6 +989,7 @@ abstract class ACO
 	// The response should be either a Start or a Stop message wrapped
 	// around an object with a name equal to the client we asked about.
 	boolean isRunningR = false;
+//try {
 	if (serializable instanceof Command) {
 	    Command command = (Command) serializable;
 	    if (command.getObject() instanceof Client) {
@@ -1058,6 +1059,7 @@ System.err.println("Bad Ping response.");
 		}
 	    }	    
 	}
+//} catch (SerializeException se) { se.printStackTrace(); throw se; }
 
 	return (isRunningR);
     }

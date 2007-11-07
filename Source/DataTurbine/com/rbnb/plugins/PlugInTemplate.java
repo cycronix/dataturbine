@@ -23,6 +23,8 @@ limitations under the License.
 			Improved handling of exceptions in the request slave.
 	2007/04/03  WHF  Added getRequestOptions().
 	2007/09/12  WHF  start() sends a notification in case someone needs it.
+	2007/11/07  WHF  When VerifyConnection fails, close the connection before
+		restarting it.
 */
 
 package com.rbnb.plugins;
@@ -590,7 +592,10 @@ public abstract class PlugInTemplate
 				perRequestSink = new Sink();
 			}
 			if (!perRequestSink.VerifyConnection()) {
-//System.err.println("verify failed");							
+//System.err.println("verify failed");
+				// 2007/11/07  WHF  If connection is bad, terminate before
+				//   restarting:
+				perRequestSink.CloseRBNBConnection();
 				perRequestSink.OpenRBNBConnection(
 						host,
 						name+"Sink",
