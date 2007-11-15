@@ -25,6 +25,7 @@ limitations under the License.
 	2007/09/12  WHF  start() sends a notification in case someone needs it.
 	2007/11/07  WHF  When VerifyConnection fails, close the connection before
 		restarting it.
+	2007/11/15  WHF  Added showHelper() and argHelper().
 */
 
 package com.rbnb.plugins;
@@ -655,6 +656,55 @@ public abstract class PlugInTemplate
 		private final Object userInstance;
 		private final Properties requestOptions = new Properties();
 	} // end class AnswerRequest
+	
+//**************************  Static Methods  *******************************//
+	/**
+	  * A helper routine which displays the options supported by 
+	  *  argHelper.  The format is a tab, followed by the option and its
+	  *  format, padded to 24 characters; followed by a description, then 
+	  *  newline.
+	  */
+	protected static void showHelper()
+	{
+		System.err.println(
+				 "\t-a address:port         RBNB address (localhost:3333)\n"
+				+"\t-n name                 Client name (class name)\n"
+		);
+	}
+	
+	/**
+	  * Helper function to parse PlugInTemplate specific command-line options.
+	  *
+	  * @return the remaining arguments.
+	  * @throws IllegalArgumentException  if the arguments supported do not
+	  *   follow the conventions specified in showHelper().
+	  */
+	protected static String[] argHelper(String[] args, PlugInTemplate pit)
+	{
+		boolean[] used = new boolean[args.length];
+		int usedCount = 0;
+		
+		for (int ii = 0; ii < args.length; ++ii) {
+			if ("-a".equals(args[ii])) {
+				used[ii] = true;
+				pit.setHost(args[++ii]);
+				used[ii] = true;
+				usedCount += 2;
+			} else if ("-n".equals(args[ii])) {
+				used[ii] = true;
+				pit.setName(args[++ii]);
+				used[ii] = true;
+				usedCount += 2;
+			}
+		}
+		
+		String[] res = new String[args.length - usedCount];
+		int iii = 0;
+		for (int ii = 0; ii < args.length; ++ii) {
+			if (!used[ii]) res[iii++] = args[ii];
+		}
+		return res;
+	}
 	
 //******************************  Data  *************************************//	
 	private static final Class[] userConstructorParameterTypes = {

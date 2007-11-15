@@ -72,6 +72,7 @@ import com.rbnb.api.*;
  * 2005/08/25  WHF  Repaired serialization support.
  * 2005/09/01  EMF  Added serializaton methods, so just underlying RMap is saved.
  * 2007/04/03  WHF  Added AddPlugInOption().
+ * 2007/11/15  WHF  Added GetDataAsArray().
  */
 
 public class ChannelMap implements java.io.Serializable
@@ -701,6 +702,22 @@ public class ChannelMap implements java.io.Serializable
      */
     public byte[][] GetDataAsByteArray(int index) 
     { return (byte[][]) getData(index); }
+	
+	/**
+	  * Returns the channel data as an untyped Object.  The 
+	  *   java.lang.reflect.Array class may then be used to extract doubles.
+	  *  This is most useful when writing PlugIns which must deal with 
+	  *  multiple input data types.
+      * @author WHF
+      *
+      * @param index The channel index.
+	  * @return The data.
+	  * @exception ArrayIndexOutOfBoundsException If index out of bounds.
+	  * @since V3.1
+	  * @version 2007/11/15
+	  */	
+	public Object GetDataAsArray(int index)
+	{ return getData(index); }
 
     /**
      * Get the fully qualified channel name from its index in constant time.

@@ -128,7 +128,8 @@ public class ResamplePlugIn extends com.rbnb.plugins.PlugInTemplate
 			// Will add if necessary, otherwise just a lookup:
 			int outIndex = out.Add(fwdData.GetName(index));
 			
-			data = GetDataAsArray.get(fwdData, index);
+			//data = GetDataAsArray.get(fwdData, index);
+			data = fwdData.GetDataAsArray(index);
 			if (data == null) {
 				System.err.println("ResamplePlugIn: Unsupported datatype.");
 				continue;

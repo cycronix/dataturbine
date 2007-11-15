@@ -96,7 +96,8 @@ public class FilterPlugIn extends com.rbnb.plugins.PlugInTemplate
 		for (int index = 0; index < fwdData.NumberOfChannels(); ++index) {
 			Object data;
 			
-			data = GetDataAsArray.get(fwdData, index);
+			//data = GetDataAsArray.get(fwdData, index);
+			data = fwdData.GetDataAsArray(index);
 			if (data == null) {
 				System.err.println("FilterPlugIn: Unsupported datatype.");
 				continue;
