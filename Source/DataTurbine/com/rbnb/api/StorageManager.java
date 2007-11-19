@@ -290,7 +290,6 @@ abstract class StorageManager
         if (closeByTime) {
           (new Thread(this)).start(); //start timer
         }
-//System.err.println("StorageManager: flushInterval="+flushIntervalI+", trimInterval="+trimInterval);
     }
 
     /**
@@ -343,7 +342,7 @@ abstract class StorageManager
 	if (getSet()!=null) {
           try {
             getSet().close();
-	    setSet(null);
+            setSet(null);
           } catch (Exception e) {
             System.err.println("Exception closing set:");
             e.printStackTrace();
@@ -394,71 +393,70 @@ abstract class StorageManager
 	       java.io.IOException,
 	       java.lang.InterruptedException
     {
-	try {
-	    // Lock the door.
-	    getDoor().setIdentification(getFullName() + "/" + getClass());
-	    getDoor().lock("StorageManager.addElement");
-
-	    if (getSet() == null) {
-		// If there isn't a set, then create a new one.
-		if (this instanceof Cache) {
-		    setSet(new FrameSet(getNextIndex()));
-		    compressAfter=(int)Math.floor(Math.sqrt(getMeps()));
-		    framesAdded=0;
-		} else {
-		    setSet(new FileSet(getNextIndex()));
-		}
-		setNextIndex(getNextIndex() + 1);
-	    }
-	    // Add the element to the current set. Note that the last set has
-	    // been added to, which means its registration needs to be
-	    // updated.
-	    getSet().addElement(elementI);
-	    framesAdded++;
-	    if (getAddedSets() == -1) {
-		setAddedSets(getNchildren() - 1);
-	    }
-
-	    //EMF 5/3/06: compress FrameSet every N frames, to
-	    //            improve request speed from cache
-	    //EMF 5/3/06: since compressed, Nchildren no longer accurate
-	    //            count of number of frames in FrameSet
-	    //if ((framesAdded%compressAfter == 0)||(framesAdded==getMeps())) {
-	    if (framesAdded==getMeps()) {
-		if (this instanceof Cache) {
-			//FrameSet oldfs=(FrameSet)getChildAt(getNchildren()-1);
-			//oldfs.updateRegistration();
-//System.err.println("getSet() "+getSet());
-			FrameSet newfs=null; //((FrameSet)getSet()).reframe();
-//System.err.println("newfs "+newfs);
-//System.err.println("\n");
-			if (newfs!=null) {
-                		newfs.updateRegistration();
-				removeChildAt(getNchildren()-1);
-//oldfs.clear(); //try this
-//oldfs.nullify();
-				removedSets=true;
-				setSet(newfs);
-				//EMF 5/19/06: reset metrics size cache, or
-				// get zero (cache and archive size)
-				getSet().setDataSize(-1); 
-			}
-		// If the current set is full, then close it.
-		if (!closeByTime && framesAdded==getMeps()) {
-                  close();
-		}
-		}
-	    }
+ //   	System.err.println("MJM: StorageManager Add Element!");
+    	try {
+		    // Lock the door.
+		    getDoor().setIdentification(getFullName() + "/" + getClass());
+		    getDoor().lock("StorageManager.addElement");
+	
+		    if (getSet() == null) {
+				// If there isn't a set, then create a new one.
+				if (this instanceof Cache) {
+//					System.err.println("MJM Cache!");
+				    setSet(new FrameSet(getNextIndex()));
+				    compressAfter=(int)Math.floor(Math.sqrt(getMeps()));
+				    framesAdded=0;
+				} else {
+				    setSet(new FileSet(getNextIndex()));
+				}
+				setNextIndex(getNextIndex() + 1);
+		    }
+		    // Add the element to the current set. Note that the last set has
+		    // been added to, which means its registration needs to be
+		    // updated.
+		    getSet().addElement(elementI);
+		    framesAdded++;
+		    if (getAddedSets() == -1) {
+		    	setAddedSets(getNchildren() - 1);
+		    }
+	
+		    //EMF 5/3/06: compress FrameSet every N frames, to
+		    //            improve request speed from cache
+		    //EMF 5/3/06: since compressed, Nchildren no longer accurate
+		    //            count of number of frames in FrameSet
+		    //if ((framesAdded%compressAfter == 0)||(framesAdded==getMeps())) {
+		    if (framesAdded==getMeps()) {
+				if (this instanceof Cache) {
+					//FrameSet oldfs=(FrameSet)getChildAt(getNchildren()-1);
+					//oldfs.updateRegistration();
+		//System.err.println("getSet() "+getSet());
+					FrameSet newfs=null; //((FrameSet)getSet()).reframe();
+		//System.err.println("newfs "+newfs);
+					if (newfs!=null) {
+		                newfs.updateRegistration();
+						removeChildAt(getNchildren()-1);
+						removedSets=true;
+						setSet(newfs);
+						//EMF 5/19/06: reset metrics size cache, or
+						// get zero (cache and archive size)
+						getSet().setDataSize(-1); 
+					}
+					// If the current set is full, then close it.
+					if (!closeByTime &&	framesAdded==getMeps()) {
+			            close();
+					}
+				}
+		    }
 		    
-
-	    if (!closeByTime&&(this instanceof Archive)&&(getSet().getNchildren()==getMeps())) {
+		    if (!closeByTime&&(this instanceof Archive)&&(getSet().getNchildren()==getMeps())) {
               close();
-	    }
-
-	} finally {
-	    // Unlock the door.
-	    getDoor().unlock();
-	}
+		    }
+  //          trim();	// MJM FOO
+    	} finally {
+    		// Unlock the door.
+    		getDoor().unlock();
+    	}
+    	
     }
 
     /**
@@ -1762,6 +1760,7 @@ abstract class StorageManager
      *   Date      By	Description
      * MM/DD/YYYY
      * ----------  --	-----------
+     * 11/19/2007  MJM	Fixed trimByTime logic for _Metrics channels
      * 10/11/2006  EMF  Added trimByTime code.
      * 11/14/2003  INB	Added location to the <code>Lock</code>.
      * 07/30/2003  INB	Nullify the <code>FrameManager</code> if it doesn't
@@ -1792,20 +1791,30 @@ abstract class StorageManager
           Registration reg = null;
           TimeRange tr = null;
           try {
+ //       	  System.err.println("MJM trim! Nchildren: "+getNchildren());
             for (int i=getNchildren()-1;i>=0;i--) {
               fm=(FrameManager)getChildAt(i);
               reg=fm.getSummary();
+/* let null Trange slide into default below, otherwise _Metrics trim is skipped.  MJM 11/2007
+//  still a concern that the default 1 sec duration will mess up for _Metrics at other than 1 Hz
               if (reg==null || (tr=reg.getTrange())==null) {
-                //System.err.println("StorageManager.trim: tr null!!");
-                return;
+//                System.err.println("StorageManager.trim: tr null!!");
+                 return; 
               }
-              //System.err.println("ichild: "+i+", set duration: "+duration+", trimInterval: "+trimInterval);
+*/
+              if (tr!=null && tr.getDuration()>0) duration+=tr.getDuration();	// pre-calc duration (mjm 11/2007)
+              else duration+=flushInterval/1000.; //gotta do something... add a second (MJM 6/26/07:  added /1000 !!)
+              
+ //             System.err.println("ichild: "+i+", duration: "+duration+", trimInterval: "+trimInterval);  // mjm
               if (duration>trimInterval) { //need to trim
+//            	if(i>0) System.err.println("TRIM "+i+" sets!");
                 for (int j=0;j<i;j++) removeSet();
                 break;
               }
-              if (tr.getDuration()>0) duration+=tr.getDuration();
-              else duration+=flushInterval/1000.; //gotta do something... (MJM 6/26/07:  added /1000 !!)
+ //             if (tr!=null && tr.getDuration()>0) duration+=tr.getDuration();  // moved before check to trim more closely
+ //             else duration+=flushInterval/1000.; 
+              
+ //             System.err.println("tr.getDuration: "+tr.getDuration()+", flushInterval: "+flushInterval+", duration: "+duration);
             }
             //System.err.println("duration "+duration);
           } catch (Exception e) {
