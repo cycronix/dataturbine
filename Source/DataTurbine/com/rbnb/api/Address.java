@@ -330,9 +330,11 @@ abstract class Address implements UsernameInterface {
      * MM/DD/YYYY
      * ----------  --	-----------
      * 05/11/2001  INB	Created.
+     * 2007/11/26  WHF  Removed, as was unused and may be difficult to determine
+     *   with some address types.
      *
      */
-    abstract boolean isLocal();
+    //abstract boolean isLocal();
 
     /**
      * Creates a new <code>Address</code> to handle the specified address.

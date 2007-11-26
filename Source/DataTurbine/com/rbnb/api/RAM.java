@@ -260,11 +260,10 @@ final class RAM
      * MM/DD/YYYY
      * ----------  --	-----------
      * 05/11/2001  INB	Created.
+     * 2007/11/26  WHF  Removed to be consistent with TCP.java.
      *
      */
-    final boolean isLocal() {
-	return (true);
-    }
+    //final boolean isLocal() { return (true); }
 
     /**
      * Creates a new client-side connection to the address.

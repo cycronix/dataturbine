@@ -775,11 +775,13 @@ class TCP
      * MM/DD/YYYY
      * ----------  --	-----------
      * 05/11/2001  INB	Created.
+     * 2007/11/26  WHF  Removed.  Was unused, and the check below does not work
+     *   in multi-homed environments.
      *
      */
-    final boolean isLocal() {
+/*    final boolean isLocal() {
 	return (host == getLocalHost());
-    }
+    } */
 
     /**
      * Gets a socket connection to the address of this <code>TCP</code> object.
@@ -845,7 +847,8 @@ class TCP
     /**
      * Gets a server socket.
      * <p>
-     * The address must be on the local host.
+     * The address must be on the local host, as determined by
+     * {@link java.net.ServerSocket(int, int, java.net.InetAddress) }. 
      * <p>
      *
      * @author Ian Brown
@@ -862,7 +865,7 @@ class TCP
      *		  connection.
      * @see #newClientSide(com.rbnb.api.ACO)
      * @since V2.0
-     * @version 10/03/2003
+     * @version 11/26/2007
      */
 
     /*
@@ -870,6 +873,7 @@ class TCP
      *   Date      By	Description
      * MM/DD/YYYY
      * ----------  --	-----------
+     * 11/26/2007  WHF  Supports multi-homed machines.
      * 10/03/2003  INB	Set the backlog large enough to ensure that we can
      *			load all of the archives and still have a few slots
      *			for additional connections.
@@ -886,17 +890,21 @@ class TCP
 		parseAddress(getAddress());
 	    }
 	}
-	if ((getHost() == null) || !getHost().equals(getLocalHost())) {
+	// 2007/11/26  WHF  The following logic will not work on a computer
+	//  with more than one adapter.
+/*	if ((getHost() == null) || !getHost().equals(getLocalHost())) {
 	    throw new com.rbnb.api.AddressException
 		(getAddress() +
 		 " cannot be used for a server socket; it is not on the " +
 		 "local machine.");
 	}
-
+*/
 	RBNB sh = (RBNB) serverHandlerI;
 	int backlog = Math.max(100,sh.getMaxActivityThreads()*2 + 8);
 
-	return (new java.net.ServerSocket(getPort(),backlog));
+	// 2007/11/26  WHF  Instead, let this constructor throw in the case
+	//  where the host cannot be resolved to a local binding:
+	return (new java.net.ServerSocket(getPort(),backlog, host));
     }
 
     /**
