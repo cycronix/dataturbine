@@ -464,7 +464,11 @@ public abstract class PlugInTemplate
 						map=new PlugInChannelMap(); // use new map
 					} else map.Clear();
 				}
-			} catch (SAPIException se) { se.printStackTrace(); }
+			} catch (SAPIException se) {
+				// Only print exception if running: exceptions may occur during
+				//  shutdown are ok.
+				if (running) se.printStackTrace(); 
+			}
 			finally { 
 				while (!threadStack.empty())
 					((AnswerRequest) threadStack.pop()).close();
@@ -479,9 +483,20 @@ public abstract class PlugInTemplate
 			Thread toJoin = myThread;
 			if (running) {
 				running = false;
-				try {
-					toJoin.join();
-				} catch (InterruptedException ie) {}
+				if (timeout > 0) {
+					// Try to shutdown gently first:
+					try {					
+						toJoin.join(timeout * 2);
+					} catch (InterruptedException ie) {}
+				}
+				if (timeout <= 0 || toJoin.isAlive()) {
+					// Force kill the connection:
+					pi.CloseRBNBConnection();
+					// The thread should then be free to close:
+					try {
+						toJoin.join();
+					} catch (InterruptedException ie) {}
+				}
 			}
 		}
 		
@@ -489,7 +504,7 @@ public abstract class PlugInTemplate
 		
 		private volatile boolean running;
 		private Thread myThread;
-	}
+	} // end inner class Slave
 		
 	/**
 	  * Instances of this class are created to handle incoming PlugIn requests.
@@ -567,12 +582,14 @@ public abstract class PlugInTemplate
 					//  Even if the above code throws, we want to give
 					//  something back to the server so the client doesn't 
 					//  hang.
-					pi.Flush(requestMap);
+					if (isRunning())
+						pi.Flush(requestMap);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			} finally {
 				thread2RequestMap.remove(thread);
+				thread = null;
 			}
 			// Request done, push us back onto the stack:
 			threadStack.push(this);
@@ -632,7 +649,14 @@ public abstract class PlugInTemplate
 			}
 		}
 		final void close()
-		{ if (perRequestSink != null) perRequestSink.CloseRBNBConnection(); } 
+		{
+			Thread t  = thread;
+			if (t != null) try {
+				t.join();
+			} catch (InterruptedException ie) {}
+			if (perRequestSink != null)
+				perRequestSink.CloseRBNBConnection();
+		} 
 		
 		final Object getUserInstance() { return userInstance; }
 		/**
