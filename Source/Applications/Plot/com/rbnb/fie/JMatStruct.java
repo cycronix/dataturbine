@@ -53,12 +53,14 @@ public class JMatStruct
 	  */
 	public JMatStruct(String name)
 	{
-		structName = name;
+		setStructName(name);
 	}
 	
 //****************************  Operations: Output  **************************//	
 	/**
-	  * Adds a field to this structure.  Returns its index.
+	  * Adds a field to this structure.  Returns its index.  Any spaces in the
+	  *   field name will be replaced with underscores.
+	  * @NullPointerException if fieldName or data are null.
 	  */
 	public int addField(
 		String fieldName, 
@@ -67,7 +69,7 @@ public class JMatStruct
 		Serializable data)
 	{
 		field_t f = new field_t();
-		f.fieldName = fieldName;
+		f.fieldName = fieldName.replace(' ', '_');
 		f.rows = rows;
 		f.cols = cols;
 		f.data = data;
@@ -120,6 +122,7 @@ public class JMatStruct
 	{
 		field_t f = new field_t();
 		f.fieldName = fieldName;
+		f.fieldName = fieldName.replace(' ', '_');
 		child.setStructName(""); // do not put in structure name
 		f.rows = 1;
 		f.cols = 1;
@@ -367,9 +370,15 @@ public class JMatStruct
 	public String getStructName() { return structName; }
 
 	/**
-	  * Sets the name of this structure.
+	  * Sets the name of this structure.  Any spaces in the name will be 
+	  *   replaced with underscores.  Final because called from constructor.
 	  */
-	public void setStructName(String name) { structName = name; }
+	public final void setStructName(String name)
+	{
+		if (name != null)
+			structName = name.replace(' ', '_');
+		else structName = null;
+	}
 	
 	/**
 	  * Returns the number of fields in this structure.

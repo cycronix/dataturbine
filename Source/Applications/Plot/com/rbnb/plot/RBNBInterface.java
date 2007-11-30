@@ -1189,7 +1189,7 @@ public class RBNBInterface implements Runnable {
 	case LayoutCubby.ExportToMatlab:
 	    // JPW 11/29/2006: Use ExportToDT to export data
 	    if (connection != null) {
-		if (exportToMatlab == null) {
+		//if (exportToMatlab == null) {
 		    // Create non-modal ExportToDT dialog to handle exporting data to the RBNB
 		    exportToMatlab =
 			new ExportToMatlab(
@@ -1197,7 +1197,7 @@ public class RBNBInterface implements Runnable {
 			    false,
 			    connection,
 			    environment);
-		}
+		//}
 		exportToMatlab.setVisible(true);
 	    } 
 	    break;	    
