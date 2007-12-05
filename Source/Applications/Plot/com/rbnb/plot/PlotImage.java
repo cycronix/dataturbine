@@ -303,6 +303,7 @@ public class PlotImage extends JComponent {
 							}
 							tf=ti[0];
 							tl=ti[num-1];
+//							System.err.println("showSome, num: "+num+", ti[0]: "+ti[0]);
 						}
 						//if (showOldest) {
 							//imold=tk.createImage(data[0]);
@@ -331,9 +332,10 @@ public class PlotImage extends JComponent {
 						int[] tpix=new int[ti.length];
 						for (int i=0;i<ti.length;i++) {
 							tpix[i]=(int)((ti[i]-start)*size.width/duration);
-	//System.err.println("tpix["+i+"] = "+tpix[i]);
+	//System.err.println("tpix["+i+"] = "+tpix[i]+", start: "+start);
+							if(tpix[i] < 0) tpix[i] = 0;  // mjm 11/5/07:  keep in range, causes infinite loop in drawImage if negative
 						}
-	//System.err.println("width = "+size.width);
+	//System.err.println("width = "+size.width+", im.length: "+im.length);
 						if (w>size.width/im.length) w=size.width/im.length;
 						for (int i=0;i<im.length;i++) {
 							//preserve aspect ratio
@@ -345,7 +347,9 @@ public class PlotImage extends JComponent {
 								hi=h;
 								wi=(int)(1.0*im[i].getWidth(this)*hi/im[i].getHeight(this));
 							}
+//							System.err.println("<drawImage, i: "+i+", tpix[i]:"+tpix[i]+", wi: "+wi+",h: "+h+", hi: "+hi);
 							bi.drawImage(im[i],tpix[i]-wi,(h-hi)/2,wi,hi,null);
+//							System.err.println(">drawImage");
 						}
 					}
 					//if (imold!=null) {
