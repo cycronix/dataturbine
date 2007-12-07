@@ -26,16 +26,19 @@ package com.rbnb.timedrive;
      *
      * @author John P. Wilson
      *
-     * @version 05/31/2006
+     * @version 12/07/2007
      */
      
     /*
-     * Copyright 2005, 2006 Creare Inc.
+     * Copyright 2005, 2006, 2007 Creare Inc.
      * All Rights Reserved
      *
      *   Date      By	Description
      * MM/DD/YYYY
      * ----------  --	-----------
+     * 12/07/2007  JPW	TimeDrive web interface now supports decimal values
+     * 			for duration and rate.  Therefore, no longer cast
+     * 			time, duration, or rate as integers in toString().
      * 05/31/2006  JPW  Add LIVE play mode constant.
      *			We used to use "t=0.0" as a special case to indicate
      *			live mode; now live mode is indicated directly by
@@ -625,7 +628,7 @@ package com.rbnb.timedrive;
 	 *
 	 * @return Time munge string.
 	 *
-	 * @version 04/13/2006
+	 * @version 12/07/2007
 	 */
 	 
 	/*
@@ -633,6 +636,9 @@ package com.rbnb.timedrive;
 	 *   Date      By	Description
 	 * MM/DD/YYYY
 	 * ----------  --	-----------
+	 * 12/07/2007  JPW	TimeDrive web interface now supports decimal
+	 * 			  values for duration and rate.  No longer cast
+	 * 			  time, duration, or rate as integers.
 	 * 04/13/2006  JPW	Make the returned String more compact;
 	 *			  this includes leaving out certain elements
 	 *			  (such as "reference") when the default value
@@ -647,9 +653,9 @@ package com.rbnb.timedrive;
 	 */
 	
 	public String toString(String syncChanI) {
-	    // JPW 04/13/2006: Cast time to be an integer
-	    // String timeStr = Double.toString(time);
-	    String timeStr = Integer.toString((int)time);
+	    // JPW 12/07/2007: No longer cast time to be an integer
+	    // String timeStr = Integer.toString((int)time);
+	    String timeStr = Double.toString(time);
 	    
 	    // JPW 05/31/2006: Live mode is now indicated in the "play=" string
 	    // String liveModeStr = "";
@@ -657,10 +663,10 @@ package com.rbnb.timedrive;
 	    // if (time == 0.0) {
 	    if (playMode == MungeParameters.LIVE) {
 		// Set the time to current system time
-		// JPW 04/13/2006: Cast time to be an integer
+		// JPW 12/07/2007: No longer cast time to be an integer
 		timeStr =
-		    Integer.toString(
-		        (int)(((double)System.currentTimeMillis()) / 1000.0));
+		    Double.toString(
+		        ((double)System.currentTimeMillis()) / 1000.0);
 	    }
 	    String syncChanStr = "";
 	    if ( (syncChanI != null) && (!syncChanI.equals("")) ) {
@@ -679,11 +685,11 @@ package com.rbnb.timedrive;
 		new String(
 		    referenceStr +
 		    "t=" + timeStr + "&" +
-		    // JPW 04/13/2006: Cast duration to be an integer
-		    "d=" + Integer.toString((int)duration) + "&" +
+		    // JPW 12/07/2007: No longer cast duration to be an integer
+		    "d=" + Double.toString(duration) + "&" +
 		    "play=" +  playStr[playMode] + "&" +
-		    // JPW 04/13/2006: Cast rate to be an integer
-		    "rate=" + Integer.toString((int)rate) +
+		    // JPW 12/07/2007: No longer cast rate to be an integer
+		    "rate=" + Double.toString(rate) +
 		    syncChanStr);
 	}
 	

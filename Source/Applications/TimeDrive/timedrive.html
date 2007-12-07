@@ -12,6 +12,8 @@
 //                         into
 //                            playmode = <pause|live|forward|backward>
 //              JPW 10/06  Set background color for the page to "antiquewhite"
+//		JPW 12/07/2007  Add fractional time step and interval values
+//				to support finer-grained control.
 
 //
 //--------------------------------------------------------------
@@ -788,7 +790,24 @@ function tzCalculation_LocalTimeZone() {
 <td align="center" bgcolor="lightblue">
 &nbsp<b>TimeStep:</b>&nbsp
 <select name="step" onchange="updateTimeStep()" onmousedown="stopRefreshTimer()">
-<option value=1>1sec
+<!-- JPW 12/06/2007: Add additional time step values for finer grained control -->
+<!-- NOTE: DON'T INCLUDE TRAILING ZEROS IN THESE VALUES!  For example, if the  -->
+<!--       URL from TimeDrive server includes the string "rate=0.01", and the  -->
+<!--       the value for the combobox is "value=0.010", THESE WON'T MATCH,     -->
+<!--       and the combobox field in the GUI will be blank.  Conversely, it    -->
+<!--       appears that extra zeros in the URL string from TimeDrive server    -->
+<!--       work fine.  For instance, if the URL from the server includes       -->
+<!--       "rate=0.010", JavaScript matches this with value=0.01 just fine.    -->
+<option value=0.001>1ms
+<option value=0.002>2ms
+<option value=0.005>5ms
+<option value=0.01>10ms
+<option value=0.02>20ms
+<option value=0.05>50ms
+<option value=0.1>0.1sec
+<option value=0.2>0.2s
+<option value=0.5>0.5s
+<option value=1>1s
 <option value=2>2s
 <option value=5>5s
 <option value=10>10s
@@ -1053,8 +1072,25 @@ function tzCalculation_LocalTimeZone() {
 <td align="center" bgcolor="lightblue">
 &nbsp;&nbsp;<b>Interval:</b>&nbsp;&nbsp;&nbsp;
 <select name="duration" onchange="updateDuration()" onmousedown="stopRefreshTimer()">
+<!-- JPW 12/06/2007: Add additional duration values for finer grained control -->
+<!-- NOTE: DON'T INCLUDE TRAILING ZEROS IN THESE VALUES!  For example, if the  -->
+<!--       URL from TimeDrive server includes the string "d=0.01", and the     -->
+<!--       value for the combobox is "value=0.010", THESE WON'T MATCH, and the -->
+<!--       combobox field in the GUI will be blank.  Conversely, it appears    -->
+<!--       that extra zeros in the URL string from TimeDrive server work fine. -->
+<!--       For instance, if the URL from the server includes "d=0.010",        -->
+<!--       JavaScript matches this with value=0.01 just fine.                  -->
 <option value=0>0
-<option value=1>1sec
+<option value=0.001>1ms
+<option value=0.002>2ms
+<option value=0.005>5ms
+<option value=0.01>10ms
+<option value=0.02>20ms
+<option value=0.05>50ms
+<option value=0.1>0.1sec
+<option value=0.2>0.2s
+<option value=0.5>0.5s
+<option value=1>1s
 <option value=2>2s
 <option value=5>5s
 <option value=10>10s
