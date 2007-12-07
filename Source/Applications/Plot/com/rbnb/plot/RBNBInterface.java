@@ -106,7 +106,7 @@ public class RBNBInterface implements Runnable {
     //EMF 1/18/06: starting playback jump for duration==0
     //             note actual jump is this * 2e-2
  //   private double zerodurbase = 5.0;
-    private double zerodurbase = 5.0/1000.; // mjm 11/5/2007 - slow video replay way down to start (can always go faster, cant slow down)
+    private double zerodurbase = 5.0/1000.;  // mjm 11/5/2007 - slow video replay way down to start (can always go faster, cant slow down)
     
     // JPW 11/29/2006: Dialog to handle exporting to RBNB
     private ExportToDT exportToDT = null;
