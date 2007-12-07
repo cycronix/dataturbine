@@ -903,9 +903,9 @@ public class RBNBPlotMain extends Applet implements ActionListener,Runnable,Prin
 	// mb.setHelpMenu(help);
 	
 	frame = new LWFrame("rbnbPlot");
-	if (environment.HOST==null) frame.setTitle("rbnbPlot by (no connection)");
+	if (environment.HOST==null) frame.setTitle("rbnbPlot (no connection)");
 	else {
-	    frame.setTitle("rbnbPlot by (connecting to "+environment.HOST+":"+
+	    frame.setTitle("rbnbPlot (connecting to "+environment.HOST+":"+
 			   environment.PORT+"...)");
 	    //start thread to listen for response to open request
 	    if (runner==null || !runner.isAlive()) {
@@ -1095,7 +1095,7 @@ public int print(Graphics g, PageFormat format, int pageNumber) {
 	    JInfoDialog id=new JInfoDialog(frame,true,"Error",aboutInfo);
 	    //id.show();
 	    //id.dispose();
-	    frame.setTitle("rbnbPlot by (no connection)");
+	    frame.setTitle("rbnbPlot (no connection)");
 	}
 	frame.setCursor(pointer);
     }
