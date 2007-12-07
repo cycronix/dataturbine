@@ -1077,7 +1077,7 @@ public int print(Graphics g, PageFormat format, int pageNumber) {
 		break;
 	    }
 	    try {
-		Thread.sleep(100);
+		Thread.sleep(200);		// slow down, let channel list get refreshed at start
 	    }
 	    catch (InterruptedException ie) {}
 	}
