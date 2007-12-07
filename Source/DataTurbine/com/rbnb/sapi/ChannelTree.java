@@ -67,6 +67,7 @@ import com.rbnb.api.Rmap;
  *   Date      By	Description
  * MM/DD/YYYY
  * ----------  --	-----------
+ * 2007/12/07  WHF  Shortcuts now appear as SERVER nodes as opposed to FOLDERs.
  * 2005/10/06  WHF  Added ChannelTree.createFromChannelMap(ChannelMap, String)
  * 2005/08/10  WHF  ChannelTree.Node.equals() returns false if the input is
  *						null.
@@ -359,7 +360,9 @@ public final class ChannelTree implements java.io.Serializable
 		if (r instanceof com.rbnb.api.Sink) return SINK;
 		if (r instanceof com.rbnb.api.Source) return SOURCE;
 		if (r instanceof com.rbnb.api.PlugIn) return PLUGIN;
-		if (r instanceof com.rbnb.api.Server) return SERVER;
+		if (r instanceof com.rbnb.api.Server
+				// 2007/12/07  WHF  Also return server type for shortcuts:
+				|| r instanceof com.rbnb.api.Shortcut) return SERVER;
 		if (r.getDblock()!=null) return CHANNEL;
 		if (r.getNchildren()>0)
 		{

@@ -292,7 +292,11 @@ public class JMatStruct
 			bb.putInt(0x1);
 			bb.putInt(structName.length());
 			bb.put(structName.getBytes());
-			bb.position(bb.position() + (0x20 - structName.length()%8));
+			//bb.position(bb.position() + (0x20 - structName.length()%8));
+			// Pad to next word boundary:
+			int rem = bb.position() % 8;
+			bb.position(bb.position() + 8 - rem);
+			
 		}
 		
 		put(bb, magic2);
@@ -413,7 +417,8 @@ public class JMatStruct
 	public int findField(String fieldName)
 	{
 		for (int ii = 0; ii < sFields.size(); ++ii) 
-			if (((field_t) sFields.get(ii)).fieldName.equals(fieldName)) return ii;
+			if (((field_t) sFields.get(ii)).fieldName.equals(fieldName)) 
+				return ii;
 		return -1;
 	}
 
@@ -448,7 +453,9 @@ public class JMatStruct
 	  */
 	public static void main(String[] args) throws Exception
 	{
-		JMatStruct jms = new JMatStruct("foo");
+		String[] names = { "foo", "foobar", "foobarfoobarfoobarfoobarfoobarfoo" };
+for (int iii = 0; iii < 3; ++iii) {
+		JMatStruct jms = new JMatStruct(names[iii]);
 		int len = 57;
 		double[] dataD = new double[len];
 		float[] dataF  = new float[len];
@@ -483,7 +490,8 @@ public class JMatStruct
 		// Add it to the first as a child:
 		jms.addChild("child", jms2);
 		
-		jms.writeStruct("test.mat");
+		jms.writeStruct("test"+iii+".mat");
+}
 	}
 }
 

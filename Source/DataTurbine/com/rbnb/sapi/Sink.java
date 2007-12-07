@@ -728,27 +728,41 @@ if (cm.debugFlag) System.err.println("-- Request: \n" +dataReq);
 	/**
 	  * Sends a request to the server for the current registration
 	  *  map for the channels in the provided <code>ChannelMap</code>.
-	  * &nbsp; If the input <code>ChannelMap</code> is empty or null, it 
-	  * will be treated as if it were a request for "&#42/..." (all channels).
+	  *  The registration map contains information such as channel names, 
+	  *  and the size, time range, and MIME type of channel data.
+	  *  If the input <code>ChannelMap</code> is empty or null, it 
+	  * will be treated as if it were a request for "..." (all local channels).
 	  * <p>The result of the request can be obtained using {@link 
 	  *  #Fetch(long, ChannelMap)}.  The result will also contain the 
 	  *  meta-data and time ranges for each requested channel.
 	  *
-	  * <code>requestMap</code> works as it would for a sink requesting data, except you are just 
-          * getting the "skeleton" channel map (names).
 	  * <p>You can use wildcards to match channels. Available wildcards and their meanings are:
 	  * <ul><li>"*"  match all objects at this level</li>
 	  * <li>"..."  match from here down recursively (but not across routing links or PlugIns)</li>
 	  * <li>".."  up a level</li>
 	  * </ul><p> To request registration maps from local and routed servers, use a <code>requestMap</code> 
 	  * with one channel named as follows:
-	  * <ul><li> Local chans:            "..."</li>
-	  * <li>Parent chans:           "../..."</li>
-	  * <li>Parent &amp local chans: "../&#42/..."</li>
-          * <li>Local &amp child chans:  "&#42/..."</li>
+	  * <ul><li> Local channels:            "..."</li>
+	  * <li>Parent channels:           "../..."</li>
+	  * <li>Parent and local channels: "../&#42/..."</li>
+          * <li>Local and child channels:  "&#42/..."</li>
           * </ul><p>Similarly, targeted requests could also be made using absolute paths, such as:
           * <ul><li>Uncle&#39s children:       "/myparent/myuncle/..."</li>
 	  * </ul>
+	  * <p>Note that it is impossible to explicity request the registration of 
+	  *  all child servers and plugins with one request. This is by design, as
+	  *  such a request might be infinite. Instead of making large wildcard 
+	  *  requests, consider breaking them into one request per branch.
+	  * <p>For example, consider a channel viewer application.  To present the
+	  *  initial view, the application might request first "/*", and get:</p>
+      *  <ul><li>Child (Server)</li><li>FFT (PlugIn)</li><li>Data (Source)</li>
+	  *  </ul>
+	  * <p>If the user is interested in the channels under the Child server,
+	  *  the application might then request "Child/*". This would reveal the
+	  *  first level of nodes under the child server. This minimal on-demand
+	  *  style of requests minimizes bandwidth and server load and ensures that
+	  *  if an error occurs, it is with the level in question and not some
+	  *  peer.</p>  
 	  * @author WHF
 	  *
 	  * @param requestMap The channels to obtain from the registration map,
