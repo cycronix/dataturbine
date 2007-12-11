@@ -72,6 +72,8 @@ public class RoutingPlugIn extends Thread
     private int metricsCache=3600;
     private int metricsArchive=0;
     private int metricsInterval=10;
+    
+    private boolean debug = false;		
 //------------------------------------------------------------------------------------------------
     public static void main(String[] args) {
 
@@ -82,6 +84,8 @@ public class RoutingPlugIn extends Thread
 	    ArgHandler ah=new ArgHandler(args);
 		
 	    if (ah.checkFlag('h')) throw new Exception();
+
+	    if (ah.checkFlag('d')) rpi.setDebug(true);
 	    
 	    if (ah.checkFlag('a')) {			// "gateway" or parent of route
 		String addressL=ah.getOption('a');
@@ -111,6 +115,7 @@ public class RoutingPlugIn extends Thread
 	    System.err.println("RoutingPlugIn argument exception "+e.getMessage());
 	    System.err.println("Usage:  RoutingPlugIn");
 	    System.err.println(" -h                 : print this help message");
+	    System.err.println(" -d                 : debug mode");		
 	    System.err.println(" -a host:port		: gateway or parent of route");
 	    System.err.println("            default : localhost:3333");
 	    System.err.println(" -b host:port		: sink or child of route");
@@ -138,7 +143,8 @@ public class RoutingPlugIn extends Thread
 //------------------------------------------------------------------------------------------------
 // Access methods
 
-    public void setPiAddress(String address) { this.piAddress=address; }    
+    public void setPiAddress(String address) { this.piAddress=address; } 
+    public void setDebug(boolean dbg) 		 { this.debug = dbg; }
     public void setSAddress(String address)  { this.sAddress=address; }    
     public void setTimeout(long to)          { this.timeout=to; }   
     public void setPluginName(String name)   { pluginName=name; }
@@ -225,7 +231,7 @@ public class RoutingPlugIn extends Thread
 		    while (true) {
 			if(reconnect) {
 			    if (plugin.VerifyConnection()) { //looks ok, so leave alone
-				//System.err.println(myID+": "+new Date()+": PlugIn connection verified, continuing...");
+				if(debug) System.err.println(myID+": "+new Date()+": PlugIn connection verified, continuing...");  // MJM DEBUG
 				reconnect=false;
 			    } else { //something's bad, restart everything
 				//loop through active requests, terminating them
@@ -252,8 +258,11 @@ public class RoutingPlugIn extends Thread
 			
 			doneFlush = false;
 			picm=plugin.Fetch(timeout); // fetch request for routed data
+			if(debug) System.err.println("Routing Plugin got picm: "+picm);	// MJM DEBUG
+			
 			long totalBytes=plugin.BytesTransferred();
 			if (mh.update(totalBytes-lastBytes)==false) { //metrics failed; abort
+				System.err.println("mh.update failed!");
 			    //loop through active requests, terminating them
 			    for (Enumeration e=activeRequests.elements(); e.hasMoreElements();) {
 				((AnswerRequest)e.nextElement()).interrupt(false);
@@ -266,10 +275,10 @@ public class RoutingPlugIn extends Thread
 			long now=System.currentTimeMillis();
 			while (it.hasNext()) {
 				AnswerRequest ar=(AnswerRequest)it.next();
-				if (now-ar.lastConnect > 60000) {
+				if (now-ar.lastConnect > 2*timeout) {		// was hard-coded 60000 msec, give it plenty of time to avoid exception MJM 12/2007
 					//System.err.println("removing stale AnswerRequest "+ar);
 					ar.sink.CloseRBNBConnection();
-					it.remove();
+					it.remove();		// this can cause java.util.ConcurrentModification exception ?! Now caught and ignored if happens MJM 12/2007
 				}
 			}
 			
@@ -362,7 +371,7 @@ public class RoutingPlugIn extends Thread
 			//EMF 1/19/06: don't close down, attempt restart
 			//mh.close();
 			if (plugin!=null) plugin.CloseRBNBConnection();
-			if (e.getMessage().equals("shutting down")) {
+			if ((e.getMessage() != null) && e.getMessage().equals("shutting down")) {
 				mh.close();
 				break;
 			}
@@ -430,7 +439,7 @@ public class RoutingPlugIn extends Thread
 //------------------------------------------------------------------------------------------------
 	public void run()			//AnswerRequest run method
 	{
-            myThread=Thread.currentThread();
+        myThread=Thread.currentThread();
 	    boolean dostream=false;
 	    boolean verifyC=false;
 	    long dT = 0;
