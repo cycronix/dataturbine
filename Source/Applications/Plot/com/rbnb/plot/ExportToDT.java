@@ -57,6 +57,7 @@ import com.rbnb.utility.Utility;
  * MM/DD/YYYY
  * ----------  --	-----------
  * 11/29/2006  JPW	Created.
+ * 12/21/2007  MJM	Tweeked output "frames" for trimByTime mode, changed "Cancel" to "Exit" on popup dialog
  *
  */
 
@@ -165,7 +166,7 @@ public class ExportToDT extends JDialog
         JPanel buttonPanel = new JPanel(new GridLayout(1,2,10,0));
         exportButton = new JButton("Export");
         buttonPanel.add(exportButton);
-        cancelButton = new JButton("Cancel");
+        cancelButton = new JButton("Exit");			// "Cancel" confusing means to exit after successful export
         buttonPanel.add(cancelButton);
         // Don't have the buttons resize if the dialog is resized
         gbc.weightx = 0;
@@ -239,13 +240,13 @@ public class ExportToDT extends JDialog
         }
         
         else if (event.getSource() == exportButton) {
-	    // Make sure user has entered a source name
-	    exportSourceName = sourceNameTF.getText().trim();
-	    if (exportSourceName.equals("")) {
-		statusLabel.setText("Status: Must enter a source name.");
-		return;
-	    }
-	    bArchive = archiveCB.isSelected();
+		    // Make sure user has entered a source name
+		    exportSourceName = sourceNameTF.getText().trim();
+		    if (exportSourceName.equals("")) {
+		    	statusLabel.setText("Status: Must enter a source name.");
+		    	return;
+		    }
+		    bArchive = archiveCB.isSelected();
             exportData();
         }
         
@@ -271,50 +272,57 @@ public class ExportToDT extends JDialog
      *
      */
     
-    private void exportData() {
+private void exportData() {
 	
 	String srcName = null;
 	
 	try {
 	    ChannelMap inMap=sink.getLastMap();
 	    if ( (inMap == null) || (inMap.NumberOfChannels() < 1) ) {
-		statusLabel.setText("Status: No channels to export");
-		return;
+	    	statusLabel.setText("Status: No channels to export");
+	    	return;
 	    }
 	    // if (src!=null) src.CloseRBNBConnection();
 	    if (bArchive) {
-		src = new Source(1,"create",1);
+	    	src = new Source(1000,"create",1000);	// more "frames" for trimbytime mode mjm 12/07
+	    				// this shouldnt hurt frame mode as only 1 is put
+	    				// this seems to reduce/eliminate duplicate frames being put in trimbytime mode
+	    				// still a mystery why it would happen... MJM							
 	    } else {
-		src = new Source(1,"none",0);
+	    	src = new Source(1,"none",0);
 	    }
 	    src.OpenRBNBConnection(
-		environment.HOST + ":" + environment.PORT,
-		exportSourceName);
+	    		environment.HOST + ":" + environment.PORT,
+	    		exportSourceName);
+
 	    srcName = src.GetClientName();
 	    statusLabel.setText("Status: Exporting to " + srcName);
 	    System.err.println("\nExport data to " + srcName);
 	    ChannelMap outMap=new ChannelMap();
+
 	    for (int i=0;i<inMap.NumberOfChannels();i++) {
-		String name=inMap.GetName(i);
-		System.err.print("\tchannel " + name + " exported as ");
-		name=name.substring(name.lastIndexOf('/')+1);
-		if (outMap.GetIndex(name)>-1) {
-		    System.err.print("...duplicate name, modifying...");
-		    int j=1;
-		    while (outMap.GetIndex(name+"_"+j)>-1) j++;
-		    name=name+"_"+j;
-		}
-		int j=outMap.Add(name);
-		System.err.println(name);
-		if (j==i) { //new channel, fill in time and data
-		    outMap.PutTimeRef(inMap,i);
-		    outMap.PutDataRef(j,inMap,i);
-		}
+	    	String name=inMap.GetName(i);
+	    	System.err.print("\tchannel " + name + " exported as ");
+	    	name=name.substring(name.lastIndexOf('/')+1);
+	    	if (outMap.GetIndex(name) > -1) {
+	    		System.err.print("...duplicate name, modifying...");
+	    		int j=1;
+	    		while (outMap.GetIndex(name+"_"+j)>-1) j++;
+	    		name=name+"_"+j;
+	    	}
+			int j=outMap.Add(name);
+			System.err.println(name);
+			if (j==i) { //new channel, fill in time and data
+//				System.out.println("PutDataRef("+j+","+i+")");
+			    outMap.PutTimeRef(inMap,i);
+			    outMap.PutDataRef(j,inMap,i);
+			}
 	    }
 	    ChannelMap cmReg=new ChannelMap();
 	    for (int i=0;i<outMap.NumberOfChannels();i++) {
-		cmReg.Add(outMap.GetName(i));
+	    	cmReg.Add(outMap.GetName(i));
 	    }
+
 	    src.Register(cmReg);
 	    src.Flush(outMap,true);
 	    System.err.println("Exported " + outMap);
@@ -325,7 +333,7 @@ public class ExportToDT extends JDialog
 		e.printStackTrace();
 		statusLabel.setText("Status: Error exporting to " + srcName);
 	}
-    }
+}
     
     /**************************************************************************
      * Methods to implement WindowListener.
