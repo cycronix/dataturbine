@@ -1,50 +1,67 @@
 <!DOCTYPE html PUBLIC "-//w3c//dtd html 4.0 transitional//en">
-<html>
-<head>
-  <meta http-equiv="Content-Type"
- content="text/html; charset=iso-8859-1">
+<html><head>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="Author" content="Matt Miller">
-  <meta name="GENERATOR"
- content="Mozilla/4.79 [en] (X11; U; Linux 2.4.9-e.3smp i686) [Netscape]">
-  <title>RBNB Release Notes</title>
-</head>
+  <meta name="GENERATOR" content="Mozilla/4.79 [en] (X11; U; Linux 2.4.9-e.3smp i686) [Netscape]">
+  <title>RBNB Release Notes</title></head>
 <body>
 <h1>RBNB Release Notes</h1>
 <h1>RBNB V3.1 Release Notes</h1>
 <h2>V3.1B1 to V3.1B2 Changes</h2>
-<li>Code is officially open source - hosted on NEESforge website.</li>
-<li>Removed obfuscation (no longer needed now that RBNB is open source); remove
-	ProGuard files from Third_Party directory.
-</li>
-<li>A plug-in to compute the time derivative of a channel was added to the
-	PlugIn area.
-</li>
+V3.1B2 released 01/11/2008<br>
+<h3>General</h3>
+<ul>
+<li>Open source code is hosted on NEESforge website.</li>
+<li>Removed obfuscation (no longer needed now that RBNB is open source); remove	ProGuard files from Third_Party directory.</li>
+<li>Add Doxygen documentation capability (add Source/Doxyfile; tweak the Ant "programmer-documentation" task; add Doxygen adapter class for Ant).</li>
+<li>Tweak regression test script to support COMSOL: take out spaces between function name and open parenthesis (change in Source/Matlab/testrbnb.m).</li>
+<li>Added ActiveX packager and installation scripts and LabView example.</li>
+</ul>
+<h3>Server</h3>
+<ul>
+<li>Added interpreter header to Source/DataTurbine/jsharp_code_prep_script</li>
+<li>User info is now replaced on successive registrations</li>
+<li>Fixed registration bug in com.rbnb.api.</li>
+<li>Shortcuts now appear as SERVER nodes in ChannelTree.  Updated Sink.RegistrationRequest documentation.</li>
+<li>Change TCP.java to support computers with multiple interfaces.</li>
+<li>Fixed bug for trimByTime mode.  _Metrics channels would not be reliably checked for trimming the ring buffer.  This could result in long term memory growth with risk of running JVM out of memory (change in Source/DataTurbine/com/rbnb/api/StorageManager.java).</li>
+<li>SAPI: Minor improvements to ChannelMap.</li>
+</ul>
+<h3>TimeDrive</h3>
+<ul>
+<li>Tweak GUI to add additional &#8220;Interval&#8221; entries for finer grain control of track display.</li>
+<li>Add fractional time step and interval values to TimeDrive web interface for finer grained control; make supporting changes in the TimeDrive server.</li>
+</ul>
+<h3>PlugIns</h3>
+<ul>
+<li>RoutingPlugin: Fix exception-handling bug; add debug flag (-d).</li>
+<li>A plug-in to compute the time derivative of a channel was added to the PlugIn area.</li>
+<li>Improved performance of PlugInTemplate.stop().</li>
+<li>Added com.rbnb.plugins.PlugInRecorder, which Subscribes to a PlugIn and archives the output.</li>
+<li>Minor improvements to PlugInTemplate.</li>
+</ul>
 <h3>UDPCaster</h3>
 <ul>
-	<li>Add new command line arguments: autostart ("-x") and stream from
-		oldest ("-o").
-	</li>
-	<li>Supports multiple recipients ("-r" flag takes a comma-delimited
-		list of recipients).
-	</li>
+<li>Add new command line arguments: autostart ("-x") and stream from oldest ("-o").</li>
+<li>Supports multiple recipients ("-r" flag takes a comma-delimited list of recipients).</li>
 </ul>
 <h3>rbnbPlot</h3>
 <ul>
-	<li>Added com.rbnb.fie (File Import/Export) package (added to Plot
-		area because that is where we are initially using it, and also
-		to keep the Server code Java 1.1.4 compliant).  JMatStruct,
-		an exporter for .MAT files, is the most significant class in
-		this package.
-	</li>
-	<li>Add MATLAB (".MAT") export support using JMatStruct.  The .MAT
-		file is created in the current directory.
-	</li>
-	<li>Plot has support to change the font size through a JVM system
-		parameter.
-	</li>
+<li>Added com.rbnb.fie (File Import/Export) package (added to Plot area because that is where we are initially using it, and also to keep the Server code Java 1.1.4 compliant).  JMatStruct, an exporter for .MAT files, is the most significant class in this package.</li>
+<li>Add MATLAB (".MAT") export support using JMatStruct.  The .MAT file is created in the current directory.</li>
+<li>Plot has support to change the font size through a JVM system parameter.</li>
+<li>Fixed export-to-DT trimByTime mode problem (ExportToDT.java).</li>
+<li>Added short sleep to help rbnbPlot channel list refresh on new connection (tweak in RBNBPlotMain.java).</li>
+<li>Change default video playback rate.</li>
+<li>Slowed down startup playback rate for zero-duration data (e.g. video).</li>
+<li>Fixed bug where zero-duration image plots would hang.</li>
+<li>Spaces in channel names replaced with underscores for .mat file export.</li>
 </ul>
 <h2>V3.0 to V3.1B1 Changes</h2>
-Third_Party directory has been pulled out of Source directory; build files have been adjusted as appropriate. This is consistant with the folder structure at NEESforge and makes sense since the content of Third_Party isn't part of the RBNB open source.
+Third_Party directory has been pulled out of Source directory; build
+files have been adjusted as appropriate. This is consistant with the
+folder structure at NEESforge and makes sense since the content of
+Third_Party isn't part of the RBNB open source.
 <h3>rbnbServer</h3>
 <ul>
 	<li>Some debug features of Locks and Doors are conditional, using the 
@@ -57,10 +74,14 @@ This release of the RBNB system contains the following changes:<br>
 <h2>V3.0 Production</h2>
 <li>Code is frozen as a stable production release.</li>
 <li>Both "push" and "pull" mirrors now have reconnect logic</li>
-<li>Added limited support for displaying 3D icons (".dae" models) to TrackKMLPlugIn.  An "Icon Scale" combo box has been added to the GUI which allows the user to specify the scale for both 2D and 3D icons.</li>
+<li>Added limited support for displaying 3D icons (".dae" models) to
+TrackKMLPlugIn. An "Icon Scale" combo box has been added to the GUI
+which allows the user to specify the scale for both 2D and 3D icons.</li>
 <h2>V3.0B3 to V3.0B4 Changes</h2>
 <li>RBNBPlot's font size can be specified with the java debug flag -Dplot.fontsize=N</li>
-<li>"Pull" mirrors will automatically reconnect if the network link goes down.  This is a beta test change, with "push" mirrors to follow in a future release.</li>
+<li>"Pull" mirrors will automatically reconnect if the network link
+goes down. This is a beta test change, with "push" mirrors to follow in
+a future release.</li>
 <li>Parameters targeted to specific plugins can now be specified via both the URL "munge" interface and the API.  
 The URL syntax is "?pio=plug-in-name,key1=value1,...,keyn=valuen".
 The API interface is ChannelMap.AddPlugInOption()</li>
@@ -69,15 +90,20 @@ The API interface is ChannelMap.AddPlugInOption()</li>
 <h2>V3.0B1 to V3.0B2 Changes</h2>
 <h3>rbnbServer</h3>
 <ul>
-  <li>Plugins now properly handle "Monitor" mode by passing through source frames consistent with how a direct (non-plugin) connection works
-  <li>Mirrors forward registration metadata (also known as "User Info").
-  <li>Subscribe to oldest and Mirror from oldest bug fix in the case where the Subscription/Mirror is set up before data is in the Source and the Source has registered channels.
-  <li>Tweeks to server thread-locking logic should make it less likely for certain rare but annoying thread-lockup problems to happen
-</ul>
+  <li>Plugins now properly handle "Monitor" mode by passing
+through source frames consistent with how a direct (non-plugin)
+connection works </li><li>Mirrors forward registration metadata (also known as "User Info").
+  </li><li>Subscribe
+to oldest and Mirror from oldest bug fix in the case where the
+Subscription/Mirror is set up before data is in the Source and the
+Source has registered channels. </li><li>Tweeks to server thread-locking logic should make it less likely for certain rare but annoying thread-lockup problems to happen
+</li></ul>
 <h3>Developer API</h3>
 <ul>
-  <li>When a user registers channels in a Source, it is now allowed to have a mix of channels with and without registration metadata (also known as "User Info").
-</ul>
+  <li>When a user registers channels in a Source, it is now
+allowed to have a mix of channels with and without registration
+metadata (also known as "User Info").
+</li></ul>
 <h2>V2.6 to V3.0B1 Changes</h2>
 V3.0B1 is the first beta release of V3 RBNB.  It is identical to
 V2.6 except that it is being released under the Apache 2.0 Open Source
@@ -91,13 +117,13 @@ V2.6 is a stable production release.<br>
 <ul>
   <li>Various archive-recovery tweeks.  Fire-walled an obscure infinite
 recovery loop problem; continued archive-robustness logic TBD.
-</ul>
+</li></ul>
 <h3>Plugins</h3>
 <ul>
 <li>Resample plugin
 added that will downsample and/or limit the amount of numerical
 data fetched through it, similar to ThumbNail for images.
-</ul>
+</li></ul>
 <h2>V2.6B5 to V2.6B6 Changes</h2>
 <h3>rbnbServer</h3>
 <ul>
@@ -116,7 +142,7 @@ repeated registration requests, e.g. from the WebDAV interface.
   </li>
   <li>Various archive-recovery tweeks.  Fire-walled an obscure infinite
 recovery loop problem; continued archive-robustness logic TBD.
-</ul>
+</li></ul>
 <h3>TrackKMLPlugIn</h3>
 <ul>
   <li>Add support for munge-settable display parameter options:
@@ -302,8 +328,7 @@ monitoring
 instead of the usual SAPI connection.<span style="font-weight: bold;"><br>
 </span>
 <h3>rbnbAVCP</h3>
-Bug fix for 16-bit audio; performance tweaks.<span
- style="font-weight: bold;"><br>
+Bug fix for 16-bit audio; performance tweaks.<span style="font-weight: bold;"><br>
 </span>
 <h3>ThumbNail PlugIn</h3>
 If max number of images has been set to 1, ThumbNail now correctly
@@ -376,7 +401,7 @@ different rates).
 <br>
 The following bugs were fixed:<br>
 <br>
-<li style="margin-left: 40px;">Monitor mode could get duplicate frames</li>
+</li><li style="margin-left: 40px;">Monitor mode could get duplicate frames</li>
 <div style="margin-left: 40px;"></div>
 <li style="margin-left: 40px;">Subscribe mode could block forever
 waiting to start</li>
@@ -481,8 +506,7 @@ This application "plays" data from one source and outputs it to
 another,&nbsp;
 time-slewing it using VCR-like controls.&nbsp; Sink clients can
 subscribe
-to the player output channels and thereby by remote-controlled.&nbsp;<span
- style="font-style: italic;">(This
+to the player output channels and thereby by remote-controlled.&nbsp;<span style="font-style: italic;">(This
 release of player is Beta-only.&nbsp; There are known issues and some
 debug
 print-outs).</span>
@@ -718,8 +742,7 @@ situations in the server. As a result, sources and sinks would produce
 informational messages about being blocked. These have been fixed.
 <h3>Frame-based Streaming from a Source with an Archive</h3>
 Streaming from a source with an archive using frame-based streaming has
-been problematic. While the use of reframing (see <a
- href="#SubscribeArchives">archive
+been problematic. While the use of reframing (see <a href="#SubscribeArchives">archive
 subscription problem</a>), it is at the price of increased storage. As
 of V2.2.2, the server will terminate a frame-based stream that attempts
 to get data out of an archive (either by requesting oldest or due to
@@ -1302,5 +1325,4 @@ reflect the structure of file systems or Web URLs.
 &nbsp;
 <br>
 &nbsp;
-</body>
-</html>
+</body></html>
