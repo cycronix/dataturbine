@@ -152,7 +152,9 @@ public class CacheInterface {
         ChannelMap cm=new ChannelMap();
         cm.PutTimeAuto("timeofday");
         cm.Add("/"+channel);
-        cm.PutData(0,data,ChannelMap.TYPE_INT8);
+ //       cm.PutData(0,data,ChannelMap.TYPE_INT8);
+ // System.err.println("mjm putting as bytearray!");
+        cm.PutDataAsByteArray(0,data);	// ByteArray more compatable with rbnbPlot etc reading it back from cache.  MJM 1/17/2008
         source.Flush(cm);
         //EMF 5/13/02: put header into metadata, not separate channel
         //cm.Add("/"+channel+"/"+headerSuffix);
