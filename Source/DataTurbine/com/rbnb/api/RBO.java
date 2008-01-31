@@ -588,6 +588,13 @@ private boolean alreadyReset=false;
      * @version 06/14/2001
      */
     private Door registrationDoor = null;
+    
+    /**
+      * If set, determines the value of getArchiveDirectory().
+      * @author WHF
+      * @since 2008/01/31
+      */
+    private String archiveDirectoryOverride = null;
 
     /**
      * Class constructor.
@@ -3284,12 +3291,15 @@ private boolean alreadyReset=false;
      *   Date      By	Description
      * MM/DD/YYYY
      * ----------  --	-----------
+     * 2008/01/31  WHF  Added override.
      * 06/22/2006  JPW	Use RBNB.getArchiveHomeDirectory()
      * 03/10/2003  INB	Allow for null ancestor.
      * 02/26/2001  INB	Created.
      *
      */
     public final String getArchiveDirectory() {
+	if (archiveDirectoryOverride != null) return archiveDirectoryOverride;
+	
 	StringBuffer sBuffer = new StringBuffer(getName());
 	Rmap ancestor = getParent();
 
@@ -7940,6 +7950,21 @@ cache.setMeps(cFrFrameSet);
 	    } catch (java.lang.Exception e) {
 	    }
 	}
+	
+	{
+	    String archDir = getArchiveDirectory();
+	    java.io.File dir = new java.io.File(archDir);
+	    if (!dir.exists()) {
+		// Assumes 'directory' starts with "./" or ".\".  Remove to
+		//  try absolute:
+		archDir = archDir.substring(2);
+		dir = new java.io.File(archDir);
+		if (dir.exists())
+		    // Set override so that archive can be found:
+		    archiveDirectoryOverride = archDir;
+		// Otherwise, allow existing code to fail.
+	    }
+	}	
         
 	// Ensure that there is an <code>RBO</code> seal. Without it, the
 	// <code>Archive(s)</code> definitely need to be recovered.
@@ -8050,12 +8075,11 @@ cache.setMeps(cFrFrameSet);
 
 	long after = afterI,
 	     before = beforeI;
+	java.io.File[] files;
 	String directory = getArchiveDirectory();
-
 	java.io.File archive = new java.io.File(directory);
 	Directory asDirectory = new Directory(archive);
-	java.io.File[] files;
-
+	        
 	// Ensure that the <code>RBO's</code> directory is valid. If
 	// not, we've got a serious problem.
 	try {
