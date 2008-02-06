@@ -1077,6 +1077,8 @@ public class ChannelMap implements java.io.Serializable
 	  *  the specified channel index.  This assumes
 	  *  that the byte ordering of the data is the same as the local 
 	  *  system.  (Not Java byte ordering, which is always MSB!)
+	  * <p><B>Note:</b> the data is not copied,
+	  *   so do not overwrite it until it is Flushed.
 	  * <p>
      *
      * @author WHF
@@ -1107,7 +1109,9 @@ public class ChannelMap implements java.io.Serializable
 
 	/**
 	  * Adds the data given in rawBytes to the channel identified with
-	  *  the specified channel index.
+	  *  the specified channel index. 
+	  * <p><B>Note:</b> the data is not copied,
+	  *   so do not overwrite it until it is Flushed.
 	  * <p>
 	  * Note that this version of PutData is not available in the 
 	  *   JavaBean/ActiveX API.
@@ -1157,6 +1161,8 @@ public class ChannelMap implements java.io.Serializable
 
 	/**
 	  * Type safe version of PutData().
+	  * <p><B>Note:</b> the data is not copied,
+	  *   so do not overwrite it until it is Flushed.
 	  * @see #PutData(int,byte[],int)
 	*/
 	public void PutDataAsFloat64(int channelIndex, double[] data)
@@ -1172,6 +1178,8 @@ public class ChannelMap implements java.io.Serializable
 
 	/**
 	  * Type safe version of PutData().
+	  * <p><B>Note:</b> the data is not copied,
+	  *   so do not overwrite it until it is Flushed.
 	  * @see #PutData(int,byte[],int)
 	*/
 	public void PutDataAsFloat32(int channelIndex, float[] data)
@@ -1187,6 +1195,8 @@ public class ChannelMap implements java.io.Serializable
 
 	/**
 	  * Type safe version of PutData().
+	  * <p><B>Note:</b> the data is not copied,
+	  *   so do not overwrite it until it is Flushed.
 	  * @see #PutData(int,byte[],int)
 	*/
 	public void PutDataAsInt64(int channelIndex, long[] data)
@@ -1201,6 +1211,8 @@ public class ChannelMap implements java.io.Serializable
 
 	/**
 	  * Type safe version of PutData().
+	  * <p><B>Note:</b> the data is not copied,
+	  *   so do not overwrite it until it is Flushed.
 	  * @see #PutData(int,byte[],int)
 	*/
 	public void PutDataAsInt32(int channelIndex, int[] data)
@@ -1215,6 +1227,8 @@ public class ChannelMap implements java.io.Serializable
 
 	/**
 	  * Type safe version of PutData().
+	  * <p><B>Note:</b> the data is not copied,
+	  *   so do not overwrite it until it is Flushed.
 	  * @see #PutData(int,byte[],int)
 	*/
 	public void PutDataAsInt16(int channelIndex, short[] data)
@@ -1229,6 +1243,8 @@ public class ChannelMap implements java.io.Serializable
 
 	/**
 	  * Type safe version of PutData().
+	  * <p><B>Note:</b> the data is not copied,
+	  *   so do not overwrite it until it is Flushed.
 	  * @see #PutData(int,byte[],int)
 	*/
 	public void PutDataAsInt8(int channelIndex, byte[] data)
@@ -1243,6 +1259,8 @@ public class ChannelMap implements java.io.Serializable
 
 	/**
 	  * Type safe version of PutData().
+	  * <p><B>Note:</b> the data is not copied,
+	  *   so do not overwrite it until it is Flushed.
 	  * @see #PutData(int,byte[],int)
 	  *
 	*/
@@ -1259,6 +1277,8 @@ public class ChannelMap implements java.io.Serializable
 	/**
 	  * Type safe version of PutData().  Places a block of bytes into the
 	  *   ChannelMap as a contiguous object.
+	  * <p><B>Note:</b> the data is not copied,
+	  *   so do not overwrite it until it is Flushed.
 	  * @see #PutData(int,byte[],int)
 	*/
 	public void PutDataAsByteArray(int channelIndex, byte[] data)
