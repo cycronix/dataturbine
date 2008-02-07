@@ -26,6 +26,7 @@ limitations under the License.
 	2007/11/07  WHF  When VerifyConnection fails, close the connection before
 		restarting it.
 	2007/11/15  WHF  Added showHelper() and argHelper().
+	2008/02/07  WHF  Added timeout argument to showHelper and argHelper.
 */
 
 package com.rbnb.plugins;
@@ -690,9 +691,11 @@ public abstract class PlugInTemplate
 	  */
 	protected static void showHelper()
 	{
-		System.err.println(
+		System.err.print(
 				 "\t-a address:port         RBNB address (localhost:3333)\n"
 				+"\t-n name                 Client name (class name)\n"
+				+"\t-to timeout             Timeout in ms to wait for request"
+						+" (inf)\n"
 		);
 	}
 	
@@ -717,6 +720,11 @@ public abstract class PlugInTemplate
 			} else if ("-n".equals(args[ii])) {
 				used[ii] = true;
 				pit.setName(args[++ii]);
+				used[ii] = true;
+				usedCount += 2;
+			} else if ("-to".equals(args[ii])) {
+				used[ii] = true;
+				pit.setTimeout(Long.parseLong(args[++ii]));
 				used[ii] = true;
 				usedCount += 2;
 			}
