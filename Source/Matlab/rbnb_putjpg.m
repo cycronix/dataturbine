@@ -6,14 +6,14 @@
 %
 % Description:	Put a JPEG image into the DataTurbine
 %
-% Usage:  rbnb_putjpg(src, name, start, img, [userinfo [,mime [,duration [,tref]]]])
+% Usage:  rbnb_putjpg(src, name, timestamp, img, [userinfo [,mime [,duration [,tref]]]])
 % 
 % Where:
 %   src:        Source connection object (from rbnb_source)
 %   name:       Name of object to put
 %   start:      Start time
-%	img:		MATLAB image to write
-%	userinfo:   Static metadata for PutUserInfo
+%   img:		MATLAB image to write
+%   userinfo:   Static metadata for PutUserInfo
 %   mime:		Static MIME type (default is 'image/jpeg')
 %   duration:   Time duration
 %   tref:       Optional start time reference:
@@ -29,16 +29,20 @@
 function nput = rbnb_putjpg(src, cname, timestamp, img, userinfo, mime, duration, tref)
 
 	% Assign defaults if necessary
-	if (nargin < 5) userinfo = '';
+	if (nargin < 5) 
+        userinfo = '';
 	end
 	
-	if(nargin < 6) mime = 'image/jpeg';
+	if(nargin < 6) 
+        mime = 'image/jpeg';
 	end
 	
-	if(nargin < 7) duration = 0.0
+	if(nargin < 7) 
+        duration = 0.0;
 	end;
 	
-	if(nargin < 8) tref = 'newest';
+	if(nargin < 8) 
+        tref = 'newest';
 	end
 	
 	% Convert image into array of bytes by funneling into a temporary file and
@@ -56,7 +60,7 @@ function nput = rbnb_putjpg(src, cname, timestamp, img, userinfo, mime, duration
 	cmap = rbnb_cmap;
 	ix = cmap.Add(cname);
 	
-	;	cmap.PutTime(timestamp, duration);  
+	%	cmap.PutTime(timestamp, duration);  
 	cmap.PutTimeAuto('timeofday');
 	
 	% Add user metadata if present
@@ -67,7 +71,8 @@ function nput = rbnb_putjpg(src, cname, timestamp, img, userinfo, mime, duration
 	% Always want MIME type, used by RDV and other smart clients
 	cmap.PutMime(ix, mime);
 	
-	cmap.PutDataAsInt8(ix, bytestream);
+    cmap.PutDataAsByteArray(ix, bytestream);
+    
 	nput = src.Flush(cmap, 1);
 			
 return
