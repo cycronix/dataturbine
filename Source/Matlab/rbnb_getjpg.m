@@ -34,7 +34,7 @@ function [img, tim, nam] = rbnb_getjpg(snk, cname, start, duration, tref)
 	end
 	
 	% Pull the image, comes back as an array of int8 bytes
-	[myPic rtim rname] = rbnb_get(smk, cname, start, duration, tref);
+	[myPic rtim rname] = rbnb_get(snk, cname, start, duration, tref);
 
 	% Generate a temporary file with a hopefully-unique name. We save it for reload below.
 	mytmp = tempname;
