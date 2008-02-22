@@ -60,8 +60,9 @@ function nput = rbnb_putjpg(src, cname, timestamp, img, userinfo, mime, duration
 	cmap = rbnb_cmap;
 	ix = cmap.Add(cname);
 	
-	%	cmap.PutTime(timestamp, duration);  
-	cmap.PutTimeAuto('timeofday');
+	cmap.PutTime(timestamp, duration);  
+    % TODO: Let user specify TimeAuto - how?
+    %cmap.PutTimeAuto('timeofday');
 	
 	% Add user metadata if present
 	if(userinfo ~= '')
