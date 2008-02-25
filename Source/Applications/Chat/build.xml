@@ -32,7 +32,9 @@
  <target name="compile" depends="init">
   <javac destdir="${rbnb.classesdir}/Applications/Chat"
          deprecation="on"
-		 debug = "on">
+	 debug = "on"
+  	 source="${rbnb.javaver}"
+  	 target="${rbnb.javaver}">
    <src path="${rbnb.sourcedir}/Applications/Chat" />
    <classpath path="${rbnb.classesdir}/Applications/Chat" />
    <classpath path="${rbnb.librarydir}/rbnb.jar" />

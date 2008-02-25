@@ -28,7 +28,9 @@
   -->
  <target name="compile" depends="init">
   <javac destdir="${rbnb.classesdir}/Applications/UDPCaster"
-         deprecation="on">
+         deprecation="on"
+  	 source="${rbnb.javaver}"
+  	 target="${rbnb.javaver}">
    <src path="${rbnb.sourcedir}/Applications/UDPCaster" />
    <classpath path="${rbnb.classesdir}/Applications/UDPCaster" />
    <classpath path="${rbnb.librarydir}/rbnb.jar" />

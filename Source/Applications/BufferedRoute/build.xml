@@ -32,7 +32,9 @@
   -->
  <target name="compile" depends="init">
   <javac destdir="${rbnb.classesdir}/Applications/BufferedRoute"
-         deprecation="on">
+         deprecation="on"
+  	 source="${rbnb.javaver}"
+	 target="${rbnb.javaver}">
    <src path="${rbnb.sourcedir}/Applications/BufferedRoute" />
    <classpath path="${rbnb.classesdir}/Applications/BufferedRoute" />
    <classpath path="${rbnb.librarydir}/rbnb.jar" />

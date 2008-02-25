@@ -38,7 +38,9 @@
   -->
  <target name="compile" depends="init">
   <javac destdir="${rbnb.classesdir}/Applications/Utility-Apps"
-         deprecation="on">
+         deprecation="on"
+  	 source="${rbnb.javaver}"
+  	 target="${rbnb.javaver}">
    <src path="${rbnb.sourcedir}/Applications/Utility-Apps" />
    <classpath path="${rbnb.classesdir}/Applications/Utility-Apps" />
    <classpath path="${rbnb.librarydir}/rbnb.jar" />

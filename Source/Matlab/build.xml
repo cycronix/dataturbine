@@ -22,7 +22,9 @@
       classes directory.  References the Matlab class files for dependencies.
   -->
  <target name="compile" depends="init">
-  <javac destdir="${rbnb.classesdir}/Matlab">
+  <javac destdir="${rbnb.classesdir}/Matlab"
+  	 source="${rbnb.javaver}"
+	 target="${rbnb.javaver}">
    <src path="${rbnb.sourcedir}/Matlab" />
    <classpath path="${rbnb.librarydir}/rbnb.jar:${rbnb.classesdir}/Matlab" /> 
   </javac>

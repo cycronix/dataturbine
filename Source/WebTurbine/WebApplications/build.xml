@@ -106,11 +106,14 @@
 		<copy todir="${rbnb.wtimageroot}">
 			<fileset dir = "${rbnb.wasourcedir}/webapps/webTurbine" />
 		</copy>
+		<!-- JPW 02/25/08: Add source and target Java version -->
 		<javac destdir="${rbnb.wtclassesdir}"
 				deprecation = "on"
 				debug = "${rbnb.compiledebug}"
 				srcdir = "${rbnb.wasourcedir}/src/other" 
-				includes = "*.java" >
+				includes = "*.java"
+				source="${rbnb.javaver}"
+				target="${rbnb.javaver}">
 			<classpath refid = "corecp" />
 			<classpath refid = "servletcp" />
 		</javac>
@@ -121,11 +124,14 @@
              webXmlFragment="${rbnb.waclassesdir}/temp/webJasper.xml" 
              outputDir="${rbnb.waclassesdir}/temp" />
 		<!-- Build JSP servlets: -->
+		<!-- JPW 02/25/08: Add source and target Java version -->
 		<javac destdir="${rbnb.wtclassesdir}"
 				deprecation = "on"
 				debug = "${rbnb.compiledebug}"
 				srcdir = "${rbnb.waclassesdir}/temp" 
-				includes = "**/*.java" >
+				includes = "**/*.java"
+				source="${rbnb.javaver}"
+				target="${rbnb.javaver}">
 			<classpath refid = "corecp" />
 			<classpath refid = "jspc.classpath" />
 		</javac>
@@ -135,24 +141,32 @@
 			<fileset file="${rbnb.wasourcedir}/JasperXML/webPostfix.xml" />
 		</concat>
 		<!-- Build new RBNB WebDAV servlet: -->
+		<!-- JPW 02/25/08: Add source and target Java version -->
 		<javac destdir="${rbnb.webdavclassesdir}" debug = "${rbnb.compiledebug}"
 				srcdir = "${rbnb.webdavsourcedir}"
-				includes = "*.java" >
+				includes = "*.java"
+				source="${rbnb.javaver}"
+				target="${rbnb.javaver}">
 			<classpath refid = "corecp" />
 			<classpath refid = "servletcp" />
 		</javac>
 		<!-- HttpForward: -->
+		<!-- JPW 02/25/08: Add source and target Java version -->
 		<javac destdir="${rbnb.webdavclassesdir}" debug = "${rbnb.compiledebug}"
 				srcdir = "${rbnb.wasourcedir}/src/HttpForward"
-				includes = "*.java" >
+				includes = "*.java"
+				source="${rbnb.javaver}"
+				target="${rbnb.javaver}">
 			<classpath refid = "corecp" />
 			<classpath refid = "servletcp" />
 		</javac>
 
 		<!-- HttpMonitor: -->
+		<!-- JPW 02/25/08: Set source and target Java version based on the "rbnb.javaver" parameter. -->
 		<javac destdir="${rbnb.waclassesdir}/HttpMonitor" debug="on"
 				deprecation="off"
-				source="1.4" target="1.4" >
+				source="${rbnb.javaver}"
+				target="${rbnb.javaver}">
 			<classpath refid = "servletcp" />
 			<src path="src/HttpMonitor/src" />
 			<src path="${rbnb.thirdpartydir}/dav4jSrc" />

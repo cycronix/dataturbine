@@ -35,7 +35,8 @@
   <!-- 2007/09/12  WHF  Added source / target options -->
   <javac destdir="${rbnb.classesdir}/Applications/PlugIns"
          deprecation="on" debug="on"
-		 source="1.4" target="1.4" >
+  	 source="${rbnb.javaver}"
+  	 target="${rbnb.javaver}">
    <src path="${rbnb.sourcedir}/Applications/PlugIns" />
    <exclude name="Unsupported/**" />
    <classpath path="${rbnb.classesdir}/Applications/PlugIns" />

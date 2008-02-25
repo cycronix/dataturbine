@@ -29,7 +29,9 @@
   -->
  <target name="compile" depends="init">
   <javac destdir="${rbnb.classesdir}/Applications/TCPCaster"
-         deprecation="on">
+         deprecation="on"
+  	 source="${rbnb.javaver}"
+  	 target="${rbnb.javaver}">
    <src path="${rbnb.sourcedir}/Applications/TCPCaster" />
    <classpath path="${rbnb.classesdir}/Applications/TCPCaster" />
    <classpath path="${rbnb.librarydir}/rbnb.jar" />

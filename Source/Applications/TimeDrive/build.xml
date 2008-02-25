@@ -35,7 +35,9 @@
   -->
  <target name="compile" depends="init">
   <javac destdir="${rbnb.classesdir}/Applications/TimeDrive"
-         deprecation="on">
+         deprecation="on"
+  	 source="${rbnb.javaver}"
+  	 target="${rbnb.javaver}">
    <src path="${rbnb.sourcedir}/Applications/TimeDrive" />
    <classpath path="${rbnb.classesdir}/Applications/TimeDrive" />
    <classpath path="${rbnb.librarydir}/rbnb.jar" />
