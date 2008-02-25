@@ -6,15 +6,34 @@
   <title>RBNB Release Notes</title></head>
 <body>
 <h1>RBNB Release Notes</h1>
-<h1>RBNB V3.1 Release Notes</h1>
+<h1>RBNB V3.1 Release Notes</h1><h2>V3.1B2 to V3.1B3 Changes</h2>
+V3.1B3 released 02/26/2008<br>
+<h3>General</h3>
+<ul><li>Added "source" and "target" flags to "javac" tasks in build.xml
+files where they were not being set.&nbsp; In general, "source" and
+"target" are set to the value of "rbnb.javaver" (declared in
+definitions.xml), which is currently "1.4".&nbsp; Note that the RBNB
+server overrides this flag and sets Java 1.3 as the target and source
+version.</li><li>In "Source/Scripts/OtherUnixScripts/Start_Webserver.sh" and "Source/Scripts/OtherUnixScripts/Stop_Webserver.sh", change shell to bash on other unix, seems to fix the bug on Solaris.</li></ul><h3>Server</h3><ul><li>Added support for loading archives via absolute pathnames. &nbsp;Modified "Source/DataTurbine/com/rbnb/api/RBO.java"<br></li></ul><h3>SAPI</h3><ul><li>Updated
+ChannelMap javadoc to specify that PutData calls do not copy the input
+arrays. Modified "Source/DataTurbine/com/rbnb/sapi/ChannelMap.java"</li></ul><h3>Matlab</h3><ul><li>Added
+new&nbsp;utilities to support RBNB-JPG processing in Matlab:
+"Source/Matlab/rbnb_putjpg.m" and "Source/Matlab/rbnb_getjpg.m"</li></ul><h3>PlugIns</h3><ul><li>Added pitch and roll to TrackData and TrackKML Plugins.</li><li>Added timeout argument to PluginTemplate.argHelper. &nbsp;Modified&nbsp;"Source/DataTurbine/com/rbnb/plugins/PlugInTemplate.java"</li></ul><h3>WebCache</h3><ul><li>WebCache/CacheInterface:&nbsp;
+changed rbnbPutData to ByteArray vs INT8 type for compatability with
+subsequent fetches from cache by rbnbPlot and RDV etc. &nbsp;Modified
+"Source/Applications/WebCache/com/rbnb/webCache/CacheInterface.java"</li></ul>
 <h2>V3.1B1 to V3.1B2 Changes</h2>
 V3.1B2 released 01/11/2008<br>
 <h3>General</h3>
 <ul>
 <li>Open source code is hosted on NEESforge website.</li>
 <li>Removed obfuscation (no longer needed now that RBNB is open source); remove	ProGuard files from Third_Party directory.</li>
-<li>Add Doxygen documentation capability (add Source/Doxyfile; tweak the Ant "programmer-documentation" task; add Doxygen adapter class for Ant).</li>
-<li>Tweak regression test script to support COMSOL: take out spaces between function name and open parenthesis (change in Source/Matlab/testrbnb.m).</li>
+<li>Add Doxygen documentation capability (add Source/Doxyfile; tweak
+the Ant "programmer-documentation" task; add Doxygen adapter class for
+Ant).</li>
+<li>Tweak regression test script to support COMSOL: take out spaces
+between function name and open parenthesis (change in
+Source/Matlab/testrbnb.m).</li>
 <li>Added ActiveX packager and installation scripts and LabView example.</li>
 </ul>
 <h3>Server</h3>
@@ -24,13 +43,18 @@ V3.1B2 released 01/11/2008<br>
 <li>Fixed registration bug in com.rbnb.api.</li>
 <li>Shortcuts now appear as SERVER nodes in ChannelTree.  Updated Sink.RegistrationRequest documentation.</li>
 <li>Change TCP.java to support computers with multiple interfaces.</li>
-<li>Fixed bug for trimByTime mode.  _Metrics channels would not be reliably checked for trimming the ring buffer.  This could result in long term memory growth with risk of running JVM out of memory (change in Source/DataTurbine/com/rbnb/api/StorageManager.java).</li>
+<li>Fixed bug for trimByTime mode. _Metrics channels would not be
+reliably checked for trimming the ring buffer. This could result in
+long term memory growth with risk of running JVM out of memory (change
+in Source/DataTurbine/com/rbnb/api/StorageManager.java).</li>
 <li>SAPI: Minor improvements to ChannelMap.</li>
 </ul>
 <h3>TimeDrive</h3>
 <ul>
 <li>Tweak GUI to add additional &#8220;Interval&#8221; entries for finer grain control of track display.</li>
-<li>Add fractional time step and interval values to TimeDrive web interface for finer grained control; make supporting changes in the TimeDrive server.</li>
+<li>Add fractional time step and interval values to TimeDrive web
+interface for finer grained control; make supporting changes in the
+TimeDrive server.</li>
 </ul>
 <h3>PlugIns</h3>
 <ul>
@@ -47,7 +71,10 @@ V3.1B2 released 01/11/2008<br>
 </ul>
 <h3>rbnbPlot</h3>
 <ul>
-<li>Added com.rbnb.fie (File Import/Export) package (added to Plot area because that is where we are initially using it, and also to keep the Server code Java 1.1.4 compliant).  JMatStruct, an exporter for .MAT files, is the most significant class in this package.</li>
+<li>Added com.rbnb.fie (File Import/Export) package (added to Plot area
+because that is where we are initially using it, and also to keep the
+Server code Java 1.1.4 compliant). JMatStruct, an exporter for .MAT
+files, is the most significant class in this package.</li>
 <li>Add MATLAB (".MAT") export support using JMatStruct.  The .MAT file is created in the current directory.</li>
 <li>Plot has support to change the font size through a JVM system parameter.</li>
 <li>Fixed export-to-DT trimByTime mode problem (ExportToDT.java).</li>
