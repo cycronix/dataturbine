@@ -52,6 +52,7 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
 import com.rbnb.sapi.ChannelMap;
+import com.rbnb.sapi.ChannelTree;
 import com.rbnb.sapi.PlugIn;
 import com.rbnb.sapi.PlugInChannelMap;
 import com.rbnb.sapi.SAPIException;
@@ -86,6 +87,7 @@ import com.rbnb.utility.Utility;
  *   Date      By	Description
  * MM/DD/YYYY
  * ----------  --	-----------
+ * 02/22/2008  WHF      Refactoring, added pitch/roll channels.
  * 11/15/2006  JPW	Add "-d" flag to indicate that the user would like
  *			debug info printed; otherwise, just print minimal
  *			debug output.
@@ -122,7 +124,9 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
     private final static String vClassificationChanName = "Classification";
     private final static String vSpeedChanName = "Speed";
     private final static String vHeadingChanName = "Heading";
-    
+    private final static String vPitchChanName = "Pitch";
+    private final static String vRollChanName = "Roll";    
+                                                        
     // Channels names for the actual, remote track channels
     private String altChanName = vAltChanName;
     private String pAltChanName = null;
@@ -133,6 +137,9 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
     private String classificationChanName = vClassificationChanName;
     private String speedChanName = vSpeedChanName;
     private String headingChanName = vHeadingChanName;
+//    private String yawChanName = vYawChanName;  heading
+    private String pitchChanName = vPitchChanName;
+    private String rollChanName = vRollChanName;    
     
     // RBNB connections
     private String address = "localhost:3333";
@@ -159,8 +166,7 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
     private String[] trackID = null;
     private String[] type = null;
     private String[] classification = null;
-    private float[] speed = null;
-    private float[] heading = null;
+    private float[] speed, heading, pitch, roll;
     
     // Number of contiguous data points to write at the track's head and tail
     private int numContiguousPts = 10;
@@ -523,6 +529,34 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
 	
     }
     
+    /**
+      * Extract a value from the configuration hash table.
+      *
+      * @author WHF
+      * @version 2008/02/20
+      */
+    /*
+     *
+     *   Date      By	Description
+     * MM/DD/YYYY
+     * ----------  --	-----------
+     * 02/20/2008  WHF  Created.
+     */
+    private String extract(Hashtable hashtable, String name, String defVal)
+    {
+	String temp = (String)hashtable.get(name);
+	String result = defVal;
+	
+	if (temp != null) {
+	    temp = temp.trim();
+	    if (!temp.equals(""))
+		result = temp;
+	}
+
+	return result;	
+    }
+      
+    
     /**************************************************************************
      * Read the configuration file for channel names.
      * <p>
@@ -603,55 +637,18 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
 	bufferedReader.close();
 	
 	// Now look through the hashtable for channel names
-	String temp = (String)hashtable.get("alt");
-	if ( (temp != null) &&
-	     (!temp.trim().equals("")) )
-	{
-	    altChanName = temp.trim();
-	}
-	temp = (String)hashtable.get("lat");
-	if ( (temp != null) &&
-	     (!temp.trim().equals("")) )
-	{
-	    latChanName = temp.trim();
-	}
-	temp = (String)hashtable.get("lon");
-	if ( (temp != null) &&
-	     (!temp.trim().equals("")) )
-	{
-	    lonChanName = temp.trim();
-	}
-	temp = (String)hashtable.get("id");
-	if ( (temp != null) &&
-	     (!temp.trim().equals("")) )
-	{
-	    idChanName = temp.trim();
-	}
-	temp = (String)hashtable.get("type");
-	if ( (temp != null) &&
-	     (!temp.trim().equals("")) )
-	{
-	    typeChanName = temp.trim();
-	}
-	temp = (String)hashtable.get("class");
-	if ( (temp != null) &&
-	     (!temp.trim().equals("")) )
-	{
-	    classificationChanName = temp.trim();
-	}
-	temp = (String)hashtable.get("speed");
-	if ( (temp != null) &&
-	     (!temp.trim().equals("")) )
-	{
-	    speedChanName = temp.trim();
-	}
-	temp = (String)hashtable.get("heading");
-	if ( (temp != null) &&
-	     (!temp.trim().equals("")) )
-	{
-	    headingChanName = temp.trim();
-	}
-	
+	// 2008/02/20  WHF  Refactored.
+	altChanName = extract(hashtable, "alt", altChanName);
+	latChanName = extract(hashtable, "lat", latChanName);
+	lonChanName = extract(hashtable, "lon", lonChanName);
+	idChanName = extract(hashtable, "id", idChanName);
+	typeChanName = extract(hashtable, "type", typeChanName);
+	classificationChanName = extract(hashtable, "class",
+			classificationChanName);
+	speedChanName = extract(hashtable, "speed", speedChanName);
+	headingChanName = extract(hashtable, "heading", headingChanName);
+	pitchChanName = extract(hashtable, "pitch", pitchChanName);
+	rollChanName = extract(hashtable, "roll", rollChanName);
     }
     
     /**************************************************************************
@@ -762,6 +759,513 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
 	
     }
     
+    /**
+      * Handle registration plugin requests.
+      *
+      * @author WHF
+      * @version 2008/02/20
+      */      
+    /*
+     *   Date      By	Description
+     * MM/DD/YYYY
+     * ----------  --	-----------
+     * 02/20/2008  WHF  Broken out from exec().
+     * 02/22/2008  WHF  Do more dynamic registration.
+    */    
+    private void handleRegistration(
+    		PlugIn plugin,
+		Sink sink,
+		PlugInChannelMap picm)
+    	throws SAPIException
+    {
+	picm.PutTime( (System.currentTimeMillis()/1000.0), 0.0);
+	if ( (picm.GetName(0).equals("...")) ||
+	     (picm.GetName(0).equals("*")) )
+	{
+	    // Do nothing.
+	}
+	else
+	{
+	    String result=
+		"<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n"
+		+"<!DOCTYPE rbnb>\n"
+		+"<rbnb>\n"
+		+"\t\t<size>"+1+"</size>\n"
+		+"\t\t<mime>application/octet-stream</mime>\n"
+		+"</rbnb>\n";
+	    picm.PutDataAsString(0,result);
+	    picm.PutMime(0,"text/xml");
+	}
+	plugin.Flush(picm);
+	System.err.println(
+	    (new Date()).toString() +
+	    "  Responded to registration request.");
+    }	
+      
+    /**
+    * Parse the message string sent with the request.  May include
+    * the following fields:
+    * 1. Bounding Box (key: "BBOX")
+    * 2. append channel (key: "append")
+    * 3. Tactical flag, indicating that this PlugIn should also
+    *    request Speed and Heading as two additional ancillary chans
+    * NOTE: We only consider the first String in the String data array
+    */
+    /*
+     *   Date      By	Description
+     * MM/DD/YYYY
+     * ----------  --	-----------
+     * 02/20/2008  WHF  Broken out from exec().    
+    */
+    private void parseRequestMessage(PlugInChannelMap picm)
+    {
+	// Reset the pseudo-alt chan name
+	pAltChanName = null;
+	// Reset tactical flag; if user sends a "tactical=1" flag then
+	// set bTacticalRequest true.  In this case, we will request
+	// Speed and Heading, in addition to the other ancillary channels,
+	// at the full duration (don't force 0-duration).
+	bTacticalRequest = false;
+	if (picm.GetType(0) == ChannelMap.TYPE_STRING) {
+	    String[] strArray = picm.GetDataAsString(0);
+	    if ( (strArray != null)    &&
+		 (strArray.length > 0) &&
+		 (strArray[0] != null)  &&
+		 (!strArray[0].trim().equals("")) )
+	    {
+		String requestData = strArray[0].trim();
+		char[] terminatorChars = {'&'};
+		KeyValueHash kvh =
+		    new KeyValueHash(requestData,terminatorChars);
+		if (kvh.get("BBOX") != null) {
+		    String bboxStr = kvh.get("BBOX");
+		    if (bPrintDebug) {
+			System.err.println(
+			    "Possible BoundingBox: \"" +
+			    bboxStr +
+			    "\"");
+		    }
+		    try {
+			BoundingBox tempBB = new BoundingBox(bboxStr);
+			boundingBox = tempBB;
+			if (bShowGUI) {
+			    geoFilterLabel.setText(getBoundingBoxString());
+			}
+			if (bPrintDebug) {
+			    System.err.println(getBoundingBoxString());
+			}
+		    } catch (Exception e) {
+			// Must not have been a valid bounding box
+		    }
+		}
+		if (kvh.get("append") != null) {
+		    pAltChanName = kvh.get("append").trim();
+		    if (pAltChanName.equals("")) {
+			pAltChanName = null;
+		    }
+		}
+		if (kvh.get("tactical") != null) {
+		    if (kvh.get("tactical").trim().equals("1")) {
+			bTacticalRequest = true;
+		    }
+		}
+	    }
+	}
+    }
+    
+    /**
+      * Adds ancillary channels if and only if they are present in the 
+      *  registration map.
+      */
+    /*
+     *   Date      By	Description
+     * MM/DD/YYYY
+     * ----------  --	-----------
+     * 02/20/2008  WHF  Broken out from exec().    
+    */    
+    private void addAncillaryChannelsConditionally(
+		ChannelMap regMap,
+		String remoteSource,
+		ChannelMap cm,
+		boolean doTactical) throws SAPIException
+    {
+    
+	if (regMap.GetIndex(
+		remoteSource + classificationChanName) != -1)
+	    cm.Add(remoteSource + classificationChanName);
+	if (regMap.GetIndex(
+		remoteSource + typeChanName) != -1)
+	    cm.Add(remoteSource + typeChanName);
+	if (regMap.GetIndex(
+		remoteSource + idChanName) != -1)
+	    cm.Add(remoteSource + idChanName);
+
+       if (doTactical) {
+	    if (regMap.GetIndex(
+		    remoteSource + speedChanName) != -1)
+		cm.Add(remoteSource + speedChanName);
+	    if (regMap.GetIndex(
+		    remoteSource + headingChanName) != -1)
+		cm.Add(remoteSource + headingChanName);
+	    if (regMap.GetIndex(
+		    remoteSource + pitchChanName) != -1)
+		cm.Add(remoteSource + pitchChanName);
+	    if (regMap.GetIndex(
+		    remoteSource + rollChanName) != -1)
+		cm.Add(remoteSource + rollChanName);
+	}
+    }
+    
+    /**
+      * Retrieve from the RBNB server that track data which matches
+      *  the client request.
+      */
+    /*
+     *   Date      By	Description
+     * MM/DD/YYYY
+     * ----------  --	-----------
+     * 02/20/2008  WHF  Broken out from exec().    
+    */
+    private void getMatchingTrackData(
+    		String remoteSource,
+		ChannelMap topLevelRegMap,
+		PlugInChannelMap picm,
+		Sink sink)
+	throws SAPIException
+    {    
+	ChannelMap cm=new ChannelMap();
+	cm.Add(remoteSource + altChanName);
+	cm.Add(remoteSource + latChanName);
+	cm.Add(remoteSource + lonChanName);
+	if ( (pAltChanName != null) &&
+	     (topLevelRegMap.GetIndex(pAltChanName) != -1) )
+	{
+	    cm.Add(pAltChanName);
+	}
+	else {
+	    // There is no pseudo-alt channel
+	    pAltChanName = null;
+	}
+	ChannelMap dataMap=null;
+	try {
+	    sink.Request(
+		cm,
+		picm.GetRequestStart(),
+		picm.GetRequestDuration(),
+		picm.GetRequestReference());
+	    dataMap = sink.Fetch(timeout);
+	} catch (Exception e) {
+	    e.printStackTrace();
+	    dataMap=new ChannelMap();
+	}
+	if ( (dataMap.GetIndex(remoteSource + altChanName) != -1) &&
+	     (dataMap.GetIndex(remoteSource + latChanName) != -1) &&
+	     (dataMap.GetIndex(remoteSource + lonChanName) != -1) )
+	{
+	    // We have top-level data!
+	    // Now, request ancillary channel data. Unless
+	    // bTacticalRequest is true, this will be a 0-dur request.
+	    //cm=new ChannelMap();
+	    cm.Clear();
+	    addAncillaryChannelsConditionally(
+	    		topLevelRegMap,
+			remoteSource,
+			cm,
+			bTacticalRequest
+	    );
+	    ChannelMap ancillaryDataMap = new ChannelMap();
+	    if (cm.NumberOfChannels() > 0) {
+		// JPW 11/22/2006
+		// To most reliably get synchronized data, perform an
+		// absolute time fetch, where the time range requested
+		// is based on the times received on the alt channel.
+		// This will avoid mismatch problems that may occur
+		// when we are fetching data from a live data source.
+		/*
+		 * Original code for fetching ancillary chan data.
+		 *
+		double starttime =
+		    picm.GetRequestStart() + picm.GetRequestDuration();
+		if (picm.GetRequestReference().equals("newest")) {
+		    // For a "newest" request, need to calculate
+		    // the starttime differently ("newest" is a
+		    // backward-looking request)
+		    starttime =
+			picm.GetRequestStart() -
+			picm.GetRequestDuration();
+		    if (starttime < 0.0) {
+			starttime = 0.0;
+		    }
+		}
+		double duration = 0.0;
+		if (bTacticalRequest) {
+		    // Use the full duration for this request
+		    starttime = picm.GetRequestStart();
+		    duration = picm.GetRequestDuration();
+		}
+		String requestRefStr = picm.GetRequestReference();
+		*
+		*/
+		int altChanIdx =
+		    dataMap.GetIndex(remoteSource + altChanName);
+		double[] altTimes = dataMap.GetTimes(altChanIdx);
+		if ( (altTimes != null) && (altTimes.length > 0) ) {
+		    double starttime = altTimes[altTimes.length - 1];
+		    double duration = 0.0;
+		    if ((bTacticalRequest) && (altTimes.length > 1)) {
+			// Request the full duration of data
+			starttime = altTimes[0];
+			duration =
+			   altTimes[altTimes.length - 1] - altTimes[0];
+		    }
+		    String requestRefStr = "absolute";
+		    try {
+			sink.Request(
+			    cm,
+			    starttime,
+			    duration,
+			    requestRefStr);
+			ancillaryDataMap = sink.Fetch(timeout);
+		    } catch (Exception e) {
+			e.printStackTrace();
+			ancillaryDataMap=new ChannelMap();
+		    }
+		}
+	    }
+	    addTrackChans(remoteSource, dataMap, ancillaryDataMap, picm);
+	}
+	else
+	{
+	    System.err.println("\tNo data at requested time.");
+	}
+    }
+    
+    /**
+      * Retrieve RBNB server sub-track data that matches the client request.
+      */
+    /*
+     *   Date      By	Description
+     * MM/DD/YYYY
+     * ----------  --	-----------
+     * 02/20/2008  WHF  Broken out from exec().    
+    */
+    private void getMatchingSubTracks(
+    		String remoteSource,
+		PlugInChannelMap picm,
+		Sink sink)
+	throws SAPIException
+    {    
+	/////////////////////////////////////////////////////////
+	// There were no top-level track channels; see if we have
+	// any sub-tracks.
+	/////////////////////////////////////////////////////////
+	if (bPrintDebug) {
+	    System.err.println(
+		"No top level track; see if there are any sub-tracks");
+	}
+	// Store the names of sub-tracks (these are tracks that
+	// at least have Alt, Lat, Lon channels)
+	Vector tracks = new Vector();
+	// Store the names of those sub-tracks which also have a
+	// Classification, Type, ID, Speed or Heading channel.
+	Vector ancillaryTracks = new Vector();
+	// NOTE: Due to a bug in RBNB Server, we can't do data absolute
+	//       requests on channels with wildcards.  However, we can
+	//       do registration requests.  Therefore, we first do a
+	//       registration request, then we determine all the sub-
+	//       track names, then we do the data request using
+	//       resolved channel names (no wildcards).
+	ChannelMap cm = new ChannelMap();
+	cm.Add(remoteSource + "*/" + altChanName);
+	cm.Add(remoteSource + "*/" + latChanName);
+	cm.Add(remoteSource + "*/" + lonChanName);
+	cm.Add(remoteSource + "*/" + classificationChanName);
+	cm.Add(remoteSource + "*/" + typeChanName);
+	cm.Add(remoteSource + "*/" + idChanName);
+	if (bTacticalRequest) {
+	    cm.Add(remoteSource + "*/" + speedChanName);
+	    cm.Add(remoteSource + "*/" + headingChanName);
+	    cm.Add(remoteSource + "*/" + pitchChanName);
+	    cm.Add(remoteSource + "*/" + rollChanName);
+	}
+	sink.RequestRegistration(cm);
+	ChannelMap regMap = sink.Fetch(timeout);
+	String[] chans = regMap.GetChannelList();
+	for (int i = 0; i < chans.length; ++i) {
+	    String chan = chans[i];
+	    // If this channel ends in altChanName then this might be
+	    // data from a sub-track
+	    // NOTE: The tactical data demux puts the concatenation of
+	    //       data from all tracks into a folder called
+	    //       "_Master".  We don't want to read data from the
+	    //       chans in this folder.
+	    if ( (chan.endsWith(altChanName)) &&
+		 (!chan.endsWith("_Master/" + altChanName)) )
+	    {
+		// See if this folder contains all the needed tactical
+		// data channels; if so, this is a sub-track
+		String trackName =
+		    chan.substring(
+			0, chan.length() - altChanName.length());
+		if ( (regMap.GetIndex(trackName+latChanName) != -1) &&
+		     (regMap.GetIndex(trackName+lonChanName) != -1) )
+		{
+		    // We found a sub-track in the registration info!
+		    // NOTE: This doesn't mean that this sub-track has
+		    //       data of interest in the specific requested
+		    //       time window - that is why we call this a
+		    //       "Possible" sub-track
+		    if (bPrintDebug) {
+			System.err.println(
+			    "Possible sub-track: " + trackName);
+		    }
+		    tracks.add(trackName);
+		    // See if one of more of the ancillary channels
+		    // exist for this sub-track (Type, ID, etc)
+		    if ( (regMap.GetIndex(
+				trackName+classificationChanName) != -1)     ||
+			 (regMap.GetIndex(trackName+typeChanName) != -1)     ||
+			 (regMap.GetIndex(trackName+idChanName) != -1)       ||
+			 (regMap.GetIndex(trackName+speedChanName) != -1)    ||
+			 (regMap.GetIndex(trackName+headingChanName) != -1)  ||
+			 (regMap.GetIndex(trackName+pitchChanName) != -1)    ||
+			 (regMap.GetIndex(trackName+rollChanName) != -1) )
+		    {
+			ancillaryTracks.add(trackName);
+		    }
+		}
+	    }
+	}
+	if (tracks.isEmpty()) {
+	    System.err.println("\tNo data at requested time.");
+	} else {
+	    //////////////////////////////////////////////////////
+	    // One or more potential sub-tracks exist; perform the
+	    // data request
+	    //////////////////////////////////////////////////////
+	    //cm=new ChannelMap();
+	    cm.Clear();
+	    for (Enumeration e = tracks.elements();
+		 e.hasMoreElements();)
+	    {
+		String trackName = (String)e.nextElement();
+		cm.Add(trackName + altChanName);
+		cm.Add(trackName + latChanName);
+		cm.Add(trackName + lonChanName);
+	    }
+	    ChannelMap dataMap=null;
+	    try {
+	    sink.Request(
+		cm,
+		picm.GetRequestStart(),
+		picm.GetRequestDuration(),
+		picm.GetRequestReference());
+	    dataMap = sink.Fetch(timeout);
+	    } catch (Exception e) {
+		e.printStackTrace();
+		dataMap=new ChannelMap();
+	    }
+	    ////////////////////////////////////////////////////////
+	    // If there were any sub-tracks with ancillary channels,
+	    // request ancillary data from these tracks now
+	    ////////////////////////////////////////////////////////
+	    ChannelMap ancillaryDataMap = new ChannelMap();
+	    if (!ancillaryTracks.isEmpty()) {
+		cm = new ChannelMap();
+		for (Enumeration e = ancillaryTracks.elements();
+		     e.hasMoreElements();)
+		{
+		    String trackName = (String)e.nextElement();
+		    // If Alt/Lat/Lon chans exists in dataMap for this
+		    // track, then we will also request the ancillary
+		    // chans from this track.
+		    if ( (dataMap.GetIndex(trackName+altChanName) != -1) &&
+			 (dataMap.GetIndex(trackName+latChanName) != -1) &&
+			 (dataMap.GetIndex(trackName+lonChanName) != -1) )
+		    {
+			// Make sure the ancillary channel exists
+			// in regMap before requesting it
+			addAncillaryChannelsConditionally(
+				regMap,
+				trackName,
+				cm,
+				true // always add regardless of bTacticalRequest
+			);
+		    }
+		}
+		if (cm.NumberOfChannels() > 0) {
+		    // JPW 11/22/2006
+		    // Up above, where we were fetching data for the
+		    // top-level channels, in order to most reliably
+		    // get synchronized data, we perform an absolute
+		    // time fetch, where the time range requested is
+		    // based on the times received on the alt channel.
+		    // This is done to avoid mismatch problems that may
+		    // occur when we are fetching data from a live data
+		    // source.  If we were to do that here, we would
+		    // need to perform a separate fetch for each Track,
+		    // using the particular times on that Track's alt
+		    // channel.  At some point in the future, we
+		    // may want to consider doing this.  For now, we
+		    // will continue to do it the way we have.  If we
+		    // start fetching sub-track data for FormatX or
+		    // CMF creation, we will probably want to do this.
+		    double starttime =
+			picm.GetRequestStart() +
+			picm.GetRequestDuration();
+		    if (picm.GetRequestReference().equals("newest")) {
+			// For a "newest" request, need to calculate
+			// the starttime differently ("newest" is a
+			// backward-looking request)
+			starttime =
+			    picm.GetRequestStart() -
+			    picm.GetRequestDuration();
+			if (starttime < 0.0) {
+			    starttime = 0.0;
+			}
+		    }
+		    double duration = 0.0;
+		    if (bTacticalRequest) {
+			// Use the full duration for this request
+			starttime = picm.GetRequestStart();
+			duration = picm.GetRequestDuration();
+		    }
+		    try {
+			sink.Request(
+			    cm,
+			    starttime,
+			    duration,
+			    picm.GetRequestReference());
+			ancillaryDataMap = sink.Fetch(timeout);
+		    } catch (Exception e) {
+			e.printStackTrace();
+			ancillaryDataMap=new ChannelMap();
+		    }
+		}
+	    }
+	    ///////////////////////////////////////////////////////
+	    // Go through our list of known sub-tracks and pick out
+	    // the tracks that have data.
+	    ///////////////////////////////////////////////////////
+	    for (Enumeration e = tracks.elements();
+		 e.hasMoreElements();)
+	    {
+		String trackName = (String)e.nextElement();
+		if ( (dataMap.GetIndex(trackName+altChanName) != -1) &&
+		     (dataMap.GetIndex(trackName+latChanName) != -1) &&
+		     (dataMap.GetIndex(trackName+lonChanName) != -1) )
+		{
+		    if (bPrintDebug) {
+			System.err.println(
+			    "Data exists for sub-track: " + trackName);
+		    }
+		    addTrackChans(
+			trackName, dataMap, ancillaryDataMap, picm);
+		}
+	    }
+	}
+    }
+    
     /**************************************************************************
      * Main PlugIn execution loop.
      * <p>
@@ -778,6 +1282,7 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
      *   Date      By	Description
      * MM/DD/YYYY
      * ----------  --	-----------
+     * 02/20/2008  WHF  Refactored.
      * 11/22/2006  JPW	For fetching ancillary channel data for the top-level
      *			track: To most reliably get synchronized data, we now
      *			perform an absolute time fetch, where the time range
@@ -853,29 +1358,7 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
 	    
 	    // Check if this is a registration request
 	    if (picm.GetRequestReference().equals("registration")) {
-		picm.PutTime( (System.currentTimeMillis()/1000.0), 0.0);
-		if ( (picm.GetName(0).equals("...")) ||
-		     (picm.GetName(0).equals("*")) )
-		{
-		    // Just return the same picm
-		    // Nothing to do
-		}
-		else
-		{
-		    String result=
-		    	"<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n"
-			+"<!DOCTYPE rbnb>\n"
-			+"<rbnb>\n"
-			+"\t\t<size>"+1+"</size>\n"
-			+"\t\t<mime>application/octet-stream</mime>\n"
-			+"</rbnb>\n";
-		    picm.PutDataAsString(0,result);
-		    picm.PutMime(0,"text/xml");
-		}
-		plugin.Flush(picm);
-		System.err.println(
-		    (new Date()).toString() +
-		    "  Responded to registration request.");
+		handleRegistration(plugin, sink, picm);
 		continue;
 	    }
 	    
@@ -890,65 +1373,7 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
 		"  Source: " +
 		remoteSource);
 	    
-	    // Parse the message string sent with the request.  May include
-	    // the following fields:
-	    // 1. Bounding Box (key: "BBOX")
-	    // 2. append channel (key: "append")
-	    // 3. Tactical flag, indicating that this PlugIn should also
-	    //    request Speed and Heading as two additional ancillary chans
-	    // NOTE: We only consider the first String in the String data array
-	    // Reset the pseudo-alt chan name
-	    pAltChanName = null;
-	    // Reset tactical flag; if user sends a "tactical=1" flag then
-	    // set bTacticalRequest true.  In this case, we will request
-	    // Speed and Heading, in addition to the other ancillary channels,
-	    // at the full duration (don't force 0-duration).
-	    bTacticalRequest = false;
-	    if (picm.GetType(0) == ChannelMap.TYPE_STRING) {
-		String[] strArray = picm.GetDataAsString(0);
-		if ( (strArray != null)    &&
-		     (strArray.length > 0) &&
-		     (strArray[0] != null)  &&
-		     (!strArray[0].trim().equals("")) )
-		{
-		    String requestData = strArray[0].trim();
-		    char[] terminatorChars = {'&'};
-		    KeyValueHash kvh =
-		    	new KeyValueHash(requestData,terminatorChars);
-		    if (kvh.get("BBOX") != null) {
-			String bboxStr = kvh.get("BBOX");
-			if (bPrintDebug) {
-			    System.err.println(
-				"Possible BoundingBox: \"" +
-				bboxStr +
-				"\"");
-			}
-			try {
-			    BoundingBox tempBB = new BoundingBox(bboxStr);
-			    boundingBox = tempBB;
-			    if (bShowGUI) {
-				geoFilterLabel.setText(getBoundingBoxString());
-			    }
-			    if (bPrintDebug) {
-				System.err.println(getBoundingBoxString());
-			    }
-			} catch (Exception e) {
-			    // Must not have been a valid bounding box
-			}
-		    }
-		    if (kvh.get("append") != null) {
-			pAltChanName = kvh.get("append").trim();
-			if (pAltChanName.equals("")) {
-			    pAltChanName = null;
-			}
-		    }
-		    if (kvh.get("tactical") != null) {
-			if (kvh.get("tactical").trim().equals("1")) {
-			    bTacticalRequest = true;
-			}
-		    }
-		}
-	    }
+	    parseRequestMessage(picm);
 	    
 	    // NOTE: Unfortunately, the RBNB returns an empty channel map when
 	    //       making a registration request using the following type of
@@ -982,6 +1407,8 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
 	    if (bTacticalRequest) {
 		cm.Add(remoteSource + speedChanName);
 		cm.Add(remoteSource + headingChanName);
+		cm.Add(remoteSource + pitchChanName);
+		cm.Add(remoteSource + rollChanName);
 	    }
 	    if (pAltChanName != null) {
 		cm.Add(pAltChanName);
@@ -994,355 +1421,9 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
 	    {
 		// We have a top-level track; now see if there is any track
 		// data available at the client's request time.
-		cm=new ChannelMap();
-		cm.Add(remoteSource + altChanName);
-		cm.Add(remoteSource + latChanName);
-		cm.Add(remoteSource + lonChanName);
-		if ( (pAltChanName != null) &&
-		     (topLevelRegMap.GetIndex(pAltChanName) != -1) )
-		{
-		    cm.Add(pAltChanName);
-		}
-		else {
-		    // There is no pseudo-alt channel
-		    pAltChanName = null;
-		}
-		ChannelMap dataMap=null;
-		try {
-		sink.Request(
-		    cm,
-		    picm.GetRequestStart(),
-		    picm.GetRequestDuration(),
-		    picm.GetRequestReference());
-		dataMap = sink.Fetch(timeout);
-		} catch (Exception e) {
-		    e.printStackTrace();
-		    dataMap=new ChannelMap();
-		}
-		if ( (dataMap.GetIndex(remoteSource + altChanName) != -1) &&
-		     (dataMap.GetIndex(remoteSource + latChanName) != -1) &&
-	     	     (dataMap.GetIndex(remoteSource + lonChanName) != -1) )
-		{
-		    // We have top-level data!
-		    // Now, request ancillary channel data. Unless
-		    // bTacticalRequest is true, this will be a 0-dur request.
-		    cm=new ChannelMap();
-		    if (topLevelRegMap.GetIndex(
-			    remoteSource + classificationChanName) != -1)
-		    {
-			cm.Add(remoteSource + classificationChanName);
-		    }
-		    if (topLevelRegMap.GetIndex(
-			    remoteSource + typeChanName) != -1)
-		    {
-			cm.Add(remoteSource + typeChanName);
-		    }
-		    if (topLevelRegMap.GetIndex(
-			    remoteSource + idChanName) != -1)
-		    {
-			cm.Add(remoteSource + idChanName);
-		    }
-		    if (bTacticalRequest) {
-			if (topLevelRegMap.GetIndex(
-				remoteSource + speedChanName) != -1)
-			{
-			    cm.Add(remoteSource + speedChanName);
-			}
-			if (topLevelRegMap.GetIndex(
-				remoteSource + headingChanName) != -1)
-			{
-			    cm.Add(remoteSource + headingChanName);
-			}
-		    }
-		    ChannelMap ancillaryDataMap = new ChannelMap();
-		    if (cm.NumberOfChannels() > 0) {
-			// JPW 11/22/2006
-			// To most reliably get synchronized data, perform an
-			// absolute time fetch, where the time range requested
-			// is based on the times received on the alt channel.
-			// This will avoid mismatch problems that may occur
-			// when we are fetching data from a live data source.
-			/*
-			 * Original code for fetching ancillary chan data.
-			 *
-			double starttime =
-			    picm.GetRequestStart() + picm.GetRequestDuration();
-			if (picm.GetRequestReference().equals("newest")) {
-			    // For a "newest" request, need to calculate
-			    // the starttime differently ("newest" is a
-			    // backward-looking request)
-			    starttime =
-			        picm.GetRequestStart() -
-				picm.GetRequestDuration();
-			    if (starttime < 0.0) {
-				starttime = 0.0;
-			    }
-			}
-			double duration = 0.0;
-			if (bTacticalRequest) {
-			    // Use the full duration for this request
-			    starttime = picm.GetRequestStart();
-			    duration = picm.GetRequestDuration();
-			}
-			String requestRefStr = picm.GetRequestReference();
-			*
-			*/
-			int altChanIdx =
-			    dataMap.GetIndex(remoteSource + altChanName);
-			double[] altTimes = dataMap.GetTimes(altChanIdx);
-			if ( (altTimes != null) && (altTimes.length > 0) ) {
-			    double starttime = altTimes[altTimes.length - 1];
-			    double duration = 0.0;
-			    if ((bTacticalRequest) && (altTimes.length > 1)) {
-				// Request the full duration of data
-				starttime = altTimes[0];
-				duration =
-				   altTimes[altTimes.length - 1] - altTimes[0];
-			    }
-			    String requestRefStr = "absolute";
-			    try {
-				sink.Request(
-				    cm,
-				    starttime,
-				    duration,
-				    requestRefStr);
-				ancillaryDataMap = sink.Fetch(timeout);
-			    } catch (Exception e) {
-				e.printStackTrace();
-				ancillaryDataMap=new ChannelMap();
-			    }
-			}
-		    }
-		    addTrackChans(remoteSource, dataMap, ancillaryDataMap, picm);
-		}
-		else
-		{
-		    System.err.println("\tNo data at requested time.");
-		}
-	    }
-	    else {
-		/////////////////////////////////////////////////////////
-		// There were no top-level track channels; see if we have
-		// any sub-tracks.
-		/////////////////////////////////////////////////////////
-		if (bPrintDebug) {
-		    System.err.println(
-			"No top level track; see if there are any sub-tracks");
-		}
-		// Store the names of sub-tracks (these are tracks that
-		// at least have Alt, Lat, Lon channels)
-		Vector tracks = new Vector();
-		// Store the names of those sub-tracks which also have a
-		// Classification, Type, ID, Speed or Heading channel.
-		Vector ancillaryTracks = new Vector();
-		// NOTE: Due to a bug in RBNB Server, we can't do data absolute
-		//       requests on channels with wildcards.  However, we can
-		//       do registration requests.  Therefore, we first do a
-		//       registration request, then we determine all the sub-
-		//       track names, then we do the data request using
-		//       resolved channel names (no wildcards).
-		cm=new ChannelMap();
-		cm.Add(remoteSource + "*/" + altChanName);
-		cm.Add(remoteSource + "*/" + latChanName);
-		cm.Add(remoteSource + "*/" + lonChanName);
-		cm.Add(remoteSource + "*/" + classificationChanName);
-		cm.Add(remoteSource + "*/" + typeChanName);
-		cm.Add(remoteSource + "*/" + idChanName);
-		if (bTacticalRequest) {
-		    cm.Add(remoteSource + "*/" + speedChanName);
-		    cm.Add(remoteSource + "*/" + headingChanName);
-		}
-		sink.RequestRegistration(cm);
-		ChannelMap regMap = sink.Fetch(timeout);
-		String[] chans = regMap.GetChannelList();
-		for (int i = 0; i < chans.length; ++i) {
-		    String chan = chans[i];
-		    // If this channel ends in altChanName then this might be
-		    // data from a sub-track
-		    // NOTE: The tactical data demux puts the concatenation of
-		    //       data from all tracks into a folder called
-		    //       "_Master".  We don't want to read data from the
-		    //       chans in this folder.
-		    if ( (chan.endsWith(altChanName)) &&
-		     	 (!chan.endsWith("_Master/" + altChanName)) )
-		    {
-			// See if this folder contains all the needed tactical
-			// data channels; if so, this is a sub-track
-			String trackName =
-		    	    chan.substring(
-				0, chan.length() - altChanName.length());
-			if ( (regMap.GetIndex(trackName+latChanName) != -1) &&
-			     (regMap.GetIndex(trackName+lonChanName) != -1) )
-			{
-			    // We found a sub-track in the registration info!
-			    // NOTE: This doesn't mean that this sub-track has
-			    //       data of interest in the specific requested
-			    //       time window - that is why we call this a
-			    //       "Possible" sub-track
-			    if (bPrintDebug) {
-				System.err.println(
-				    "Possible sub-track: " + trackName);
-			    }
-			    tracks.add(trackName);
-			    // See if one of more of the ancillary channels
-			    // exist for this sub-track (Type, ID, etc)
-			    if ( (regMap.GetIndex(trackName+classificationChanName) != -1) ||
-				 (regMap.GetIndex(trackName+typeChanName) != -1)           ||
-				 (regMap.GetIndex(trackName+idChanName) != -1)             ||
-				 (regMap.GetIndex(trackName+speedChanName) != -1)          ||
-				 (regMap.GetIndex(trackName+headingChanName) != -1) )
-			    {
-				ancillaryTracks.add(trackName);
-			    }
-			}
-		    }
-		}
-		if (tracks.isEmpty()) {
-		    System.err.println("\tNo data at requested time.");
-		} else {
-		    //////////////////////////////////////////////////////
-		    // One or more potential sub-tracks exist; perform the
-		    // data request
-		    //////////////////////////////////////////////////////
-		    cm=new ChannelMap();
-		    for (Enumeration e = tracks.elements();
-		         e.hasMoreElements();)
-		    {
-			String trackName = (String)e.nextElement();
-			cm.Add(trackName + altChanName);
-			cm.Add(trackName + latChanName);
-			cm.Add(trackName + lonChanName);
-		    }
-		    ChannelMap dataMap=null;
-		    try {
-		    sink.Request(
-		    	cm,
-			picm.GetRequestStart(),
-			picm.GetRequestDuration(),
-			picm.GetRequestReference());
-		    dataMap = sink.Fetch(timeout);
-		    } catch (Exception e) {
-			e.printStackTrace();
-			dataMap=new ChannelMap();
-		    }
-		    ////////////////////////////////////////////////////////
-		    // If there were any sub-tracks with ancillary channels,
-		    // request ancillary data from these tracks now
-		    ////////////////////////////////////////////////////////
-		    ChannelMap ancillaryDataMap = new ChannelMap();
-		    if (!ancillaryTracks.isEmpty()) {
-			cm = new ChannelMap();
-			for (Enumeration e = ancillaryTracks.elements();
-			     e.hasMoreElements();)
-			{
-			    String trackName = (String)e.nextElement();
-			    // If Alt/Lat/Lon chans exists in dataMap for this
-			    // track, then we will also request the ancillary
-			    // chans from this track.
-			    if ( (dataMap.GetIndex(trackName+altChanName) != -1) &&
-				 (dataMap.GetIndex(trackName+latChanName) != -1) &&
-				 (dataMap.GetIndex(trackName+lonChanName) != -1) )
-			    {
-				// Make sure the ancillary channel exists
-				// in regMap before requesting it
-				if (regMap.GetIndex(
-				     trackName + classificationChanName) != -1)
-				{
-				    cm.Add(trackName + classificationChanName);
-				}
-				if (regMap.GetIndex(
-				     trackName + typeChanName) != -1)
-				{
-				    cm.Add(trackName + typeChanName);
-				}
-				if (regMap.GetIndex(
-				     trackName + idChanName) != -1)
-				{
-				    cm.Add(trackName + idChanName);
-				}
-				if (regMap.GetIndex(
-				     trackName + speedChanName) != -1)
-				{
-				    cm.Add(trackName + speedChanName);
-				}
-				if (regMap.GetIndex(
-				     trackName + headingChanName) != -1)
-				{
-				    cm.Add(trackName + headingChanName);
-				}
-			    }
-			}
-			if (cm.NumberOfChannels() > 0) {
-			    // JPW 11/22/2006
-			    // Up above, where we were fetching data for the
-			    // top-level channels, in order to most reliably
-			    // get synchronized data, we perform an absolute
-			    // time fetch, where the time range requested is
-			    // based on the times received on the alt channel.
-			    // This is done to avoid mismatch problems that may
-			    // occur when we are fetching data from a live data
-			    // source.  If we were to do that here, we would
-			    // need to perform a separate fetch for each Track,
-			    // using the particular times on that Track's alt
-			    // channel.  At some point in the future, we
-			    // may want to consider doing this.  For now, we
-			    // will continue to do it the way we have.  If we
-			    // start fetching sub-track data for FormatX or
-			    // CMF creation, we will probably want to do this.
-			    double starttime =
-				picm.GetRequestStart() +
-				picm.GetRequestDuration();
-			    if (picm.GetRequestReference().equals("newest")) {
-				// For a "newest" request, need to calculate
-				// the starttime differently ("newest" is a
-				// backward-looking request)
-				starttime =
-				    picm.GetRequestStart() -
-				    picm.GetRequestDuration();
-				if (starttime < 0.0) {
-				    starttime = 0.0;
-				}
-			    }
-			    double duration = 0.0;
-			    if (bTacticalRequest) {
-				// Use the full duration for this request
-				starttime = picm.GetRequestStart();
-				duration = picm.GetRequestDuration();
-			    }
-			    try {
-				sink.Request(
-				    cm,
-				    starttime,
-				    duration,
-				    picm.GetRequestReference());
-				ancillaryDataMap = sink.Fetch(timeout);
-			    } catch (Exception e) {
-				e.printStackTrace();
-				ancillaryDataMap=new ChannelMap();
-			    }
-			}
-		    }
-		    ///////////////////////////////////////////////////////
-		    // Go through our list of known sub-tracks and pick out
-		    // the tracks that have data.
-		    ///////////////////////////////////////////////////////
-		    for (Enumeration e = tracks.elements();
-		         e.hasMoreElements();)
-		    {
-			String trackName = (String)e.nextElement();
-			if ( (dataMap.GetIndex(trackName+altChanName) != -1) &&
-			     (dataMap.GetIndex(trackName+latChanName) != -1) &&
-			     (dataMap.GetIndex(trackName+lonChanName) != -1) )
-			{
-			    if (bPrintDebug) {
-				System.err.println(
-				    "Data exists for sub-track: " + trackName);
-			    }
-			    addTrackChans(
-				trackName, dataMap, ancillaryDataMap, picm);
-			}
-		    }
-		}
+		getMatchingTrackData(remoteSource, topLevelRegMap, picm, sink);
+	    } else {
+		getMatchingSubTracks(remoteSource, picm, sink);
 	    }
 	    
 	    // Timestamp the data we send back
@@ -1609,8 +1690,37 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
 		    }
 		}
 		destinationMapO.PutTimes(times);
-		destinationMapO.PutDataAsFloat32(destChanIdx, speed);
+		destinationMapO.PutDataAsFloat32(destChanIdx, heading);
 	    }
+	    
+	    // Pitch, roll - part of tactical request?
+	    if (bTacticalRequest) {
+		srcChanName = remoteSourceI + pitchChanName;
+		destChanName = remoteSourceI + vPitchChanName;
+		srcChanIdx = ancillarySourceMapI.GetIndex(srcChanName);
+		destChanIdx = destinationMapO.Add(destChanName);
+		if (srcChanIdx > -1) {
+		    mimeType = ancillarySourceMapI.GetMime(srcChanIdx);
+		    if ( (mimeType != null) && (!mimeType.equals("")) ) {
+			destinationMapO.PutMime(destChanIdx,mimeType);
+		    }
+		}
+		destinationMapO.PutTimes(times);
+		destinationMapO.PutDataAsFloat32(destChanIdx, pitch);
+
+		srcChanName = remoteSourceI + rollChanName;
+		destChanName = remoteSourceI + vRollChanName;
+		srcChanIdx = ancillarySourceMapI.GetIndex(srcChanName);
+		destChanIdx = destinationMapO.Add(destChanName);
+		if (srcChanIdx > -1) {
+		    mimeType = ancillarySourceMapI.GetMime(srcChanIdx);
+		    if ( (mimeType != null) && (!mimeType.equals("")) ) {
+			destinationMapO.PutMime(destChanIdx,mimeType);
+		    }
+		}
+		destinationMapO.PutTimes(times);
+		destinationMapO.PutDataAsFloat32(destChanIdx, roll);
+	    }	    
 	    
 	} catch (SAPIException e) {
 	    System.err.println(
@@ -1629,7 +1739,78 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
 	}
 	
     }
-    
+        
+    /**
+      * Extracts a channel from the provided ChannelMap.
+      */
+    /*
+     *   Date      By	Description
+     * MM/DD/YYYY
+     * ----------  --	-----------
+     * 02/21/2008  WHF  Broken out from exec().    
+    */      
+    private float[] getAncillaryTrackData(
+    		ChannelMap ancillarycmI,
+		String fullChanName
+    ) { 
+	float[] result;
+	int chanIdx = ancillarycmI.GetIndex(fullChanName);
+	
+	if (chanIdx > -1) {
+	    // We want the result to be an array of single-precision floats
+	    if (ancillarycmI.GetType(chanIdx) == ChannelMap.TYPE_FLOAT32) {
+		result = ancillarycmI.GetDataAsFloat32(chanIdx);
+	    } else if (ancillarycmI.GetType(chanIdx) == ChannelMap.TYPE_FLOAT64) {
+		double[] resultD = ancillarycmI.GetDataAsFloat64(chanIdx);
+		// convert to array of floats
+		result = new float[resultD.length];
+		for (int i=0; i<resultD.length; ++i) {
+		    result[i] = (float)resultD[i];
+		}
+		resultD = null;
+	    } else {
+		// We will use the default array created below
+		result = null;
+	    }
+	} else result = null;
+	
+	if (result == null) {
+	    // Need to specify a default array which is the same
+	    // length as time array
+	    result = new float[ times.length ];
+	    Arrays.fill(result, -Float.MAX_VALUE);
+	}
+	
+	return result;
+    }
+
+    /**
+      * Bounds a data array to length numPts.
+      */
+    /*
+     *   Date      By	Description
+     * MM/DD/YYYY
+     * ----------  --	-----------
+     * 02/21/2008  WHF  Broken out from exec().    
+    */          
+    private float[] boundData(float[] in, int numPts)
+    {   
+	float[] out;
+	
+    	if ( in.length != numPts) {
+	    if (bPrintDebug) {
+		System.err.println(
+		    "\tWARNING: Channel has different number of points: " +
+		    in.length);
+	    }
+	    // Chop off extra points from the end of the data
+	    out = new float[numPts];
+	    System.arraycopy(in, 0, out, 0, numPts);
+	} else out = in;
+	
+	return out;
+    }
+	    
     /**************************************************************************
      * Extract, verify, and process data for a particular track from the
      * given ChannelMap.
@@ -1677,6 +1858,7 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
      *   Date      By	Description
      * MM/DD/YYYY
      * ----------  --	-----------
+     * 02/21/2008  WHF  Refactored; added pitch and roll.
      * 11/09/2006  JPW  Ancillary data is now stored in arrays
      * 11/08/2006  JPW	Add support for new ancillary chans: speed and heading
      * 10/11/2006  JPW  Add support for the pseudo-alt channel (pAlt)
@@ -1702,6 +1884,7 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
 	classification = null;
 	speed = null;
 	heading = null;
+	pitch = roll = null;
 	
 	if (cmI == null) {
 	    System.err.println("No channel data:");
@@ -1934,64 +2117,29 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
 	    }
 	}
 	
-	////////
-	// Speed
-	////////
+	///////////////////////////////
+	// Speed, Heading, Pitch, Roll
+	///////////////////////////////
 	if (bTacticalRequest) {
-	    chanIdx = ancillarycmI.GetIndex(remoteSourceI + speedChanName);
-	    if (chanIdx > -1) {
-		// We want Speed to be an array of single-precision floats
-		if (ancillarycmI.GetType(chanIdx) == ChannelMap.TYPE_FLOAT32) {
-		    speed = ancillarycmI.GetDataAsFloat32(chanIdx);
-		} else if (ancillarycmI.GetType(chanIdx) == ChannelMap.TYPE_FLOAT64) {
-		    double[] speedD = ancillarycmI.GetDataAsFloat64(chanIdx);
-		    // convert to array of floats
-		    speed = new float[speedD.length];
-		    for (int i=0; i<speedD.length; ++i) {
-			speed[i] = (float)speedD[i];
-		    }
-		    speedD = null;
-		} else {
-		    // We will use the default array created below
-		    speed = null;
-		}
-	    }
-	    if (speed == null) {
-		// Need to specify a default array which is the same
-		// length as time array
-		speed = new float[ times.length ];
-		Arrays.fill(speed, -Float.MAX_VALUE);
-	    }
-	}
-	
-	//////////
-	// Heading
-	//////////
-	if (bTacticalRequest) {
-	    chanIdx = ancillarycmI.GetIndex(remoteSourceI + headingChanName);
-	    if (chanIdx > -1) {
-		// We want Heading to be an array of single-precision floats
-		if (ancillarycmI.GetType(chanIdx) == ChannelMap.TYPE_FLOAT32) {
-		    heading = ancillarycmI.GetDataAsFloat32(chanIdx);
-		} else if (ancillarycmI.GetType(chanIdx) == ChannelMap.TYPE_FLOAT64) {
-		    double[] headingD = ancillarycmI.GetDataAsFloat64(chanIdx);
-		    // convert to array of floats
-		    heading = new float[headingD.length];
-		    for (int i=0; i<headingD.length; ++i) {
-			heading[i] = (float)headingD[i];
-		    }
-		    headingD = null;
-		} else {
-		    // We will use the default array created below
-		    heading = null;
-		}
-	    }
-	    if (heading == null) {
-		// Need to specify a default array which is the same
-		// length as time array
-		heading = new float[ times.length ];
-		Arrays.fill(heading, -Float.MAX_VALUE);
-	    }
+	    speed = getAncillaryTrackData(
+		    ancillarycmI,
+		    remoteSourceI + speedChanName
+	    );
+	    
+	    heading = getAncillaryTrackData(
+		    ancillarycmI,
+		    remoteSourceI + headingChanName
+	    );
+
+	    pitch = getAncillaryTrackData(
+		    ancillarycmI,
+		    remoteSourceI + pitchChanName
+	    );
+
+	    roll = getAncillaryTrackData(
+		    ancillarycmI,
+		    remoteSourceI + rollChanName
+	    );
 	}
 	
 	///////////////////////////////////////////
@@ -2155,28 +2303,14 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
 	    System.arraycopy(classification,0,newClassification,0,numPts);
 	    classification = newClassification;
 	}
-	if ( (numSpeed != -1) && (numSpeed != numPts) ) {
-	    if (bPrintDebug) {
-		System.err.println(
-		    "\tWARNING: Speed has different number of points: " +
-		    numSpeed);
-	    }
-	    // Chop off extra points from the end of the data
-	    float[] newSpeed = new float[numPts];
-	    System.arraycopy(speed,0,newSpeed,0,numPts);
-	    speed = newSpeed;
+	
+	if (bTacticalRequest) {
+	    speed = boundData(speed, numPts);
+	    heading = boundData(heading, numPts);
+	    pitch = boundData(pitch, numPts);
+	    roll = boundData(roll, numPts);
 	}
-	if ( (numHeading != -1) && (numHeading != numPts) ) {
-	    if (bPrintDebug) {
-		System.err.println(
-		    "\tWARNING: Heading has different number of points: " +
-		    numHeading);
-	    }
-	    // Chop off extra points from the end of the data
-	    float[] newHeading = new float[numPts];
-	    System.arraycopy(heading,0,newHeading,0,numPts);
-	    heading = newHeading;
-	}
+	
 	if (numTimes != numPts) {
 	    // Don't need to warn the user about this - the times vector
 	    // is from the Alt data channel, so if we needed to adjust Alt

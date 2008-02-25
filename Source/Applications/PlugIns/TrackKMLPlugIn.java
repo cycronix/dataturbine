@@ -49,6 +49,8 @@ import java.util.Vector;
 import java.util.zip.Deflater;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
 import com.rbnb.sapi.ChannelMap;
@@ -110,6 +112,8 @@ import com.rbnb.kml.*;
  *   Date      By	Description
  * MM/DD/YYYY
  * ----------  --	-----------
+ * 2008/02/25  WHF      Added heading, and sign + bias correction dialog.
+ * 02/22/2008  WHF      Added pitch/roll channels to KML.
  * 07/23/2007  JPW	Add "-u" command line options.  This allows a user to
  *			specify a base URL for fetching Placemark icons.  Thus,
  *			instead of bundling icons with the KML file into a
@@ -212,6 +216,8 @@ public class TrackKMLPlugIn implements ActionListener, ItemListener {
     private String idChanName = "TrackID";
     private String typeChanName = "Type";
     private String classificationChanName = "Classification";
+    private final static String pitchChanName = "Pitch";
+    private final static String rollChanName = "Roll";    
     
     // RBNB connections
     private String address = "localhost:3333";
@@ -240,9 +246,8 @@ public class TrackKMLPlugIn implements ActionListener, ItemListener {
     //                 used if we want to add placemarks at each track point
     //                 which are taged with their start and end times.
     private double[] time = null;
-    private float[] alt = null;
+    private float[] alt = null, heading, pitch, roll;
     private float[] pAlt = null;
-    private double[] heading = null;
     private double[] lat = null;
     private double[] lon = null;
     private double[] speed = null;
@@ -1038,10 +1043,22 @@ public class TrackKMLPlugIn implements ActionListener, ItemListener {
 		}
 	    }
 	    
+	    // 2008/02/25  WHF  Angular correction dialog.
+	    java.awt.Button b = new java.awt.Button("Angle Corrections");
+	    b.addActionListener(new ActionListener() {
+		public void actionPerformed(ActionEvent ae) {
+		    if (angleCorrectionDlg == null)
+			angleCorrectionDlg = new AngleCorrectionDlg();
+		    angleCorrectionDlg.setVisible(true);
+		}
+	    } );
+	    gbc.insets.left = 15;
+	    Utility.add(guiPanel, b, gbl, gbc, 10, 0, 1, 1);
+	    
 	    //show curtain
 	    checkbox=new Checkbox("Show Curtain",showCurtainG);
 	    gbc.insets = new Insets(5,15,5,5);
-	    Utility.add(guiPanel,checkbox,gbl,gbc,10,0,1,1);
+	    Utility.add(guiPanel,checkbox,gbl,gbc,11,0,1,1);
 	    checkbox.addItemListener(this);
 	    
 	    frame.add(guiPanel);
@@ -2554,12 +2571,12 @@ public class TrackKMLPlugIn implements ActionListener, ItemListener {
 		}
 	    }
 	    try {
-	    sink.Request(
-	    	labelCM,
-		starttime,
-		0,
-		referenceI);
-	    labelCM = sink.Fetch(timeout);
+		sink.Request(
+		    labelCM,
+		    starttime,
+		    0,
+		    referenceI);
+		labelCM = sink.Fetch(timeout);
 	    } catch (Exception e) {
 		e.printStackTrace();
 		labelCM=new ChannelMap();
@@ -2650,26 +2667,44 @@ public class TrackKMLPlugIn implements ActionListener, ItemListener {
 	StringBuffer kmlSB = new StringBuffer(1000);
 	
 	//EMF 2/9/06: get label, icon, color
-	String trackLabel = getLabel("Alt",alt[numPts - 1],lat[numPts - 1],lon[numPts - 1],false);
+	String trackLabel = getLabel(
+		"Alt",
+		alt[numPts - 1],
+		lat[numPts - 1],
+		lon[numPts - 1],
+		false
+	);
 	String[] icon = getIcon();
 	String color = getColor();
 	String styleID = "trackStyle" + trackName + color;
-	double heading = 0.0;
-	try {
-	    heading = calculateHeading();
-	} catch (Exception e) {
-	    // No need to do anything; just use default heading = 0.0
-	}
 	
 	// JPW 06/04/2007: Placeholders for heading, pitch, and roll values
 	String currentHeadingStr = "0";
 	String currentPitchStr = "0";
 	String currentRollStr = "0";
-	try {
+	/*try {
 	    currentHeadingStr = ToString.toString("%.6f",heading);
 	} catch (Exception e) {
 	    currentHeadingStr = Double.toString(heading);
-	}
+	} */
+	
+	// 2008/02/25  WHF  Use heading data if available, otherwise calc.
+	double head;
+	if (heading == null) {
+	    try {
+		head = calculateHeading();
+	    } catch (Exception e) {
+		head = 0.0;
+	    }
+	} else head = headingSwitchSign * heading[numPts-1] + headingBias;
+	
+	currentHeadingStr = Double.toString(head);
+
+	// 2008/02/22  WHF  Pitch/roll support
+	if (pitch != null) currentPitchStr = Double.toString(
+	    	pitchSwitchSign * pitch[numPts-1] + pitchBias);
+	if (roll != null) currentRollStr = Double.toString(
+	    	rollSwitchSign * roll[numPts-1] + rollBias);
 	
 	///////////////////////////////////////////
 	// The main alt/lat/lon placemark and track
@@ -2693,7 +2728,7 @@ public class TrackKMLPlugIn implements ActionListener, ItemListener {
 		"</PolyStyle>\n" +
 		"<IconStyle>\n" +
 		"<scale>" + Double.toString(iconScale) + "</scale>\n" +
-		"<heading>" + heading + "</heading>\n" +
+		"<heading>" + currentHeadingStr + "</heading>\n" +
 		"<Icon>\n");
 	    
 	    // JPW 06/05/2007: Only specify Icon details if user has not
@@ -3227,6 +3262,7 @@ public class TrackKMLPlugIn implements ActionListener, ItemListener {
      *   Date      By	Description
      * MM/DD/YYYY
      * ----------  --	-----------
+     * 02/22/2008  WHF  Added heading/pitch/roll.
      * 10/11/2006  JPW  Add support for pseudo-alt channel
      * 07/12/2006  JPW  Created.
      */
@@ -3239,7 +3275,7 @@ public class TrackKMLPlugIn implements ActionListener, ItemListener {
 	
 	// JPW 06/04/2007: Add time array
 	time = null;
-	alt = null;
+	alt = heading = pitch = roll = null;
 	pAlt = null;
 	lat = null;
 	lon = null;
@@ -3335,6 +3371,30 @@ public class TrackKMLPlugIn implements ActionListener, ItemListener {
 		} else {
 		    System.err.println("Wrong type for Classification channel");
 		    classification = null;
+		    return false;
+		}
+	    } else if (chan.equals(headingChanName)) {
+		// pitch should be an array of floats
+		if (cmI.GetType(i) == ChannelMap.TYPE_FLOAT32) {
+		    heading = cmI.GetDataAsFloat32(i);
+		} else {
+		    System.err.println("Wrong type for Heading channel");
+		    return false;
+		}
+	    } else if (chan.equals(pitchChanName)) {
+		// pitch should be an array of floats
+		if (cmI.GetType(i) == ChannelMap.TYPE_FLOAT32) {
+		    pitch = cmI.GetDataAsFloat32(i);
+		} else {
+		    System.err.println("Wrong type for Pitch channel");
+		    return false;
+		}
+	    } else if (chan.equals(rollChanName)) {
+		// roll should be an array of floats
+		if (cmI.GetType(i) == ChannelMap.TYPE_FLOAT32) {
+		    roll = cmI.GetDataAsFloat32(i);
+		} else {
+		    System.err.println("Wrong type for Roll channel");
 		    return false;
 		}
 	    } else {
@@ -3896,6 +3956,153 @@ public class TrackKMLPlugIn implements ActionListener, ItemListener {
 	return icon;
 	
     }
-
+    
+    /**
+      * Angle correction variables.
+      */
+    private double
+	headingBias,
+	pitchBias,
+	rollBias,
+	headingSwitchSign = 1,
+	pitchSwitchSign = 1,
+	rollSwitchSign = 1;
+	
+    /**
+      * This dialog is lazily initialized when needed.
+      */
+    private AngleCorrectionDlg angleCorrectionDlg = null;
+    
+    private class AngleCorrectionDlg extends javax.swing.JDialog
+    {
+	public AngleCorrectionDlg()
+	{
+	    super(frame, "Angle Corrections", true); // modal
+	    
+	    addWindowListener(new WindowAdapter() {
+		public void windowClosing(WindowEvent we) {
+		    doCancel();
+		}
+	    });
+	    
+	    java.awt.Container cp = getContentPane();
+	    cp.setLayout(new java.awt.GridLayout(5, 3));
+	    
+	    cp.add(new JLabel("Angle", JLabel.CENTER));
+	    cp.add(new JLabel("Switch Sign?", JLabel.CENTER));
+	    cp.add(new JLabel("Bias", JLabel.CENTER));
+	    
+	    cp.add(new JLabel("Heading"));
+	    cp.add(hsb = new javax.swing.JCheckBox());
+	    cp.add(hBias = new javax.swing.JTextField(5));
+	    
+	    cp.add(new JLabel("Pitch"));
+	    cp.add(psb = new javax.swing.JCheckBox());
+	    cp.add(pBias = new javax.swing.JTextField(5));
+	    
+	    cp.add(new JLabel("Roll"));
+	    cp.add(rsb = new javax.swing.JCheckBox());
+	    cp.add(rBias = new javax.swing.JTextField(5));
+	    
+	    JButton b = new JButton("Ok");
+	    b.addActionListener(new ActionListener() {
+		public void actionPerformed(ActionEvent ae) {
+		    doOk();
+		}
+	    } );
+	    cp.add(b);
+	    cp.add(new JLabel("")); // take up center pos
+	    b = new JButton("Cancel");
+	    b.addActionListener(new ActionListener() {
+		public void actionPerformed(ActionEvent ae) {
+		    doCancel();
+		}
+	    } );
+	    cp.add(b);
+	    
+	    pack();
+	    
+	    writeGUI();
+	}
+	
+	private void doOk()
+	{
+	    try {
+		readGUI();
+		setVisible(false);
+	    } catch (NumberFormatException nfe) {
+		JOptionPane.showMessageDialog(
+			this,
+			nfe.getMessage(),
+			"Error",
+			JOptionPane.ERROR_MESSAGE
+		);
+	    }
+	}
+	
+	private void doCancel()
+	{
+	    // Reset the GUI with variables so ready for next use:
+	    writeGUI();
+	    setVisible(false);
+	}
+	
+	/**
+	  * Read the controls into variables.  Note that no variables are 
+	  *  written until all are validated.
+	  */
+	private void readGUI()
+	{
+	    double hb, pb, rb;
+	    String field = null;
+	    
+	    try {
+		field = "Heading";
+		hb = Double.parseDouble(hBias.getText());
+		field = "Pitch";
+		pb = Double.parseDouble(pBias.getText());
+		field = "Roll";
+		rb = Double.parseDouble(rBias.getText());		
+	    } catch (Exception e) {
+		throw new NumberFormatException(
+			"Could not parse field \""+field+" Bias\".  Please"
+			+" correct."
+		);
+	    }
+	    
+	    headingBias = hb;
+	    pitchBias = pb;
+	    rollBias = rb;
+	 
+	    // These won't throw.
+	    headingSwitchSign = hsb.isSelected()?-1:1;
+	    pitchSwitchSign = psb.isSelected()?-1:1;
+	    rollSwitchSign = rsb.isSelected()?-1:1;
+	}
+	
+	/**
+	  * Write the current variable states into the controls.
+	  */
+	private void writeGUI()
+	{
+	    hBias.setText(Double.toString(headingBias));
+	    pBias.setText(Double.toString(pitchBias));
+	    rBias.setText(Double.toString(rollBias));
+	    
+	    hsb.setSelected(headingSwitchSign == -1);
+	    hsb.setSelected(pitchSwitchSign == -1);
+	    rsb.setSelected(rollSwitchSign == -1);	    
+	}
+	
+	/**
+	  * Sign correction check boxes.
+	  */
+	private final javax.swing.JCheckBox hsb, psb, rsb;
+	/**
+	  * Offset correction text fields.
+	  */
+	private final javax.swing.JTextField hBias, pBias, rBias;
+    }
+	
 }
 

@@ -456,6 +456,9 @@ public abstract class PlugInTemplate
 				while (running) {
 					pi.Fetch(timeout, map);
 					if (!map.GetIfFetchTimedOut()) {
+						if (debugFlag) 
+							System.err.println(
+									"PlugInTemplate: received request: "+map);
 						AnswerRequest a;
 						if (threadStack.empty())
 							a = new AnswerRequest();
