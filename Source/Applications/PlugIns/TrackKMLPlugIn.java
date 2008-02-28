@@ -112,6 +112,7 @@ import com.rbnb.kml.*;
  *   Date      By	Description
  * MM/DD/YYYY
  * ----------  --	-----------
+ * 2008/02/28  WHF      PseudoAlt now in its own virtual channel.
  * 2008/02/25  WHF      Added heading, and sign + bias correction dialog.
  * 02/22/2008  WHF      Added pitch/roll channels to KML.
  * 07/23/2007  JPW	Add "-u" command line options.  This allows a user to
@@ -217,7 +218,8 @@ public class TrackKMLPlugIn implements ActionListener, ItemListener {
     private String typeChanName = "Type";
     private String classificationChanName = "Classification";
     private final static String pitchChanName = "Pitch";
-    private final static String rollChanName = "Roll";    
+    private final static String rollChanName = "Roll";   
+    private final static String pseudoAltChanName = "PseudoAlt";
     
     // RBNB connections
     private String address = "localhost:3333";
@@ -2309,6 +2311,7 @@ public class TrackKMLPlugIn implements ActionListener, ItemListener {
 	// Pseudo-Alt channel.
 	// NOTE: We only do pseudo-alt if there is one and only one track!
 	int pseudoAltChanIdx = -1;
+	/* 2008/02/28  WHF  Pseudo Alt now in its own unambiguous channel.
 	if (cmI.NumberOfChannels() == 7) {
 	    // Determine the pseudo-alt channel
 	    String[] chans = cmI.GetChannelList();
@@ -2329,7 +2332,19 @@ public class TrackKMLPlugIn implements ActionListener, ItemListener {
 		    break;
 		}
 	    }
-	}
+	} */
+
+	for (int ii = 0; ii < cmI.NumberOfChannels(); ++ii) {
+	    String chan = cmI.GetName(ii);
+	    
+	    if (chan.endsWith(pseudoAltChanName)) {
+		// This is our pseudo-alt channel
+		if (bPrintDebug)
+		    System.err.println("Found pseudo-alt channel: " + chan);
+		pseudoAltChanIdx = ii;
+		break;
+	    }
+	}	
 	
 	for (Enumeration e = sortmap.keys();e.hasMoreElements();) {
 	    String folder = (String)e.nextElement();
@@ -2689,6 +2704,8 @@ public class TrackKMLPlugIn implements ActionListener, ItemListener {
 	} */
 	
 	// 2008/02/25  WHF  Use heading data if available, otherwise calc.
+	// 2008/02/27  WHF  Use array lengths instead of assuming length equal
+	//    to altitude.
 	double head;
 	if (heading == null) {
 	    try {
@@ -2696,15 +2713,15 @@ public class TrackKMLPlugIn implements ActionListener, ItemListener {
 	    } catch (Exception e) {
 		head = 0.0;
 	    }
-	} else head = headingSwitchSign * heading[numPts-1] + headingBias;
+	} else head = headingSwitchSign * heading[heading.length-1] + headingBias;
 	
 	currentHeadingStr = Double.toString(head);
 
 	// 2008/02/22  WHF  Pitch/roll support
 	if (pitch != null) currentPitchStr = Double.toString(
-	    	pitchSwitchSign * pitch[numPts-1] + pitchBias);
+	    	pitchSwitchSign * pitch[pitch.length-1] + pitchBias);
 	if (roll != null) currentRollStr = Double.toString(
-	    	rollSwitchSign * roll[numPts-1] + rollBias);
+	    	rollSwitchSign * roll[roll.length-1] + rollBias);
 	
 	///////////////////////////////////////////
 	// The main alt/lat/lon placemark and track

@@ -87,6 +87,9 @@ import com.rbnb.utility.Utility;
  *   Date      By	Description
  * MM/DD/YYYY
  * ----------  --	-----------
+ * 2008/02/28  WHF      PseudoAlt now written to its own virtual channel.
+ * 2008/02/27  WHF      Renamed bTacticalRequest to fullDurationFlag to convey
+ *                      its new meaning.
  * 02/22/2008  WHF      Refactoring, added pitch/roll channels.
  * 11/15/2006  JPW	Add "-d" flag to indicate that the user would like
  *			debug info printed; otherwise, just print minimal
@@ -126,6 +129,7 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
     private final static String vHeadingChanName = "Heading";
     private final static String vPitchChanName = "Pitch";
     private final static String vRollChanName = "Roll";    
+    private final static String vPseudoAltChanName = "PseudoAlt";
                                                         
     // Channels names for the actual, remote track channels
     private String altChanName = vAltChanName;
@@ -211,7 +215,14 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
     // JPW 11/08/2006: Does the user want to request additional ancillary
     //                 tactical data channels (Speed and Heading) and also
     //                 use the full duration (rather than force 0-duration)?
-    private boolean bTacticalRequest = false;
+    //private boolean bTacticalRequest = false;
+    
+    /**
+      * If true, make a full duration request for the 'ancillary' data.
+      *   Otherwise zero duration requests are made.
+      *  @since 2008/02/27 
+      */
+    private boolean fullDurationFlag;
     
     // JPW 11/15/2006: Print debug info?
     private boolean bPrintDebug = false;
@@ -449,6 +460,8 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
 	System.err.println("Name of the class channel: " + classificationChanName);
 	System.err.println("Name of the speed channel: " + speedChanName);
 	System.err.println("Name of the heading channel: " + headingChanName);
+	System.err.println("Name of the pitch channel: " + pitchChanName);
+	System.err.println("Name of the roll channel: " + rollChanName);
 	
 	System.err.print("\n");
 	
@@ -825,7 +838,8 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
 	// set bTacticalRequest true.  In this case, we will request
 	// Speed and Heading, in addition to the other ancillary channels,
 	// at the full duration (don't force 0-duration).
-	bTacticalRequest = false;
+	//bTacticalRequest = false;
+	fullDurationFlag = false;
 	if (picm.GetType(0) == ChannelMap.TYPE_STRING) {
 	    String[] strArray = picm.GetDataAsString(0);
 	    if ( (strArray != null)    &&
@@ -866,7 +880,8 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
 		}
 		if (kvh.get("tactical") != null) {
 		    if (kvh.get("tactical").trim().equals("1")) {
-			bTacticalRequest = true;
+			//bTacticalRequest = true;
+			fullDurationFlag = true;
 		    }
 		}
 	    }
@@ -882,12 +897,13 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
      * MM/DD/YYYY
      * ----------  --	-----------
      * 02/20/2008  WHF  Broken out from exec().    
+     * 02/27/2008  WHF  Removed doTactical input, as the inputs are always
+     *                  present.
     */    
     private void addAncillaryChannelsConditionally(
 		ChannelMap regMap,
 		String remoteSource,
-		ChannelMap cm,
-		boolean doTactical) throws SAPIException
+		ChannelMap cm) throws SAPIException
     {
     
 	if (regMap.GetIndex(
@@ -900,20 +916,18 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
 		remoteSource + idChanName) != -1)
 	    cm.Add(remoteSource + idChanName);
 
-       if (doTactical) {
-	    if (regMap.GetIndex(
-		    remoteSource + speedChanName) != -1)
-		cm.Add(remoteSource + speedChanName);
-	    if (regMap.GetIndex(
-		    remoteSource + headingChanName) != -1)
-		cm.Add(remoteSource + headingChanName);
-	    if (regMap.GetIndex(
-		    remoteSource + pitchChanName) != -1)
-		cm.Add(remoteSource + pitchChanName);
-	    if (regMap.GetIndex(
-		    remoteSource + rollChanName) != -1)
-		cm.Add(remoteSource + rollChanName);
-	}
+	if (regMap.GetIndex(
+		remoteSource + speedChanName) != -1)
+	    cm.Add(remoteSource + speedChanName);
+	if (regMap.GetIndex(
+		remoteSource + headingChanName) != -1)
+	    cm.Add(remoteSource + headingChanName);
+	if (regMap.GetIndex(
+		remoteSource + pitchChanName) != -1)
+	    cm.Add(remoteSource + pitchChanName);
+	if (regMap.GetIndex(
+		remoteSource + rollChanName) != -1)
+	    cm.Add(remoteSource + rollChanName);
     }
     
     /**
@@ -964,14 +978,13 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
 	{
 	    // We have top-level data!
 	    // Now, request ancillary channel data. Unless
-	    // bTacticalRequest is true, this will be a 0-dur request.
+	    // fullDurationFlag is true, this will be a 0-dur request.
 	    //cm=new ChannelMap();
 	    cm.Clear();
 	    addAncillaryChannelsConditionally(
 	    		topLevelRegMap,
 			remoteSource,
-			cm,
-			bTacticalRequest
+			cm			
 	    );
 	    ChannelMap ancillaryDataMap = new ChannelMap();
 	    if (cm.NumberOfChannels() > 0) {
@@ -981,38 +994,14 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
 		// is based on the times received on the alt channel.
 		// This will avoid mismatch problems that may occur
 		// when we are fetching data from a live data source.
-		/*
-		 * Original code for fetching ancillary chan data.
-		 *
-		double starttime =
-		    picm.GetRequestStart() + picm.GetRequestDuration();
-		if (picm.GetRequestReference().equals("newest")) {
-		    // For a "newest" request, need to calculate
-		    // the starttime differently ("newest" is a
-		    // backward-looking request)
-		    starttime =
-			picm.GetRequestStart() -
-			picm.GetRequestDuration();
-		    if (starttime < 0.0) {
-			starttime = 0.0;
-		    }
-		}
-		double duration = 0.0;
-		if (bTacticalRequest) {
-		    // Use the full duration for this request
-		    starttime = picm.GetRequestStart();
-		    duration = picm.GetRequestDuration();
-		}
-		String requestRefStr = picm.GetRequestReference();
-		*
-		*/
+
 		int altChanIdx =
 		    dataMap.GetIndex(remoteSource + altChanName);
 		double[] altTimes = dataMap.GetTimes(altChanIdx);
-		if ( (altTimes != null) && (altTimes.length > 0) ) {
+		if (altTimes != null && altTimes.length > 0) {
 		    double starttime = altTimes[altTimes.length - 1];
 		    double duration = 0.0;
-		    if ((bTacticalRequest) && (altTimes.length > 1)) {
+		    if (fullDurationFlag && altTimes.length > 1) {
 			// Request the full duration of data
 			starttime = altTimes[0];
 			duration =
@@ -1082,12 +1071,10 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
 	cm.Add(remoteSource + "*/" + classificationChanName);
 	cm.Add(remoteSource + "*/" + typeChanName);
 	cm.Add(remoteSource + "*/" + idChanName);
-	if (bTacticalRequest) {
-	    cm.Add(remoteSource + "*/" + speedChanName);
-	    cm.Add(remoteSource + "*/" + headingChanName);
-	    cm.Add(remoteSource + "*/" + pitchChanName);
-	    cm.Add(remoteSource + "*/" + rollChanName);
-	}
+	cm.Add(remoteSource + "*/" + speedChanName);
+	cm.Add(remoteSource + "*/" + headingChanName);
+	cm.Add(remoteSource + "*/" + pitchChanName);
+	cm.Add(remoteSource + "*/" + rollChanName);
 	sink.RequestRegistration(cm);
 	ChannelMap regMap = sink.Fetch(timeout);
 	String[] chans = regMap.GetChannelList();
@@ -1188,8 +1175,7 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
 			addAncillaryChannelsConditionally(
 				regMap,
 				trackName,
-				cm,
-				true // always add regardless of bTacticalRequest
+				cm
 			);
 		    }
 		}
@@ -1225,7 +1211,7 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
 			}
 		    }
 		    double duration = 0.0;
-		    if (bTacticalRequest) {
+		    if (fullDurationFlag) {
 			// Use the full duration for this request
 			starttime = picm.GetRequestStart();
 			duration = picm.GetRequestDuration();
@@ -1404,12 +1390,10 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
 	    cm.Add(remoteSource + classificationChanName);
 	    cm.Add(remoteSource + typeChanName);
 	    cm.Add(remoteSource + idChanName);
-	    if (bTacticalRequest) {
-		cm.Add(remoteSource + speedChanName);
-		cm.Add(remoteSource + headingChanName);
-		cm.Add(remoteSource + pitchChanName);
-		cm.Add(remoteSource + rollChanName);
-	    }
+	    cm.Add(remoteSource + speedChanName);
+	    cm.Add(remoteSource + headingChanName);
+	    cm.Add(remoteSource + pitchChanName);
+	    cm.Add(remoteSource + rollChanName);
 	    if (pAltChanName != null) {
 		cm.Add(pAltChanName);
 	    }
@@ -1536,9 +1520,14 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
 	    
 	    // JPW 10/11/2006: Pseudo-Alt
 	    if (pAlt != null) {
+		/* 2008/02/28  WHF  Pseudo-Alt now has its own virtual channel:
 		String chanName = pAltChanName;
 		srcChanIdx = sourceMapI.GetIndex(chanName);
-		destChanIdx = destinationMapO.Add(chanName);
+		destChanIdx = destinationMapO.Add(chanName); */
+		srcChanName = remoteSourceI + pAltChanName;
+		destChanName = remoteSourceI + vPseudoAltChanName;
+		srcChanIdx = sourceMapI.GetIndex(srcChanName);
+		destChanIdx = destinationMapO.Add(destChanName);		
 		mimeType = sourceMapI.GetMime(srcChanIdx);
 		if ( (mimeType != null) && (!mimeType.equals("")) ) {
 		    destinationMapO.PutMime(destChanIdx,mimeType);
@@ -1582,10 +1571,10 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
 		    destinationMapO.PutMime(destChanIdx,mimeType);
 		}
 	    }
-	    // If bTacticalRequest is false, only put a single value
+	    // If fullDurationFlag is false, only put a single value
 	    //    corresponding to the last timestamp.  Otherwise, use the
 	    //    full array of data.
-	    if (!bTacticalRequest) {
+	    if (!fullDurationFlag) {
 		double[] timeArray = new double[1];
 		timeArray[0] = times[ times.length - 1 ];
 		destinationMapO.PutTimes(timeArray);
@@ -1612,10 +1601,10 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
 		    destinationMapO.PutMime(destChanIdx,mimeType);
 		}
 	    }
-	    // If bTacticalRequest is false, only put a single value
+	    // If fullDurationFlag is false, only put a single value
 	    //    corresponding to the last timestamp.  Otherwise, use the
 	    //    full array of data.
-	    if (!bTacticalRequest) {
+	    if (!fullDurationFlag) {
 		double[] timeArray = new double[1];
 		timeArray[0] = times[ times.length - 1 ];
 		destinationMapO.PutTimes(timeArray);
@@ -1645,7 +1634,7 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
 	    // If bTacticalRequest is false, only put a single value
 	    //    corresponding to the last timestamp.  Otherwise, use the
 	    //    full array of data.
-	    if (!bTacticalRequest) {
+	    if (!fullDurationFlag) {
 		double[] timeArray = new double[1];
 		timeArray[0] = times[ times.length - 1 ];
 		destinationMapO.PutTimes(timeArray);
@@ -1662,65 +1651,59 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
 	    }
 	    
 	    // Speed - only add it to destination map if client has requested it
-	    if (bTacticalRequest) {
-		srcChanName = remoteSourceI + speedChanName;
-		destChanName = remoteSourceI + vSpeedChanName;
-		srcChanIdx = ancillarySourceMapI.GetIndex(srcChanName);
-		destChanIdx = destinationMapO.Add(destChanName);
-		if (srcChanIdx > -1) {
-		    mimeType = ancillarySourceMapI.GetMime(srcChanIdx);
-		    if ( (mimeType != null) && (!mimeType.equals("")) ) {
-			destinationMapO.PutMime(destChanIdx,mimeType);
-		    }
+	    srcChanName = remoteSourceI + speedChanName;
+	    destChanName = remoteSourceI + vSpeedChanName;
+	    srcChanIdx = ancillarySourceMapI.GetIndex(srcChanName);
+	    destChanIdx = destinationMapO.Add(destChanName);
+	    if (srcChanIdx > -1) {
+		mimeType = ancillarySourceMapI.GetMime(srcChanIdx);
+		if ( (mimeType != null) && (!mimeType.equals("")) ) {
+		    destinationMapO.PutMime(destChanIdx,mimeType);
 		}
-		destinationMapO.PutTimes(times);
-		destinationMapO.PutDataAsFloat32(destChanIdx, speed);
 	    }
+	    destinationMapO.PutTimes(times);
+	    destinationMapO.PutDataAsFloat32(destChanIdx, speed);
 	    
 	    // Heading - only add it to destination map if client has requested it
-	    if (bTacticalRequest) {
-		srcChanName = remoteSourceI + headingChanName;
-		destChanName = remoteSourceI + vHeadingChanName;
-		srcChanIdx = ancillarySourceMapI.GetIndex(srcChanName);
-		destChanIdx = destinationMapO.Add(destChanName);
-		if (srcChanIdx > -1) {
-		    mimeType = ancillarySourceMapI.GetMime(srcChanIdx);
-		    if ( (mimeType != null) && (!mimeType.equals("")) ) {
-			destinationMapO.PutMime(destChanIdx,mimeType);
-		    }
+	    srcChanName = remoteSourceI + headingChanName;
+	    destChanName = remoteSourceI + vHeadingChanName;
+	    srcChanIdx = ancillarySourceMapI.GetIndex(srcChanName);
+	    destChanIdx = destinationMapO.Add(destChanName);
+	    if (srcChanIdx > -1) {
+		mimeType = ancillarySourceMapI.GetMime(srcChanIdx);
+		if ( (mimeType != null) && (!mimeType.equals("")) ) {
+		    destinationMapO.PutMime(destChanIdx,mimeType);
 		}
-		destinationMapO.PutTimes(times);
-		destinationMapO.PutDataAsFloat32(destChanIdx, heading);
 	    }
+	    destinationMapO.PutTimes(times);
+	    destinationMapO.PutDataAsFloat32(destChanIdx, heading);
 	    
-	    // Pitch, roll - part of tactical request?
-	    if (bTacticalRequest) {
-		srcChanName = remoteSourceI + pitchChanName;
-		destChanName = remoteSourceI + vPitchChanName;
-		srcChanIdx = ancillarySourceMapI.GetIndex(srcChanName);
-		destChanIdx = destinationMapO.Add(destChanName);
-		if (srcChanIdx > -1) {
-		    mimeType = ancillarySourceMapI.GetMime(srcChanIdx);
-		    if ( (mimeType != null) && (!mimeType.equals("")) ) {
-			destinationMapO.PutMime(destChanIdx,mimeType);
-		    }
+	    // Pitch, roll
+	    srcChanName = remoteSourceI + pitchChanName;
+	    destChanName = remoteSourceI + vPitchChanName;
+	    srcChanIdx = ancillarySourceMapI.GetIndex(srcChanName);
+	    destChanIdx = destinationMapO.Add(destChanName);
+	    if (srcChanIdx > -1) {
+		mimeType = ancillarySourceMapI.GetMime(srcChanIdx);
+		if ( (mimeType != null) && (!mimeType.equals("")) ) {
+		    destinationMapO.PutMime(destChanIdx,mimeType);
 		}
-		destinationMapO.PutTimes(times);
-		destinationMapO.PutDataAsFloat32(destChanIdx, pitch);
+	    }
+	    destinationMapO.PutTimes(times);
+	    destinationMapO.PutDataAsFloat32(destChanIdx, pitch);
 
-		srcChanName = remoteSourceI + rollChanName;
-		destChanName = remoteSourceI + vRollChanName;
-		srcChanIdx = ancillarySourceMapI.GetIndex(srcChanName);
-		destChanIdx = destinationMapO.Add(destChanName);
-		if (srcChanIdx > -1) {
-		    mimeType = ancillarySourceMapI.GetMime(srcChanIdx);
-		    if ( (mimeType != null) && (!mimeType.equals("")) ) {
-			destinationMapO.PutMime(destChanIdx,mimeType);
-		    }
+	    srcChanName = remoteSourceI + rollChanName;
+	    destChanName = remoteSourceI + vRollChanName;
+	    srcChanIdx = ancillarySourceMapI.GetIndex(srcChanName);
+	    destChanIdx = destinationMapO.Add(destChanName);
+	    if (srcChanIdx > -1) {
+		mimeType = ancillarySourceMapI.GetMime(srcChanIdx);
+		if ( (mimeType != null) && (!mimeType.equals("")) ) {
+		    destinationMapO.PutMime(destChanIdx,mimeType);
 		}
-		destinationMapO.PutTimes(times);
-		destinationMapO.PutDataAsFloat32(destChanIdx, roll);
-	    }	    
+	    }
+	    destinationMapO.PutTimes(times);
+	    destinationMapO.PutDataAsFloat32(destChanIdx, roll);
 	    
 	} catch (SAPIException e) {
 	    System.err.println(
@@ -2042,7 +2025,7 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
 	    if (bPrintDebug) {
 		System.err.println("Track ID set to " + tempTrackID);
 	    }
-	    if (!bTacticalRequest) {
+	    if (!fullDurationFlag) {
 		// Just need an array of length 1
 		trackID = new String[1];
 		trackID[0] = tempTrackID;
@@ -2073,7 +2056,7 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
 		    remoteSourceI);
 		System.err.println("Type set to Unknown");
 	    }
-	    if (!bTacticalRequest) {
+	    if (!fullDurationFlag) {
 		// Just need an array of length 1
 		type = new String[1];
 		type[0] = "Unknown";
@@ -2104,7 +2087,7 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
 		    remoteSourceI);
 		System.err.println("Classification set to Unknown");
 	    }
-	    if (!bTacticalRequest) {
+	    if (!fullDurationFlag) {
 		// Just need an array of length 1
 		classification = new String[1];
 		classification[0] = "Unknown";
@@ -2120,27 +2103,25 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
 	///////////////////////////////
 	// Speed, Heading, Pitch, Roll
 	///////////////////////////////
-	if (bTacticalRequest) {
-	    speed = getAncillaryTrackData(
-		    ancillarycmI,
-		    remoteSourceI + speedChanName
-	    );
-	    
-	    heading = getAncillaryTrackData(
-		    ancillarycmI,
-		    remoteSourceI + headingChanName
-	    );
+	speed = getAncillaryTrackData(
+		ancillarycmI,
+		remoteSourceI + speedChanName
+	);
+	
+	heading = getAncillaryTrackData(
+		ancillarycmI,
+		remoteSourceI + headingChanName
+	);
 
-	    pitch = getAncillaryTrackData(
-		    ancillarycmI,
-		    remoteSourceI + pitchChanName
-	    );
+	pitch = getAncillaryTrackData(
+		ancillarycmI,
+		remoteSourceI + pitchChanName
+	);
 
-	    roll = getAncillaryTrackData(
-		    ancillarycmI,
-		    remoteSourceI + rollChanName
-	    );
-	}
+	roll = getAncillaryTrackData(
+		ancillarycmI,
+		remoteSourceI + rollChanName
+	);
 	
 	///////////////////////////////////////////
 	// Handle mismatch in length of data arrays
@@ -2189,7 +2170,7 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
 	int numClassification = -1;
 	int numSpeed = -1;
 	int numHeading = -1;
-	if (bTacticalRequest) {
+	if (fullDurationFlag) {
 	    numTrackID = trackID.length;
 	    numType = type.length;
 	    numClassification = classification.length;
@@ -2304,7 +2285,7 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
 	    classification = newClassification;
 	}
 	
-	if (bTacticalRequest) {
+	if (fullDurationFlag) {
 	    speed = boundData(speed, numPts);
 	    heading = boundData(heading, numPts);
 	    pitch = boundData(pitch, numPts);
@@ -2343,6 +2324,35 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
 	
     }
     
+    /**
+      * Returns true if array lengths are logical.
+      * @since 02/27/2008
+      */
+    /*
+     *   Date      By	Description
+     * MM/DD/YYYY
+     * ----------  --	-----------
+     * 11/09/2006  WHF  Created.  
+     */      
+    private boolean checkArrayLengths()
+    {
+	int numPts = alt.length;
+	
+	if ( numPts != lat.length                    ||
+	     numPts != lon.length                    ||
+	     pAlt != null && numPts != pAlt.length   ||
+	     fullDurationFlag && (
+		     numPts != trackID.length        ||
+		     numPts != type.length           ||
+		     numPts != classification.length ||
+		     numPts != speed.length          ||
+		     numPts != heading.length        ||
+		     numPts != pitch.length          ||
+		     numPts != roll.length ) )
+	    return false; // lengths not logical
+	return true;
+    }
+    
     /**************************************************************************
      * Geo-filter lat/lon data
      * <p>
@@ -2366,17 +2376,9 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
     
     private void geoFilterCoordinates() {
 	
-	// Check that all coordinate arrays are the same size
 	int numPts = alt.length;
-	if ( (numPts != lat.length)                                      ||
-	     (numPts != lon.length)                                      ||
-	     ( (pAlt != null) && (numPts != pAlt.length) )               ||
-	     ( (bTacticalRequest) && (numPts != trackID.length) )        ||
-	     ( (bTacticalRequest) && (numPts != type.length) )           ||
-	     ( (bTacticalRequest) && (numPts != classification.length) ) ||
-	     ( (bTacticalRequest) && (numPts != speed.length) )          ||
-	     ( (bTacticalRequest) && (numPts != heading.length) ) )
-	{
+	// Check that all coordinate arrays are the same size
+	if (!checkArrayLengths()) {
 	    System.err.println(
 		"ERROR: coordinate arrays not equal size; cannot geo-filter.");
 	    return;
@@ -2416,7 +2418,7 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
 		}
 		latV.add(new Double(lat[i]));
 		lonV.add(new Double(lon[i]));
-		if (bTacticalRequest) {
+		if (fullDurationFlag) {
 		    trackIDV.add(new String(trackID[i]));
 		    typeV.add(new String(type[i]));
 		    classificationV.add(new String(classification[i]));
@@ -2435,7 +2437,7 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
 	    //                 lat/lon point on what comes before or after this
 	    //                 point, because what comes before or after this
 	    //                 point will typically not be from the same track.
-	    else if (!bTacticalRequest)
+	    else if (!fullDurationFlag)
 	    {
 		// This point did not pass the filter. However, there are two
 		// cases where we will still add the current point:
@@ -2453,7 +2455,7 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
 		    // JPW 11/17/2006: Because we have added the condition
 		    //                 if (!bTacticalRequest) above, we will
 		    //                 never go into the following if statement
-		    if (bTacticalRequest) {
+		    if (fullDurationFlag) {
 			trackIDV.add(new String(trackID[i]));
 			typeV.add(new String(type[i]));
 			classificationV.add(new String(classification[i]));
@@ -2475,7 +2477,7 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
 		    // JPW 11/17/2006: Because we have added the condition
 		    //                 if (!bTacticalRequest) above, we will
 		    //                 never go into the following if statement
-		    if (bTacticalRequest) {
+		    if (fullDurationFlag) {
 			trackIDV.add(new String(trackID[i]));
 			typeV.add(new String(type[i]));
 			classificationV.add(new String(classification[i]));
@@ -2493,7 +2495,7 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
 	}
 	lat = new double[timeV.size()];
 	lon = new double[timeV.size()];
-	if (bTacticalRequest) {
+	if (fullDurationFlag) {
 	    trackID = new String[timeV.size()];
 	    type = new String[timeV.size()];
 	    classification = new String[timeV.size()];
@@ -2508,7 +2510,7 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
 	    }
 	    lat[i] = ((Double)latV.get(i)).doubleValue();
 	    lon[i] = ((Double)lonV.get(i)).doubleValue();
-	    if (bTacticalRequest) {
+	    if (fullDurationFlag) {
 		trackID[i] = (String)trackIDV.get(i);
 		type[i] = (String)typeV.get(i);
 		classification[i] = (String)classificationV.get(i);
@@ -2546,18 +2548,10 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
      */
     
     private void compressCoordinates() {
+	int numPts = alt.length;
 	
 	// Check that all coordinate arrays are the same size
-	int numPts = alt.length;
-	if ( (numPts != lat.length)                                      ||
-	     (numPts != lon.length)                                      ||
-	     ( (pAlt != null) && (numPts != pAlt.length) )               ||
-	     ( (bTacticalRequest) && (numPts != trackID.length) )        ||
-	     ( (bTacticalRequest) && (numPts != type.length) )           ||
-	     ( (bTacticalRequest) && (numPts != classification.length) ) ||
-	     ( (bTacticalRequest) && (numPts != speed.length) )          ||
-	     ( (bTacticalRequest) && (numPts != heading.length) ) )
-	{
+	if (!checkArrayLengths()) {
 	    System.err.println(
 		"ERROR: coordinate arrays not equal size; cannot compress.");
 	    return;
@@ -2622,6 +2616,8 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
 	String[] newClassification = new String[indexVector.size()];
 	float[] newSpeed = new float[indexVector.size()];
 	float[] newHeading = new float[indexVector.size()];
+	float[] newPitch = new float[indexVector.size()];
+	float[] newRoll = new float[indexVector.size()];
 	
 	int i = 0;
 	for (Enumeration e = indexVector.elements(); e.hasMoreElements();) {
@@ -2633,12 +2629,14 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
 	    }
 	    newLat[i] = lat[idx];
 	    newLon[i] = lon[idx];
-	    if (bTacticalRequest) {
+	    if (fullDurationFlag) {
 		newTrackID[i] = trackID[idx];
 		newType[i] = type[idx];
 		newClassification[i] = classification[idx];
 		newSpeed[i] = speed[idx];
 		newHeading[i] = heading[idx];
+		newPitch[i] = pitch[idx];
+		newRoll[i] = roll[idx];
 	    }
 	    ++i;
 	}
@@ -2650,25 +2648,15 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
 	}
 	lat = newLat;
 	lon = newLon;
-	if (bTacticalRequest) {
+	if (fullDurationFlag) {
 	    trackID = newTrackID;
 	    type = newType;
 	    classification = newClassification;
 	    speed = newSpeed;
 	    heading = newHeading;
-	}
-	
-	newTimes = null;
-	newAlt = null;
-	newPalt = null;
-	newLat = null;
-	newLon = null;
-	newTrackID = null;
-	newType = null;
-	newClassification = null;
-	newSpeed = null;
-	newHeading = null;
-	
+	    pitch = newPitch;
+	    roll = newRoll;
+	}	
     }
     
     /**************************************************************************
