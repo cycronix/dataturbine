@@ -7,18 +7,23 @@
 <body>
 <h1>RBNB Release Notes</h1>
 <h1>RBNB V3.1 Release Notes</h1><h2>V3.1B2 to V3.1B3 Changes</h2>
-V3.1B3 released 02/26/2008<br>
+V3.1B3 released 03/04/2008<br>
 <h3>General</h3>
-<ul><li>Added "source" and "target" flags to "javac" tasks in build.xml
+<ul><li>On 03/01/08, the RBNB Subversion repository was switched from NEESforge to Google Code.</li><li>Added "source" and "target" flags to "javac" tasks in build.xml
 files where they were not being set.&nbsp; In general, "source" and
 "target" are set to the value of "rbnb.javaver" (declared in
 definitions.xml), which is currently "1.4".&nbsp; Note that the RBNB
 server overrides this flag and sets Java 1.3 as the target and source
-version.</li><li>In "Source/Scripts/OtherUnixScripts/Start_Webserver.sh" and "Source/Scripts/OtherUnixScripts/Stop_Webserver.sh", change shell to bash on other unix, seems to fix the bug on Solaris.</li></ul><h3>Server</h3><ul><li>Added support for loading archives via absolute pathnames. &nbsp;Modified "Source/DataTurbine/com/rbnb/api/RBO.java"<br></li></ul><h3>SAPI</h3><ul><li>Updated
+version.</li><li>In
+"Source/Scripts/OtherUnixScripts/Start_Webserver.sh" and
+"Source/Scripts/OtherUnixScripts/Stop_Webserver.sh", change shell to
+bash on other unix, seems to fix the bug on Solaris.</li></ul><h3>Server</h3><ul><li>Added support for loading archives via absolute pathnames. &nbsp;Modified "Source/DataTurbine/com/rbnb/api/RBO.java"<br></li></ul><h3>SAPI</h3><ul><li>Updated
 ChannelMap javadoc to specify that PutData calls do not copy the input
 arrays. Modified "Source/DataTurbine/com/rbnb/sapi/ChannelMap.java"</li></ul><h3>Matlab</h3><ul><li>Added
 new&nbsp;utilities to support RBNB-JPG processing in Matlab:
-"Source/Matlab/rbnb_putjpg.m" and "Source/Matlab/rbnb_getjpg.m"</li></ul><h3>PlugIns</h3><ul><li>Added pitch and roll to TrackData and TrackKML Plugins.</li><li>Added timeout argument to PluginTemplate.argHelper. &nbsp;Modified&nbsp;"Source/DataTurbine/com/rbnb/plugins/PlugInTemplate.java"</li></ul><h3>WebCache</h3><ul><li>WebCache/CacheInterface:&nbsp;
+"Source/Matlab/rbnb_putjpg.m" and "Source/Matlab/rbnb_getjpg.m"</li></ul><h3>PlugIns</h3><ul><li>Add support for 3D icon orientation in&nbsp;TrackDataPlugIn and TrackKMLPlugIn.</li><li>Added
+timeout argument to PluginTemplate.argHelper.
+&nbsp;Modified&nbsp;"Source/DataTurbine/com/rbnb/plugins/PlugInTemplate.java"</li></ul><h3>WebCache</h3><ul><li>WebCache/CacheInterface:&nbsp;
 changed rbnbPutData to ByteArray vs INT8 type for compatability with
 subsequent fetches from cache by rbnbPlot and RDV etc. &nbsp;Modified
 "Source/Applications/WebCache/com/rbnb/webCache/CacheInterface.java"</li></ul>
