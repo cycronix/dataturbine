@@ -2720,8 +2720,15 @@ public class TrackKMLPlugIn implements ActionListener, ItemListener {
 	    head = headingSwitchSign * heading[heading.length-1] + headingBias;
 	currentHeadingStr = Double.toString(head);
 	*/
-	if (heading != null) currentHeadingStr = Double.toString(
-	    	headingSwitchSign * heading[heading.length-1] + headingBias);
+	// 2008/03/11  WHF  Correct heading bounds, as GE does not like headings
+	//    < 0 or > 360:
+	if (heading != null) {
+	    double head	= headingSwitchSign * heading[heading.length-1] 
+	    		+ headingBias;
+	    while (head < 0) head += 360.0;
+	    while (head > 360) head -= 360.0;
+	    currentHeadingStr = Double.toString(head);
+	}
 
 	// 2008/02/22  WHF  Pitch/roll support
 	if (pitch != null) currentPitchStr = Double.toString(
