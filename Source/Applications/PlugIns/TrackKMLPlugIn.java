@@ -112,6 +112,8 @@ import com.rbnb.kml.*;
  *   Date      By	Description
  * MM/DD/YYYY
  * ----------  --	-----------
+ * 2008/03/10  WHF      Moved calculateHeading() and validDataPoint() to 
+ *                      TrackDataPlugIn.
  * 2008/02/28  WHF      PseudoAlt now in its own virtual channel.
  * 2008/02/25  WHF      Added heading, and sign + bias correction dialog.
  * 02/22/2008  WHF      Added pitch/roll channels to KML.
@@ -2706,16 +2708,20 @@ public class TrackKMLPlugIn implements ActionListener, ItemListener {
 	// 2008/02/25  WHF  Use heading data if available, otherwise calc.
 	// 2008/02/27  WHF  Use array lengths instead of assuming length equal
 	//    to altitude.
-	double head;
+	// 2008/03/10  WHF  Moved calculateHeading to TrackDataPlugIn.
+	/*double head;
 	if (heading == null) {
 	    try {
 		head = calculateHeading();
 	    } catch (Exception e) {
 		head = 0.0;
 	    }
-	} else head = headingSwitchSign * heading[heading.length-1] + headingBias;
-	
+	} else 
+	    head = headingSwitchSign * heading[heading.length-1] + headingBias;
 	currentHeadingStr = Double.toString(head);
+	*/
+	if (heading != null) currentHeadingStr = Double.toString(
+	    	headingSwitchSign * heading[heading.length-1] + headingBias);
 
 	// 2008/02/22  WHF  Pitch/roll support
 	if (pitch != null) currentPitchStr = Double.toString(
@@ -3414,6 +3420,8 @@ public class TrackKMLPlugIn implements ActionListener, ItemListener {
 		    System.err.println("Wrong type for Roll channel");
 		    return false;
 		}
+	    } else if (chan.equals(speedChanName)) {
+		// We do not use this channel, but let's not emit a warning
 	    } else {
 		System.err.println("Unknown channel " + chan);
 	    }
@@ -3468,191 +3476,7 @@ public class TrackKMLPlugIn implements ActionListener, ItemListener {
 	return true;
 	
     }
-    
-    /**************************************************************************
-     * Calculate track heading (between 0 and 360 degrees). Ideally we
-     * want to calculate heading using the current point and two points
-     * back from the current point.
-     * <p>
-     *
-     * @author John P. Wilson
-     *
-     * @version 03/22/2006
-     */
-    
-    /*
-     *
-     *   Date      By	Description
-     * MM/DD/YYYY
-     * ----------  --	-----------
-     * 03/22/2006  JPW  Previously I used the current and next to current
-     *			point to calculate heading.  Now, look back farther
-     *			to calculate heading.  We made this change because
-     *			frequently the NASA data has repeated points - which
-     *			will result in heading = 0.0 and the plane icon
-     *			jerking around in Google Earth
-     * 02/03/2006  JPW  Created.
-     *
-     */
-    
-    private double calculateHeading() throws Exception {
-	
-	// Check that latitude and longitude arrays are the same size
-	if ( (lat == null) ||
-	     (lon == null) ||
-	     (lat.length != lon.length) ||
-	     (lat.length == 0) )
-	{
-	    throw new Exception(
-	    "ERROR: problem with lat/lon arrays; can't calculate heading.");
-	}
-	
-	double deltaLon = 0.0;
-	double deltaLat = 0.0;
-	
-	if (lat.length == 1)
-	{
-	    // Only a single data point, can't calculate heading
-	    return (double)0.0;
-	}
-	else if (!validDataPoint(lat[lat.length-1],lon[lon.length-1]))
-	{
-	    // The most recent point is not valid; can't calculate heading
-	    return (double)0.0;
-	}
-	else if (lat.length == 2)
-	{
-	    // We are forced to use the 2 most recent points to calc heading
-	    if (!validDataPoint(lat[0],lon[0]))
-	    {
-		return (double)0.0;
-	    }
-	    else
-	    {
-		deltaLon = lon[1] - lon[0];
-		deltaLat = lat[1] - lat[0];
-	    }
-	}
-	else
-	{
-	    
-	    // First preference is to use the current point and two points
-	    // back.  If the point two back isn't valid, try the
-	    // current point and one back.  If that isn't valid, just
-	    // return 0.0
-	    
-	    if (validDataPoint(lat[lat.length-3],lon[lon.length-3])) {
-		deltaLon = lon[lon.length-1] - lon[lon.length-3];
-		deltaLat = lat[lat.length-1] - lat[lat.length-3];
-	    }
-	    else if (validDataPoint(lat[lat.length-2],lon[lon.length-2])) {
-		deltaLon = lon[lon.length-1] - lon[lon.length-2];
-		deltaLat = lat[lat.length-1] - lat[lat.length-2];
-	    } else {
-		return 0.0;
-	    }
-	    
-	}
-	
-	/////////////////////////////////////////
-	// Take care of the zero conditions first
-	/////////////////////////////////////////
-	
-	if ( (deltaLat == 0.0) && (deltaLon == 0.0) ) {
-	    // Moving nowhere
-	    return 0.0;
-	} else if ( (deltaLat == 0.0) && (deltaLon > 0.0) ) {
-	    // Moving east
-	    return 90.0;
-	} else if ( (deltaLat == 0.0) && (deltaLon < 0.0) ) {
-	    // Moving west
-	    return 270.0;
-	} else if ( (deltaLat > 0.0) && (deltaLon == 0.0) ) {
-	    // Moving north
-	    return 0.0;
-	} else if ( (deltaLat < 0.0) && (deltaLon == 0.0) ) {
-	    // Moving south
-	    return 180.0;
-	}
-	
-	////////////////////////////////////////
-	// Calculate angle in one of 4 quadrants
-	////////////////////////////////////////
-	
-	// Positive deltaLat, positive deltaLon
-	else if ( (deltaLat > 0.0) && (deltaLon > 0.0) ) {
-	    // Heading between 0 and 90 degrees
-	    return Math.toDegrees( Math.atan(deltaLon/deltaLat) );
-	}
-	
-	// Positive deltaLat, negative deltaLon
-	else if ( (deltaLat > 0.0) && (deltaLon < 0.0) ) {
-	    // Heading between 270 and 360 degrees
-	    return
-	        360.0 -
-		Math.toDegrees(
-		    Math.atan( Math.abs(deltaLon)/Math.abs(deltaLat) ) );
-	}
-	
-	// Negative deltaLat, positive deltaLon
-	else if ( (deltaLat < 0.0) && (deltaLon > 0.0) ) {
-	    // Heading between 90 and 180 degrees
-	    return
-	        180.0 -
-		Math.toDegrees(
-		    Math.atan( Math.abs(deltaLon)/Math.abs(deltaLat) ) );
-	}
-	
-	// Negative deltaLat, negative deltaLon
-	else if ( (deltaLat < 0.0) && (deltaLon < 0.0) ) {
-	    // Heading between 180 and 270 degrees
-	    return
-	        180.0 +
-		Math.toDegrees(
-		    Math.atan( Math.abs(deltaLon)/Math.abs(deltaLat) ) );
-	}
-	
-	return 0.0;
-	
-    }
-    
-    /**************************************************************************
-     * Is the given data point valid?  It will be valid if neither the x nor
-     * the y are NaN or positive or negative MAX_VALUE or NEGATIVE_INFINITY or
-     * POSITIVE_INFINITY.
-     *
-     * @author John P. Wilson
-     *
-     * @version 03/22/2006
-     */
-    
-    /*
-     *
-     *   Date      By	Description
-     * MM/DD/YYYY
-     * ----------  --	-----------
-     * 03/22/2006  JPW  Created.
-     *
-     */
-    
-    private static boolean validDataPoint(double x, double y) {
-	
-	if ( (!Double.isNaN(x)) &&
-	     (!Double.isNaN(y)) &&
-	     (!Double.isInfinite(x)) &&
-	     (!Double.isInfinite(y)) &&
-	     (x != Double.MAX_VALUE) &&
-	     (x != -Double.MAX_VALUE) &&
-	     (y != Double.MAX_VALUE) &&
-	     (y != -Double.MAX_VALUE) )
-	{
-	    return true;
-	}
-	
-	return false;
-	
-    }
-    
+            
     /**************************************************************************
      * Return appropriate display label.
      * <p>

@@ -1705,36 +1705,34 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
 	    destinationMapO.PutTimes(times);
 	    destinationMapO.PutDataAsFloat32(destChanIdx, roll);
 	    
-	} catch (SAPIException e) {
-	    System.err.println(
-		"Caught exception trying to add channels for track " +
-		remoteSourceI +
-		"\n" +
-		e);
-	    return;
 	} catch (Exception e) {
 	    System.err.println(
-		"Caught exception trying to add channels for track " +
-		remoteSourceI +
-		"\n" +
-		e);
+		    "Caught exception trying to add channels for track " +
+		    remoteSourceI
+	    );
+	    e.printStackTrace();
+	    System.err.println();
 	    return;
-	}
-	
+	}	
     }
         
     /**
       * Extracts a channel from the provided ChannelMap.
+      *
+      * @param createEmptyArray  if true, an array of zeros is created
+      *    if no data is found.
       */
     /*
      *   Date      By	Description
      * MM/DD/YYYY
      * ----------  --	-----------
-     * 02/21/2008  WHF  Broken out from exec().    
+     * 02/21/2008  WHF  Broken out from exec().
+     * 2008/03/10  WHF  Added createEmptyArray argument.
     */      
     private float[] getAncillaryTrackData(
     		ChannelMap ancillarycmI,
-		String fullChanName
+		String fullChanName,
+		boolean createEmptyArray
     ) { 
 	float[] result;
 	int chanIdx = ancillarycmI.GetIndex(fullChanName);
@@ -1757,7 +1755,7 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
 	    }
 	} else result = null;
 	
-	if (result == null) {
+	if (result == null && createEmptyArray) {
 	    // Need to specify a default array which is the same
 	    // length as time array
 	    result = new float[ times.length ];
@@ -1766,6 +1764,25 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
 	
 	return result;
     }
+    
+    /**
+      * Extracts a channel from the provided ChannelMap.  Delegates to 
+      * {@link #getAncillaryTrackData(ChannelMap, String, boolean) with 
+      *   createEmptyArray equal to <b>true</b>.
+      */
+    /*
+     *   Date      By	Description
+     * MM/DD/YYYY
+     * ----------  --	-----------
+     * 2008/03/10  WHF  Created.  
+    */      
+    private float[] getAncillaryTrackData(
+    		ChannelMap ancillarycmI,
+		String fullChanName
+    ) { 
+	return getAncillaryTrackData(ancillarycmI, fullChanName, true);
+    }
+    
 
     /**
       * Bounds a data array to length numPts.
@@ -1793,6 +1810,193 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
 	
 	return out;
     }
+    
+        /**************************************************************************
+     * Is the given data point valid?  It will be valid if neither the x nor
+     * the y are NaN or positive or negative MAX_VALUE or NEGATIVE_INFINITY or
+     * POSITIVE_INFINITY.
+     *
+     * @author John P. Wilson
+     *
+     * @version 03/22/2006
+     */
+    
+    /*
+     *
+     *   Date      By	Description
+     * MM/DD/YYYY
+     * ----------  --	-----------
+     * 03/10/2008  WHF  Moved from TrackKMLPlugIn.
+     * 03/22/2006  JPW  Created.
+     *
+     */
+    
+    private static boolean validDataPoint(double x, double y) {
+	
+	if ( (!Double.isNaN(x)) &&
+	     (!Double.isNaN(y)) &&
+	     (!Double.isInfinite(x)) &&
+	     (!Double.isInfinite(y)) &&
+	     (x != Double.MAX_VALUE) &&
+	     (x != -Double.MAX_VALUE) &&
+	     (y != Double.MAX_VALUE) &&
+	     (y != -Double.MAX_VALUE) )
+	{
+	    return true;
+	}
+	
+	return false;
+	
+    }
+    
+    /**************************************************************************
+     * Calculate track heading (between 0 and 360 degrees). Ideally we
+     * want to calculate heading using the current point and two points
+     * back from the current point.
+     * <p>
+     *
+     * @author John P. Wilson
+     *
+     * @version 03/22/2006
+     */
+    
+    /*
+     *
+     *   Date      By	Description
+     * MM/DD/YYYY
+     * ----------  --	-----------
+     * 2008/03/10  WHF  Moved here from TrackKMLPlugIn.  Removed throws clause.
+     * 03/22/2006  JPW  Previously I used the current and next to current
+     *			point to calculate heading.  Now, look back farther
+     *			to calculate heading.  We made this change because
+     *			frequently the NASA data has repeated points - which
+     *			will result in heading = 0.0 and the plane icon
+     *			jerking around in Google Earth
+     * 02/03/2006  JPW  Created.
+     *
+     */
+    
+    private double calculateHeading() {
+	
+	// Check that latitude and longitude arrays are the same size
+	if ( (lat == null) ||
+	     (lon == null) ||
+	     (lat.length != lon.length) ||
+	     (lat.length == 0) )
+	{
+	    System.err.println(
+	    "ERROR: problem with lat/lon arrays; can't calculate heading.");
+	    return 0.0;
+	}
+	
+	double deltaLon = 0.0;
+	double deltaLat = 0.0;
+	
+	if (lat.length == 1)
+	{
+	    // Only a single data point, can't calculate heading
+	    return 0.0;
+	}
+	else if (!validDataPoint(lat[lat.length-1],lon[lon.length-1]))
+	{
+	    // The most recent point is not valid; can't calculate heading
+	    return 0.0;
+	}
+	else if (lat.length == 2)
+	{
+	    // We are forced to use the 2 most recent points to calc heading
+	    if (!validDataPoint(lat[0],lon[0]))
+	    {
+		return 0.0;
+	    }
+	    else
+	    {
+		deltaLon = lon[1] - lon[0];
+		deltaLat = lat[1] - lat[0];
+	    }
+	}
+	else
+	{
+	    
+	    // First preference is to use the current point and two points
+	    // back.  If the point two back isn't valid, try the
+	    // current point and one back.  If that isn't valid, just
+	    // return 0.0
+	    
+	    if (validDataPoint(lat[lat.length-3],lon[lon.length-3])) {
+		deltaLon = lon[lon.length-1] - lon[lon.length-3];
+		deltaLat = lat[lat.length-1] - lat[lat.length-3];
+	    }
+	    else if (validDataPoint(lat[lat.length-2],lon[lon.length-2])) {
+		deltaLon = lon[lon.length-1] - lon[lon.length-2];
+		deltaLat = lat[lat.length-1] - lat[lat.length-2];
+	    } else {
+		return 0.0;
+	    }
+	    
+	}
+	
+	/////////////////////////////////////////
+	// Take care of the zero conditions first
+	/////////////////////////////////////////
+	
+	if ( (deltaLat == 0.0) && (deltaLon == 0.0) ) {
+	    // Moving nowhere
+	    return 0.0;
+	} else if ( (deltaLat == 0.0) && (deltaLon > 0.0) ) {
+	    // Moving east
+	    return 90.0;
+	} else if ( (deltaLat == 0.0) && (deltaLon < 0.0) ) {
+	    // Moving west
+	    return 270.0;
+	} else if ( (deltaLat > 0.0) && (deltaLon == 0.0) ) {
+	    // Moving north
+	    return 0.0;
+	} else if ( (deltaLat < 0.0) && (deltaLon == 0.0) ) {
+	    // Moving south
+	    return 180.0;
+	}
+	
+	////////////////////////////////////////
+	// Calculate angle in one of 4 quadrants
+	////////////////////////////////////////
+	
+	// Positive deltaLat, positive deltaLon
+	else if ( (deltaLat > 0.0) && (deltaLon > 0.0) ) {
+	    // Heading between 0 and 90 degrees
+	    return Math.toDegrees( Math.atan(deltaLon/deltaLat) );
+	}
+	
+	// Positive deltaLat, negative deltaLon
+	else if ( (deltaLat > 0.0) && (deltaLon < 0.0) ) {
+	    // Heading between 270 and 360 degrees
+	    return
+	        360.0 -
+		Math.toDegrees(
+		    Math.atan( Math.abs(deltaLon)/Math.abs(deltaLat) ) );
+	}
+	
+	// Negative deltaLat, positive deltaLon
+	else if ( (deltaLat < 0.0) && (deltaLon > 0.0) ) {
+	    // Heading between 90 and 180 degrees
+	    return
+	        180.0 -
+		Math.toDegrees(
+		    Math.atan( Math.abs(deltaLon)/Math.abs(deltaLat) ) );
+	}
+	
+	// Negative deltaLat, negative deltaLon
+	else if ( (deltaLat < 0.0) && (deltaLon < 0.0) ) {
+	    // Heading between 180 and 270 degrees
+	    return
+	        180.0 +
+		Math.toDegrees(
+		    Math.atan( Math.abs(deltaLon)/Math.abs(deltaLat) ) );
+	}
+	
+	return 0.0;
+	
+    }    
 	    
     /**************************************************************************
      * Extract, verify, and process data for a particular track from the
@@ -2110,8 +2314,19 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
 	
 	heading = getAncillaryTrackData(
 		ancillarycmI,
-		remoteSourceI + headingChanName
+		remoteSourceI + headingChanName,
+		false       // do not create empty array, calc heading instead
 	);
+	
+	if (heading == null) {
+	    if (!fullDurationFlag)
+		heading = new float[] { (float) calculateHeading() };
+	    else // fill a whole array with calculated value
+		java.util.Arrays.fill(
+	    		heading = new float[times.length],
+			(float) calculateHeading()
+		);
+	}
 
 	pitch = getAncillaryTrackData(
 		ancillarycmI,
