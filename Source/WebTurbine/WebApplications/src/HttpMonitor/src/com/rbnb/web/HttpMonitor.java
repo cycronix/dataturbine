@@ -39,6 +39,8 @@ limitations under the License.
 	2007/07/10  WHF  Read timeout on URLConnection.
 	2007/07/30  WHF  Added initialSleep child of <resource>, staggerStartup
 			attribute.
+	2008/03/14  WHF  Added check on the returned value of "Last-Modified", to
+			make sure it is really different from the last result.
 */
 
 package com.rbnb.web;
@@ -227,10 +229,14 @@ public abstract class HttpMonitor
 					lastMod = srcCon.getLastModified();
 					theirDate = srcCon.getDate();
 					// Copy to its destination:
-					//ba = copy(srcCon);
 					ba = read(srcCon);
-					if (doWrite && ba.length > 0) putResponse = write(ba);
-					success = true;
+					// 2008/03/14  WHF  If lastMod is set, verify lastMod really
+					//   has changed; if not, abort write, and do not count this
+					//   as a success.
+					if (lastMod == 0 || lastMod != prevLastMod) {					
+						if (doWrite && ba.length > 0) putResponse = write(ba);
+						success = true;
+					}
 //					if (debug)
 //						System.err.println("Copied "+source+" to "+dest);
 				} /*else if (debug) {
