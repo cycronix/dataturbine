@@ -30,7 +30,7 @@
 
  <!-- DataTurbine compilation target. -->
  <target name="compile-dataturbine" depends="init">
-  <mkdir target="${rbnb.classesdir}" />
+  <mkdir dir="${rbnb.classesdir}" />
   <subant target="compile">
    <fileset dir="."
             includes="DataTurbine/build.xml" />
