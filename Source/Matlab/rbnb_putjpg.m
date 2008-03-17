@@ -53,6 +53,7 @@ function nput = rbnb_putjpg(src, cname, timestamp, img, userinfo, mime, duration
 	fh = fopen(mytmp, 'r');
 	bytestream = fread(fh, 'int8');
 	fclose(fh);
+    delete(mytmp);
 	
 	bytestream = int8(bytestream);	
 	

@@ -51,6 +51,7 @@ function [img, tim, nam] = rbnb_getjpg(snk, cname, start, duration, tref)
     
     % A bit of perhaps-unnecessary housecleaning
 	clear myPic;
+    delete(mytmp);
 		
     % Marshall return values
 	tim = rtim;
