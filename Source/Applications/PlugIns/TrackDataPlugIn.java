@@ -77,7 +77,7 @@ import com.rbnb.utility.Utility;
  *
  * @author John P. Wilson
  *
- * @version 11/15/2006
+ * @version 03/24/2008
  */
 
 /*
@@ -87,6 +87,9 @@ import com.rbnb.utility.Utility;
  *   Date      By	Description
  * MM/DD/YYYY
  * ----------  --	-----------
+ * 2008/03/24  JPW	In addTrackChans(), for pseudo-alt, when defining the
+ * 			source channel name, don't prepend  remoteSourceI onto
+ * 			pAltChanName; just use pAltChanName on its own.
  * 2008/02/28  WHF      PseudoAlt now written to its own virtual channel.
  * 2008/02/27  WHF      Renamed bTacticalRequest to fullDurationFlag to convey
  *                      its new meaning.
@@ -1465,7 +1468,7 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
      *
      * @author John P. Wilson
      *
-     * @version 11/09/2006
+     * @version 03/24/2008
      */
     
     /*
@@ -1473,6 +1476,9 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
      *   Date      By	Description
      * MM/DD/YYYY
      * ----------  --	-----------
+     * 03/24/2008  JPW  For pseudo-alt, when defining the source channel name,
+     *                  don't prepend  remoteSourceI onto pAltChanName; just use
+     *                  pAltChanName on its own.
      * 11/09/2006  JPW  Ancillary data is now stored in arrays
      * 11/08/2006  JPW	Add support for new ancillary chans: speed and heading
      * 10/11/2006  JPW  Add support for the pseudo-alt channel (pAlt)
@@ -1524,10 +1530,11 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
 		String chanName = pAltChanName;
 		srcChanIdx = sourceMapI.GetIndex(chanName);
 		destChanIdx = destinationMapO.Add(chanName); */
-		srcChanName = remoteSourceI + pAltChanName;
+		// JPW 03/24/2008: Use pAltChanName on its own - don't prepend remoteSourceI
+		srcChanName = pAltChanName;
 		destChanName = remoteSourceI + vPseudoAltChanName;
 		srcChanIdx = sourceMapI.GetIndex(srcChanName);
-		destChanIdx = destinationMapO.Add(destChanName);		
+		destChanIdx = destinationMapO.Add(destChanName);
 		mimeType = sourceMapI.GetMime(srcChanIdx);
 		if ( (mimeType != null) && (!mimeType.equals("")) ) {
 		    destinationMapO.PutMime(destChanIdx,mimeType);
