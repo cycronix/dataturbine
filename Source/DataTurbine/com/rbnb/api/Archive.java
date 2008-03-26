@@ -1367,8 +1367,8 @@ final class Archive
 	       java.io.IOException,
 	       java.lang.InterruptedException
     {
-// Exception __e = new Exception("WHF TESTING");
-// __e.printStackTrace();
+// new Exception("WHF TESTING").printStackTrace();
+//System.err.println("Archive::setSet(): "+setI);
 	// Add the set to the <code>Archive</code>.
 	super.setSet(setI);
 

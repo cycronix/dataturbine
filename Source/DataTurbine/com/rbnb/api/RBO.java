@@ -43,6 +43,8 @@ package com.rbnb.api;
  *   Date      By	Description
  * MM/DD/YYYY
  * ----------  --	-----------
+ * 03/26/2008  WHF      Added check for incoming frame at time of termination to
+ *                      avoid deadlock in later requests.
  * 01/05/2007  EMF      Avoid infinite loop on archive recovery
  * 11/16/2006  MJM      Fall back to old framesets=sqrt(cachesize) logic by default
  * 11/16/2006  EMF      Fixed deep recovery of archives.
@@ -772,6 +774,15 @@ private boolean alreadyReset=false;
 		       !getPerformClearCache()) {
 		    wait(TimerPeriod.NORMAL_WAIT);
 		}
+		
+		// 2008/03/26  WHF  Added warning; clear frame when terminating
+		//   so requests of detached sources do not get stuck in the
+		//   moveDownFrom() method.
+		if (getFrame() != null && getTerminateRequested()) {
+		    System.err.println("WARNING: Unprocessed frame "+getFrame()
+			    +" in server at time of termination; frame lost.");
+		    setFrame(null);
+		}
 
 		if (!getTerminateRequested() &&
 		    !getPerformClearCache() &&
@@ -1105,11 +1116,16 @@ private boolean alreadyReset=false;
 			 getRCO().getTerminateRequested())) {
 			return;
 		    }
+		    // 2008/03/25  WHF  Moved setFrame() call here inside the
+		    //   synch block.  With it outside the synch block, the
+		    //   frame would sometimes be set just as the server
+		    //   was shutting down, thus blocking inside 'moveDownFrom'.
+		    setFrame(childI);		    
 		}
 
 		// Place the input frame <code>Rmap</code> where it will be
 		// picked up.
-		setFrame(childI);
+		//setFrame(childI);
 
 	    } finally {
 		setAddingAFrame(false);
@@ -2526,6 +2542,8 @@ private boolean alreadyReset=false;
     private final void doShutdown(Log logI) {
 	boolean locked = false;
 
+// 2008/03/26  WHF  Var "frame" should be null here or there may be deadlocks.
+//System.err.println("RBO::doShutdown, frame = "+frame);
 	try {
 	    try {
 		lockWrite("RBO.doShutdown");

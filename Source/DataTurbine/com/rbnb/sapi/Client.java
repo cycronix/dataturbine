@@ -30,7 +30,7 @@ import com.rbnb.api.*;
  * @author WHF
  *
  * @since V2.0
- * @version 09/28/2004
+ * @version 03/25/2008
 */
 
 /*
@@ -61,6 +61,7 @@ import com.rbnb.api.*;
  *			to a local variable in the one method where it is
  *			actually used.
  * 2005/10/25  EMF  Added BytesTransferred method, to support client metrics.
+ * 2008/03/25  WHF  Added synchWserver to _close call.
  */
 
 public abstract class Client implements java.io.Serializable
@@ -718,6 +719,8 @@ public abstract class Client implements java.io.Serializable
      * MM/DD/YYYY
      * ----------  --	-----------
      * 2004/01/08  WHF	Code moved from CloseRBNBConnection(boolean, boolean).
+	 * 2008/03/25  WHF  Synchronizes with server before closing so any unflushed
+	 *    data is written to disk before the close.
 	 */
 	final void _close(
 			boolean keepCache,
@@ -728,6 +731,7 @@ public abstract class Client implements java.io.Serializable
 		    com.rbnb.api.Source s = (com.rbnb.api.Source) c;
 		    s.setAkeep(keepArchive);
 		    s.setCkeep(keepCache);
+			try { s.synchronizeWserver(); } catch (Exception e) {}
 		}
 		server=null;
 		clearData();

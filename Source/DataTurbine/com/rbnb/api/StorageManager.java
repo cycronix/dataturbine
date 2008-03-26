@@ -1827,6 +1827,7 @@ abstract class StorageManager
 	     ((getNchildren() - empties) > getMs()))) {
 	      // If the maximum number of sets is exceeded, then delete the
 	      // oldest one.
+//System.err.println("StorageManager::trim(): removing set, max sets = "+getMs()+", children = "+getNchildren()+", empties = "+empties);
               removeSet();
 	  } //end while
         } //end else
@@ -1840,41 +1841,43 @@ abstract class StorageManager
 	       java.io.IOException,
 	       java.lang.InterruptedException
     {
-	    FrameManager set = (FrameManager) getChildAt(0);
-//if (set instanceof FrameSet) System.err.println("FrameSet");
-//if (set instanceof FileSet) System.err.println("removing FileSet");
-	    boolean isMine = (set.getParent() == this);
+	FrameManager set = (FrameManager) getChildAt(0);
+/*if (set instanceof FrameSet) System.err.println("FrameSet");
+if (set instanceof FileSet) System.err.println("removing FileSet");
+System.err.println(this);
+new Exception(set.toString()).printStackTrace(); */
+	boolean isMine = (set.getParent() == this);
 
-	    // Remove the set.
-	    removeChildAt(0);
-	    removedSets = true;
-	    if (this instanceof Archive) {
-		((Archive) this).setOldest
-		    (((FileSet) getChildAt(0)).getIndex());
-	    }
+	// Remove the set.
+	removeChildAt(0);
+	removedSets = true;
+	if (this instanceof Archive) {
+	    ((Archive) this).setOldest
+		(((FileSet) getChildAt(0)).getIndex());
+	}
 
-	    try {
-		// Lock the set.
+	try {
+	    // Lock the set.
 //		set.getDoor().lock("StorageManager.trim"); // MJM set.clear() locks it anyways
 
-		// Delete the set.
-		if (set instanceof FileSet) {
-		    set.setParent(this);
-		}
-		set.clear();
+	    // Delete the set.
+	    if (set instanceof FileSet) {
+		set.setParent(this);
+	    }
+	    set.clear();
 
-		if (set instanceof FileSet) {
-		    set.setParent(null);
-		}
+	    if (set instanceof FileSet) {
+		set.setParent(null);
+	    }
 
-	    } finally {
-		// Unlock the <code>FileSet</code>.
+	} finally {
+	    // Unlock the <code>FileSet</code>.
 //		set.getDoor().unlock();		// MJM
-	    }
+	}
 
-	    if (isMine && (set.getParent() == null)) {
-		set.nullify();
-	    }
+	if (isMine && (set.getParent() == null)) {
+	    set.nullify();
+	}
     } //end method removeSet
 
 
