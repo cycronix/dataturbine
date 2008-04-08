@@ -77,7 +77,7 @@ import com.rbnb.utility.Utility;
  *
  * @author John P. Wilson
  *
- * @version 03/24/2008
+ * @version 04/08/2008
  */
 
 /*
@@ -87,6 +87,7 @@ import com.rbnb.utility.Utility;
  *   Date      By	Description
  * MM/DD/YYYY
  * ----------  --	-----------
+ * 2008/04/08  WHF      Corrected heading calculation.
  * 2008/03/24  JPW	In addTrackChans(), for pseudo-alt, when defining the
  * 			source channel name, don't prepend  remoteSourceI onto
  * 			pAltChanName; just use pAltChanName on its own.
@@ -1864,7 +1865,7 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
      *
      * @author John P. Wilson
      *
-     * @version 03/22/2006
+     * @version 04/08/2008
      */
     
     /*
@@ -1872,6 +1873,7 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
      *   Date      By	Description
      * MM/DD/YYYY
      * ----------  --	-----------
+	 * 2008/04/08  WHF  Corrected heading calculation.
      * 2008/03/10  WHF  Moved here from TrackKMLPlugIn.  Removed throws clause.
      * 03/22/2006  JPW  Previously I used the current and next to current
      *			point to calculate heading.  Now, look back farther
@@ -1896,9 +1898,8 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
 	    return 0.0;
 	}
 	
-	double deltaLon = 0.0;
-	double deltaLat = 0.0;
-	
+	double lat1, lat2, lon1, lon2;
+		
 	if (lat.length == 1)
 	{
 	    // Only a single data point, can't calculate heading
@@ -1918,8 +1919,10 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
 	    }
 	    else
 	    {
-		deltaLon = lon[1] - lon[0];
-		deltaLat = lat[1] - lat[0];
+		//deltaLon = lon[1] - lon[0];
+		//deltaLat = lat[1] - lat[0];
+		lon2 = lon[1]; lon1 = lon[0];
+		lat2 = lat[1]; lat1 = lat[0];
 	    }
 	}
 	else
@@ -1931,18 +1934,40 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
 	    // return 0.0
 	    
 	    if (validDataPoint(lat[lat.length-3],lon[lon.length-3])) {
-		deltaLon = lon[lon.length-1] - lon[lon.length-3];
-		deltaLat = lat[lat.length-1] - lat[lat.length-3];
+		//deltaLon = lon[lon.length-1] - lon[lon.length-3];
+		//deltaLat = lat[lat.length-1] - lat[lat.length-3];
+		lon2 = lon[lon.length-1]; lon1 = lon[lon.length-3];
+		lat2 = lat[lat.length-1]; lat1 = lat[lat.length-3];
 	    }
 	    else if (validDataPoint(lat[lat.length-2],lon[lon.length-2])) {
-		deltaLon = lon[lon.length-1] - lon[lon.length-2];
-		deltaLat = lat[lat.length-1] - lat[lat.length-2];
+		//deltaLon = lon[lon.length-1] - lon[lon.length-2];
+		//deltaLat = lat[lat.length-1] - lat[lat.length-2];
+		lon2 = lon[lon.length-1]; lon1 = lon[lon.length-2];
+		lat2 = lat[lat.length-1]; lat1 = lat[lat.length-2];
 	    } else {
 		return 0.0;
-	    }
-	    
+	    }	    
 	}
 	
+	// Convert degrees to radians:
+	final double D2R = Math.PI / 180.0;
+	lat1 *= D2R; lat2 *= D2R; lon1 *= D2R; lon2 *= D2R;
+		
+	// 2008/04/08  WHF  New approach, see:
+	//  http://mathforum.org/library/drmath/view/55417.html
+	// NOTE: This returns a result between -180 and 180.  TrackKML
+	//  contains code to normalize this value to between 0 and 360, so it
+	//  is not repeated here.
+	return Math.atan2(
+		Math.sin(lon2-lon1)*Math.cos(lat2),
+		Math.cos(lat1)*Math.sin(lat2)
+		    - Math.sin(lat1)*Math.cos(lat2)*Math.cos(lon2-lon1)
+	   ) / Math.PI*180.0;
+	
+	 /* old approach
+	double deltaLon = lon2 - lon1;
+	double deltaLat = lat2 - lat1;
+	 
 	/////////////////////////////////////////
 	// Take care of the zero conditions first
 	/////////////////////////////////////////
@@ -2001,10 +2026,9 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
 		    Math.atan( Math.abs(deltaLon)/Math.abs(deltaLat) ) );
 	}
 	
-	return 0.0;
-	
-    }    
-	    
+	return 0.0; */
+    }  
+    
     /**************************************************************************
      * Extract, verify, and process data for a particular track from the
      * given ChannelMap.
