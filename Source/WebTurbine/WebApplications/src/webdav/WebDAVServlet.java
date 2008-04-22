@@ -779,9 +779,13 @@ if (debug) System.err.println(parentNode);
 				res.setStatus(res.SC_CREATED);
 			}
 			// Put the timestamp:				
-			if (conn.reqParam.isTimeSet())
+			if (conn.reqParam.isTimeSet()) {
+				// 2008/04/22  WHF  Handle case where duration was set by 
+				//  client, but not time.  Use 'now'.
+				if (conn.reqParam.start == 0.0)
+					conn.reqParam.start = System.currentTimeMillis() * 1e-3;
 				cmp.PutTime(conn.reqParam.start, conn.reqParam.duration);
-			else cmp.PutTimeAuto("timeofday");
+			} else cmp.PutTimeAuto("timeofday");
 						
 			// 04/16/2003  WHF	Multiplex support:
 			if (conn.reqParam.mux==1) {
