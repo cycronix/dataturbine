@@ -41,6 +41,8 @@ limitations under the License.
 			attribute.
 	2008/03/14  WHF  Added check on the returned value of "Last-Modified", to
 			make sure it is really different from the last result.
+	2008/04/29  WHF  Removed dependency on sun.misc.BASE64Encoder, which is 
+			VM specific and deprecated.
 */
 
 package com.rbnb.web;
@@ -110,8 +112,12 @@ public abstract class HttpMonitor
 		{
 			// Note that the Sun Base64 encoder might not be available on 
 			//  all JVMs.
-			String authentication = (new sun.misc.BASE64Encoder()).encode(
-					(name + ":"+ pwd).getBytes());
+			// 2008/04/29  WHF  Switched from sun proprietary encoder to 
+			//  RBNB version, which is compiled into this project.
+			String authentication =
+					//(new sun.misc.BASE64Encoder())
+					com.rbnb.utility.Base64Encode
+							.encode((name + ":"+ pwd).getBytes());
 			auth = "Basic "+ authentication;
 		}
 		
@@ -967,6 +973,7 @@ System.err.println("Using SAX parser: "+xmlReader.getClass().getName());
 				webDavHandlerFactory = 
 						new com.ibm.webdav.protocol.URLStreamHandlerFactory();
 			} catch (Throwable e) { 
+				e.printStackTrace();				
 				System.err.println("WARNING: WebDAV extensions not available.");
 			}
 		}				
