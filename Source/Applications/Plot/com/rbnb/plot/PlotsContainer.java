@@ -365,13 +365,16 @@ public class PlotsContainer extends JComponent implements ActionListener, Compon
 		}
 
    //EMF 10/15/04: add PlotContainerImage if appropriate
+   //EMF 5/5/08: add MIME type check for starting PlotContainerImage
    public PlotContainer addPlot(RegChannel regChan,int dg) {
 	   PlotContainer pc=null;
 //System.err.println("PlotsContainer.addPlot: name="+regChan.name+", mime="+regChan.getMime());
 	   //key off channel name
 	   if (regChan.name!=null
 	   	&& (regChan.name.toLowerCase().endsWith("jpg")
-	   	||regChan.name.toLowerCase().endsWith("jpeg"))) {
+	   	||regChan.name.toLowerCase().endsWith("jpeg")
+		||regChan.mime.toLowerCase().endsWith("jpg")
+		||regChan.mime.toLowerCase().endsWith("jpeg"))) {
 		   pc = (PlotContainer) (new PlotContainerImage(regChan,displayMode,posDurCubby,environment));
 	   } else if (regChan.name!=null
 	   	&& ((regChan.name.toLowerCase().endsWith("txt")
