@@ -202,7 +202,13 @@ import com.rbnb.utility.KeyValueHash;
 		beenScaled=true;
 		// push new values to children components
 		setOrdinate(scaleMin,scaleMax,scaleDiv);
-		}
+		//if (ht.containsKey(prefix+"rangelow")&&ht.containsKey(prefix+"rangenominal")&&ht.containsKey(prefix+"rangehigh")) {
+		//    float rangelow=Float.parseFloat((String)ht.get(prefix+"rangelow"));
+		//    float rangenominal=Float.parseFloat((String)ht.get(prefix+"rangenominal"));
+		//    float rangehigh=Float.parseFloat((String)ht.get(prefix+"rangehigh"));
+		//    pArea.setRangeLines(rangelow,rangenominal,rangehigh);
+		//} else pArea.clearRangeLines();
+	}
 	
 	public void setDisplayMode(int dm) {
 		displayMode=dm;

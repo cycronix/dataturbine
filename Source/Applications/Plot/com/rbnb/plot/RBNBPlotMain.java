@@ -639,7 +639,7 @@ public class RBNBPlotMain extends Applet implements ActionListener,Runnable,Prin
 		    loc.set(LayoutCubby.OpenRBNB);
 		    frame.setCursor(wait);
 		    frame.setTitle(
-		        "rbnbPlot " +
+		        "rbnbPlot by Creare " +
 			Environment.VERSION +
 			" (connecting to " +
 			environment.HOST+":" +
@@ -657,7 +657,7 @@ public class RBNBPlotMain extends Applet implements ActionListener,Runnable,Prin
 	    }
 	    else if (arg.equals("Close RBNB")) {
 		loc.set(LayoutCubby.CloseRBNB);
-		frame.setTitle("rbnbPlot (no connection)");
+		frame.setTitle("rbnbPlot by Creare (no connection)");
 	    }
 	    else if (arg.equals("About")) {
 		System.err.println("rbnbPlot by Creare, version "+Environment.VERSION);
@@ -902,10 +902,10 @@ public class RBNBPlotMain extends Applet implements ActionListener,Runnable,Prin
 	// JPW 04/07/2005: setHelpMenu is not yet implemented in Swing
 	// mb.setHelpMenu(help);
 	
-	frame = new LWFrame("rbnbPlot");
-	if (environment.HOST==null) frame.setTitle("rbnbPlot (no connection)");
+	frame = new LWFrame("rbnbPlot by Creare");
+	if (environment.HOST==null) frame.setTitle("rbnbPlot by Creare (no connection)");
 	else {
-	    frame.setTitle("rbnbPlot (connecting to "+environment.HOST+":"+
+	    frame.setTitle("rbnbPlot by Creare (connecting to "+environment.HOST+":"+
 			   environment.PORT+"...)");
 	    //start thread to listen for response to open request
 	    if (runner==null || !runner.isAlive()) {
@@ -1077,12 +1077,12 @@ public int print(Graphics g, PageFormat format, int pageNumber) {
 		break;
 	    }
 	    try {
-		Thread.sleep(200);		// slow down, let channel list get refreshed at start
+		Thread.sleep(100);		// slow down, let channel list get refreshed at start
 	    }
 	    catch (InterruptedException ie) {}
 	}
 	if (status.booleanValue()==true) {
-	    frame.setTitle("rbnbPlot (connected to "+environment.HOST+":"+
+	    frame.setTitle("rbnbPlot by Creare (connected to "+environment.HOST+":"+
 			   environment.PORT+")");
 	    //EMF 9/7/05: pop channel dialog
 		if (uc==null) try { Thread.currentThread().sleep(1000); } catch (Exception e) {}
@@ -1095,7 +1095,7 @@ public int print(Graphics g, PageFormat format, int pageNumber) {
 	    JInfoDialog id=new JInfoDialog(frame,true,"Error",aboutInfo);
 	    //id.show();
 	    //id.dispose();
-	    frame.setTitle("rbnbPlot (no connection)");
+	    frame.setTitle("rbnbPlot by Creare (no connection)");
 	}
 	frame.setCursor(pointer);
     }
