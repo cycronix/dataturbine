@@ -83,6 +83,7 @@ import org.apache.catalina.util.XMLWriter;
 // 2006/01/30  WHF  Added If-Modifed-Since logic.
 // 2006/08/14  WHF  Removed 'uplink' from 'Up one level'; now uses '..'.
 // 2007/04/20  WHF  Added plug-in option parsing.
+// 2008/05/05  MJM	Added auto-connect to detached source logic
 //
 
 /**
@@ -717,12 +718,32 @@ if (debug) System.err.println(parentNode);
 				return;
 			}
 			String fileName = conn.reqParam.name;
-
+			
 			//look up source in hashtable & connect if new source
 			Source src = (Source)sourcesHT.get(conn.reqParam.source);
-			if(src==null) {
-				res.sendError(res.SC_CONFLICT);
-				return;
+			if (src==null ||
+					!src.VerifyConnection()) { // check to ensure it didn't die	 (mjm added here 4/25/08)			
+				if(true) {// mjm 4-24-08 auto-connect to (detached) source		
+					if(debug) System.err.println
+						("Auto-connect source on put chan: "+conn.reqParam.source+", cacheSize: "+conn.reqParam.getCacheSize());		
+					src = new Source(
+						conn.reqParam.getCacheSize(),
+//						conn.reqParam.getArchiveMode(),
+						"append",			// only allow append to existing source in this case
+//						conn.reqParam.getArchiveSize());
+						0);			// zero archive size in append mode means use existing
+					src.OpenRBNBConnection(
+						defaultProperties.get("hostname").toString(),
+						conn.reqParam.source,
+						defaultProperties.get("username").toString(),
+						defaultProperties.get("password").toString()						
+					);
+					sourcesHT.put(conn.reqParam.source, src);
+					conn = connect(req);	// reconnect to update ctree???
+				} else {
+					res.sendError(res.SC_CONFLICT);		// old way
+					return;
+				}
 			}
 			
 			//Get byteorder
@@ -770,9 +791,14 @@ if (debug) System.err.println(parentNode);
 			ChannelTree.Node node = conn.ctree.findNode(conn.reqParam.path);
 			if (node != null && node.getSize() == 0 
 					&& ZEROFILE_MIME.equals(node.getMime())) {
-				cmp.Add(conn.reqParam.name);
+				if(debug) System.err.println("Warning:  ZeroFile undeleted: "+conn.reqParam.path);
+				// mjm 4/29/08: this can fail, e.g. if channel is one of multiplexed source
+				// just issue console warning and let it slide.  Rather have junk than failure
+/*				cmp.Add(conn.reqParam.name);
+				System.err.println("ack, deleting source");
 				src.Delete(cmp);
 				cmp.Clear();
+*/
 			} else if (node == null) {
 				// 2005/11/01  WHF  If the resource does not presently exist
 				//    we should indicate this fact:
@@ -833,7 +859,7 @@ if (debug) System.err.println(parentNode);
 					cmp.PutMime(index, mime);
 				}
 			}
-if (debug) System.err.println("Putting:\n"+cmp);
+			if (debug) System.err.println("Putting:\n"+cmp);
 			src.Flush(cmp);
 			
 		} catch (SAPIException se) { throw new ServletException(se); }
@@ -852,7 +878,7 @@ if (debug) System.err.println("Putting:\n"+cmp);
 			conn = connect(req);
 
 			ChannelTree.Node node = conn.ctree.findNode(conn.reqParam.path);
-if (debug) System.err.println(node);
+			if (debug) System.err.println(node);
 
 			long ifModSince = -1;
 			try {
@@ -955,8 +981,9 @@ if (debug) System.err.println(node);
 				
 				// Put the data:
 				conn.destSource.Flush(output);
-				if (deleteSource)
+				if (deleteSource) {
 					conn.destSource.Delete(data);
+				}
 			} else if (node.getType() == ChannelTree.SOURCE) {
 				if (conn.destSource != null) // already exists
 					res.sendError(res.SC_CONFLICT);
@@ -1457,7 +1484,9 @@ if (debug) System.err.println("registering null channel(s): "+sourceMap);
 		conn.ctree = ChannelTree.createFromChannelMap(
 				conn.cm,
 				conn.reqParam.servlet);
-				
+
+//		System.err.println("conn.ctree: "+conn.ctree);
+		
 		// Check for destination header field in the case of Copy/Move:
 		String dest = req.getHeader("destination");
 		conn.destSource = null;
