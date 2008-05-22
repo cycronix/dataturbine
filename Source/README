@@ -75,9 +75,10 @@ You can download the Java Media Framework from http://java.sun.com.
 
 Once you've unpacked this package, perform the following steps:
 
-   a) Open the file RBNB/<version>/Source/Applications/Video/build.xml in an
-      editor,
-   b) Find the line that says:
+   a) Open the following files in a text editor:
+      i)  RBNB/<version>/Source/Applications/Video/build.xml
+      ii) RBNB/<version>/Source/Applications/AudioVideo/build.xml
+   b) Find the line in each of the files that says:
 
 <classpath path="${rbnb.basedir}/../LicensedSoftware/JMF-2.1.1e/lib/jmf.jar" />
 
