@@ -420,6 +420,10 @@ class MirrorController
      *
      * @author Ian Brown
      *
+     * @param bForceStopI  If this is true, stop the source; otherwise, check
+     *                     the value of persistentmirror to see if the source
+     *                     should be stopped or detached.
+     *
      * @exception com.rbnb.api.AddressException
      *		  thrown if there is a problem with an address.
      * @exception com.rbnb.api.SerializeException
@@ -434,7 +438,7 @@ class MirrorController
      *		  thrown if the terminate is interrupted.
      * @see #initializeSource()
      * @since V2.0
-     * @version 05/11/2001
+     * @version 05/21/2008
      */
 
     /*
@@ -442,17 +446,46 @@ class MirrorController
      *   Date      By	Description
      * MM/DD/YYYY
      * ----------  --	-----------
+     * 05/21/2008  JPW  Add bForceStopI flag.  if bForceStopI is true, then
+     *                  stop the source.  Otherwise, check the value of the
+     *                  system property, "persistentmirror" - if it is true,
+     *                  detach the source, otherwise stop the source.
      * 04/18/2001  INB	Created.
      *
      */
-    private final void disconnectSource()
+    private final void disconnectSource(boolean bForceStopI)
 	throws com.rbnb.api.AddressException,
 	       com.rbnb.api.SerializeException,
 	       java.io.EOFException,
 	       java.io.IOException,
 	       java.lang.InterruptedException
     {
-	getSource().stop();
+	// JPW 05/21/2008: Original code for this method:
+	// getSource().stop();
+	
+	if (bForceStopI) {
+	    getSource().stop();
+	} else {
+	    // Check the value of the system variable "persistentmirror"
+	    String bPersistentMirrorStr = System.getProperty("persistentmirror","true");
+	    if (bPersistentMirrorStr.equals("false")) {
+		getSource().stop();
+	    } else {
+		// System.err.println(
+		//     "MirrorController.disconnectSource(): detach the source");
+		// detach the source
+		// this code is based on what is done in sapi.Source.Detach() and
+		//     sapi.Client._close(true, true) methods
+		getSource().setAkeep(true);
+		getSource().setCkeep(true);
+		try {
+		    getSource().synchronizeWserver();
+		} catch (Exception e) {
+		    // Nothing to do
+		}
+		getSource().stop();
+	    }
+	}
     }
     
     /**
@@ -1217,7 +1250,10 @@ class MirrorController
 			    // user must have terminated it; assume the user
 			    // wanted to terminate the Mirror
 			    if (!isSinkRunning()) {
-				break;
+				// JPW 05/21/08: Change from calling break to throwing the original exception
+				// break;
+				// Throw the original exception
+				throw se;
 			    }
 			    // First, the output Source must be terminated and
 			    // then the Source can reconnect.  Otherwise, when
@@ -1366,7 +1402,7 @@ class MirrorController
 	
 	// Close the existing Source
 	try {
-	    disconnectSource();
+	    disconnectSource(true);
 	} catch (Exception ignoreException) {
 	    // don't do anything
 	}
@@ -1473,7 +1509,7 @@ class MirrorController
 
 	} finally {
 	    try {
-		disconnectSource();
+		disconnectSource(false);
 	    } catch (java.lang.Exception e) {
 	    }
 	    try {
