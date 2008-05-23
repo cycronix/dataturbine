@@ -6,7 +6,13 @@
   <title>RBNB Release Notes</title></head>
 <body>
 <h1>RBNB Release Notes</h1>
-<h1>RBNB V3.1 Release Notes</h1><h2>V3.1B2 to V3.1B3 Changes</h2>
+<h1>RBNB V3.1 Release Notes</h1><h2>V3.1B3 to V3.1B4 Changes</h2>
+V3.1B4 released 05/23/2008<br><h3>General</h3><ul><li>In the IzPack installation: changed URL to dataturbine.org</li><li>Source/build.xml: Change 'target' to 'dir' in build.xml, was broken on netbeans.</li><li>Update WebTurbine HTML home page to reference updated Developer Guide</li><li>Updated DataTurbine Developer Guide V3</li></ul><h3>Server</h3><ul><li>When
+the upstream side of a Mirror is terminated, the downstream output
+Source side of the Mirror is now detached (data still available in
+RBNB) rather than stopped (unloaded from the RBNB). Add a new Java flag
+for overriding this default behavior:
+&#8211;Dpersistentmirror=&lt;true|false&gt;</li><li>Source close synchs with server; lost frames zeroed to prevent deadlock.</li></ul><h3>Matlab</h3><ul><li>In Matlab/rbnb_getjpg.m and Matlab/rbnb_putjpg.m: Delete temp files after using them.</li></ul><h3>PlugIns</h3><ul><li>Corrected heading calculation in TrackDataPlugIn.</li><li>Fix bug in TrackDataPlugIn dealaing with the display of "pseudo-alt" KML channels.</li><li>Bound heading angle in TrackKMLPlugIn.</li><li>Moved calculateHeading() to TrackDataPlugIn.</li></ul><h3>WebDAVServlet</h3><ul><li>Modified WebDAVServlet to enable appending to detached sources.</li><li>Corrected start time issue in WebDAV interface when only duration specified on PUT.</li></ul><h3>HttpMonitor</h3><ul><li>Removed HttpMonitor dependency on sun.misc.Base64*</li><li>Added check to HttpMonitor: if LastModified field is present, only update if changed.</li></ul><h3>rbnbPlot</h3><ul><li>Minor updates to RBNB Plot.</li><li>rbnbPlot now uses MIME type to identify JPEGs for display.</li></ul><h2>V3.1B2 to V3.1B3 Changes</h2>
 V3.1B3 released 03/04/2008<br>
 <h3>General</h3>
 <ul><li>On 03/01/08, the RBNB Subversion repository was switched from NEESforge to Google Code.</li><li>Added "source" and "target" flags to "javac" tasks in build.xml
