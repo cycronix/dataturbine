@@ -762,7 +762,6 @@ if (debug) System.err.println(parentNode);
 			ServletInputStream sis = req.getInputStream();
 			byte[] array;
 			int len = req.getContentLength();
-			if (debug) System.err.println("reconnect: "+reconnect+", length: "+len); 
 			
 			if (len == 0) { // Microsoft client likes to put empty files.
 				registerNullChannels(src, conn);
