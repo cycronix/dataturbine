@@ -84,6 +84,7 @@ import org.apache.catalina.util.XMLWriter;
 // 2006/08/14  WHF  Removed 'uplink' from 'Up one level'; now uses '..'.
 // 2007/04/20  WHF  Added plug-in option parsing.
 // 2008/05/05  MJM	Added auto-connect to detached source logic
+// 2008/05/28  MJM	Tweeked reconnect logic (restored the delete zero-file logic)
 //
 
 /**
@@ -704,6 +705,7 @@ if (debug) System.err.println(parentNode);
 		throws IOException, ServletException
 	{		
 		Connection conn = null;
+		
 		try {
 			conn = connect(req);
 
@@ -723,7 +725,7 @@ if (debug) System.err.println(parentNode);
 			Source src = (Source)sourcesHT.get(conn.reqParam.source);
 			if (src==null ||
 					!src.VerifyConnection()) { // check to ensure it didn't die	 (mjm added here 4/25/08)			
-				if(true) {// mjm 4-24-08 auto-connect to (detached) source		
+				if(true) {// mjm 4-24-08 auto-connect to (detached) source	
 					if(debug) System.err.println
 						("Auto-connect source on put chan: "+conn.reqParam.source+", cacheSize: "+conn.reqParam.getCacheSize());		
 					src = new Source(
@@ -760,6 +762,8 @@ if (debug) System.err.println(parentNode);
 			ServletInputStream sis = req.getInputStream();
 			byte[] array;
 			int len = req.getContentLength();
+			if (debug) System.err.println("reconnect: "+reconnect+", length: "+len); 
+			
 			if (len == 0) { // Microsoft client likes to put empty files.
 				registerNullChannels(src, conn);
 				return;
@@ -791,14 +795,12 @@ if (debug) System.err.println(parentNode);
 			ChannelTree.Node node = conn.ctree.findNode(conn.reqParam.path);
 			if (node != null && node.getSize() == 0 
 					&& ZEROFILE_MIME.equals(node.getMime())) {
-				if(debug) System.err.println("Warning:  ZeroFile undeleted: "+conn.reqParam.path);
-				// mjm 4/29/08: this can fail, e.g. if channel is one of multiplexed source
-				// just issue console warning and let it slide.  Rather have junk than failure
-/*				cmp.Add(conn.reqParam.name);
-				System.err.println("ack, deleting source");
+//				if(debug) System.err.println("Warning:  ZeroFile undeleted: "+conn.reqParam.path);
+// following 3 lines were commented out, but they are required e.g. for server-registration data (why?)
+				cmp.Add(conn.reqParam.name);
 				src.Delete(cmp);
 				cmp.Clear();
-*/
+// restored code to here
 			} else if (node == null) {
 				// 2005/11/01  WHF  If the resource does not presently exist
 				//    we should indicate this fact:
