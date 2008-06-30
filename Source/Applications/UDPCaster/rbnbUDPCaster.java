@@ -30,7 +30,7 @@ import com.rbnb.utility.RBNBProcess;
  *
  * @author John P. Wilson
  *
- * @version 10/01/2007
+ * @version 06/27/2008
  */
 
 /*
@@ -55,7 +55,7 @@ public class rbnbUDPCaster {
      * @author John P. Wilson
      *
      * @param argsI  argument list
-     * @version 10/01/2007
+     * @version 06/27/2008
      */
     
     /*
@@ -63,6 +63,7 @@ public class rbnbUDPCaster {
      *   Date      By	Description
      * MM/DD/YYYY
      * ----------  --	-----------
+     * 06/27/2008  JPW  Add "-g" option to run in headless mode
      * 10/01/2007  JPW  Change "-r" from a single recipient to (optionally) a
      *                  comma-delimited list of host:port recipients.
      * 09/26/2007  JPW  Added "-o" (stream from oldest) and "-x" (autostart)
@@ -78,6 +79,7 @@ public class rbnbUDPCaster {
 	int senderPortL = -1;
 	boolean bStreamFromOldestL = false;
 	boolean bAutostartL = false;
+	boolean bHeadlessL = false;
 	
 	//parse args
 	try {
@@ -101,6 +103,10 @@ public class rbnbUDPCaster {
 	    
 	    if (ah.checkFlag('c')) {
 		chanNameL = ah.getOption('c');
+	    }
+	    
+	    if (ah.checkFlag('g')) {
+		bHeadlessL = true;
 	    }
 	    
 	    if (ah.checkFlag('o')) {
@@ -163,6 +169,9 @@ public class rbnbUDPCaster {
 	    System.err.println(" -a <server address>   : RBNB address");
 	    System.err.println("               default : localhost:3333");
 	    System.err.println(" -c <input chan>       : RBNB channel to subscribe to");
+	    System.err.println(" -g                    : run in headless (no GUI) mode");
+	    System.err.println("                       : NOTE: to use headless mode, all parameters must be specified on command");
+	    System.err.println("                       :       line and the autostart (\"-x\") option must also be used");
 	    System.err.println(" -o                    : stream from oldest");
 	    System.err.println("               default : stream from newest");
 	    System.err.println(" -r <host:port list>   : comma-delimited list of host:port recipients to send the UDP packets to");
@@ -170,6 +179,14 @@ public class rbnbUDPCaster {
 	    System.err.println(" -s <port>             : socket port for sending out UDP packets");
 	    System.err.println("               default : 3456");
 	    System.err.println(" -x                    : auto-start");
+	    RBNBProcess.exit(0);
+	}
+	
+	// If user is running headless (no GUI), then make sure they
+	// have also specified the autostart option
+	if (bHeadlessL && !bAutostartL) {
+	    System.err.println("Can only run in headless mode (\"-g\") if all parameters are");
+	    System.err.println("specified on command line and auto-start (\"-x\") is also specified.");
 	    RBNBProcess.exit(0);
 	}
 	
@@ -190,7 +207,8 @@ public class rbnbUDPCaster {
 		senderPortL,
 		recipients,
 		bStreamFromOldestL,
-		bAutostartL);
+		bAutostartL,
+		bHeadlessL);
 	
     }
 }

@@ -65,16 +65,17 @@ import com.rbnb.utility.Utility;
  *
  * @author John P. Wilson
  *
- * @version 10/02/2007
+ * @version 06/27/2008
  */
 
 /*
- * Copyright 2005 - 2007 Creare Inc.
+ * Copyright 2005 - 2008 Creare Inc.
  * All Rights Reserved
  *
  *   Date      By	Description
  * MM/DD/YYYY
  * ----------  --	-----------
+ * 06/27/2008  JPW	Add headless (no GUI) mode.  Class no longer extends JFrame.
  * 10/02/2007  JPW	Replace the single recipient with a Vector of
  *			Recipient objects (provided as an argument in the
  *			constructor).  To do this, I removed the use of
@@ -86,7 +87,7 @@ import com.rbnb.utility.Utility;
  *
  */
 
-public class UDPCaster extends JFrame implements ActionListener {
+public class UDPCaster implements ActionListener {
     
     /**
      * RBNB server to connect to
@@ -219,6 +220,27 @@ public class UDPCaster extends JFrame implements ActionListener {
     private JTextField timestampTextField = null;
     private JButton selectChanButton = null;
     
+    /**
+     * Running in headless mode?
+     * <p>
+     *
+     * @author John P. Wilson
+     *
+     * @version 06/27/2008
+     */
+    private boolean bHeadless = false;
+    
+    /**
+     * If we are not running in headless mode, this
+     * is the frame object displayed to the user.
+     * <p>
+     *
+     * @author John P. Wilson
+     *
+     * @version 06/27/2008
+     */
+    private JFrame frame = null;
+    
     /**************************************************************************
      * Constructor
      * <p>
@@ -231,8 +253,9 @@ public class UDPCaster extends JFrame implements ActionListener {
      * @param recipientsI         Where to send the UDP packets
      * @param bStreamFromOldestI  Stream from oldest?
      * @param bAutostartI         Autostart?
+     * @param bHeadlessI          Run in headless (no GUI) mode?
      *
-     * @version 10/02/2007
+     * @version 06/27/2008
      */
     
     /*
@@ -240,6 +263,7 @@ public class UDPCaster extends JFrame implements ActionListener {
      *   Date      By	Description
      * MM/DD/YYYY
      * ----------  --	-----------
+     * 06/27/2008  JPW	Add bHeadlessI argument
      * 10/02/2007  JPW  Remove recipientHostI and recipientPortI; add
      *			Vector recipientsI.
      * 09/26/2007  JPW  Add stream from oldest and autostart arguments.
@@ -252,10 +276,16 @@ public class UDPCaster extends JFrame implements ActionListener {
 		     int senderPortI,
 		     Vector recipientsI,
 		     boolean bStreamFromOldestI,
-		     boolean bAutostartI)
+		     boolean bAutostartI,
+		     boolean bHeadlessI)
     {
 	
-	super("UDPCaster    disconnected");
+	bHeadless = bHeadlessI;
+	
+	// super("UDPCaster    disconnected");
+	if (!bHeadless) {
+	    frame = new JFrame("UDPCaster    disconnected");
+	}
 	
 	if ( (serverAddressI != null) && (!serverAddressI.equals("")) ) {
 	    serverAddress = serverAddressI;
@@ -272,9 +302,12 @@ public class UDPCaster extends JFrame implements ActionListener {
 	
 	bStreamFromOldest = bStreamFromOldestI;
 	
-	createMenus();
+	if (!bHeadless) {
+	    JMenuBar menuBar = createMenus();
+	    frame.setJMenuBar(menuBar);
+	    frame.setFont(new Font("Dialog", Font.PLAIN, 12));
+	}
 	
-	setFont(new Font("Dialog", Font.PLAIN, 12));
         GridBagLayout gbl = new GridBagLayout();
 	
 	JPanel guiPanel = new JPanel(gbl);
@@ -416,32 +449,34 @@ public class UDPCaster extends JFrame implements ActionListener {
 	
 	// Add the panel to the content pane of the JFrame
 	gbl = new GridBagLayout();
-        getContentPane().setLayout(gbl);
-        gbc = new GridBagConstraints();
+	gbc = new GridBagConstraints();
         gbc.anchor = GridBagConstraints.CENTER;
 	gbc.fill = GridBagConstraints.BOTH;
         gbc.weightx = 100;
         gbc.weighty = 100;
         gbc.insets = new Insets(0,0,0,0);
-        Utility.add(getContentPane(),guiPanel,gbl,gbc,0,0,1,1);
-	
-	pack();
-	
-	// Handle the close operation in the windowClosing() method of the
-	// registered WindowListener object.  This will get around
-	// JFrame's default behavior of automatically hiding the window when
-	// the user clicks on the '[x]' button.
-	this.setDefaultCloseOperation(
-	    javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
-	
-	addWindowListener(
-            new WindowAdapter() {
-		public void windowClosing(WindowEvent e) {
-		    exit();
-		}
-	    });
-	
-	setVisible(true);
+	if (!bHeadless) {
+	    frame.getContentPane().setLayout(gbl);
+	    Utility.add(frame.getContentPane(),guiPanel,gbl,gbc,0,0,1,1);
+	    
+            frame.pack();
+            
+            // Handle the close operation in the windowClosing() method of the
+            // registered WindowListener object.  This will get around
+            // JFrame's default behavior of automatically hiding the window when
+            // the user clicks on the '[x]' button.
+            frame.setDefaultCloseOperation(
+        	javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
+            
+            frame.addWindowListener(
+        	new WindowAdapter() {
+        	    public void windowClosing(WindowEvent e) {
+		        exit();
+        	    }
+        	});
+            
+	    frame.setVisible(true);
+	}
 	
 	if (bAutostartI) {
 	    // Check to make sure we have all needed data
@@ -505,7 +540,7 @@ public class UDPCaster extends JFrame implements ActionListener {
      *
      */
     
-    private void createMenus() {
+    private JMenuBar createMenus() {
 	
 	Font font = new Font("Dialog", Font.PLAIN, 12);
 	JMenuBar menuBar = new JMenuBar();
@@ -534,7 +569,7 @@ public class UDPCaster extends JFrame implements ActionListener {
 	menu.add(menuItem);
 	menuBar.add(menu);
 	
-	setJMenuBar(menuBar);
+	return menuBar;
 	
     }
     
@@ -565,9 +600,13 @@ public class UDPCaster extends JFrame implements ActionListener {
 	}
 	
 	else if (label.equals("Close")) {
-	    setCursor(new Cursor(Cursor.WAIT_CURSOR));
+	    if (!bHeadless) {
+		frame.setCursor(new Cursor(Cursor.WAIT_CURSOR));
+	    }
 	    disconnect();
-	    setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+	    if (!bHeadless) {
+		frame.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+	    }
 	}
 	
 	else if (label.equals("Exit")) {
@@ -608,30 +647,39 @@ public class UDPCaster extends JFrame implements ActionListener {
 	String recipientsStr = recipientAddressTextField.getText().trim();
 	
 	if ((tempServerAddress == null) || (tempServerAddress.length() == 0)) {
-	    JOptionPane.showMessageDialog(
-		this,
-		"Must enter an RBNB address in the " +
-		    "\"RBNB address\" field.",
-		"Connect Error",
-		JOptionPane.ERROR_MESSAGE);
+	    if (!bHeadless) {
+		JOptionPane.showMessageDialog(
+		    frame,
+		    "Must enter an RBNB address in the " +
+		    	"\"RBNB address\" field.",
+		    "Connect Error",
+		    JOptionPane.ERROR_MESSAGE);
+	    }
+	    System.err.println("No server address was provided.");
 	    return;
 	}
 	if ( (tempChanName == null) || (tempChanName.length() == 0) ) {
-	    JOptionPane.showMessageDialog(
-		this,
-		"Must enter an RBNB channel in the " +
-		    "\"RBNB channel\" field.",
-		"Connect Error",
-		JOptionPane.ERROR_MESSAGE);
+	    if (!bHeadless) {
+		JOptionPane.showMessageDialog(
+		    frame,
+		    "Must enter an RBNB channel in the " +
+		        "\"RBNB channel\" field.",
+		    "Connect Error",
+		    JOptionPane.ERROR_MESSAGE);
+	    }
+	    System.err.println("No channel name was provided.");
 	    return;
 	}
 	if (recipientsStr.equals("")) {
-	    JOptionPane.showMessageDialog(
-		this,
-		"Must enter at least one recipient address in the " +
-		    "\"Recipients\" field.",
-		"Connect Error",
-		JOptionPane.ERROR_MESSAGE);
+	    if (!bHeadless) {
+		JOptionPane.showMessageDialog(
+		    frame,
+		    "Must enter at least one recipient address in the " +
+		    	"\"Recipients\" field.",
+		    "Connect Error",
+		    JOptionPane.ERROR_MESSAGE);
+	    }
+	    System.err.println("No recipient address was provided.");
 	    return;
 	}
 	// convert recipientsStr into Vector of Recipient objects
@@ -655,11 +703,14 @@ public class UDPCaster extends JFrame implements ActionListener {
 	    }
 	}
 	if (tempRecipients.isEmpty()) {
-	    JOptionPane.showMessageDialog(
-		this,
-		"No valid recipient addresses in the \"Recipients\" field.",
-		"Connect Error",
-		JOptionPane.ERROR_MESSAGE);
+	    if (!bHeadless) {
+		JOptionPane.showMessageDialog(
+		    frame,
+		    "No valid recipient addresses in the \"Recipients\" field.",
+		    "Connect Error",
+		    JOptionPane.ERROR_MESSAGE);
+	    }
+	    System.err.println("No valid recipient address was provided.");
 	    return;
 	}
 	
@@ -670,22 +721,34 @@ public class UDPCaster extends JFrame implements ActionListener {
 	recipients = tempRecipients;
 	
 	try {
-	    setCursor(new Cursor(Cursor.WAIT_CURSOR));
+	    if (!bHeadless) {
+		frame.setCursor(new Cursor(Cursor.WAIT_CURSOR));
+	    }
 	    connect();
-	    setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+	    if (!bHeadless) {
+		frame.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+	    }
 	} catch (Exception e) {
-	    setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+	    if (!bHeadless) {
+		frame.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+	    }
 	    String errorMsg =
 	        new String("Error opening connections:\n" + e.getMessage());
 	    System.err.println(errorMsg);
-	    JOptionPane.showMessageDialog(
-		this,
-		errorMsg,
-		"Connect Error",
-		JOptionPane.ERROR_MESSAGE);
-	    setCursor(new Cursor(Cursor.WAIT_CURSOR));
+	    if (!bHeadless) {
+		JOptionPane.showMessageDialog(
+		    frame,
+		    errorMsg,
+		    "Connect Error",
+		    JOptionPane.ERROR_MESSAGE);
+	    }
+	    if (!bHeadless) {
+		frame.setCursor(new Cursor(Cursor.WAIT_CURSOR));
+	    }
 	    disconnect();
-	    setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+	    if (!bHeadless) {
+		frame.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+	    }
 	    return;
 	}
 	
@@ -765,7 +828,9 @@ public class UDPCaster extends JFrame implements ActionListener {
 	
 	System.err.println("UDP socket and RBNB data fetch connections open.");
 	
-	setTitle("UDPCaster    connected to RBNB at " + serverAddress);
+	if (!bHeadless) {
+	    frame.setTitle("UDPCaster    connected to RBNB at " + serverAddress);
+	}
 	
 	bConnected = true;
 	
@@ -838,7 +903,9 @@ public class UDPCaster extends JFrame implements ActionListener {
 	timestampTextField.setText("");
 	
 	System.err.println("All connections closed.");
-	setTitle("UDPCaster    disconnected");
+	if (!bHeadless) {
+	    frame.setTitle("UDPCaster    disconnected");
+	}
 	
 	bConnected = false;
 	
@@ -864,9 +931,13 @@ public class UDPCaster extends JFrame implements ActionListener {
     
     private void exit() {
 	
-	setCursor(new Cursor(Cursor.WAIT_CURSOR));
+	if (!bHeadless) {
+	    frame.setCursor(new Cursor(Cursor.WAIT_CURSOR));
+	}
 	disconnect();
-	setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+	if (!bHeadless) {
+	    frame.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+	}
 	
 	System.exit(0);
 	
@@ -895,10 +966,14 @@ public class UDPCaster extends JFrame implements ActionListener {
     
     private void selectRBNBChan(boolean bIncludeUnderscoreChansI) {
 	
+	// NOTE: This method will never be called if we are in headless
+	//       mode, so there is no need to protect out use of the
+	//       "frame" variable in this method.
+	
 	String address = serverAddressTextField.getText().trim();
 	if ( (address == null) || (address.length() == 0) ) {
 	    JOptionPane.showMessageDialog(
-		this,
+		frame,
 		"You must first enter an RBNB address in the " +
 		"\"RBNB address\" field.",
 		"Error",
@@ -907,7 +982,7 @@ public class UDPCaster extends JFrame implements ActionListener {
 	}
 	
 	// Get list channels from the RBNB
-	setCursor(new Cursor(Cursor.WAIT_CURSOR));
+	frame.setCursor(new Cursor(Cursor.WAIT_CURSOR));
 	Sink tempSink = new Sink();
 	ChannelMap cm = null;
 	try {
@@ -916,20 +991,20 @@ public class UDPCaster extends JFrame implements ActionListener {
 	    cm = tempSink.Fetch(5000);
 	    tempSink.CloseRBNBConnection();
 	} catch (SAPIException e) {
-	    setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+	    frame.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
 	    JOptionPane.showMessageDialog(
-		this,
+		frame,
 		"Caught exception trying to obtain channel names:\n" +
 		    e.getMessage(),
 		"Error",
 		JOptionPane.ERROR_MESSAGE);
 	    return;
 	}
-	setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+	frame.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
 	
 	if ( (cm == null) || (cm.NumberOfChannels() == 0) ) {
 	    JOptionPane.showMessageDialog(
-		this,
+		frame,
 		"No channels available in the data server.",
 		"Error",
 		JOptionPane.ERROR_MESSAGE);
@@ -954,7 +1029,7 @@ public class UDPCaster extends JFrame implements ActionListener {
 	}
 	if ( (channelList == null) || (channelList.length == 0) ) {
 	    JOptionPane.showMessageDialog(
-		this,
+		frame,
 		"No channels available in the data server.",
 		"Error",
 		JOptionPane.ERROR_MESSAGE);
@@ -964,7 +1039,7 @@ public class UDPCaster extends JFrame implements ActionListener {
 	String selectedChanStr = (String)channelList[0];
 	Object selectedValue =
 	    JOptionPane.showInputDialog(
-	        this,
+	        frame,
 		"Select the desired RBNB channel",
 		"RBNB Channel",
 		JOptionPane.QUESTION_MESSAGE,
@@ -1047,21 +1122,29 @@ public class UDPCaster extends JFrame implements ActionListener {
 		    startTimeStr = dateFormat.format(displayDate);
 		}
 		timestampTextField.setText(startTimeStr);
+		System.err.println("Send " + length + " frames (total = " + frameNumber + "); start time = " + startTimeStr);
 	    }
 	    
 	} // end while loop
 	
 	} catch (Exception e) {
-	    e.printStackTrace();
-	    JOptionPane.showMessageDialog(
-		this,
+	    System.err.println(
 		"Error fetching RBNB data or sending UDP packet out:\n" +
-		    e.getMessage(),
-		"Data Error",
-		JOptionPane.ERROR_MESSAGE);
-	    setCursor(new Cursor(Cursor.WAIT_CURSOR));
+	        e.getMessage());
+	    e.printStackTrace();
+	    if (!bHeadless) {
+		JOptionPane.showMessageDialog(
+		    frame,
+		    "Error fetching RBNB data or sending UDP packet out:\n" +
+		        e.getMessage(),
+		    "Data Error",
+		    JOptionPane.ERROR_MESSAGE);
+		frame.setCursor(new Cursor(Cursor.WAIT_CURSOR));
+	    }
 	    disconnect();
-	    setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+	    if (!bHeadless) {
+		frame.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+	    }
 	}
     }
     
