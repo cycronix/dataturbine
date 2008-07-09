@@ -366,24 +366,29 @@ public class PlotsContainer extends JComponent implements ActionListener, Compon
 
    //EMF 10/15/04: add PlotContainerImage if appropriate
    //EMF 5/5/08: add MIME type check for starting PlotContainerImage
+   //JPW 7/9/08: add check on regChan.getMime() being null before checking if mime is "jpg" or "jpeg"
    public PlotContainer addPlot(RegChannel regChan,int dg) {
 	   PlotContainer pc=null;
 //System.err.println("PlotsContainer.addPlot: name="+regChan.name+", mime="+regChan.getMime());
 	   //key off channel name
-	   if (regChan.name!=null
-	   	&& (regChan.name.toLowerCase().endsWith("jpg")
-	   	||regChan.name.toLowerCase().endsWith("jpeg")
-		||regChan.mime.toLowerCase().endsWith("jpg")
-		||regChan.mime.toLowerCase().endsWith("jpeg"))) {
-		   pc = (PlotContainer) (new PlotContainerImage(regChan,displayMode,posDurCubby,environment));
-	   } else if (regChan.name!=null
-	   	&& ((regChan.name.toLowerCase().endsWith("txt")
-		||regChan.name.toLowerCase().endsWith("text"))
-                ||(regChan.getMime()!=null
-                &&regChan.getMime().toLowerCase().startsWith("text")))) {
-			pc = (PlotContainer) (new PlotContainerText(regChan,displayMode,posDurCubby,environment));
-	   } else {
-		   pc = new PlotContainer(regChan,displayMode,posDurCubby,environment);
+	   if ( (regChan.name != null)
+	         && (regChan.name.toLowerCase().endsWith("jpg")
+	   	    || regChan.name.toLowerCase().endsWith("jpeg")
+		    || ( (regChan.getMime() != null)
+			  && (regChan.mime.toLowerCase().endsWith("jpg")
+			      || regChan.mime.toLowerCase().endsWith("jpeg")) ) ) )
+	   {
+		pc = (PlotContainer) (new PlotContainerImage(regChan,displayMode,posDurCubby,environment));
+	   }
+	   else if ( (regChan.name != null)
+	   	      && ( (regChan.name.toLowerCase().endsWith("txt") || regChan.name.toLowerCase().endsWith("text"))
+                           ||(regChan.getMime()!=null && regChan.getMime().toLowerCase().startsWith("text"))))
+	   {
+		pc = (PlotContainer) (new PlotContainerText(regChan,displayMode,posDurCubby,environment));
+	   }
+	   else
+	   {
+		pc = new PlotContainer(regChan,displayMode,posDurCubby,environment);
 	   }
 		//int n=numColumns(group[dg].getComponentCount()+1);
 		//GridLayout gl=(GridLayout)group[dg].getLayout();
