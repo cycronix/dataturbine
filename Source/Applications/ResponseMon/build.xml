@@ -1,0 +1,55 @@
+<!-- Name: build.xml
+     By:   WHF
+     Date: 2008/07/09
+
+     Description:
+         This file is the primary Ant build file for the ResponseMon 
+	application.
+-->
+
+<project name="APPLICATION.RESPONSEMON" default="library" basedir=".">
+
+ <!-- Import the standard definitions (properties). -->
+ <import file="../../definitions.xml" />
+
+ <!-- Initialize by setting the timestamp. -->
+ <target name="init">
+  <tstamp />
+  <!-- <buildnumber /> -->
+  <mkdir dir="${rbnb.builddir}" />
+  <mkdir dir="${rbnb.classesdir}" />
+  <mkdir dir="${rbnb.classesdir}/Applications" />
+  <mkdir dir="${rbnb.classesdir}/Applications/ResponseMon" />
+  <mkdir dir="${rbnb.librarydir}" />
+ </target>
+
+ <!-- Compile the Java source code and place the results in the 
+      classes directory.
+  -->
+ <target name="compile" depends="init">
+  <javac destdir="${rbnb.classesdir}/Applications/ResponseMon"
+         deprecation="on" debug="on"
+  	 source="${rbnb.javaver}"
+  	 target="${rbnb.javaver}">
+   <src path="${rbnb.sourcedir}/Applications/ResponseMon" />
+   <classpath path="${rbnb.classesdir}/Applications/ResponseMon" />
+   <classpath path="${rbnb.librarydir}/rbnb.jar" />
+  </javac>
+ </target>
+
+ <!-- Create the jar file. -->
+ <target name="library" depends="compile">
+  <jar destfile="${rbnb.librarydir}/ResponseMon.jar"
+       basedir="${rbnb.classesdir}/Applications/ResponseMon"
+       manifest="Manifest"
+   />
+ </target>
+
+ <!-- Cleans out all compiled and library files for the Source project. -->
+ <target name="clean">
+  <delete dir="${rbnb.classesdir}/Applications/ResponseMon" />
+  <delete file="${rbnb.librarydir}/ResponseMon.jar" />
+ </target>
+
+</project>
+

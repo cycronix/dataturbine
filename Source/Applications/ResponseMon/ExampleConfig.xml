@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!-- Example config file for ResponseMon. -->
+<responseMon intervalMs="10000" rbnbSource="ResMon" host="localhost:3333" 
+		timeoutMs="10000" >
+	<resource>
+		<!-- The URL of the resource from which to calculate response times. -->
+		<url>http://rbnb.net/cgi-bin/awstats.cgi?config=rbnb.net</url>
+		<!-- The tag used to describe the resource in the RBNB. -->
+		<tag>rbnb.net Stats Page</tag>
+	</resource>
+	
+	<!-- Weather Forecast from NOAA -->
+	<resource>
+		<url>http://forecast.weather.gov/MapClick.php?CityName=Hanover&amp;state=NH&amp;site=GYX&amp;textField1=43.7024&amp;textField2=-72.2789&amp;e=1</url>
+		<tag>NOAA Weather Forecast for Hanover, NH</tag>
+	</resource>
+	
+	<!-- Large file -->
+	<resource>
+		<url>http://www.ti.com/lit/gpn/tms320c6414t</url>
+		<tag>TI</tag>
+	</resource>
+</responseMon>
