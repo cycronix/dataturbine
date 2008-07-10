@@ -162,6 +162,15 @@
 		</javac>
 
 		<!-- HttpMonitor: -->
+		<!-- 2008/07/10  WHF  Compile in Base64Encoder and Decoder from 
+				com.rbnb.utility. -->
+		<javac destdir="${rbnb.waclassesdir}/HttpMonitor" debug="on"
+				deprecation="off"
+				source="${rbnb.javaver}"
+				target="${rbnb.javaver}">
+			<src path="${rbnb.sourcedir}/DataTurbine" />
+			<include name="com/rbnb/utility/Base64*.java" />
+		</javac>
 		<!-- JPW 02/25/08: Set source and target Java version based on the "rbnb.javaver" parameter. -->
 		<javac destdir="${rbnb.waclassesdir}/HttpMonitor" debug="on"
 				deprecation="off"
@@ -172,6 +181,7 @@
 			<src path="${rbnb.thirdpartydir}/dav4jSrc" />
 			<src path="${rbnb.thirdpartydir}/piccolo" />
 		</javac>
+		
 		<mkdir dir="${rbnb.walibdir}/webapps/webTurbine/WEB-INF/lib" />
 		<!-- 2007/01/24  WHF  Copied to this area in 'library' task. 
 		<jar destfile="${rbnb.walibdir}/webapps/webTurbine/WEB-INF/lib/HttpMonitor.jar"

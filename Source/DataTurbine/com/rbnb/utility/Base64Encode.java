@@ -24,9 +24,12 @@ import java.io.*;
   
 //
 // 2004/11/10  WHF  Created.
+// 2008/07/10  WHF  Added padding character.
 //
 public abstract class Base64Encode
 {
+	public static final char BASE64_PAD = '=';
+	
 	/**
 	  * Encodes the provided bytes into a base64 string.
 	  */
@@ -51,18 +54,21 @@ public abstract class Base64Encode
 			sb.append(Base64Decode.BASE64CHARS.charAt((work >> 4) & 0x3f));
 			// pack left
 			sb.append(Base64Decode.BASE64CHARS.charAt((work & 0x0f) << 2));
+			sb.append(BASE64_PAD);
 		} else if (c + 1 == x.length) { // one byte left, requires 2 * 6 bits
 			// The unsigned shift is necessary here because x[c] is still a 
 			//  byte.
 			sb.append(Base64Decode.BASE64CHARS.charAt((x[c] & 0xff) >> 2));
-			sb.append(Base64Decode.BASE64CHARS.charAt((x[c] & 0x03) << 4)); 
+			sb.append(Base64Decode.BASE64CHARS.charAt((x[c] & 0x03) << 4));
+			sb.append(BASE64_PAD);
+			sb.append(BASE64_PAD);
 		}
 		return sb.toString();
 	}
 	
-	public static void main(String args[])
+	public static void main(String args[]) throws Exception
 	{
-		try { /*
+		/*
 		byte[] buff = new byte[128];
 		while (true) {
 			int bytesRead = System.in.read(buff);
@@ -73,15 +79,24 @@ public abstract class Base64Encode
 			System.out.println(out);
 			System.out.println(new String(Base64Decode.decode(
 					new ByteArrayInputStream(out.getBytes()))));
-		}
-		*/
+		} // */ 
 		byte[] buff = new byte[256];
 		for (int ii = 0; ii < 256; ++ii) buff[ii] = (byte) ii;
 		String out = encode(buff);
 		System.out.println(out);
 		byte[] resp = Base64Decode.decode(
 				new ByteArrayInputStream(out.getBytes()));
-		for (int ii = 0; ii < 256; ++ii) System.out.println(resp[ii]&0xff);
-		} catch (Exception e) { e.printStackTrace(); }
+		for (int ii = 0; ii < 256; ++ii) System.out.println(resp[ii]&0xff); //*/
+
+		/* // Test to compare Our ver with SUN's:		
+		System.err.println("SUN:  "+
+				(new sun.misc.BASE64Encoder())
+				//com.rbnb.utility.Base64Encode
+						.encode(args[0].getBytes()));
+		System.err.println("RBNB: "+
+				//(new sun.misc.BASE64Encoder())
+				com.rbnb.utility.Base64Encode
+						.encode(args[0].getBytes()));
+		*/
 	}
 }

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <!-- Example config file for ResponseMon. -->
 <responseMon intervalMs="10000" rbnbSource="ResMon" host="localhost:3333" 
-		timeoutMs="10000" >
+		timeoutMs="10000" debug="true">
 	<resource>
 		<!-- The URL of the resource from which to calculate response times. -->
 		<url>http://rbnb.net/cgi-bin/awstats.cgi?config=rbnb.net</url>
@@ -16,8 +16,23 @@
 	</resource>
 	
 	<!-- Large file -->
-	<resource>
+	<!--<resource>
 		<url>http://www.ti.com/lit/gpn/tms320c6414t</url>
 		<tag>TI</tag>
+	</resource>  -->
+	
+	<!-- SSL without password -->
+	<resource> <!-- Substitute your server name for 'whf' -->
+		<url>https://whf/AccountMan/</url>
+		<tag>Local Account Manager</tag>
 	</resource>
+	
+	<!-- Password protected -->
+	<resource> 
+		<url>http://whf/RBNB/</url>
+		<tag>RBNB View</tag>
+		<user>administrator</user>
+		<password>admin</password>
+	</resource>
+		
 </responseMon>

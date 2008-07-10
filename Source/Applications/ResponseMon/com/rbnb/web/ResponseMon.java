@@ -1,6 +1,20 @@
 /*
 	ResponseMon.java
+
+	Copyright 2008 Creare Inc.
+
+	Licensed under the Apache License, Version 2.0 (the "License"); 
+	you may not use this file except in compliance with the License. 
+	You may obtain a copy of the License at 
 	
+	http://www.apache.org/licenses/LICENSE-2.0 
+	
+	Unless required by applicable law or agreed to in writing, software 
+	distributed under the License is distributed on an "AS IS" BASIS, 
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+	See the License for the specific language governing permissions and 
+	limitations under the License.
+
 	2008/07/09  WHF  Created.
 */
 
@@ -67,6 +81,7 @@ public class ResponseMon
 		
 	private void getAndTimeResources() throws SAPIException
 	{		
+		printHeader();
 		java.text.DateFormat dateFormat = new java.text.SimpleDateFormat(
 				"MM/dd/yyyy kk:mm:ss"
 		);
@@ -157,6 +172,12 @@ public class ResponseMon
 						);
 					} catch (Throwable t) {}
 				}
+				
+				// If authorization is available, set it:
+				if (auth != null) {
+					srcCon.setRequestProperty("Authorization", auth);
+				}
+				
 					
 				// This method connects to the server and obtains the response
 				//  code.  The file is not downloaded.  A response >= 400 will
@@ -198,6 +219,7 @@ public class ResponseMon
 				lastResponseCode = 602;
 			} catch (Exception e) {
 				lastResponseCode = 600;
+				if (debug) e.printStackTrace();
 			}
 				
 			return result;
@@ -214,8 +236,17 @@ public class ResponseMon
 		public double getTotalTime() { return lastTotalTime; }
 		public int getFileSize() { return fileSize; }
 
+		public void setAuthorization(String name, String pwd)
+		{
+			String authentication =
+					com.rbnb.utility.Base64Encode
+							.encode((name + ":"+ pwd).getBytes());
+			auth = "Basic "+ authentication;
+		}		
+
 		private final URL source;
 		private final String tag;
+		private String auth;
 		
 		private int lastResponseCode, fileSize;
 		private final byte[] ba = new byte[1024];
@@ -290,7 +321,11 @@ System.err.println("Using SAX parser: "+xmlReader.getClass().getName());
 		  */
 		private void makeResource()
 		{
-			resourceQueue.add(new Resource(srcUrl, tag));
+			Resource res = new Resource(srcUrl, tag);
+			if (user != null && password != null)
+				res.setAuthorization(user, password);
+			
+			resourceQueue.add(res);
 		}
 			
 		
@@ -331,6 +366,7 @@ System.err.println("Using SAX parser: "+xmlReader.getClass().getName());
 				
 				if ((temp = attributes.getValue("host")) != null)
 					host = temp;
+				debug = "true".equals(attributes.getValue("debug"));
 			} else {
 				if (!inConfig) throw new SAXException(
 						"Root tag is not \"responseMon\";"
@@ -341,15 +377,12 @@ System.err.println("Using SAX parser: "+xmlReader.getClass().getName());
 					if ("resource".equals(qName)) {
 						clear();
 						inResource = true;
-					} else if ("url".equals(qName)) {
+					} else if ("url".equals(qName) || "tag".equals(qName)
+							|| "user".equals(qName) 
+							|| "password".equals(qName))
 						throw new SAXException(
-								"url must be a child of resource."
+								qName + " must be a child of resource."
 						);
-					} else if ("tag".equals(qName)) {
-						throw new SAXException(
-								"tag must be a child of resource."
-						);
-					}
 				} else if ("resource".equals(qName)) {
 					throw new SAXException(
 							"resource can not be a child of itself."
@@ -375,16 +408,11 @@ System.err.println("Using SAX parser: "+xmlReader.getClass().getName());
 					}
 				} else if ("tag".equals(qName)) {
 					tag = sbuffer.toString();
-				} /*else if ("user".equals(qName))
+				} else if ("user".equals(qName))
 					user = sbuffer.toString();
 				else if ("password".equals(qName))
 					password = sbuffer.toString();
-				} else if ("auth".equals(qName) && !(inResource || inGate)) {
-					// Global auth, applies to all resources
-					defaultUser = user;
-					defaultPassword = password;
-				} */
-				if ("resource".equals(qName)) {
+				else if ("resource".equals(qName)) {
 					inResource = false;
 					if (srcUrl == null || tag == null) {
 						throw new SAXException(
@@ -408,7 +436,7 @@ System.err.println("Using SAX parser: "+xmlReader.getClass().getName());
 		
 	//***********************  ConfigParser Member Data  *********************//
 		private URL srcUrl;
-		private String tag;
+		private String tag, user, password;
 		private boolean inConfig = false, inResource = false;
 		private XMLReader xmlReader = null;
 		private final StringBuffer sbuffer = new StringBuffer();		
@@ -422,6 +450,7 @@ System.err.println("Using SAX parser: "+xmlReader.getClass().getName());
 	private String host = "localhost:3333", rbnbSource = "ResponseMon";
 	private long intervalMs = 10000;
 	private int resourceReadTimeout = 10000;
+	private boolean debug = false;
 	
 
 //*****************************  Statics  ***********************************//
