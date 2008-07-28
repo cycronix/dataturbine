@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+	build.xml
+	
+	Build file for UDPFragmenter, a UDP packet retransmitter in smaller
+	packet sizes.
+	
+	** History ** 
+	2007/06/05  WHF  Created.
+	2008/07/28  WHF  Integrated into RBNB build system.
+-->
+
+<project name="UDPFragmenter" default="library" basedir=".">
+
+<import file="../../definitions.xml" />
+
+<property 
+		name="class_dir" 
+		value="${rbnb.classesdir}/Applications/UDPFragmenter"
+/>
+
+<target name="compile">
+  <mkdir dir="${class_dir}" />
+	<javac destdir="${class_dir}"
+			debug="on" deprecation="on"
+			source="1.4" target="1.4" >
+		<src path="src" />
+	</javac>
+</target>
+
+<!--
+<target name="documentation">
+	<mkdir dir="doc" />
+	<javadoc sourcefiles="*.java" destdir="doc"
+			classpath="out"
+			Windowtitle="UDPFragmenter API Documentation"
+			Private="no"
+			linksource="no"
+			Use="yes" >
+		<package name="com.rbnb.udp" />
+		<tag name="author" description="Author:" scope="all" />
+		<tag name="version" description="Version:" scope="all" />
+		<link href="http://java.sun.com/j2se/1.4.2/docs/api" offline="true"
+				packagelistLoc="packagelists/java" />
+	</javadoc>
+</target>  -->
+
+<target name="library" depends="compile">
+	<mkdir dir = "${rbnb.librarydir}" />
+	<manifest file = "${rbnb.librarydir}\manif.txt">
+		<attribute name="Main-Class" value="com.rbnb.udp.Fragmenter" />
+	</manifest>
+	<jar 
+			destfile="${rbnb.librarydir}/udpfrag.jar"
+			basedir="${class_dir}"
+			manifest="${rbnb.librarydir}\manif.txt"
+	/>
+	<delete file="${rbnb.librarydir}\manif.txt"/>
+</target>
+
+<target name="clean">
+	<delete dir="${class_dir}" />
+	<delete file="${rbnb.librarydir}/udpfrag.jar" />
+</target>
+
+</project>
