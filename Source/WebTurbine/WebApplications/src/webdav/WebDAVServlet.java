@@ -85,6 +85,7 @@ import org.apache.catalina.util.XMLWriter;
 // 2007/04/20  WHF  Added plug-in option parsing.
 // 2008/05/05  MJM	Added auto-connect to detached source logic
 // 2008/05/28  MJM	Tweeked reconnect logic (restored the delete zero-file logic)
+// 2008/07/31  WHF  Fixed delete of original file on MOVE; added deleteNode().
 //
 
 /**
@@ -670,16 +671,8 @@ if (debug) System.err.println(parentNode);
 			} else {
 				if (conn.ctree.findNode(conn.reqParam.path) != null) {
 					if (!protectSet.contains(conn.reqParam.source)) {
-						// If not protected, delete:
-						ChannelMap cmap = new ChannelMap();
-						// We call for a recursive delete to remove any children.
-						cmap.Add(conn.reqParam.name + "/...");
-						src.Delete(cmap);
-						// Delete the channel itself also.  Must be in a 
-						//   separate request:
-						cmap.Clear();
-						cmap.Add(conn.reqParam.name); 
-						src.Delete(cmap);
+						// If not protected, delete:						
+						deleteNode(src, conn.reqParam.name);
 					} else res.sendError(res.SC_FORBIDDEN);
 				} else res.sendError(res.SC_NOT_FOUND);
 			}
@@ -983,7 +976,12 @@ if (debug) System.err.println(parentNode);
 				// Put the data:
 				conn.destSource.Flush(output);
 				if (deleteSource) {
-					conn.destSource.Delete(data);
+					// 2008/07/31  WHF  Wrong source!
+					//conn.destSource.Delete(data);
+					Source original = (Source) sourcesHT.get(
+							conn.reqParam.source
+					);
+					deleteNode(original, conn.reqParam.name);
 				}
 			} else if (node.getType() == ChannelTree.SOURCE) {
 				if (conn.destSource != null) // already exists
@@ -1013,7 +1011,27 @@ if (debug) System.err.println(parentNode);
 			throw new ServletException(sapiE);
 		}
 		finally { recycleConnection(conn); }
-	}		
+	}
+	
+	/**
+	  * Delete the node (channel or folder) controlled by 'src' with 
+	  *  name 'nodeName'.
+	  *
+	  * @since 2008/07/31
+	  */
+	private static void deleteNode(Source src, String nodeName)
+		throws SAPIException
+	{
+		ChannelMap cmap = new ChannelMap();
+		// We call for a recursive delete to remove any children.
+		cmap.Add(nodeName + "/...");
+		src.Delete(cmap);
+		// Delete the channel itself also.  Must be in a 
+		//   separate request:
+		cmap.Clear();
+		cmap.Add(nodeName); 
+		src.Delete(cmap);
+	}
 	
 	private void parsePlugInOptionStr(String options, ChannelMap cmap)
 	{
