@@ -43,6 +43,7 @@ package com.rbnb.api;
  *   Date      By	Description
  * MM/DD/YYYY
  * ----------  --	-----------
+ * 08/12/2008  WHF      Implemented failSafeMode.
  * 03/26/2008  WHF      Added check for incoming frame at time of termination to
  *                      avoid deadlock in later requests.
  * 01/05/2007  EMF      Avoid infinite loop on archive recovery
@@ -187,6 +188,20 @@ class RBO
 {
 //EMF 1/5/07
 private boolean alreadyReset=false;
+
+    /**
+     * If true, an archive which fails to load for append will be moved and a
+     *  new archive created.
+     * <p>
+     *
+     * @author WHF
+     *
+     * @since V3.1
+     * @version 2008/08/12
+     */
+    private final boolean failSafeMode;
+
+
     /**
      * accepting a frame?
      * <p>
@@ -629,6 +644,14 @@ private boolean alreadyReset=false;
     {
 	super();
 	registrationDoor = new Door(Door.READ_WRITE);
+
+	boolean tempFailSafe = true;	
+	try {
+	    tempFailSafe = !Boolean.getBoolean("com.rbnb.api.RBO.noFailSafe");
+	} catch (Throwable t) {	}
+	finally {
+	    failSafeMode = tempFailSafe;
+	}
     }
 
     /**
@@ -658,6 +681,14 @@ private boolean alreadyReset=false;
     {
 	super(rcoI);
 	registrationDoor = new Door(Door.READ_WRITE);
+	
+	boolean tempFailSafe = true;	
+	try {
+	    tempFailSafe = !Boolean.getBoolean("com.rbnb.api.RBO.noFailSafe");
+	} catch (Throwable t) {	}
+	finally {
+	    failSafeMode = tempFailSafe;
+	}
     }
 
     /**
@@ -6761,7 +6792,9 @@ private boolean alreadyReset=false;
 		    readFromArchive();
 //System.err.println("RBO.setUpArchiveAndCache, after readFromArchive, RBO is");
 //System.err.println(this);
-		} catch (java.lang.IllegalStateException e) {
+			// 2008/08/12  WHF  Catch all Throwables:
+		} //catch (java.lang.IllegalStateException e) {
+		catch (Throwable e) {
 
 		    /*
 		    System.err.println("Caught for: " +
@@ -6769,8 +6802,12 @@ private boolean alreadyReset=false;
 				       ACCESS_APPEND);
 		    */
 
-		    if (getAmode() == ACCESS_LOAD) {
-			throw e;
+		    // 2008/08/12  WHF  If failsafe false, recreate original
+		    //    behavior:
+		    if (getAmode() == ACCESS_LOAD
+		    		|| !failSafeMode 
+		    		&& e instanceof IllegalStateException) {
+			throw new RuntimeException(e);
 		    } else {
 			if (!(this instanceof Log) && (getLog() != null)) {
 			    getLog().addMessage
@@ -6780,6 +6817,7 @@ private boolean alreadyReset=false;
 				 "Existing archive could not be recovered, " +
 				 "creating a new one.");
 			}
+			moveOldArchive();
 			setAmode(ACCESS_CREATE);
 			setUpCache();
 			setUpArchive();
@@ -6796,6 +6834,64 @@ private boolean alreadyReset=false;
 	    }
 	}
     }
+    
+    /**
+      * Moves an old, probably invalid archive to a new name.
+      *
+      * @author Bill Finger
+      * @since V3.1
+      * @version 2008/08/12
+      *
+      * @throws Nothing.
+      */
+    private void moveOldArchive()
+    {
+	final String FAIL_EXT = ".fail.";
+	try {
+	    java.io.File aDir = new java.io.File(getArchiveDirectory());
+	    
+	    // Get parent directory, using Java 1.1 APIs:
+	    java.io.File parent = new java.io.File(
+	    		new java.io.File(aDir.getAbsolutePath()).getParent()
+	    );
+	    
+	    int maxBak = 0;
+	    String[] children = parent.list();
+	    for (int ii = 0; ii < children.length; ++ii) {
+		String child = children[ii];
+		
+		if (child.startsWith(aDir.getName()) 
+			&& !child.equals(aDir.getName())) {
+		    // Find extension, if any:
+		    String ext = child.substring(aDir.getName().length());
+		    if (!ext.startsWith(FAIL_EXT)) continue; // not a retry file
+		    int bakNum = Integer.parseInt(
+		    		ext.substring(FAIL_EXT.length())
+		    );
+		    if (bakNum > maxBak) maxBak = bakNum;
+		}
+	    }
+	    
+	    String numStr;
+	    int num = maxBak + 1;
+	    // Quick & dirty text formatting:
+	    if (num > 99) numStr = Integer.toString(num);
+	    else if (num > 9) numStr = "0" + Integer.toString(num);
+	    else numStr = "00" + Integer.toString(num);
+	    java.io.File newDir = new java.io.File(
+	    		parent,
+			aDir.getName() + FAIL_EXT + numStr
+	    );
+	    if (!aDir.renameTo(newDir)) throw new Exception("Rename failed: "
+			+aDir+" to " + newDir + ".");	    
+	    
+	} catch (Throwable t) {
+	    System.err.println("WARNING: Could not move archive "
+	    		+getArchiveDirectory());
+	    t.printStackTrace();
+	}
+    }
+
 
     /**
      * Sets up the <code>Cache</code>.

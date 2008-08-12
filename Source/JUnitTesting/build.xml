@@ -1,0 +1,70 @@
+<!-- Name: build.xml
+
+	Description:
+         This is the build script to run JUnit tests on various DataTurbine
+	functions.  JUnit V 4.4 is in the 'lib' directory.  Requires Ant 1.7.
+     
+     History:
+     	2008/08/11  WHF  Created.
+-->
+
+<project name="JUnit Testing" default="test-all" basedir=".">
+
+	 <!-- Import the standard definitions (properties). -->
+	<import file="../definitions.xml" />
+
+	<property name="rbnb.testdir" value="${rbnb.builddir}/Testing" />
+	
+	<!-- Ant version check for JUnit 4 to work correctly -->
+	<condition property="rbnb.junitAntVersion">
+		<antversion atleast="1.7.0" />
+	</condition>
+	
+	<target name="init">
+		<mkdir dir="${rbnb.testdir}" />
+	</target>
+	
+	<!-- Compile all the test classes. -->
+	<target name="compile" depends="init">
+		<javac destdir="${rbnb.testdir}" 
+				classpath="lib/junit.jar,${rbnb.librarydir}/rbnb.jar"
+				debug="on" deprecation="on" 
+				source="1.5" target="1.5" >
+			<src path="src" />
+		</javac>
+	</target>	
+	
+	<!-- As targets are created, add them to the 
+			dependency list of this task. -->
+	<target name="test-all" depends="test-dataturbine" />
+	
+	
+	<!-- Just prints an error message. -->
+	<target name="badAntVersion" unless="rbnb.junitAntVersion" >
+		<echo>Ant version 1.7 required for JUnit tests.</echo>
+		<echo>You have ${ant.version}.</echo>
+	</target>
+
+	<!-- Test aspects of the server. -->
+	<target name="test-dataturbine" depends="compile,badAntVersion"
+			if="rbnb.junitAntVersion">
+		
+		<junit failureproperty="testResult" >
+<!--				printsummary="withOutAndErr" 
+				showoutput="true" >  -->
+			<classpath>
+				<pathelement location="${rbnb.testdir}" />
+				<pathelement location="lib/junit.jar" />
+				<pathelement location="${rbnb.librarydir}/rbnb.jar" />
+			</classpath>
+			<sysproperty key="com.rbnb.tests.rbnbArchiveDir" 
+					value="${rbnb.testdir}" />
+			<formatter type="plain" usefile="false" />
+			<test name="com.rbnb.tests.ArchiveTests" />
+		</junit>
+	</target>
+	
+	<target name="clean">
+		<delete dir="${rbnb.testdir}" />
+	</target>		
+</project>

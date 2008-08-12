@@ -15,13 +15,13 @@
 <project name="RBNB" default="distribute-izpack" basedir=".">
 
  <!-- Import the standard definitions (properties). -->
- <import file="definitions.xml" />
+	<import file="definitions.xml" />
 
  <!-- Initialize the build and distribute directories. -->
- <target name="init">
-  <mkdir dir="${rbnb.builddir}" />
-  <mkdir dir="${rbnb.distributedir}" />
- </target>
+	<target name="init">
+		<mkdir dir="${rbnb.builddir}" />
+		<mkdir dir="${rbnb.distributedir}" />
+	</target>
 
  <!-- The DataTurbine library is needed by everything else and a number of
       other targets and sub-builds depend on it and its documentation being
@@ -29,145 +29,152 @@
       that completely build it before any of the other builds are run. -->
 
  <!-- DataTurbine compilation target. -->
- <target name="compile-dataturbine" depends="init">
-  <mkdir dir="${rbnb.classesdir}" />
-  <subant target="compile">
-   <fileset dir="."
-            includes="DataTurbine/build.xml" />
-  </subant>
- </target>
+	<target name="compile-dataturbine" depends="init">
+		<mkdir dir="${rbnb.classesdir}" />
+		<subant target="compile">
+			<fileset dir="."
+					includes="DataTurbine/build.xml" />
+		</subant>
+	</target>
 
  <!--DataTurbine library target. -->
- <target name="library-dataturbine" depends="init">
-  <mkdir dir="${rbnb.librarydir}" />
-  <subant target="library">
-   <fileset dir="."
-            includes="DataTurbine/build.xml" />
-  </subant>
- </target>
+	<target name="library-dataturbine" depends="init">
+		<mkdir dir="${rbnb.librarydir}" />
+		<subant target="library">
+			<fileset dir="."
+					includes="DataTurbine/build.xml" />
+		</subant>
+	</target>
+ 
+ <!-- DataTurbine JUnit test target. -->
+	<target name="test-dataturbine" depends="library-dataturbine">
+		<subant target="test-dataturbine" antfile="JUnitTesting/build.xml" 
+			buildpath="." />
+	</target>
+	
 
  <!-- The following paths are used by reference by Javadoc to locate its source
      files and classes. -->
- <path id="rbnb.javadoc.source.path">
-  <pathelement path="${rbnb.sourcedir}/DataTurbine" />
-  <pathelement path="${rbnb.sourcedir}/Applications/Video" />
-  <pathelement path="${rbnb.sourcedir}/Applications/PlugIns" />
- </path>
- <path id="rbnb.javadoc.class.path">
-  <pathelement path="${rbnb.builddir}/rbnb.jar" />
-  <pathelement path="${rbnb.basedir}/../LicensedSoftware/JMF-2.1.1e/lib/jmf.jar" />
- </path>
+	<path id="rbnb.javadoc.source.path">
+		<pathelement path="${rbnb.sourcedir}/DataTurbine" />
+		<pathelement path="${rbnb.sourcedir}/Applications/Video" />
+		<pathelement path="${rbnb.sourcedir}/Applications/PlugIns" />
+	</path>
+	<path id="rbnb.javadoc.class.path">
+		<pathelement path="${rbnb.builddir}/rbnb.jar" />
+		<pathelement path="${rbnb.basedir}/../LicensedSoftware/JMF-2.1.1e/lib/jmf.jar" />
+	</path>
 
  <!-- Build the documentation directory. -->
- <target name="documentation" depends="library-dataturbine">
-  <mkdir dir="${rbnb.documentationdir}" />
-  <copy todir="${rbnb.librarydir}">
-   <fileset dir="${rbnb.sourcedir}"
-            includes="ReleaseNotes.html,EULA.html,InstallNotes.txt" />
-  </copy>
-  <copy todir="${rbnb.documentationdir}">
-   <fileset dir="${rbnb.sourcedir}"
-            includes="ReleaseNotes.html,EULA.html" />
-   <fileset dir="${rbnb.sourcedir}/Documentation/HTML" 
-            excludes="SAPI/Old" />
-  </copy>
-  <javadoc sourcepathref="rbnb.javadoc.source.path"
-           destdir="${rbnb.documentationdir}/JavaDoc"
-           classpathref="rbnb.javadoc.class.path"
-           Windowtitle="RBNB ${rbnb.version} Java API Documentation"
-           Use="yes" >
-   <package name="com.rbnb.api" />
-   <package name="com.rbnb.sapi" />
-   <package name="com.rbnb.plugins" />
-   <package name="com.rbnb.simpleplayer" />
-   <package name="com.rbnb.media.datasink.protocol" />
-   <tag name="author" description="Author:" scope="all" />
-   <tag name="version" description="Version:" scope="all" />
-   <link href="http://java.sun.com/products/java-media/jmf/2.1.1/apidocs"
-         offline="true"
-         packagelistLoc="${rbnb.sourcedir}/Documentation/HTML/JavaDoc/jmf" />
-   <link href="http://java.sun.com/j2se/1.4.2/docs/api"
-         offline="true"
-         packagelistLoc="${rbnb.sourcedir}/Documentation/HTML/JavaDoc/java" />
-  </javadoc>
- </target>
+	<target name="documentation" depends="library-dataturbine">
+		<mkdir dir="${rbnb.documentationdir}" />
+		<copy todir="${rbnb.librarydir}">
+			<fileset dir="${rbnb.sourcedir}"
+					includes="ReleaseNotes.html,EULA.html,InstallNotes.txt" />
+		</copy>
+		<copy todir="${rbnb.documentationdir}">
+			<fileset dir="${rbnb.sourcedir}"
+					includes="ReleaseNotes.html,EULA.html" />
+			<fileset dir="${rbnb.sourcedir}/Documentation/HTML"
+					excludes="SAPI/Old" />
+		</copy>
+		<javadoc sourcepathref="rbnb.javadoc.source.path"
+				destdir="${rbnb.documentationdir}/JavaDoc"
+				classpathref="rbnb.javadoc.class.path"
+				Windowtitle="RBNB ${rbnb.version} Java API Documentation"
+				Use="yes">
+			<package name="com.rbnb.api" />
+			<package name="com.rbnb.sapi" />
+			<package name="com.rbnb.plugins" />
+			<package name="com.rbnb.simpleplayer" />
+			<package name="com.rbnb.media.datasink.protocol" />
+			<tag name="author" description="Author:" scope="all" />
+			<tag name="version" description="Version:" scope="all" />
+			<link href="http://java.sun.com/products/java-media/jmf/2.1.1/apidocs"
+					offline="true"
+					packagelistLoc="${rbnb.sourcedir}/Documentation/HTML/JavaDoc/jmf" />
+			<link href="http://java.sun.com/j2se/1.4.2/docs/api"
+					offline="true"
+					packagelistLoc="${rbnb.sourcedir}/Documentation/HTML/JavaDoc/java" />
+		</javadoc>
+	</target>
 
  <!-- Builds a complete set of the documentation, including class privates. -->
- <target name="programmer-documentation">
-  <mkdir dir="${rbnb.builddir}/ProgrammerDocumentation" />
-  <javadoc sourcepathref="rbnb.javadoc.source.path"
-           destdir="${rbnb.builddir}/ProgrammerDocumentation"
-	   classpath="${rbnb.librarydir}/rbnb.jar;${rbnb.librarydir}/Classes/Applications/PlugIns"
-           Windowtitle="RBNB ${rbnb.version} Java API Programmer Documentation"
-	   Private="yes"
-	   linksource="yes"
-           Use="yes" >
-   <package name="com.rbnb.api" />
-   <package name="com.rbnb.sapi" />
-   <package name="com.rbnb.simpleplayer" />
-   <package name="com.rbnb.utility" />
-   <package name="com.rbnb.media.datasink.protocol" />
-   <package name="com.rbnb.plugins" />
-   <tag name="author" description="Author:" scope="all" />
-   <tag name="version" description="Version:" scope="all" />
-   <link href="http://java.sun.com/products/java-media/jmf/2.1.1/apidocs"
-         offline="true"
-         packagelistLoc="${rbnb.sourcedir}/Documentation/HTML/JavaDoc/jmf" />
-   <link href="http://java.sun.com/j2se/1.4.2/docs/api"
-         offline="true"
-         packagelistLoc="${rbnb.sourcedir}/Documentation/HTML/JavaDoc/java" />
-  </javadoc>
+	<target name="programmer-documentation">
+		<mkdir dir="${rbnb.builddir}/ProgrammerDocumentation" />
+		<javadoc sourcepathref="rbnb.javadoc.source.path"
+				destdir="${rbnb.builddir}/ProgrammerDocumentation"
+				classpath="${rbnb.librarydir}/rbnb.jar;${rbnb.librarydir}/Classes/Applications/PlugIns"
+				Windowtitle="RBNB ${rbnb.version} Java API Programmer Documentation"
+				Private="yes"
+				linksource="yes"
+				Use="yes">
+			<package name="com.rbnb.api" />
+			<package name="com.rbnb.sapi" />
+			<package name="com.rbnb.simpleplayer" />
+			<package name="com.rbnb.utility" />
+			<package name="com.rbnb.media.datasink.protocol" />
+			<package name="com.rbnb.plugins" />
+			<tag name="author" description="Author:" scope="all" />
+			<tag name="version" description="Version:" scope="all" />
+			<link href="http://java.sun.com/products/java-media/jmf/2.1.1/apidocs"
+					offline="true"
+					packagelistLoc="${rbnb.sourcedir}/Documentation/HTML/JavaDoc/jmf" />
+			<link href="http://java.sun.com/j2se/1.4.2/docs/api"
+					offline="true"
+					packagelistLoc="${rbnb.sourcedir}/Documentation/HTML/JavaDoc/java" />
+		</javadoc>
   <!-- pfh add doxygen here, as is also developer docs. 
    See http://ant-doxygen.sourceforge.net/usage.php -->
-  <doxygen>
-      <property name="INPUT" value="." />
-  </doxygen>
- </target>
+		<doxygen>
+			<property name="INPUT" value="." />
+		</doxygen>
+	</target>
 
  <!-- Compile all of the applications, but don't build any libraries. -->
  <!-- JPW 08/20/2007: Since Third_Party has been pulled out of Source, -->
  <!--                 need to separately call its "compile" target.    -->
- <target name="compile" depends="documentation">
-  <mkdir dir="${rbnb.classesdir}" />
-  <subant target="compile">
-   <fileset dir="."
-	    includes="*/build.xml"
-            excludes="DataTurbine/build.xml,WebTurbine/build.xml" />
-   <fileset dir=".."
-	    includes="Third_Party/build.xml" />
-   <fileset dir="."
-            includes="WebTurbine/build.xml" />
-  </subant>
- </target>
+	<target name="compile" depends="documentation">
+		<mkdir dir="${rbnb.classesdir}" />
+		<subant target="compile">
+			<fileset dir="."
+					includes="*/build.xml"
+					excludes="DataTurbine/build.xml,WebTurbine/build.xml" />
+			<fileset dir=".."
+					includes="Third_Party/build.xml" />
+			<fileset dir="."
+					includes="WebTurbine/build.xml" />
+		</subant>
+	</target>
 
  <!-- Compile and make libraries for all of the applications.          -->
  <!-- JPW 08/20/2007: Since Third_Party has been pulled out of Source, -->
  <!--                 need to separately call its "library" target.    -->
- <target name="library" depends="documentation">
-  <mkdir dir="${rbnb.librarydir}" />
-  <subant target="library">
-   <fileset dir="."
-	    includes="*/build.xml"
-            excludes="DataTurbine/build.xml,WebTurbine/build.xml" />
-   <fileset dir=".."
-	    includes="Third_Party/build.xml" />
-   <fileset dir="."
-            includes="WebTurbine/build.xml" />
-  </subant>
- </target>
+	<target name="library" depends="documentation">
+		<mkdir dir="${rbnb.librarydir}" />
+		<subant target="library">
+			<fileset dir="."
+					includes="*/build.xml"
+					excludes="DataTurbine/build.xml,WebTurbine/build.xml" />
+			<fileset dir=".."
+					includes="Third_Party/build.xml" />
+			<fileset dir="."
+					includes="WebTurbine/build.xml" />
+		</subant>
+	</target>
 
  <!-- Build a distribution package using IzPack. -->
- <target name="distribute-izpack" depends="library">
-  <subant target="distribute">
-   <fileset dir="."
-            includes="IzPack/build.xml" />
-  </subant>
- </target>
+	<target name="distribute-izpack" depends="library">
+		<subant target="distribute">
+			<fileset dir="."
+					includes="IzPack/build.xml" />
+		</subant>
+	</target>
 
  <!-- Cleans out all the built and distributable stuff. -->
- <target name="clean">
-  <delete dir="${rbnb.builddir}" />
-  <delete dir="${rbnb.distributedir}" />
- </target>
-
+	<target name="clean">
+		<delete dir="${rbnb.builddir}" />
+		<delete dir="${rbnb.distributedir}" />
+	</target>
+	
 </project>

@@ -6,6 +6,21 @@
   <title>RBNB Release Notes</title></head>
 <body>
 <h1>RBNB Release Notes</h1>
+<h1>RBNB V3.1b? Notes</h1>
+<h3>Server</h3>
+<ul>
+	<li>If an Archive is loaded for Append, and the load fails, the old archive
+		is now moved to a new name, of the form &lt;old_name&gt;.fail.001 
+		(002, etc).  A new archive is then created with the old name.</li>
+	<li>The old behavior can be restored with:
+		<p><center><code>-Dcom.rbnb.api.RBO.noFailSafe=true</code></center></p>
+	</li>
+</ul>
+<h3>Build Environment</h3>
+<ul>
+	<li>Added JUnit test framework, which requires Ant 1.7.  Currently the
+		only test is to check the behavior listed under 'Server', above.</li>
+</ul>
 <h1>RBNB V3.1a Release Notes</h1>
 <h2>V3.1a Production Release</h2>
 V3.1a released 07/09/2008<br>This release corresponds to RBNB Subversion repository revision number 151<br>Fixed a bug in rbnbPlot (RBNB Issue #9, "<span class="h3">rbnbPlot throws NullPointerException on chans w/o MIME</span>").<br>Add headless (no GUI) mode to UDPCaster; this is activated using the new "-g" command line flag.<br><h1>RBNB V3.1 Release Notes</h1>
