@@ -155,7 +155,7 @@
 		<subant target="library">
 			<fileset dir="."
 					includes="*/build.xml"
-					excludes="DataTurbine/build.xml,WebTurbine/build.xml" />
+					excludes="DataTurbine/build.xml,WebTurbine/build.xml,JUnitTesting/build.xml" />
 			<fileset dir=".."
 					includes="Third_Party/build.xml" />
 			<fileset dir="."
