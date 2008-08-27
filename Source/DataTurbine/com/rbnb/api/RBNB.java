@@ -106,6 +106,8 @@ import java.io.PrintWriter;
  *   Date      By	Description
  * MM/DD/YYYY
  * ----------  --	-----------
+ * 08/26/2008  MJM  Changed Metrics to use zero-duration timestamps.  
+ * 					Reduces archive and in-use memory by >4x.
  * 06/22/2006  JPW	Add "-H" archive home directory in parseArguments().
  *			Add archiveHomeDirectory, getArchiveHomeDirectory()
  *			and setArchiveHomeDirectory().
@@ -842,6 +844,7 @@ final class RBNB
      *   Date      By	Description
      * MM/DD/YYYY
      * ----------  --	-----------
+     * 08/26/2008  MJM  Use zero-duration timestamps for reduced memory use
      * 01/16/2004  INB	Initialize the data byte sizes to 0.
      * 11/15/2002  INB	Created.
      *
@@ -862,13 +865,14 @@ final class RBNB
 	    rmapR = metrics;
 	    double duration = 1.;
 	    if (lastTimeI == Long.MIN_VALUE) {
-		rmapR.setTrange(new TimeRange(nowI/1000. - duration,duration));
+	    	rmapR.setTrange(new TimeRange(nowI/1000. - duration,duration));
 	    } else {
-		duration = (nowI - lastTimeI - 1)/1000.;
-		if (duration < 0.) {
-		    duration = 0.;
-		}
-		rmapR.setTrange(new TimeRange(nowI/1000. - duration,duration));
+	    	duration = (nowI - lastTimeI - 1)/1000.;
+	    	if (duration < 0.) {
+	    		duration = 0.;
+	    	}
+//	    	rmapR.setTrange(new TimeRange(nowI/1000. - duration,duration));
+	    	rmapR.setTrange(new TimeRange(nowI/1000.,0.));	// mjm 8/2008:  zero duration -> more compact metrics?
 	    }
 
 	    long[] totalMemory = { Runtime.getRuntime().totalMemory() };
@@ -881,7 +885,7 @@ final class RBNB
 			       DataBlock.ORDER_MSB,
 			       false,
 			       0,
-			       8));
+			       8)); 
 
 	    long[] availableMemory = { totalMemory[0] -
 				       Runtime.getRuntime().freeMemory() };
