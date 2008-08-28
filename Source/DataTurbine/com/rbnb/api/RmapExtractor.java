@@ -37,6 +37,7 @@ package com.rbnb.api;
  *   Date      By	Description
  * MM/DD/YYYY
  * ----------  --	-----------
+ * 08/15/2008  MJM	Do not "merge" multi-channel Rmaps in Monitor mode, or lose time-info
  * 03/18/2003  INB	Ensure that combined results contain marker blocks.
  * 11/30/2000  INB	Created.
  *
@@ -372,49 +373,56 @@ class RmapExtractor {
 	    }
 
 	    if ((combinedR instanceof Rmap) &&
-		(getWorkRequest() != null) &&
-		(getWorkRequest() instanceof DataRequest)) {
-		Rmap combined = (Rmap) combinedR;
-		DataRequest dr = (DataRequest) getWorkRequest();
-		if (dr.getReference() != DataRequest.ABSOLUTE) {
-		    boolean needMerge = false;
-		    for (int idx = 0;
-			 (idx < dr.getNchildren()) && !needMerge;
-			 ++idx) {
-			if (dr.getChildAt(idx).getFrange() != null) {
-			    needMerge = true;
-			}
-		    }
+	    		(getWorkRequest() != null) &&
+	    		(getWorkRequest() instanceof DataRequest)) {
+	    	Rmap combined = (Rmap) combinedR;
+	    	DataRequest dr = (DataRequest) getWorkRequest();
+	    	
+	   // MJM 8/2008:  only merge frames in NON-monitor mode 	
+	    	boolean isMonitorMode = (dr.getDomain() == DataRequest.FUTURE) &&
+	    				(dr.getMode()      == DataRequest.FRAMES) &&
+	    				(dr.getReference() == DataRequest.NEWEST);
+    		                      
+	    	if ((dr.getReference() != DataRequest.ABSOLUTE) && (isMonitorMode == false)) {
+	    		boolean needMerge = false;
+	    		for (int idx = 0;
+	    		(idx < dr.getNchildren()) && !needMerge;
+	    		++idx) {
+	    			if (dr.getChildAt(idx).getFrange() != null) {
+	    				needMerge = true;
+	    			}
+	    		}
 
-		    if (needMerge) {
-			TimeRange fRange = combined.mergeFrange
-			    (dr.getReference(),
-			     null);
-			String[] names = dr.extractNames();
-			if ((names.length > 1) ||
-			    ((names.length == 1) &&
-			     (!names[0].endsWith("/*") &&
-			      !names[0].endsWith("/...")))) {
-			    for (int idx = 0;
-				 idx < combined.getNchildren();
-				 ++idx) {
-				combined.getChildAt(idx).setFrange(fRange);
-			    }
+//	    		if(false) {		// MJM 7/16/2008:  try removing this, it breaks multi-chan monitor mode
+	    		if (needMerge) {
+	    			TimeRange fRange = combined.mergeFrange
+	    			(dr.getReference(),
+	    					null);
+	    			String[] names = dr.extractNames();
+	    			if ((names.length > 1) ||
+	    					((names.length == 1) &&
+	    							(!names[0].endsWith("/*") &&
+	    									!names[0].endsWith("/...")))) {
+	    				for (int idx = 0;
+	    				idx < combined.getNchildren();
+	    				++idx) {
+	    					combined.getChildAt(idx).setFrange(fRange);
+	    				}
 
-			} else if (names.length == 1) {
-			    while (combined.getNchildren() > 0) {
-				combined.removeChildAt(0);
-			    }
-			    combined.addChild(Rmap.createFromName(names[0]));
-			    combined.getChildAt(0).setFrange(fRange);
-			    Rmap bottom = combined.moveToBottom();
-			    bottom.setDblock(Rmap.MarkerBlock);
+	    			} else if (names.length == 1) {
+	    				while (combined.getNchildren() > 0) {
+	    					combined.removeChildAt(0);
+	    				}
+	    				combined.addChild(Rmap.createFromName(names[0]));
+	    				combined.getChildAt(0).setFrange(fRange);
+	    				Rmap bottom = combined.moveToBottom();
+	    				bottom.setDblock(Rmap.MarkerBlock);
 
-			} else if (names.length == 0) {
-			    combinedR = null;
-			}
-		    }
-		}
+	    			} else if (names.length == 0) {
+	    				combinedR = null;
+	    			}
+	    		}
+	    	}
 	    }
 	}
 

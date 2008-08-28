@@ -107,7 +107,7 @@ import java.util.Vector;
  * @see com.rbnb.api.StreamServerListener
  * @see com.rbnb.api.StreamRequestHandler
  * @since V2.0
- * @version 03/13/2007
+ * @version 08/27/2008
  */
 
 /*
@@ -117,6 +117,8 @@ import java.util.Vector;
  *   Date      By	Description
  * MM/DD/YYYY
  * ----------  --	-----------
+ * 08/27/2008  JPW	Make change in processWorking():
+ * 			Support monitor mode data request with more than 1 child
  * 03/13/2007  JPW	Make a change in findStartRequest():
  *			For subscription to oldest, if there is no Frange in
  *			the extracted DataRequest, set foundR to false and wait
@@ -1174,7 +1176,7 @@ final class StreamRBOListener
      * @exception java.lang.InterruptedException
      *		  thrown if this operation is interrupted.
      * @since V2.0
-     * @version 07/15/2005
+     * @version 08/27/2008
      */
 
     /*
@@ -1182,6 +1184,7 @@ final class StreamRBOListener
      *   Date      By	Description
      * MM/DD/YYYY
      * ----------  --	-----------
+     * 08/27/2008  JPW  Support monitor mode data request with more than 1 child
      * 2005/07/15  WHF  Added OutOfMemoryError handling.
      * 04/25/2005  JPW	If we got a match and if the user is in Monitor mode,
      *			check that we don't send out a repeated frame.
@@ -1302,6 +1305,7 @@ final class StreamRBOListener
 	    // JPW 04/25/2005
 	    // If we got a match and if the user is in Monitor mode,
 	    // check that we don't send out a repeated frame
+	    /*
 	    TimeRange monitorTR = null;
 	    if ( (!(match instanceof EndOfStream))        &&
 		 (match.getNchildren() > 0)               &&
@@ -1341,24 +1345,127 @@ final class StreamRBOListener
 		}
 		// System.err.println("monitorFrameIdx: " + monitorFrameIdx);
 	    }
+	    */
+	    
+	    boolean bMonitorDataRequest = false;
+	    if ( (subWorking instanceof DataRequest)                           &&
+		 (((DataRequest)subWorking).getDomain() == DataRequest.FUTURE) &&
+		 (((DataRequest)subWorking).getMode() == DataRequest.FRAMES)   &&
+		 (((DataRequest)subWorking).getReference() == DataRequest.NEWEST) )
+	    {
+		bMonitorDataRequest = true;
+	    }
+	    
+	    // JPW 07/23/08: The previous logic to check frame indeces when in
+	    //               monitor mode didn't account for the fact that there
+	    //               may be multiple channels, each with its own frame
+	    //               index.  This new logic does account for that.
+	    if ( (!(match instanceof EndOfStream)) &&
+		 (match.getNchildren() > 0)        &&
+		 (bMonitorDataRequest) )
+	    {
+		// Go through each child and make sure the frame index for
+		// each child is greater than monitorFrameIdx; if any child
+		// has a frame index lower than monitorFrameIdx, make a note
+		// of it for later removal from the Rmap.
+		Vector childrenToRemove = null;
+		double newMonitorFrameIdx = -1.0;
+		for (int i = 0; i < match.getNchildren(); ++i) {
+		    TimeRange monitorTR = match.getChildAt(i).getFrange();
+		    if (monitorTR == null) {
+			continue;
+		    }
+		    if (monitorTR.getNptimes() != 1) {
+			// I only expect 1 time point; throw this exception
+			// to notify me that some Monitor mode cases can have
+			// more than 1 point
+			throw new IllegalStateException(
+			    "For Monitor mode match, only 1 time point was " +
+			    "expected; got " +
+			    monitorTR.getNptimes());
+		    }
+		    // System.err.println("\n\nTimeRange:" + monitorTR);
+		    if (monitorTR.getPtimes()[0] <= monitorFrameIdx) {
+			// This child should be remove from match
+			if (childrenToRemove == null) {
+			    childrenToRemove = new Vector();
+			}
+			childrenToRemove.addElement(match.getChildAt(i));
+		    }
+		    if (monitorTR.getPtimes()[0] > newMonitorFrameIdx) {
+			newMonitorFrameIdx = monitorTR.getPtimes()[0];
+		    }
+		}
+		monitorFrameIdx = newMonitorFrameIdx;
+		// System.err.println("monitorFrameIdx: " + monitorFrameIdx);
+		if (childrenToRemove != null) {
+		    // System.err.print("Orig num children = " + match.getNchildren());
+		    for (int i = 0; i < childrenToRemove.size(); ++i) {
+			match.removeChild((Rmap)childrenToRemove.elementAt(i));
+		    }
+		    // System.err.println(" ==> final num children = " + match.getNchildren());
+		    if (match.getNchildren() == 0) {
+			// No children to post!
+			// NOTE: countR = the number of frames retreived;
+			//       I don't think we increment it here
+			setNeedWait(true);
+			// For Monitor mode, we always just want the most recent
+			// data, so set pickup counter to 0 (we don't "get behind"
+			// like in Subscribe mode).
+			setToPickup(0);
+			setNeedStart(false);
+			continue;
+		    }
+		}
+	    }
 	    
 	    if ((match != null) &&
 		((dSub != null) &&
 		(dSub.getReference() != DataRequest.ABSOLUTE)) &&
 		(!(match instanceof EndOfStream) ||
 		 (match.getNchildren() > 0))) {
-		// If the request is for a relative time, then use the first
-		// response as a request.
+		// Create an Rmap with absolute timestamps by calling extractRmap() once again.
 		subWorking = match;
 		dSub = ((subWorking instanceof DataRequest) ?
 			((DataRequest) subWorking) :
 			null);
 		reasonEOS = EndOfStream.REASON_NODATA;
-//System.err.println("\ncalling extractRmap again!!\n");
-		match = ((Rmap) getSource()).extractRmap(match,true);
+		if ( (!bMonitorDataRequest) ||
+		     ( (bMonitorDataRequest) && (match.getNchildren() == 1) ) )
+		{
+		    match = ((Rmap) getSource()).extractRmap(match,true);
+		}
+		else
+		{
+		    // This is a monitor mode data request with more than 1 child.
+		    // If all the children have the same frame index, then go
+		    // ahead and make one call to extractRmap().  Otherwise,
+		    // call extractRmap() for each child and then combine the
+		    // results into a final Rmap
+		    // Make a stripped-down parent "shell" Rmap
+		    Rmap parentRequestRmap = (Rmap)match.clone();
+		    for (int i = 0; i < match.getNchildren(); ++i) {
+			parentRequestRmap.removeChildAt(0);
+		    }
+		    Rmap finalRmap = null;
+		    for (int i = 0; i < match.getNchildren(); ++i) {
+			Rmap tempParent = (Rmap)parentRequestRmap.clone();
+			Rmap childRmap = (Rmap)match.getChildAt(i).clone();
+			tempParent.addChild(childRmap);
+			Rmap nextMatch = ((Rmap) getSource()).extractRmap(tempParent,true);
+			if (finalRmap == null) {
+			    finalRmap = nextMatch;
+			} else {
+			    for (int j = 0; j < nextMatch.getNchildren(); ++j) {
+				finalRmap.addChild((Rmap)nextMatch.getChildAt(j).clone());
+			    }
+			}
+		    }
+		    match = finalRmap;
+		}
                 //EMF
 		//match = newFr.extractRmap(match,true);
-
+		
 		// System.err.println(
 		//     "StreamRBOListener.processWorking(): this:\n" +
                 //     this +
@@ -1446,8 +1553,6 @@ final class StreamRBOListener
 		//     ", frame index = " +
 		//     subWorking.getChildAt(0).getFrange());
 		
-//System.err.println("StreamRBOListener.processWorking: calling post with "+match);
-//System.err.println();
 		post(match);
 		haveNewRBO = false;
 		if ((myBase != null) &&
