@@ -6,20 +6,23 @@
   <title>RBNB Release Notes</title></head>
 <body>
 <h1>RBNB Release Notes</h1>
-<h1>RBNB V3.1b? Notes</h1>
-<h3>Server</h3>
+<h1>RBNB V3.2 Release Notes</h1><h2>V3.1a to V3.2B1 Changes</h2>
+V3.2B1 released 08/28/2008<br>This release corresponds to RBNB Subversion repository revision number 162<span style="font-weight: bold;"><br></span><h3><span style="font-weight: bold;"></span>Server</h3>
 <ul>
+	<li>Fix RBNB Issue #8, "Monitoring a source which has multiple RingBuffers
+doesn't work" (http://code.google.com/p/dataturbine/issues/detail?id=8)</li>
 	<li>If an Archive is loaded for Append, and the load fails, the old archive
 		is now moved to a new name, of the form &lt;old_name&gt;.fail.001 
-		(002, etc).  A new archive is then created with the old name.</li>
-	<li>The old behavior can be restored with:
-		<p><center><code>-Dcom.rbnb.api.RBO.noFailSafe=true</code></center></p>
-	</li>
+		(002, etc).  A new archive is then created with the old name. &nbsp;The old behavior can be restored with: "<code>-Dcom.rbnb.api.RBO.noFailSafe=true"</code></li><li>Changed Metrics Rmaps to use zero-duration timestamps to reduce memory (cache and archive) utilization.</li>
 </ul>
-<h3>Build Environment</h3>
+<h3>Applications</h3>
+<ul><li>In WebDAVServlet, fixed delete of original file on MOVE</li><li>Added UDPFragmenter, a utility to fragment UDP packets for transmission over networks without IP fragmentation support.</li><li>Added
+ResponseMon application, an HttpMonitor variant to quantize webserver
+response times and log to DataTurbine; includes BASIC authentication
+support.</li></ul><h3>Build Environment</h3>
 <ul>
 	<li>Added JUnit test framework, which requires Ant 1.7.  Currently the
-		only test is to check the behavior listed under 'Server', above.</li>
+		only test is to check archive append load failures (see note in Server, above). &nbsp;The&nbsp;JUnitTesting subdirectory is excluded from the&nbsp;root library Ant build task.</li>
 </ul>
 <h1>RBNB V3.1a Release Notes</h1>
 <h2>V3.1a Production Release</h2>
