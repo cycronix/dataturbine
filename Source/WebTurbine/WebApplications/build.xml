@@ -1,9 +1,7 @@
 <!-- Name: build.xml
      By:   Bill Finger
-     Date: 2005/12/08
 	 
 	 History
-	 2007/08/23  PFH  Removing references to proguard and obfuscation.
 	 2004/06/22  WHF  Created.
 	 2005/10/12  WHF  Made the leap to the new RBNB WebDav.
 	 2005/12/08  WHF  Cleaned up some old definitions.
@@ -14,7 +12,9 @@
 	 2006/04/26  WHF  Builds HttpMonitor.
 	 2006/07/13  JPW  No longer copy KMLResources directory; copy
 	                      TrackResources directory.
-	 2007/03/23  WHF  Attempt to use Piccolo as the SAX driver, versus xerces.				
+	 2007/03/23  WHF  Attempt to use Piccolo as the SAX driver, versus xerces.
+	 2007/08/23  PFH  Removing references to proguard and obfuscation.
+	 2008/08/29  WHF  Cleaned up build.  Added ChartServlet.
 -->
 
 <project name="WebApplications" default="library" basedir=".">
@@ -33,12 +33,14 @@
 	<property name="rbnb.walibdir"
 			value="${rbnb.librarydir}/WebServerImage" />
 			
+	<!-- WebTurbine web-application properties: -->
 	<property name="rbnb.wtimageroot"
 			value="${rbnb.waclassesdir}/webapps/webTurbine" />
 	<property name="rbnb.wtclassesdir"
 			value="${rbnb.wtimageroot}/WEB-INF/classes" />
 	<property name="rbnb.wtwarpath"
 			value="${rbnb.walibdir}/webapps/webTurbine.war" />
+			
 	<property name="rbnb.docwarpath"
 			value="${rbnb.walibdir}/webapps/documentation.war" />
 			
@@ -111,7 +113,7 @@
 				deprecation = "on"
 				debug = "${rbnb.compiledebug}"
 				srcdir = "${rbnb.wasourcedir}/src/other" 
-				includes = "*.java"
+				includes = "**/*.java"
 				source="${rbnb.javaver}"
 				target="${rbnb.javaver}">
 			<classpath refid = "corecp" />
@@ -144,17 +146,29 @@
 		<!-- JPW 02/25/08: Add source and target Java version -->
 		<javac destdir="${rbnb.webdavclassesdir}" debug = "${rbnb.compiledebug}"
 				srcdir = "${rbnb.webdavsourcedir}"
-				includes = "*.java"
+				includes = "**/*.java"
 				source="${rbnb.javaver}"
 				target="${rbnb.javaver}">
 			<classpath refid = "corecp" />
 			<classpath refid = "servletcp" />
 		</javac>
+		<!-- Build ChartServlet into the WebTurbine web application: -->
+		<javac destdir="${rbnb.wtclassesdir}"
+				deprecation = "on"
+				debug = "${rbnb.compiledebug}"
+				srcdir = "${rbnb.wasourcedir}/src/ChartServlet" 
+				includes = "com/creare/chart/*.java"
+				source = "${rbnb.javaver}"
+				target = "${rbnb.javaver}">
+			<classpath refid = "corecp" />
+			<classpath refid = "servletcp" />
+			<classpath path="${rbnb.thirdpartydir}/jfreechart-0.9.7.jar" />
+		</javac>
 		<!-- HttpForward: -->
 		<!-- JPW 02/25/08: Add source and target Java version -->
 		<javac destdir="${rbnb.webdavclassesdir}" debug = "${rbnb.compiledebug}"
 				srcdir = "${rbnb.wasourcedir}/src/HttpForward"
-				includes = "*.java"
+				includes = "**/*.java"
 				source="${rbnb.javaver}"
 				target="${rbnb.javaver}">
 			<classpath refid = "corecp" />
@@ -232,6 +246,8 @@
 				    includes="admin.jar,plot.jar,source.jar,webcache.jar,
 					messaging.jar,chat.jar,proxy.jar,bufferedroute.jar,
 					rbnbAVCP.jar,player.jar,HttpMonitor.jar" />
+			<fileset dir = "${rbnb.thirdpartydir}"
+					includes="jfreechart-0.9.7.jar,jcommon-0.7.3.jar" />
 		</copy>
 		<mkdir dir = "${rbnb.walibdir}/webapps/webTurbine/WEB-INF/classes" />
 		<copy todir = "${rbnb.walibdir}/webapps/webTurbine/WEB-INF/classes" >
