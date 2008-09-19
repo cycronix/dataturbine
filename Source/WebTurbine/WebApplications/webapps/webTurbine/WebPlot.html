@@ -1,0 +1,104 @@
+<!doctype html public "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<!-- WebPlot.html
+
+	Copyright Creare Inc.  2008.  All rights reserved.
+
+	Licensed under the Apache License, Version 2.0 (the "License"); 
+	you may not use this file except in compliance with the License. 
+	You may obtain a copy of the License at 
+	
+	http://www.apache.org/licenses/LICENSE-2.0 
+	
+	Unless required by applicable law or agreed to in writing, software 
+	distributed under the License is distributed on an "AS IS" BASIS, 
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+	See the License for the specific language governing permissions and 
+	limitations under the License.
+
+
+	Front end to chart servlet.
+	
+	2008/09/17  WHF  Created.
+-->
+
+<html>
+<head>
+	<title>WebPlot: Web Based Data Viewer for DataTurbine</title>
+	<link rel="stylesheet" href="/stylesheets/rbnbstyles.css" type="text/css">
+	<script language="javascript"><!--
+		function updateChart()
+		{
+			df = document.dataForm;
+			
+			s = "chart?channel=".concat(df.channel.value)
+					.concat("&time=").concat(df.time.value)
+					.concat("&duration=").concat(df.duration.value)
+					.concat("&reference=").concat(df.reference.value);
+						
+			document.getElementById("chartUrl").innerHTML = 
+					document.URL.substring(0, document.URL.lastIndexOf('/')+1).concat(s);
+			document.chart.src = s.concat(
+					'&nocache='.concat(new Date().getTime())
+			);
+			return false;
+		}
+		function calcNow()
+		{
+			d = new Date();
+			// Convert from milliseconds to seconds for RBNB time:
+			document.dataForm.time.value = d.getTime() / 1000.0;
+			updateChart();
+		}
+		function refChange()
+		{
+			if (document.dataForm.reference.value == "absolute")
+				document.dataForm.now.disabled = false;
+			else document.dataForm.now.disabled = true;
+		}				
+	--></script>		
+
+</head>
+<body onLoad="updateChart(); ">
+	<h1>WebPlot: Web Based Data Viewer for DataTurbine</h1>
+	<center>
+	<p><img name="chart" src="chart?duration=1.0" /></p>
+	<table><tr>
+		<td class="smaller">URL: </td>
+		<td id="chartUrl" class="smaller"> </td>
+	</tr></table>
+	<form name="dataForm" onSubmit="return updateChart();">
+		<table cols=2>
+			<tr><td>Channel: </td><td>
+				<input name="channel" value="rbnbSource/c0" />
+			</td></tr>
+			<tr>
+				<td>Start: </td>
+				<td><input name="time" value="0.0" />
+				<input type="button" name="now" onClick="calcNow(); return false;"
+						value="Now" disabled="true" />
+				</div></td>
+			</tr>
+			<tr><td>Duration:</td><td>
+				<input name="duration" value="1.0" />
+			</td></tr>
+			<tr>
+				<td>Reference:</td>
+				<td>
+					<select name="reference" onChange="refChange();" >
+						<option value="absolute">Absolute </option>
+						<option selected value="newest">Newest</option>
+						<option value="oldest">Oldest</option>
+					</select>
+				</td>
+			</tr>
+			<tr><td colspan=2>
+				<div class="centered">
+					<input type="submit" value="Update Plot" />
+				</div>
+			</td></tr>
+		</table>			
+	</form>
+	</center>
+</body>
+</html>
