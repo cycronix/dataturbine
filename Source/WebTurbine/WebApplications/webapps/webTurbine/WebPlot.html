@@ -34,7 +34,9 @@
 			s = "chart?channel=".concat(df.channel.value)
 					.concat("&time=").concat(df.time.value)
 					.concat("&duration=").concat(df.duration.value)
-					.concat("&reference=").concat(df.reference.value);
+					.concat("&reference=").concat(df.reference.value)
+					.concat("&width=").concat(df.width.value)
+					.concat("&height=").concat(df.height.value);
 						
 			document.getElementById("chartUrl").innerHTML = 
 					document.URL.substring(0, document.URL.lastIndexOf('/')+1).concat(s);
@@ -92,7 +94,19 @@
 					</select>
 				</td>
 			</tr>
-			<tr><td colspan=2>
+			<tr>
+				<td>Graph width:</td>
+				<td>
+					<input name="width" value="320" />
+					</td>
+			</tr>
+			<tr>
+				<td>Graph height:</td>
+				<td><input name="height" value="240" />
+					</td>
+			</tr>
+			<tr><td
+				 colspan=2>
 				<div class="centered">
 					<input type="submit" value="Update Plot" />
 				</div>
