@@ -20,6 +20,7 @@
 	Front end to chart servlet.
 	
 	2008/09/17  WHF  Created.
+	2008/09/29  WHF  Added dynamic select box.
 -->
 
 <html>
@@ -30,8 +31,15 @@
 		function updateChart()
 		{
 			df = document.dataForm;
+			var ids = document.getElementById("idChannelSelect"); 
+			if (document.getElementById("select").checked)
+				// More IE insanity.
+				channel = //ids.value;
+						ids.options[ids.selectedIndex].text;
+			else
+				channel = df.channelText.value;
 			
-			s = "chart?channel=".concat(df.channel.value)
+			s = "chart?channel=".concat(channel)
 					.concat("&time=").concat(df.time.value)
 					.concat("&duration=").concat(df.duration.value)
 					.concat("&reference=").concat(df.reference.value)
@@ -52,16 +60,66 @@
 			document.dataForm.time.value = d.getTime() / 1000.0;
 			updateChart();
 		}
+		function channelChange(rid)
+		{
+			document.getElementById(rid).click();
+			updateChart();
+		}
+		function getKeyCode(e)
+		{
+			if(window.event) { // IE
+				keynum = e.keyCode
+			} else if(e.which) { // Netscape/Firefox/Opera
+				keynum = e.which
+			}
+			
+			return keynum;
+		}
+		function onChannelTextKey(event)
+		{
+			if (getKeyCode(event)==13) {
+				channelChange('text');
+				return false; 
+			}
+			return true;
+		}
+
 		function refChange()
 		{
 			if (document.dataForm.reference.value == "absolute")
 				document.dataForm.now.disabled = false;
 			else document.dataForm.now.disabled = true;
 		}				
+		
+		// To support Firefox, had to make global:
+		var client;
+		function handler()
+		{
+			switch (client.readyState) {
+				case 4:
+				// The insanity below is to support IE:
+				document.getElementById("idChannelSelect").innerHTML=""+
+						client.responseText;
+				document.getElementById("idChannelSelect").outerHTML =
+						document.getElementById("idChannelSelect").outerHTML;
+				updateChart();				
+				break;
+			}
+		}
+		
+		function refreshList()
+		{
+			client = new XMLHttpRequest();
+			client.onreadystatechange = handler;
+			var d = new Date();
+			client.open("GET", "fillSelect.jsp?i="+d.getTime());
+			client.send("dummy text for firefox");
+		}
+		
 	--></script>		
 
 </head>
-<body onLoad="updateChart(); ">
+<body onLoad="refreshList(); ">
 	<h1>WebPlot: Web Based Data Viewer for DataTurbine</h1>
 	<center>
 	<p><img name="chart" src="chart?duration=1.0" /></p>
@@ -71,9 +129,27 @@
 	</tr></table>
 	<form name="dataForm" onSubmit="return updateChart();">
 		<table cols=2>
-			<tr><td>Channel: </td><td>
-				<input name="channel" value="rbnbSource/c0" />
-			</td></tr>
+			<tr><td>Channel: </td><td><table><tr>			
+				<td><input type="radio" checked name="cSelType" id="select" 
+						onClick="updateChart();" /></td>
+				<td id="selectHTML">
+				<select name="channelSelect" id="idChannelSelect"
+						onChange="channelChange('select');" >
+					<option>rbnbSource/c0</option>
+					<option>rbnbSource/c1</option>
+				</select>
+				</td>
+				<td><input type="button" name="refreshListButton"
+						onClick="refreshList(); return false;"
+						value="Refresh List" /></td>
+			</tr></table></td></tr>
+			<tr><td>&nbsp; </td><td><table><tr> 
+				<td><input type="radio" name="cSelType" id="text" 
+						onClick="updateChart();" /></td>
+				<td><input name="channelText" value="rbnbSource/c0" 
+						onKeyPress="return onChannelTextKey(event);"	
+						onChange="channelChange('text');" /></td>
+			</tr></table></td></tr>
 			<tr>
 				<td>Start: </td>
 				<td><input name="time" value="0.0" />
@@ -96,17 +172,13 @@
 			</tr>
 			<tr>
 				<td>Graph width:</td>
-				<td>
-					<input name="width" value="320" />
-					</td>
+				<td><input name="width" value="320" /></td>
 			</tr>
 			<tr>
 				<td>Graph height:</td>
-				<td><input name="height" value="240" />
-					</td>
-			</tr>
-			<tr><td
-				 colspan=2>
+				<td><input name="height" value="240" /></td>
+			</tr>			
+			<tr><td colspan=2>
 				<div class="centered">
 					<input type="submit" value="Update Plot" />
 				</div>
