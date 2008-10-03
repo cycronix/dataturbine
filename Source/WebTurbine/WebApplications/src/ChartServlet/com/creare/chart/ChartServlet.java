@@ -27,6 +27,7 @@
 	2004/03/15  WHF  Only display last two segments of channel name.
 	2004/10/14  WHF  Use javax.imageio instead of JAI.
 	2008/08/29  WHF  Integrated into the WebTurbine.
+	2008/10/03  WHF  Improved DataTurbine connection management.
 */
 
 
@@ -35,6 +36,8 @@ package com.creare.chart;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Array;
+import java.util.Iterator;
+import java.util.Stack;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.*;
@@ -48,6 +51,13 @@ import com.rbnb.sapi.*;
   */
 public class ChartServlet extends HttpServlet
 {
+	public ChartServlet()
+	{
+		Thread t = new Thread(new NodeFreshnessEnforcer());
+		t.setDaemon(true);
+		t.start();
+	}		
+	
 	protected void doGet(
 		HttpServletRequest request, 
 		HttpServletResponse response) 
@@ -65,23 +75,20 @@ public class ChartServlet extends HttpServlet
 		WorkNode work=null;
 		
 		try {
-		work=getWorkNode();
-		work.width=getParameterInt(request, "width", 320);
-		work.height=getParameterInt(request, "height", 240);
-		work.channel = java.net.URLDecoder.decode(
-				getParameterString(request, "channel", "rbnbSource/c0"),
-				"utf-8");
-
-		work.map.Clear();
-		work.map.Add(work.channel);
-		work.sink.Request(work.map, start, duration, reference);
-		work.sink.Fetch(-1, work.map);
-		} catch (SAPIException sapiE) 
-		{ 
-/*			response.setContentType("text/plain");
-			java.io.Writer w=response.getWriter();
-			w.write("Error connecting to server:\n\n");
-			sapiE.printStackTrace(new java.io.PrintWriter(w)); */
+			work=getWorkNode();
+			work.width=getParameterInt(request, "width", 320);
+			work.height=getParameterInt(request, "height", 240);
+			work.channel = java.net.URLDecoder.decode(
+					getParameterString(request, "channel", "rbnbSource/c0"),
+					"utf-8"
+			);
+	
+			work.map.Clear();
+			work.map.Add(work.channel);
+			work.sink.Request(work.map, start, duration, reference);
+			work.sink.Fetch(-1, work.map);
+		} catch (SAPIException sapiE) {
+			// In this case, do not recycle the node:
 			throw new ServletException(sapiE);
 		}
 		
@@ -107,7 +114,7 @@ public class ChartServlet extends HttpServlet
 		recycleWorkNode(work);
 	}
 	
-	private static void processData(WorkNode work, HttpServletResponse response)
+	private void processData(WorkNode work, HttpServletResponse response)
 			throws java.io.IOException
 	{
 		double[] time=work.map.GetTimes(0);
@@ -145,14 +152,6 @@ public class ChartServlet extends HttpServlet
 				throw new ClassCastException(
 					"Unsupported type.");
 		}
-		/*
-		int len=100;
-		double[] time=new double[len];
-		double[] out=new double[len];
-		for (int ii=0; ii<len; ++ii) {
-			time[ii]=6.28/len*ii;
-			out[ii]=Math.sin(time[ii]);
-		} */
 
 		int lastSlash = work.channel.lastIndexOf('/'),
 				penultimateSlash = work.channel.lastIndexOf('/', lastSlash-1);
@@ -167,10 +166,8 @@ public class ChartServlet extends HttpServlet
 				work.width,
 				work.height);
 		work.baos.reset();						
-//		work.pb.setSource(img,0);   // The source image			
 			
 		// Perform the encode operation
-//		JAI.create("encode", work.pb, null);
 		javax.imageio.ImageIO.write(
 				(java.awt.image.RenderedImage) img,
 				"png",
@@ -192,7 +189,7 @@ public class ChartServlet extends HttpServlet
 	/**
 	  * Reuses an existing work node, or creates a new one.
 	  */
-	private static WorkNode getWorkNode() throws SAPIException
+	private WorkNode getWorkNode() throws SAPIException
 	{
 		WorkNode wn;
 		boolean needConnect=true;
@@ -219,8 +216,9 @@ public class ChartServlet extends HttpServlet
 	/**
 	  * Return a used node to the stack.
 	  */
-	private static void recycleWorkNode(WorkNode node)
+	private void recycleWorkNode(WorkNode node)
 	{
+		node.lastRecycleTime = System.currentTimeMillis();
 		workNodeStack.push(node);
 	}
 
@@ -259,14 +257,9 @@ public class ChartServlet extends HttpServlet
 	}	
 	
 	private static class WorkNode {
-		public WorkNode() {
-/*			pb.add(baos);           // The stream
-			pb.add("png");		// file format
-			pb.add(null);           // Encoding parameters
-*/		}
+		public WorkNode() { }
 
 		public final ByteArrayOutputStream baos=new ByteArrayOutputStream();
-//		public final ParameterBlock pb=new ParameterBlock();
 		public double[] data;
 		public final ArrayXYDataSet dataSet=new ArrayXYDataSet(); 
 		public final com.jrefinery.chart.JFreeChart chart=
@@ -280,10 +273,47 @@ public class ChartServlet extends HttpServlet
 		public String channel;
 		public int width;
 		public int height;
+		public long lastRecycleTime;
 	}
 	
-//	private WorkNode work=new WorkNode();
-	private static java.util.Stack workNodeStack=new java.util.Stack();
+	private class NodeFreshnessEnforcer implements Runnable
+	{
+		public void run() {
+			final Stack closeStack = new Stack();
+			
+			try {
+				while (true) {
+					if (workNodeStack.size() > MAX_RETAINED_CONNECTIONS) {
+						long now = System.currentTimeMillis();
+						// Lock the stack for a moment:
+						synchronized (workNodeStack) {
+							// Iterate over nodes, removing those that are old:
+							for (Iterator iter = workNodeStack.iterator(); 
+									iter.hasNext(); ) {
+								WorkNode node = (WorkNode) iter.next();
+								if (now - node.lastRecycleTime 
+										> MAX_CONNECTION_AGE) {
+									iter.remove();
+									closeStack.push(node);
+								}
+							}
+						}
+						
+						// Now close all marked nodes:
+						while (!closeStack.empty()) {
+							WorkNode node = (WorkNode) closeStack.pop();
+							node.sink.CloseRBNBConnection();
+						}					
+					}
+					Thread.sleep(MAX_CONNECTION_AGE);
+				}
+			} catch (InterruptedException ie) {}
+		}
+	}
+	
+	private final Stack workNodeStack=new Stack();
+	private static final int MAX_RETAINED_CONNECTIONS = 5;
+	private static final long MAX_CONNECTION_AGE = 10000; // in ms
 	
 	private static class ArrayXYDataSet 
 			extends com.jrefinery.data.AbstractSeriesDataset 
