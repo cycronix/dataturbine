@@ -4,8 +4,15 @@
          This is the build script to run JUnit tests on various DataTurbine
 	functions.  JUnit V 4.4 is in the 'lib' directory.  Requires Ant 1.7.
      
-     History:
+     History:        
+     
+     	20008/09/21 PTG  Modified the compile targets classpath. The classpath
+        attribute for the 'javac' tag failed on MAC OSX 10.4 so moved this
+	tags attributes that pointed to the required .jar's into two respective
+	ant 'classpath' tags.
+	
      	2008/08/11  WHF  Created.
+
 -->
 
 <project name="JUnit Testing" default="test-all" basedir=".">
@@ -27,10 +34,11 @@
 	<!-- Compile all the test classes. -->
 	<target name="compile" depends="init">
 		<javac destdir="${rbnb.testdir}" 
-				classpath="lib/junit.jar,${rbnb.librarydir}/rbnb.jar"
 				debug="on" deprecation="on" 
 				source="1.5" target="1.5" >
 			<src path="src" />
+                        <classpath path="${rbnb.librarydir}/rbnb.jar" />
+                        <classpath path="lib/junit.jar" />
 		</javac>
 	</target>	
 	
