@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Meta>
+	<name>Creare</name>
+	<Camera>
+		<longitude>-72.23316444940639</longitude>
+		<latitude>43.68442151366472</latitude>
+		<altitude>5</altitude>
+		<tilt>90</tilt>
+		<heading>-80.94327872299081</heading>
+		<roll>0</roll>
+	</Camera>
+	<ViewVolume>
+		<near>20.0</near>
+		<leftFov>-30.0</leftFov>
+		<rightFov>30.0</rightFov>
+		<bottomFov>-30.0</bottomFov>
+		<topFov>30.0</topFov>
+	</ViewVolume>
+	<Point>
+		<coordinates>-72.23316444940639,43.68442151366472,0</coordinates>
+	</Point>
+</Meta>
