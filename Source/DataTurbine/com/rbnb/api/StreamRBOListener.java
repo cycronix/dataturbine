@@ -117,6 +117,7 @@ import java.util.Vector;
  *   Date      By	Description
  * MM/DD/YYYY
  * ----------  --	-----------
+ * 10/31/2008  MJM	in updateWorking(), limit increment to not get ahead of actual data.  
  * 08/27/2008  JPW	Make change in processWorking():
  * 			Support monitor mode data request with more than 1 child
  * 03/13/2007  JPW	Make a change in findStartRequest():
@@ -377,7 +378,7 @@ final class StreamRBOListener
     public synchronized void accept(Serializable eventI,Rmap matchI)
         throws java.lang.InterruptedException
     {
-	// System.err.println("StreamRBOListener.accept():eventI:\n" + eventI);
+//	System.err.println("\n---StreamRBOListener.accept():eventI:\n" + eventI);
         //EMF 6/28/06: keep a copy of the eventI,
 	//             so can search it instead of full RBO
 	//newFrames.add(eventI);
@@ -891,6 +892,7 @@ final class StreamRBOListener
 		
 		if (foundR) {
 		    setWorking(result);
+//		    System.err.println("\nfindStartRequest(): working request:\n" + result);
 		}
 	    } else {
 		haveNewRBO = false;
@@ -1259,6 +1261,7 @@ final class StreamRBOListener
 	    //     'k');
 	    try {
 	      match = ((Rmap) getSource()).extractRmap(subWorking,true);
+
 //EMF
 //if (newFrames.isEmpty()) newFr=new Rmap();
 //else newFr=(Rmap)newFrames.remove(0);
@@ -1267,10 +1270,9 @@ final class StreamRBOListener
 //System.err.println();
             //match = newFr.extractRmap(subWorking,true);
             //match = ((Rmap)newFrames.remove(0)).extractRmap(subWorking,true);
-//System.err.println("StreamRBOListener.processWorking: subWorking "+subWorking);
-//System.err.println();
-//System.err.println("StreamRBOListener.processWorking: match "+match);
-//System.err.println();
+//System.err.println("\nStreamRBOListener.processWorking: subWorking "+subWorking);
+// System.err.println("\nStreamRBOListener.processWorking: match "+match);
+
 	    } catch (OutOfMemoryError oome) {
 		System.err.println(
 			"OutOfMemoryError servicing request.  Recovering...");
@@ -1843,6 +1845,7 @@ final class StreamRBOListener
      *   Date      By	Description
      * MM/DD/YYYY
      * ----------  --	-----------
+     * 10/31/2008  MJM	Limit increment so it doesnt get ahead of actual data.  
      * 04/15/2005  JPW	Increment time of the first child in the request Rmap
      *                      only.  This avoids the problem of incrementing
      *                      multiple times if there is more than one RingBuffer
@@ -1877,9 +1880,20 @@ final class StreamRBOListener
 		    "Unexpected time at top level of DataRequest:\n" +
 		    getWorking());
 	    }
+
+	    // MJM 10/31/08: find frame limit, and never increment more than 1 past the end
+	    TimeRange tLimits = new TimeRange(Double.MAX_VALUE),
+		fLimits = new TimeRange(Double.MAX_VALUE);
+	    tLimits.setDuration(-Double.MAX_VALUE);
+	    fLimits.setDuration(-Double.MAX_VALUE);
+	    
+	    ((RBO) getSource()).getRegistered().findLimits(tLimits,fLimits);	// mjm
+	    
 	    // Now we call addToStart() on the first child only
 	    Rmap child = getWorking().getChildAt(0);
-	    child.addToStart(myOriginal.getIncrement());
+	    
+	    if(child.getFrange().getLimits()[1] <= fLimits.getLimits()[1])    // mjm                     
+	    	child.addToStart(myOriginal.getIncrement());
 	}
     }
 

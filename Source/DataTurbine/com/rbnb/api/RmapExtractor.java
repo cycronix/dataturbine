@@ -37,6 +37,7 @@ package com.rbnb.api;
  *   Date      By	Description
  * MM/DD/YYYY
  * ----------  --	-----------
+ * 10/31/2008  MJM  Tweeked previous check for monitor-mode.  Changed logic to detect wildcards.
  * 08/15/2008  MJM	Do not "merge" multi-channel Rmaps in Monitor mode, or lose time-info
  * 03/18/2003  INB	Ensure that combined results contain marker blocks.
  * 11/30/2000  INB	Created.
@@ -304,6 +305,7 @@ class RmapExtractor {
      *   Date      By	Description
      * MM/DD/YYYY
      * ----------  --	-----------
+     * 10/31/2008  MJM  Tweeked previous check for monitor-mode. Changed logic to detect wildcards.
      * 03/18/2003  INB	Ensure that combined results contain marker blocks.
      * 12/11/2000  INB	Created.
      *
@@ -379,10 +381,11 @@ class RmapExtractor {
 	    	DataRequest dr = (DataRequest) getWorkRequest();
 	    	
 	   // MJM 8/2008:  only merge frames in NON-monitor mode 	
-	    	boolean isMonitorMode = (dr.getDomain() == DataRequest.FUTURE) &&
+/*	    	boolean isMonitorMode = (dr.getDomain() == DataRequest.FUTURE) &&
 	    				(dr.getMode()      == DataRequest.FRAMES) &&
 	    				(dr.getReference() == DataRequest.NEWEST);
-    		                      
+*/    		boolean isMonitorMode = dr.getGapControl();  // mjm 10/28/2008
+    		
 	    	if ((dr.getReference() != DataRequest.ABSOLUTE) && (isMonitorMode == false)) {
 	    		boolean needMerge = false;
 	    		for (int idx = 0;
@@ -393,23 +396,27 @@ class RmapExtractor {
 	    			}
 	    		}
 
-//	    		if(false) {		// MJM 7/16/2008:  try removing this, it breaks multi-chan monitor mode
 	    		if (needMerge) {
 	    			TimeRange fRange = combined.mergeFrange
 	    			(dr.getReference(),
 	    					null);
 	    			String[] names = dr.extractNames();
-	    			if ((names.length > 1) ||
+/*	    			if ((names.length > 1) ||
 	    					((names.length == 1) &&
 	    							(!names[0].endsWith("/*") &&
-	    									!names[0].endsWith("/...")))) {
+	    									!names[0].endsWith("/..."))))		    									
+*/
+	// mjm 10/30/08: 	Skip wildcard remove/create logic, 
+	//    				it doesnt work, particularly for subscribe mode.
+	// 					Some question remains why/what it might have been used for;
+	//					perhaps it needs to be fixed for other modes of use...
+	    			if (names.length >= 1) { 
 	    				for (int idx = 0;
 	    				idx < combined.getNchildren();
 	    				++idx) {
 	    					combined.getChildAt(idx).setFrange(fRange);
 	    				}
-
-	    			} else if (names.length == 1) {
+/*	    			} else if (names.length == 1) {		// mjm 10/30/08: broken wildcard logic?
 	    				while (combined.getNchildren() > 0) {
 	    					combined.removeChildAt(0);
 	    				}
@@ -417,8 +424,7 @@ class RmapExtractor {
 	    				combined.getChildAt(0).setFrange(fRange);
 	    				Rmap bottom = combined.moveToBottom();
 	    				bottom.setDblock(Rmap.MarkerBlock);
-
-	    			} else if (names.length == 0) {
+*/	    			} else if (names.length == 0) {
 	    				combinedR = null;
 	    			}
 	    		}
