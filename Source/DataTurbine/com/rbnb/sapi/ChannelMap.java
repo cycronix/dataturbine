@@ -1296,6 +1296,9 @@ public class ChannelMap implements java.io.Serializable
 	  *  string inside the &lt;user&gt; and &lt;/user&gt; tags of the server
 	  *  XML file.  This is prefered to placing data directly in the 
 	  *  registration map, as that overrides the server registration data.
+	  * <p>Although there is no official standard for user data information,
+	  *  many viewers understand key/value pairs in the following form:
+	  * <p><center>key1=value1,key2=value2,...,keyN=valueN</center></p>
 	  * <p>
 	  * This method will work along with {@link #GetUserInfo(int)} with data
 	  * (non registration) ChannelMaps.  However, {@link #PutDataAsString(

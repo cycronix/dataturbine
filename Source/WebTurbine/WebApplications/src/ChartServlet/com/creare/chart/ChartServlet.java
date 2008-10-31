@@ -28,6 +28,7 @@
 	2004/10/14  WHF  Use javax.imageio instead of JAI.
 	2008/08/29  WHF  Integrated into the WebTurbine.
 	2008/10/03  WHF  Improved DataTurbine connection management.
+	2008/10/31  WHF  Check registration for units.
 */
 
 
@@ -85,6 +86,12 @@ public class ChartServlet extends HttpServlet
 	
 			work.map.Clear();
 			work.map.Add(work.channel);
+			// 2008/10/31  WHF  RequestRegistration to find unit data.
+			work.sink.RequestRegistration(work.map);
+			work.sink.Fetch(-1, work.map);
+			if (work.map.NumberOfChannels() > 0) 
+				work.userInfo = work.map.GetUserInfo(0);
+			else work.userInfo = null;
 			work.sink.Request(work.map, start, duration, reference);
 			work.sink.Fetch(-1, work.map);
 		} catch (SAPIException sapiE) {
@@ -157,9 +164,27 @@ public class ChartServlet extends HttpServlet
 				penultimateSlash = work.channel.lastIndexOf('/', lastSlash-1);
 		String theTitle = (penultimateSlash < 0 
 				? work.channel : work.channel.substring(penultimateSlash+1));
-		work.chart.setTitle( // work.channel);
-				theTitle);
-				
+		work.chart.setTitle(theTitle);
+		
+		// 2008/10/31  WHF  Unit support.  Set Range Label initially to empty,
+		//  then override if units found.
+		((com.jrefinery.chart.plot.XYPlot) work.chart.getPlot())
+				.getRangeAxis().setLabel("");
+		if (work.userInfo != null) {
+			java.util.StringTokenizer st = new java.util.StringTokenizer(
+					work.userInfo,
+					","
+			);
+			while (st.hasMoreTokens()) {
+				String s = st.nextToken();
+				if (s.startsWith("units=")) {
+					String u = s.substring(s.indexOf('=')+1);
+					((com.jrefinery.chart.plot.XYPlot) work.chart.getPlot())
+							.getRangeAxis().setLabel(u);
+				}
+			}
+		}
+		
 		work.dataSet.setValues(time, out);
 		
 		BufferedImage img=work.chart.createBufferedImage(
@@ -270,7 +295,7 @@ public class ChartServlet extends HttpServlet
 		public final ChannelMap map=new ChannelMap();
 		public final Sink sink=new Sink();
 		// Set on request:
-		public String channel;
+		public String channel, userInfo;
 		public int width;
 		public int height;
 		public long lastRecycleTime;
