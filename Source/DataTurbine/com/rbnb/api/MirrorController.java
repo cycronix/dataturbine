@@ -43,7 +43,7 @@ package com.rbnb.api;
  * @author Ian Brown
  *
  * @since V2.0
- * @version 05/29/2007
+ * @version 12/22/2008
  */
 
 /*
@@ -53,6 +53,12 @@ package com.rbnb.api;
  *   Date      By	Description
  * MM/DD/YYYY
  * ----------  --	-----------
+ * 12/22/2008  JPW	In post(), we do a better job of properly handling the
+ * 			case where we detect the sink connection has been shut
+ * 			down when we are in the while() loop trying to
+ * 			reconnect to the Mirror source; if this sink connection
+ * 			has been shut down, we throw the original exception and
+ * 			the mirror will end up being terminated.
  * 06/07/2007  JPW	Add isSinkRunning(); this method is called to check on
  *			the Sink connection; it is called when the Mirror is
  *			trying to reconnect to the Source - if the user has
@@ -1130,7 +1136,7 @@ class MirrorController
      * @exception java.lang.InterruptedException
      *		  thrown if the operation is interrupted.
      * @since V2.0
-     * @version 05/29/2007
+     * @version 12/22/2008
      */
 
     /*
@@ -1138,6 +1144,13 @@ class MirrorController
      *   Date      By	Description
      * MM/DD/YYYY
      * ----------  --	-----------
+     * 12/22/2008  JPW  We do a better job of properly handling the case
+     * 			where we detect the sink connection has been shut
+     * 			down when we are in the while() loop trying to
+     * 			reconnect to the Mirror source; if this sink
+     * 			connection has been shut down, we throw the
+     * 			original exception and the mirror will end up
+     * 			being terminated.
      * 05/29/2007  JPW	Try to reconnect Source if a SocketException is thrown
      * 04/18/2001  INB	Created.
      *
@@ -1221,7 +1234,9 @@ class MirrorController
 	    // JPW 05/29/07: Try Source reconnect if SocketException is thrown
 	    while (true) {
 		try {
+		    // System.err.println("Try to add frame to downstream mirror source...");
 		    getSource().addChild(response);
+		    // System.err.println("Successfully added frame to downstream mirror source");
 		    // We successfully added the child to the Mirror source;
 		    // break out of the do...while loop
 		    break;
@@ -1240,6 +1255,8 @@ class MirrorController
 		    int reconnectAttempt = 0;
 		    long retryPeriod = MirrorController.INITIAL_RETRY_PERIOD;
 		    while (true) {
+			// JPW 12/22/2008: Add bSinkNotRunning
+			boolean bSinkNotRunning = false;
 			try {
 			    getLog().addMessage(
 				getLogLevel(),
@@ -1252,6 +1269,7 @@ class MirrorController
 			    if (!isSinkRunning()) {
 				// JPW 05/21/08: Change from calling break to throwing the original exception
 				// break;
+				bSinkNotRunning = true;
 				// Throw the original exception
 				throw se;
 			    }
@@ -1271,6 +1289,17 @@ class MirrorController
 			    // break out of the while loop
 			    break;
 			} catch (Exception reconnectException) {
+			    if (bSinkNotRunning) {
+				// JPW 12/22/2008: Added this case of what to do when
+				//                 we know the sink isn't running.
+				getLog().addMessage(
+				    getLogLevel(),
+				    getLogClass(),
+				    getSource().getName(),
+				    "The sink connection used by the mirror has closed.");
+				// Throw the original exception
+				throw se;
+			    }
 			    getLog().addException(
 				getLogLevel(),
 				getLogClass(),
