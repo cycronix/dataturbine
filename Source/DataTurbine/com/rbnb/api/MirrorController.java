@@ -53,6 +53,7 @@ package com.rbnb.api;
  *   Date      By	Description
  * MM/DD/YYYY
  * ----------  --	-----------
+ * 03/13/2009  MJM add synchronization call to mirror
  * 12/22/2008  JPW	In post(), we do a better job of properly handling the
  * 			case where we detect the sink connection has been shut
  * 			down when we are in the while() loop trying to
@@ -1144,6 +1145,9 @@ class MirrorController
      *   Date      By	Description
      * MM/DD/YYYY
      * ----------  --	-----------
+     * 03/13/2009  MJM add synchronization call to help mirror to wait on network 
+     * 			disconnect (versus continuing to send/buffer data that gets lost on
+     * 			reconnect).
      * 12/22/2008  JPW  We do a better job of properly handling the case
      * 			where we detect the sink connection has been shut
      * 			down when we are in the while() loop trying to
@@ -1234,13 +1238,18 @@ class MirrorController
 	    // JPW 05/29/07: Try Source reconnect if SocketException is thrown
 	    while (true) {
 		try {
-		    // System.err.println("Try to add frame to downstream mirror source...");
+//		    System.err.println("Try to add frame to downstream mirror source...");	// MJM
 		    getSource().addChild(response);
-		    // System.err.println("Successfully added frame to downstream mirror source");
+		    
+		    if(System.getProperty("asyncMirror")==null)
+		    	getSource().synchronizeWserver();		// mjm force sync for robust mirror reconnect
+		    
+//		    System.err.println("Successfully added frame to downstream mirror source");	// MJM
 		    // We successfully added the child to the Mirror source;
 		    // break out of the do...while loop
 		    break;
 		} catch (java.net.SocketException se) {
+		    System.err.println("Got Mirror Put Exception!!!!!!");					// MJM
 		    // If the Mirror's Sink connection is down, the user must
 		    // have terminated it;  assume the user wanted to terminate
 		    // the Mirror
