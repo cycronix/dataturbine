@@ -1254,13 +1254,13 @@ class MirrorController
 		    // have terminated it;  assume the user wanted to terminate
 		    // the Mirror
 		    if (!isSinkRunning()) {
-			throw se;
+		    	throw se;
 		    }
 		    getLog().addException(
-			getLogLevel(),
-			getLogClass(),
-			getSource().getName(),
-			se);
+		    		getLogLevel(),
+		    		getLogClass(),
+		    		getSource().getName(),
+		    		se);
 		    int reconnectAttempt = 0;
 		    long retryPeriod = MirrorController.INITIAL_RETRY_PERIOD;
 		    while (true) {
@@ -1268,33 +1268,36 @@ class MirrorController
 			boolean bSinkNotRunning = false;
 			try {
 			    getLog().addMessage(
-				getLogLevel(),
-				getLogClass(),
-				getSource().getName(),
-				"Restarting Mirror source...");
+			    		getLogLevel(),
+			    		getLogClass(),
+			    		getSource().getName(),
+						"Restarting Mirror source...");
 			    // If the Mirror's Sink connection is down, the
 			    // user must have terminated it; assume the user
 			    // wanted to terminate the Mirror
 			    if (!isSinkRunning()) {
-				// JPW 05/21/08: Change from calling break to throwing the original exception
-				// break;
-				bSinkNotRunning = true;
-				// Throw the original exception
-				throw se;
+			    	// JPW 05/21/08: Change from calling break to throwing the original exception
+			    	// break;
+			    	bSinkNotRunning = true;
+			    	// Throw the original exception
+			    	throw se;
 			    }
 			    // First, the output Source must be terminated and
 			    // then the Source can reconnect.  Otherwise, when
 			    // the Source reconnects, an IllegalStateException
-			    // will be thrown (“Cannot reconnec to existing
+			    // will be thrown (“Cannot reconnect to existing
 			    // client handler”).
 			    stopOutputSource();
 			    reinitializeSource();
 			    getLog().addMessage(
-				getLogLevel(),
-				getLogClass(),
-				getSource().getName(),
-				"Mirror source successfully restarted");
+			    		getLogLevel(),
+			    		getLogClass(),
+			    		getSource().getName(),
+						"Mirror source successfully restarted");
 			    // We succesfully reinitialized Mirror source;
+			    
+			    getSource().addChild(response);		// MJM 4/17/09:  resend last frame before disconnect (?)
+
 			    // break out of the while loop
 			    break;
 			} catch (Exception reconnectException) {
@@ -1315,24 +1318,24 @@ class MirrorController
 				getSource().getName(),
 				reconnectException);
 			    if (reconnectAttempt >= MirrorController.MAX_NUM_RETRIES) {
-				getLog().addMessage(
-				    getLogLevel(),
-				    getLogClass(),
-				    getSource().getName(),
-				    "Exceeded maximum number of Mirror source restart attempts");
-				// Throw the original exception
-				throw se;
+			    	getLog().addMessage(
+			    			getLogLevel(),
+			    			getLogClass(),
+			    			getSource().getName(),
+				    	"Exceeded maximum number of Mirror source restart attempts");
+			    	// Throw the original exception
+			    	throw se;
 			    } else {
-				++reconnectAttempt;
-				retryPeriod = retryPeriod * 2;
-				if (retryPeriod > MirrorController.RETRY_PERIOD_MAX) {
-				    retryPeriod = RETRY_PERIOD_MAX;
-				}
-				try {
-				    Thread.currentThread().sleep(retryPeriod);
-				} catch (Exception sleepException) {
-				    // Nothing to do
-				}
+			    	++reconnectAttempt;
+			    	retryPeriod = retryPeriod * 2;
+			    	if (retryPeriod > MirrorController.RETRY_PERIOD_MAX) {
+			    		retryPeriod = RETRY_PERIOD_MAX;
+			    	}
+			    	try {
+			    		Thread.currentThread().sleep(retryPeriod);
+			    	} catch (Exception sleepException) {
+			    		// Nothing to do
+			    	}
 			    }
 			}
 		    }
