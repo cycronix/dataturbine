@@ -16,6 +16,8 @@ limitations under the License.
 
 package com.rbnb.api;
 
+import com.rbnb.utility.ToString;
+
 /**
  * Extended <code>MirrorIO</code> that actually performs the mirroring
  * task.
@@ -53,7 +55,7 @@ package com.rbnb.api;
  *   Date      By	Description
  * MM/DD/YYYY
  * ----------  --	-----------
- * 03/13/2009  MJM add synchronization call to mirror
+ * 03/13/2009  MJM	add synchronization call to mirror
  * 12/22/2008  JPW	In post(), we do a better job of properly handling the
  * 			case where we detect the sink connection has been shut
  * 			down when we are in the while() loop trying to
@@ -321,6 +323,103 @@ class MirrorController
      */
     static interface Action {
 	public void doAction(Object o) throws Exception;
+    }
+    
+    /**
+     * See if the last frame (the given Rmap argument) needs to be resent to
+     * the downstream source. This is done by comparing the end time of a
+     * channel in the given Rmap to the end time for this same channel from the
+     * downstream source.
+     * <p>
+     * This method could be useful for when a previosuly disconnected mirror
+     * reconnects.
+     *
+     * @author JPW
+     *
+     * @since V3.2B1
+     * @version 04/21/2009
+     */
+    
+    /*
+     *
+     *   Date      By	Description
+     * MM/DD/YYYY
+     * ----------  --	-----------
+     * 04/21/2009  JPW	Created.
+     *
+     */
+    private boolean checkLastFrame(Rmap lastRmapI) throws Exception {
+	
+	// THIS IS STILL TEST CODE, THUS IT CONTAINS A NUMBER OF DEBUG PRINT STATEMENTS
+	
+	System.err.println(lastRmapI);
+	
+	// Find the first named channel
+	// (we will query the downstream RBNB source for this same chan)
+	String chanName = lastRmapI.getFullName();
+	Rmap childRmap = lastRmapI;
+	while (chanName == null) {
+	    childRmap = childRmap.getChildAt(0);
+	    chanName = childRmap.getFullName();
+	}
+	// Remove leading slash if there is one
+	if (chanName.startsWith("/")) {
+	    chanName = chanName.substring(1);
+	}
+	System.err.println("chan = " + chanName);
+	
+	// Get the time info for this channel
+	TimeRange chanTR = childRmap.getTrange();
+	while (chanTR == null) {
+	    // Need to move up the hierarchy until we find time info
+	    childRmap = childRmap.getParent();
+	    chanTR = childRmap.getTrange();
+	}
+	double[] pTimes = chanTR.getPtimes();
+	// We assume here that duration is available from the same chanTR
+	// May need to check if the value returned from getDuration() equals "INHERIT_DURATION"
+	//     - in that case, maybe we continue to move up the Rmap hierarchy until
+	//       we get an actual duration?
+	double endTime = pTimes[ chanTR.getNptimes() - 1] + chanTR.getDuration();
+	
+	// Get the newest point from the downstream source for this chan
+	// getSource() returns the downstream mirror source; not sure
+	// if we might be able to use this directly to get at the
+	// latest time?
+	// Rmap rmap = getSource().findChild(new Rmap(chanName));
+	String srcName = getSource().getName();
+	Server srcServer = ((getDirection() == PULL) ?
+			    (Server) getLocal() :
+			    getRemote());
+	String srcRBNBAddress = srcServer.getAddress();
+	com.rbnb.sapi.ChannelMap requestMap = new com.rbnb.sapi.ChannelMap();
+	requestMap.Add(srcName + "/" + chanName);
+	com.rbnb.sapi.Sink tempSink = new com.rbnb.sapi.Sink();
+	tempSink.OpenRBNBConnection(srcRBNBAddress, "tempSink");
+	tempSink.Request(requestMap, 0, 0, "newest");
+	com.rbnb.sapi.ChannelMap dataMap = tempSink.Fetch(15000);
+	if (dataMap.NumberOfChannels() != 1) {
+	    return true;
+	}
+	System.err.println("Received dataMap from downstream source:\n" + dataMap);
+	double[] times = dataMap.GetTimes(0);
+	float[] data = dataMap.GetDataAsFloat32(0);
+	System.err.println("    number of points = " + data.length);
+	System.err.println("    start time = " + dataMap.GetTimeStart(0));
+	System.err.println("    duration = " + dataMap.GetTimeDuration(0));
+	for (int i = 0; i < times.length; ++i) {
+	    System.err.println("    time[" + i + "] = " + times[i]);
+	}
+	double sourceEndTime = dataMap.GetTimeStart(0) + dataMap.GetTimeDuration(0);
+	
+	System.err.println("endTime = " + endTime + ", sourceEndTime = " + sourceEndTime);
+	if ( (endTime - sourceEndTime) > 1.0E-9) {
+	    // Need to send the last frame again (the downstream source never got it)
+	    System.err.println("Resend last frame");
+	    return true;
+	}
+	System.err.println("Don't resend last frame");
+	return false;
     }
     
     /**
@@ -1238,18 +1337,19 @@ class MirrorController
 	    // JPW 05/29/07: Try Source reconnect if SocketException is thrown
 	    while (true) {
 		try {
-//		    System.err.println("Try to add frame to downstream mirror source...");	// MJM
+		    // System.err.println("Try to add frame to downstream mirror source...");
 		    getSource().addChild(response);
 		    
-		    if(System.getProperty("asyncMirror")==null)
+		    if(System.getProperty("asyncMirror")==null) {
 		    	getSource().synchronizeWserver();		// mjm force sync for robust mirror reconnect
+		    }
 		    
-//		    System.err.println("Successfully added frame to downstream mirror source");	// MJM
+		    // System.err.println("Successfully added frame to downstream mirror source");
 		    // We successfully added the child to the Mirror source;
 		    // break out of the do...while loop
 		    break;
 		} catch (java.net.SocketException se) {
-		    System.err.println("Got Mirror Put Exception!!!!!!");					// MJM
+		    // System.err.println("Got Mirror Put Exception!!!!!!");
 		    // If the Mirror's Sink connection is down, the user must
 		    // have terminated it;  assume the user wanted to terminate
 		    // the Mirror
@@ -1294,10 +1394,42 @@ class MirrorController
 			    		getLogClass(),
 			    		getSource().getName(),
 						"Mirror source successfully restarted");
-			    // We succesfully reinitialized Mirror source;
 			    
-			    getSource().addChild(response);		// MJM 4/17/09:  resend last frame before disconnect (?)
-
+			    // We succesfully reinitialized Mirror source
+			    
+			    /*
+			     * JPW 04/21/09: The following code can be used to check with
+			     *               the downstream mirror output source and only
+			     *               send the last Rmap if it didn't already make
+			     *               it.
+			     *               
+			     *               The reason this code is commented out is that
+			     *               this last Rmap is automatically sent after
+			     *               we break out of this while() loop and go to
+			     *               the outer while() loop.  Thus, with this code
+			     *               in place, we were getting a duplicate Rmap
+			     *               sent to the downstream source.
+			     *
+			    // Synchronize before checking to see if we need to send last Rmap
+			    getSource().synchronizeWserver();
+			    
+			    // Check if we need to send the last Rmap
+			    boolean bResend = true;
+			    try {
+				bResend = checkLastFrame(response);
+			    } catch (Exception e) {
+				// We will resend by default when any error happens
+				bResend = true;
+			    }
+			    if (bResend) {
+				getSource().addChild(response);		// MJM 4/17/09:  resend last frame before disconnect
+				// getSource().synchronizeWserver();
+				// System.err.println("Sleeping for 10 sec after re-sending Rmap response");
+				// Thread.currentThread().sleep(10000);
+				// System.err.println("Done with sleep");
+			    }
+			    */
+			    
 			    // break out of the while loop
 			    break;
 			} catch (Exception reconnectException) {
