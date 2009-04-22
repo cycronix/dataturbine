@@ -6,7 +6,22 @@
   <title>RBNB Release Notes</title></head>
 <body>
 <h1>RBNB Release Notes</h1>
-<h1>RBNB V3.2 Release Notes</h1><h2>V3.1a to V3.2B1 Changes</h2>
+<h1>RBNB V3.2 Release Notes</h1><h2>V3.2B1 to V3.2B2 Changes</h2>
+V3.2B2 released 04/22/2009<br>This release corresponds to RBNB Subversion repository revision number 179<span style="font-weight: bold;"><br></span><h3><span style="font-weight: bold;"></span>Server</h3>
+<ul><li>Added synchronize call to Mirror write to confirm data sent. This avoids lost data on reconnect.</li><li>Added
+test code (currently commented out) in Mirror which can be used to
+check the latest time in the downstream mirror source to see if the
+last data frame should be resent (this would be used after the mirror
+connection was broken and then reconnected).</li><li>If a mirror
+connection has been broken and is in a loop&nbsp;trying to reconnect,
+the user can manually terminate the mirror's sink connection (in
+rbnbAdmin) in order to break out of this loop and terminate the mirror.</li><li>Changes to fix subscribe and mirror problem where multi-ringbuffer sources would not reliably send data for all channels.</li></ul>
+<h3>Applications</h3>
+<ul><li>Added ChartServlet and WebPlot (a front end to ChartServlet;&nbsp;a link to this on the main WebTurbine web page).</li><li>Added FillInTree utility class (a class to provide a fully-filled in ChannelTree for clients that need it).</li><li>Added
+KMLigPlugIn.&nbsp; As KMLitPlugIn, but by using the new PhotoOverlay
+element in KML2.2, it eliminates the need for the vastly more
+complicated DAE files.</li><li>Made note about user data format in ChannelMap.PutUserData().</li><li>Add DeadReckoningPlugIn: shows a dead reckoning "ring" around last known position based on latency and last known ground speed.</li></ul><h3>Build Environment</h3>
+<ul><li>In JUnitTesting/build.xml, modified the compile target's classpath so it works under&nbsp;MAC OSX 10.4.</li></ul><h2>V3.1a to V3.2B1 Changes</h2>
 V3.2B1 released 08/28/2008<br>This release corresponds to RBNB Subversion repository revision number 162<span style="font-weight: bold;"><br></span><h3><span style="font-weight: bold;"></span>Server</h3>
 <ul>
 	<li>Fix RBNB Issue #8, "Monitoring a source which has multiple RingBuffers
@@ -21,8 +36,10 @@ ResponseMon application, an HttpMonitor variant to quantize webserver
 response times and log to DataTurbine; includes BASIC authentication
 support.</li></ul><h3>Build Environment</h3>
 <ul>
-	<li>Added JUnit test framework, which requires Ant 1.7.  Currently the
-		only test is to check archive append load failures (see note in Server, above). &nbsp;The&nbsp;JUnitTesting subdirectory is excluded from the&nbsp;root library Ant build task.</li>
+	<li>Added JUnit test framework, which requires Ant 1.7.
+Currently the only test is to check archive append load failures (see
+note in Server, above). &nbsp;The&nbsp;JUnitTesting subdirectory is
+excluded from the&nbsp;root library Ant build task.</li>
 </ul>
 <h1>RBNB V3.1a Release Notes</h1>
 <h2>V3.1a Production Release</h2>
