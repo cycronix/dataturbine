@@ -350,7 +350,18 @@ class MirrorController
      */
     private boolean checkLastFrame(Rmap lastRmapI) throws Exception {
 	
-	// THIS IS STILL TEST CODE, THUS IT CONTAINS A NUMBER OF DEBUG PRINT STATEMENTS
+	// THIS IS TEST CODE, CONTAINS A NUMBER OF DEBUG PRINT STATEMENTS
+	
+	// This code uses the SAPI to get the last data and time point from
+	// the desired channel in the downstream source.  There may be more
+	// efficient ways of doing this:
+	// 1. Maybe doing a registration request woudl provide the desired
+	//    timestamp info.
+	// 2. Using the full API, there may be a way to request only the
+	//    timestamp (no data).
+	// 3. Check out how the RBNB server determines that a frame is going
+	//    backward in time (RingBuffer.java line 603)- some of this code
+	//    may be useful for figuring out a way how to compare times.
 	
 	System.err.println(lastRmapI);
 	
@@ -1398,17 +1409,24 @@ class MirrorController
 			    // We succesfully reinitialized Mirror source
 			    
 			    /*
-			     * JPW 04/21/09: The following code can be used to check with
-			     *               the downstream mirror output source and only
-			     *               send the last Rmap if it didn't already make
-			     *               it.
-			     *               
-			     *               The reason this code is commented out is that
-			     *               this last Rmap is automatically sent after
-			     *               we break out of this while() loop and go to
-			     *               the outer while() loop.  Thus, with this code
-			     *               in place, we were getting a duplicate Rmap
-			     *               sent to the downstream source.
+			     * JPW 04/21/09:
+			     *
+			     * We have reconnected with the downstream Mirror
+			     * output source.  The following code can be used
+			     * to check with the downstream source and only
+			     * send the last Rmap if it didn't already make it.
+			     *
+			     * This code is commented out because the last Rmap
+			     * *is* already automatically sent after we break
+			     * out of this while() loop and go to the outer
+			     * while() loop.  Thus, for cases we have tested,
+			     * running this code here results in the downstream
+			     * source getting a duplicate Rmap - the first Rmap
+			     * from here and then the duplicate when this Rmap
+			     * is sent again up above.  We had added this code
+			     * because SDSC reported that this Rmap ends up
+			     * missing after a mirror reconnects (there were
+			     * from tests run on the Internet).
 			     *
 			    // Synchronize before checking to see if we need to send last Rmap
 			    getSource().synchronizeWserver();
