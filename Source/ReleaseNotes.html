@@ -8,7 +8,12 @@
 <h1>RBNB Release Notes</h1>
 <h1>RBNB V3.2 Release Notes</h1><h2>V3.2B1 to V3.2B2 Changes</h2>
 V3.2B2 released 04/22/2009<br>This release corresponds to RBNB Subversion repository revision number 179<span style="font-weight: bold;"><br></span><h3><span style="font-weight: bold;"></span>Server</h3>
-<ul><li>Added synchronize call to Mirror write to confirm data sent. This avoids lost data on reconnect.</li><li>Added
+<ul><li>Added synchronize call to Mirror write to confirm data sent.
+This avoids lost data on reconnect, but may incur unwanted additional
+network delay due to the fact that&nbsp;the server waits for confirmation that the data sent to
+the downstream mirror was actually delivered. &nbsp;To turn this
+feature off, include the following definition in the DataTurbine
+startup Java command: -DasyncMirror<span style="font-size: 11pt; font-family: &quot;Calibri&quot;,&quot;sans-serif&quot;;"> </span></li><li>Added
 test code (currently commented out) in Mirror which can be used to
 check the latest time in the downstream mirror source to see if the
 last data frame should be resent (this would be used after the mirror
