@@ -1,5 +1,0 @@
-The apache tomcat subdirectory contains a reduced set of files from the full
-installation, and exists to support compilation of the WebTurbine components.
-
-2005/12/08  WHF
-

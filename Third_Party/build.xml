@@ -8,7 +8,8 @@
 	                 Source directory (it now resides at the top level
 			 alongside Source).  Therefore, in this build file,
 			 I had to change how to find definitions.xml.
-
+         WHF 2009/04/29: Removed file copy of archives.  Unzip tomcat.
+		 
      Description:
          This file is the primary Ant build file for the third party
          applications.
@@ -20,35 +21,43 @@
  <!-- JPW 08/20/2007: Since Third_Party has been moved out of the Source -->
  <!--                 directory, changed where to find definitions.xml   -->
  <!-- import file="../definitions.xml" /-->
- <import file="../Source/definitions.xml" />
+	<import file="../Source/definitions.xml" />
 
- <!-- Library directory. -->
- <property name="rbnb.thirdpartylibdir"
-           value="${rbnb.librarydir}/Third_Party" />
+	<!-- Library directory. -->
+<!--	<property name="rbnb.thirdpartylibdir"
+			value="${rbnb.librarydir}/Third_Party" /> -->
 
- <!-- Initialize the application build directory. -->
- <target name="init">
-  <mkdir dir="${rbnb.thirdpartylibdir}" />
- </target>
+	<!-- Initialize the application build directory. -->
+	<target name="init">
+		<mkdir dir="${rbnb.thirdpartyout}" />
+		<!-- Conditionally set property, so that Ant will not expand the
+			zip file every time we execute a build.  -->
+		<uptodate property="thirdPartyOut.hasTomcat"
+				srcfile="${rbnb.thirdpartydir}/${rbnb.tomcatver}.zip"
+				targetfile="${rbnb.thirdpartyout}/${rbnb.tomcatver}" />
+	</target>
 
- <!-- Compile all of the applications - a NOP. -->
- <target name="compile" depends="init">
- </target>
+	<!-- Compile all of the applications - a NOP. -->
+	<target name="compile" depends="init"></target>
 
- <!-- Copy the third party libraries to the build directory. -->
- <target name="library" depends="compile">
-  <copy todir="${rbnb.thirdpartylibdir}">
-<!--   <fileset dir="${rbnb.thirdpartydir}"
-            includes="jakarta-tomcat-4.1.21.zip,JAI.zip" />  -->
+	 <!-- Unzip any third party libraries to the build directory that are needed
+	 	during the build process.  Note if additional libraries are added,
+		more sub-targets may be needed to get sufficient conditional 
+		granularity. -->
+	<target name="library" depends="compile" unless="thirdPartyOut.hasTomcat">
+<!--  <copy todir="${rbnb.thirdpartylibdir}">
 	<fileset dir="${rbnb.thirdpartydir}"
             includes="apache-tomcat-5.5.12.zip,
-                      apache-tomcat-5.5.12-compat.zip,JAI.zip" /> 
-  </copy>
- </target>
+                      apache-tomcat-5.5.12-compat.zip,JAI.zip" /> 					  
+  </copy> -->
+
+		<unzip dest="${rbnb.thirdpartyout}"
+			src="${rbnb.thirdpartydir}/${rbnb.tomcatver}.zip" />
+	</target>
 
  <!-- Cleans out all compiled and library files for the applications. -->
- <target name="clean">
-  <delete dir="${rbnb.builddir}/Third_Party" />
- </target>
+	<target name="clean">
+		<delete dir="${rbnb.thirdpartyout}" />
+	</target>
 
 </project>

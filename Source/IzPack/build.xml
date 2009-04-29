@@ -11,59 +11,58 @@
 	 2005/10/12  WHF  Updated for Tomcat 5.5.
      2005/12/08  EMF  Added Java1.4 compatibility kit for Tomcat 5.5.
 	 2005/12/09  EMF  Unpack war files, so config can be easily changed by users.
+	 2009/04/29  WHF  Updated for Tomcat 6.0.
 -->
 
 <project name="IZPACK" default="distribute" basedir=".">
 
  <!-- Import the standard definitions (properties). -->
- <import file="../definitions.xml" />
+	<import file="../definitions.xml" />
 
  <!-- Initialize the application build directory. -->
- <target name="init">
-  <mkdir dir="${rbnb.builddir}/IzPack" />
- </target>
+	<target name="init">
+		<mkdir dir="${rbnb.builddir}/IzPack" />
+	</target>
 
  <!-- Compile all of the applications - a NOP. -->
- <target name="compile" depends="init">
- </target>
+	<target name="compile" depends="init"></target>
 
  <!-- Copy the IzPack stuff to the build directory. -->
- <target name="library" depends="compile">
-  <filter token="__RBNB.VERSION__" value="${rbnb.version}" />
-  <copy todir="${rbnb.builddir}/IzPack" filtering="true">
-   <fileset dir="${rbnb.sourcedir}/IzPack"
-            includes="**"
-            excludes="build.xml" />
-   <fileset dir="${rbnb.builddir}/Lib"
-            includes="InstallNotes.txt" />
-  </copy>
- </target>
+	<target name="library" depends="compile">
+		<filter token="__RBNB.VERSION__" value="${rbnb.version}" />
+		<copy todir="${rbnb.builddir}/IzPack" filtering="true">
+			<fileset dir="${rbnb.sourcedir}/IzPack"
+					includes="**"
+					excludes="build.xml" />
+			<fileset dir="${rbnb.builddir}/Lib"
+					includes="InstallNotes.txt" />
+		</copy>
+	</target>
 
  <!-- Distribution build -->
- <target name="distribute" depends="clean,library">
-  <mkdir dir="${rbnb.builddir}/Third_Party" />
-<!--  <unzip src="${rbnb.builddir}/Lib/Third_Party/jakarta-tomcat-4.1.21.zip"
-         dest="${rbnb.builddir}/Third_Party" /> -->
+	<target name="distribute" depends="clean,library">
+<!--  Task now performed by ThirdParty build script:
+		<mkdir dir="${rbnb.builddir}/Third_Party" />
 
-  <unzip src="${rbnb.builddir}/Lib/Third_Party/apache-tomcat-5.5.12.zip"
-         dest="${rbnb.builddir}/Third_Party" />
-  <unzip src="${rbnb.builddir}/Lib/Third_Party/apache-tomcat-5.5.12-compat.zip"
-         dest="${rbnb.builddir}/Third_Party" />
+		<unzip src="${rbnb.builddir}/Lib/Third_Party/apache-tomcat-5.5.12.zip"
+			 dest="${rbnb.builddir}/Third_Party" />
+		<unzip src="${rbnb.builddir}/Lib/Third_Party/apache-tomcat-5.5.12-compat.zip"
+			 dest="${rbnb.builddir}/Third_Party" /> -->
 
-  <izpack input="${rbnb.builddir}/IzPack/distribute.xml"
-          output="${rbnb.distributedir}/RBNB-${rbnb.version}-install.jar"
-          installerType="standard-kunststoff"
-          basedir="${rbnb.builddir}"
-          izPackDir="${rbnb.thirdpartydir}/izpack-3.5.4" />
- </target>
+		<izpack input="${rbnb.builddir}/IzPack/distribute.xml"
+				output="${rbnb.distributedir}/RBNB-${rbnb.version}-install.jar"
+				installerType="standard-kunststoff"
+				basedir="${rbnb.builddir}"
+				izPackDir="${rbnb.thirdpartydir}/izpack-3.5.4" />
+	</target>
 
- <!-- Cleans out all compiled and library failes for the applications. -->
- <target name="clean">
-  <delete>
-   <fileset dir="${rbnb.distributedir}" includes="**" />
-  </delete>
-  <delete dir="${rbnb.builddir}/Third_Party" />
-  <delete dir="${rbnb.builddir}/IzPack" />
- </target>
+ <!-- Cleans out all compiled and library files for the applications. -->
+	<target name="clean">
+		<delete>
+			<fileset dir="${rbnb.distributedir}" includes="**" />
+		</delete>
+		<!-- <delete dir="${rbnb.builddir}/Third_Party" /> -->
+		<delete dir="${rbnb.builddir}/IzPack" />
+	</target>
 
 </project>

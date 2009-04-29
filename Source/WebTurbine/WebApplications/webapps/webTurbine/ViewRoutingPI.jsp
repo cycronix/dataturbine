@@ -3,12 +3,13 @@
 	import="com.rbnb.sapi.*, java.util.ArrayList, org.xml.sax.*"
 	isELIgnored="false"
 %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%-- <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %> --%>
 <%!
 	/* ViewRoutingPI.jsp.  Servlet to view current Robust Routing connections.
 	
 		2005/10/25  WHF  Created.
 		2005/12/15  WHF  Made modifications as per MJM.
+		2009/04/29  WHF  Removed tag library dependency.
 	*/
 	
 	/**
@@ -115,10 +116,11 @@
 
 	pageContext.setAttribute("plugIns", plugIns);
 	pageContext.setAttribute("action", action);
-%>
-	<!-- Action = ${action} -->
-	<c:if test="${action == 'start' || action == 'loopback'}">
-		<% // Validate that requesting host is local:
+
+	// Action = ${action}
+	//<c:if test="${action == 'start' || action == 'loopback'}">
+	if ("start".equals(action) || "loopback".equals(action)) {
+		// Validate that requesting host is local:
 		java.net.InetAddress requestAddr 
 				= java.net.InetAddress.getByName(request.getRemoteAddr());
 		java.net.InetAddress[] addrs = java.net.InetAddress.getAllByName(
@@ -136,9 +138,9 @@
 			<%-- We comment the include so it is not displayed. --%> 
 			<!-- <jsp:include page="StartPlugIn.jsp" /> -->
 		<% 	Thread.sleep(1000); 
-		} %>
-	</c:if>
-<%
+		} 
+	} // </c:if>
+
 	try {
 	sink.OpenRBNBConnection(parentAddr, "RoutingConsoleSink");
 	// Because it lies in a different web application, we cannot 'include'

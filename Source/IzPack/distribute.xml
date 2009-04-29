@@ -7,9 +7,6 @@
 
  <native type="izpack" name="ShellLink.dll" />
 
- <variables>
- </variables>
-
  <resources>
   <res id="HTMLLicencePanel.licence" src="Lib/Documentation/EULA.html" />
   <res id="shortcutSpec.xml" src="IzPack/shortcutSpec.xml" />
@@ -23,17 +20,12 @@
   <appname>RBNB</appname>
   <appversion>@__RBNB.VERSION__@</appversion>
   <url>http://dataturbine.org</url>
-  <!--
-  <authors>
-   <author name="Matthew J. Miller" email="mjm@creare.com" />
-   <author name="Ian A. Brown" email="inb@creare.com" />
-   <author name="Eric M. Friets" email="emf@creare.com" />
-   <author name="William H. Finger" email="whf@creare.com" />
-   <author name="John P. Wilson" email="whitemountain@charter.net" />
-  </authors>
-  -->
   <uninstaller write="yes" />
  </info>
+ 
+ <variables>
+ 	<variable name="TOMCATVER" value="apache-tomcat-6.0.18" />
+ </variables>
 
  <guiprefs resizable="yes" width="800" height="600" />
 
@@ -63,29 +55,20 @@
     <include name="*.sh" />
     <os name="Linux" />
    </fileset>
-<!--
-   <file src="Third_Party/apache-tomcat-5.5.12"
-         targetdir="$INSTALL_PATH" />
-   <file src="Lib/Configuration" targetdir="$INSTALL_PATH/apache-tomcat-5.5.12/webapps/ROOT" />
+  
+   <fileset dir="ThirdParty" targetdir="$INSTALL_PATH" override="yes">
+   		<include name="**" />
+	</fileset>
+   		
+   <file src="Lib/Configuration" targetdir="$INSTALL_PATH/$TOMCATVER/webapps/ROOT" />
    <file src="IzPack/RBNB.ico"
-         targetdir="$INSTALL_PATH/apache-tomcat-5.5.12/bin" />
+         targetdir="$INSTALL_PATH/$TOMCATVER/bin" />
    <fileset dir="Lib/WebServerImage"
-            targetdir="$INSTALL_PATH/apache-tomcat-5.5.12"
-	    override="yes">
-    <include name="**" />
-   </fileset>  -->
-   
-   <file src="Third_Party/apache-tomcat-5.5.12"
-         targetdir="$INSTALL_PATH" />
-   <file src="Lib/Configuration" targetdir="$INSTALL_PATH/apache-tomcat-5.5.12/webapps/ROOT" />
-   <file src="IzPack/RBNB.ico"
-         targetdir="$INSTALL_PATH/apache-tomcat-5.5.12/bin" />
-   <fileset dir="Lib/WebServerImage"
-            targetdir="$INSTALL_PATH/apache-tomcat-5.5.12"
+            targetdir="$INSTALL_PATH/$TOMCATVER"
 	    override="yes">
     <include name="**" />
    </fileset>
-   
+
 <!--   <executable targetfile="$INSTALL_PATH/bin/Start_Webserver.sh"
                os="unix"
                stage="never"
@@ -94,47 +77,47 @@
                os="unix"
 	       stage="never"
 	       keep="true" />   -->
-   <executable targetfile="$INSTALL_PATH/apache-tomcat-5.5.12/bin/catalina.sh"
+   <executable targetfile="$INSTALL_PATH/$TOMCATVER/bin/catalina.sh"
                os="unix"
 	       stage="never"
 	       keep="true" />
-   <executable targetfile="$INSTALL_PATH/apache-tomcat-5.5.12/bin/digest.sh"
+   <executable targetfile="$INSTALL_PATH/$TOMCATVER/bin/digest.sh"
                os="unix"
 	       stage="never"
 	       keep="true" />
-<!--   <executable targetfile="$INSTALL_PATH/apache-tomcat-5.5.12/bin/jasper.sh"
+<!--   <executable targetfile="$INSTALL_PATH/$TOMCATVER/bin/jasper.sh"
                os="unix"
 	       stage="never"
 	       keep="true" />  -->
-   <executable targetfile="$INSTALL_PATH/apache-tomcat-5.5.12/bin/JavaEnvStart.sh"
+   <executable targetfile="$INSTALL_PATH/$TOMCATVER/bin/JavaEnvStart.sh"
                os="unix"
 	       stage="never"
 	       keep="true" />
-   <executable targetfile="$INSTALL_PATH/apache-tomcat-5.5.12/bin/JavaEnvStop.sh"
+   <executable targetfile="$INSTALL_PATH/$TOMCATVER/bin/JavaEnvStop.sh"
                os="unix"
 	       stage="never"
 	       keep="true" />
-<!--   <executable targetfile="$INSTALL_PATH/apache-tomcat-5.5.12/bin/jspc.sh"
+<!--   <executable targetfile="$INSTALL_PATH/$TOMCATVER/bin/jspc.sh"
                os="unix"
 	       stage="never"
 	       keep="true" /> -->
-   <executable targetfile="$INSTALL_PATH/apache-tomcat-5.5.12/bin/setclasspath.sh"
+   <executable targetfile="$INSTALL_PATH/$TOMCATVER/bin/setclasspath.sh"
                os="unix"
 	       stage="never"
 	       keep="true" />
-   <executable targetfile="$INSTALL_PATH/apache-tomcat-5.5.12/bin/shutdown.sh"
+   <executable targetfile="$INSTALL_PATH/$TOMCATVER/bin/shutdown.sh"
                os="unix"
 	       stage="never"
 	       keep="true" />
-   <executable targetfile="$INSTALL_PATH/apache-tomcat-5.5.12/bin/startup.sh"
+   <executable targetfile="$INSTALL_PATH/$TOMCATVER/bin/startup.sh"
                os="unix"
 	       stage="never"
 	       keep="true" />
-   <executable targetfile="$INSTALL_PATH/apache-tomcat-5.5.12/bin/tool-wrapper.sh"
+   <executable targetfile="$INSTALL_PATH/$TOMCATVER/bin/tool-wrapper.sh"
                os="unix"
 	       stage="never"
 	       keep="true" />
-   <executable targetfile="$INSTALL_PATH/apache-tomcat-5.5.12/bin/version.sh"
+   <executable targetfile="$INSTALL_PATH/$TOMCATVER/bin/version.sh"
                os="unix"
 	       stage="never"
 	       keep="true" />

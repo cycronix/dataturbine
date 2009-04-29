@@ -14,6 +14,7 @@
 	                  Source, I changed the definition of
 			  "rbnb.thirdpartydir".  Add a check that Third_Party
 			  exists in proper location (fail build if it isn't).
+	 2009/04/29  WHF  Added rbnb.thirdpartyout, rbnb.tomcatver.
  -->
 
 <project name="DEFINITIONS">
@@ -48,6 +49,12 @@
 
   -->
  <property name="rbnb.thirdpartydir" value="${rbnb.basedir}/Third_Party" />
+ 
+ <!-- The version of the Tomcat webserver currently compiled against and
+      shipped with the product.  Note that this value must match the variable
+	  TOMCATVER in IzPack/distribute.xml. -->
+ <property name="rbnb.tomcatver" value="apache-tomcat-6.0.18" />
+
 
  <!-- The build directory contains all of the intermediate files created by
       the build system.  This directory can be deleted and then rebuilt by
@@ -67,6 +74,11 @@
   -->
  <property name="rbnb.documentationdir"
            value="${rbnb.librarydir}/Documentation" />
+
+ <!-- The ThirdParty directory typically contains zip archives.  The directory
+      below is used when those archives must be expanded in order to compile
+	  dependencies. -->
+ <property name="rbnb.thirdpartyout" value="${rbnb.builddir}/ThirdParty" />		
 
  <!-- The distrubute directory contains a distributable (installable) version
       of the executable code.

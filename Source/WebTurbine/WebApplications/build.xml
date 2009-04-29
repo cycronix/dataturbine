@@ -15,6 +15,7 @@
 	 2007/03/23  WHF  Attempt to use Piccolo as the SAX driver, versus xerces.
 	 2007/08/23  PFH  Removing references to proguard and obfuscation.
 	 2008/08/29  WHF  Cleaned up build.  Added ChartServlet.
+	 2009/04/29  WHF  Minor changes for Tomcat 6.0 support.
 -->
 
 <project name="WebApplications" default="library" basedir=".">
@@ -54,10 +55,10 @@
 	
 	<!-- Third party paths  -->  
 	<property name="rbnb.jakartadir" 
-			value="${rbnb.thirdpartydir}/apache-tomcat-5.5.12" />			
+			value="${rbnb.thirdpartyout}/${rbnb.tomcatver}" />			
 	<path id = "servletcp" >
-		<pathelement location="${rbnb.jakartadir}/common/lib/servlet-api.jar"/>
-		<pathelement location="${rbnb.jakartadir}/common/lib/jsp-api.jar" />
+		<pathelement location="${rbnb.jakartadir}/lib/servlet-api.jar"/>
+		<pathelement location="${rbnb.jakartadir}/lib/jsp-api.jar" />
 	</path>
 	<path id = "corecp" >
 		<pathelement location = "${rbnb.librarydir}/rbnb.jar" />
@@ -87,17 +88,14 @@
 				<fileset dir="${rbnb.jakartadir}/bin"> 
 					<include name="*.jar"/> 
 				</fileset> 
-				<fileset dir="${rbnb.jakartadir}/server/lib"> 
-					<include name="*.jar"/> 
-				</fileset>
-				<fileset dir="${rbnb.jakartadir}/common/lib"> 
+				<fileset dir="${rbnb.jakartadir}/lib"> 
 					<include name="*.jar"/> 
 				</fileset>
 				<!-- Tag library, which for some reason is not included in
 						the common area: -->
-				<fileset dir="${rbnb.jakartadir}/webapps/jsp-examples/WEB-INF/lib"> 
+				<!--<fileset dir="${rbnb.jakartadir}/webapps/jsp-examples/WEB-INF/lib"> 
 					<include name="*.jar"/> 
-				</fileset>				
+				</fileset> -->				
 			</classpath> 
 		</taskdef>
 	</target> 
@@ -259,10 +257,11 @@
 		<copy todir="${rbnb.walibdir}/webapps/webTurbine/WEB-INF/classes/TrackResources">
 		    <fileset dir="${rbnb.classesdir}/Applications/PlugIns/TrackResources"/>
 		</copy>
+		<!-- 2009/04/29  WHF  Tag library no longer required. 
 		<copy todir = "${rbnb.walibdir}/webapps/webTurbine/WEB-INF/lib" >
 			<fileset dir = "${rbnb.jakartadir}/webapps/jsp-examples/WEB-INF/lib"
 					includes = "*.jar" />
-		</copy>
+		</copy> -->
 			
 		
 		<jar destfile = "${rbnb.docwarpath}">
@@ -286,7 +285,7 @@
 			</fileset>
 		</copy>
 		<copy file = "${rbnb.librarydir}/rbnb.jar"
-				todir = "${rbnb.walibdir}/common/lib" />
+				todir = "${rbnb.walibdir}/lib" />
 		
 		<!-- just copy files, do not war them up
 		 Build RBNB WebDAV WAR file: 
