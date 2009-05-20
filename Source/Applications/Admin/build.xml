@@ -36,10 +36,13 @@
  <!-- Compile the Admin Java source code and place the results in the Admin
       classes directory.  References the Core library and the Admin classes for
       dependencies.
+	  
+	  2009/05/20  WHF  Added debugging to compiler output.
   -->
  <target name="compile" depends="init">
   <javac destdir="${rbnb.classesdir}/Applications/Admin"
          deprecation="on"
+		 debug="on"
          source="${rbnb.javaver}"
          target="${rbnb.javaver}">
    <src path="${rbnb.sourcedir}/Applications/Admin" />

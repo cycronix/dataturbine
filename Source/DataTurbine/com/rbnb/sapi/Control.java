@@ -22,15 +22,19 @@ limitations under the License.
 	
 	*** Modification History ***
 	2007/07/20  WHF  Created.
+	2009/05/20  WHF  Implemented Terminate(String) method.  Renamed Terminate()
+		method to TerminateServer().
 */
 
 package com.rbnb.sapi;
 
+import java.lang.reflect.Method;
 import java.io.IOException;
 import java.util.Vector;
 
 import com.rbnb.api.Controller;
 import com.rbnb.api.ControllerHandle;
+import com.rbnb.api.Rmap;
 import com.rbnb.api.Server;
 import com.rbnb.api.Username;
 
@@ -82,20 +86,57 @@ public class Control extends Client
 	/**
 	  * Stops the object with the given name.  It may be a server or any
 	  *  sort of client.
+	  * <p>Note: this method returns after the server has acknowledged receipt
+	  *   of the command, but before the server executes the task.  Thus the
+	  *  actual shutdown of the object will occur asynchronously.
 	  */
 	public void Terminate(String name) throws SAPIException
-	{}
+	{
+		assertConnection();
+		
+		Rmap leaf;
+		try {
+			// Create an Rmap hierarchy to the target.  Note that we 
+			//  use the fully qualified name unless a leading slash is present.
+			//  This is because stop() fails with child servers using a 
+			//  relative name (leading "." as the name).  Other clients work!
+			String fullName = name.charAt(0) == '/' ? name 
+					: getServer().getFullName() + '/' + name;
+			Rmap toFind = getServer().createFromName(fullName);
+				
+			leaf = controller.getRegistered(toFind);
+			// Find the endpoint of the Rmap chain:
+			while (leaf.getNchildren() > 0)
+				leaf = leaf.getChildAt(0);
+		
+			// The controller stop method takes one of Client, Server, 
+			//  or Shortcut, none of which have a common base class.
+			//  Thus we must handle each case separately.
+			if (leaf instanceof com.rbnb.api.Client) {
+				controller.stop((com.rbnb.api.Client) leaf);
+			} else if (leaf instanceof Server) {
+				controller.stop((Server) leaf);
+			} else if (leaf instanceof com.rbnb.api.Shortcut) {
+				controller.stop((com.rbnb.api.Shortcut) leaf);
+			}
+
+		} catch (Exception e) {
+			throw new SAPIException(e);
+		}
+	}
 	
 	/**
 	  * Stops the server to which this Control is connected.
 	  */
-	public void Terminate() throws SAPIException
+	public void TerminateServer() throws SAPIException
 	{
-/*		try {
+		assertConnection();
+		
+		try {
 			super.terminateLocalServer();
 		} catch (Exception e) {
 			throw new SAPIException(e);
-		} */
+		}
 	}
 	
 	/**

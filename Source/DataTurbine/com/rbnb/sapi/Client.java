@@ -62,6 +62,8 @@ import com.rbnb.api.*;
  *			actually used.
  * 2005/10/25  EMF  Added BytesTransferred method, to support client metrics.
  * 2008/03/25  WHF  Added synchWserver to _close call.
+ * 2009/05/19  WHF  Uncommented server termination code, added exception 
+ *          indicator.  Added member termination function.
  */
 
 public abstract class Client implements java.io.Serializable
@@ -747,12 +749,12 @@ public abstract class Client implements java.io.Serializable
 	/**
 	  * Intended for use with Control clients.
 	  */
-/*	final void terminateLocalServer()
+	final void terminateLocalServer() throws Exception
 	{
 		server.stop();
 		server = null;
 		clearData();
-	} */
+	}
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////// Static Utility Methods: /////////////////////////////
 	/**

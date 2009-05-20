@@ -69,6 +69,7 @@
 					value="${rbnb.testdir}" />
 			<formatter type="plain" usefile="false" />
 			<test name="com.rbnb.tests.ArchiveTests" />
+			<test name="com.rbnb.tests.SapiControlTests" />
 		</junit>
 	</target>
 	
