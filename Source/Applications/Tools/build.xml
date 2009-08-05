@@ -1,0 +1,88 @@
+<!-- Name: build.xml
+     By:   Eric Friets
+     Date: 07/31/2009
+
+     Description:
+         This file is the primary Ant build file for the RBNB Tools
+         application.  
+-->
+
+<project name="APPLICATION.TOOLS" default="library" basedir=".">
+
+ <!-- Import the standard definitions (properties). -->
+ <import file="../../definitions.xml" />
+
+ <!-- Initialize by setting the timestamp. -->
+ <target name="init">
+  <tstamp />
+  <buildnumber />
+  <mkdir dir="${rbnb.builddir}" />
+  <mkdir dir="${rbnb.classesdir}" />
+  <mkdir dir="${rbnb.classesdir}/Applications" />
+  <mkdir dir="${rbnb.classesdir}/Applications/Tools" />
+  <mkdir dir="${rbnb.librarydir}" />
+ </target>
+
+ <!-- conditional compile, based on version -->
+ <target name="compile.check">
+	<condition property="use1.6">
+		<available classname="java.awt.SystemTray" />
+	</condition>
+ </target>
+
+ <!-- Compile the Tools Java source code and place the results in the Tools
+      classes directory.  References the Core library, admin.jar, and the 
+	Tools classes for dependencies.
+  -->
+ <target name="compile" depends="init,compile.check" if="use1.6">
+  <echo> Using javac1.6 </echo>
+  <javac destdir="${rbnb.classesdir}/Applications/Tools"
+         deprecation="on"
+	 source="1.5"
+  	 target="1.5">
+   <src path="${rbnb.sourcedir}/Applications/Tools" />
+   <classpath path="${rbnb.classesdir}/Applications/Tools" />
+   <classpath path="${rbnb.librarydir}/rbnb.jar" />
+   <classpath path="${rbnb.librarydir}/admin.jar" />
+  </javac>
+ </target>
+
+ <target name="compileold" depends="init,compile.check" unless="use1.6">
+  <echo> Using javac1.5 </echo>
+  <javac destdir="${rbnb.classesdir}/Applications/Tools"
+         deprecation="on"
+	 excludes="TrayIconHolder.java"
+  	 source="1.5"
+  	 target="1.5">
+   <src path="${rbnb.sourcedir}/Applications/Tools" />
+   <classpath path="${rbnb.classesdir}/Applications/Tools" />
+   <classpath path="${rbnb.librarydir}/rbnb.jar" />
+   <classpath path="${rbnb.librarydir}/admin.jar" />
+  </javac>
+</target>
+ 
+ <!-- Copy the icon images to the classes directory. -->
+ <target name="images">
+  <copy
+	file="${rbnb.sourcedir}/Applications/Tools/Creare.gif"
+	todir="${rbnb.classesdir}/Applications/Tools"
+  />
+ </target>
+ 
+ <!-- Create the tools jar file using the Player classes. -->
+ <target name="library" depends="compile, compileold, images">
+  <jar destfile="${rbnb.librarydir}/tools.jar"
+       basedir="${rbnb.classesdir}/Applications/Tools"
+       manifest="Manifest"
+       compress="false"
+   />
+ </target>
+
+ <!-- Cleans out all compiled and library files for the Player project. -->
+ <target name="clean">
+  <delete dir="${rbnb.classesdir}/Applications/Tools" />
+  <delete file="${rbnb.librarydir}/tools.jar" />
+ </target>
+
+</project>
+
