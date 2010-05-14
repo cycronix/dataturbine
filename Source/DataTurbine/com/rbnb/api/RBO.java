@@ -43,6 +43,7 @@ package com.rbnb.api;
  *   Date      By	Description
  * MM/DD/YYYY
  * ----------  --	-----------
+ * 03/19/2010  MJM      Added logic to conservatively add FileSets for reattaching sources
  * 08/12/2008  WHF      Implemented failSafeMode.
  * 03/26/2008  WHF      Added check for incoming frame at time of termination to
  *                      avoid deadlock in later requests.
@@ -7591,6 +7592,7 @@ private boolean alreadyReset=false;
      *   Date      By	Description
      * MM/DD/YYYY
      * ----------  --	-----------
+     * 03/19/2010  MJM  Add FileSets for reconnecting sources - avoid unexpectedly small archive
      * 02/17/2003  INB	Modified to handle multiple <code>RingBuffers</code>.
      * 12/06/2001  INB	Created.
      *
@@ -7604,16 +7606,17 @@ private boolean alreadyReset=false;
     {
 //EMF 12/6/06: always do what the user asked for, not what the archive is,
 //             but don't trim existing data
-	if (getAframes() > 0) {
+      if (getAframes() > 0) {
 	    // If the user specified a maximum size in terms of frames, try to
 	    // adjust the size of the <code>Archive</code> by increasing or
 	    // decreasing the number of <code>FileSets</code> stored.
-/*
+
+ /*
 	    double fsSize = aFrSFileSet*cFrFrameSet;
 
 	    int aFS = Math.max(2,(int) Math.ceil(getAframes()/fsSize));
- // System.err.println("Debug: getAframes(): "+getAframes()+", fsSize: "+fsSize+", aFS: "+aFS);
-
+  System.err.println("Debug: getAframes(): "+getAframes()+", fsSize: "+fsSize+", aFS: "+aFS+", aFileSets: "+aFileSets);
+ 
 	    if (aFS < aFileSets) {
 		getLog().addMessage
 		    (getLogLevel(),
@@ -7625,23 +7628,32 @@ private boolean alreadyReset=false;
 	    }
 	    aFileSets = aFS;
 */
-setUpArchive();
+  	    double fsSize = aFrSFileSet*cFrFrameSet;	// mjm
+  	    
+		setUpArchive();
 	    RingBuffer rb;
 	    for (int idx = 0,
 		     eIdx = getNchildren();
-		 idx < eIdx;
-		 ++idx) {
-		rb = (RingBuffer) getChildAt(idx);
-Archive archive=rb.getArchive();
-if (archive!=null) {
-		//rb.getArchive().setMs(aFS);
-		//rb.getArchive().trim();
-archive.setMs(aFileSets);
-archive.setMeps(aFrSFileSet);
-}
+		 	idx < eIdx;
+		 	++idx) {
+	    		rb = (RingBuffer) getChildAt(idx);
+	    		Archive archive=rb.getArchive();
+	    		
+	    		// following patch presumes that prior filesets may have only a single frame per fileset 
+	    		// (conservatively keep maybe lots-more vs trim lots-less)	    		
+	    		int nOFS = archive.getNchildren();		// number old file sets.  mjm 4/10
+	    	    int aFS = nOFS - (int)(nOFS/fsSize);	// tweek down presuming at least 1 frame per old fileset.  mjm 4/10
+ //System.err.println("ajusted FileSets: "+(aFileSets+aFS)+" ("+aFileSets+"+"+aFS+")");	// mjm debug
+	    		if (archive!=null) {
+	    			//rb.getArchive().setMs(aFS);
+	    			//rb.getArchive().trim();
+//	    			archive.setMs(aFileSets);	
+	    			archive.setMs(aFileSets + aFS);		// mjm 4/10:  shrinking buffer fix?
+	    			archive.setMeps(aFrSFileSet);
+	    		}
 	    }
-	}
-    }
+	  }
+   }
 
     /**
      * Updates the <code>Cache</code> by adjusting its size to match the
