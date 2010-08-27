@@ -34,6 +34,7 @@ import java.util.Vector;
 
 import com.rbnb.api.Controller;
 import com.rbnb.api.ControllerHandle;
+import com.rbnb.api.DataRequest;
 import com.rbnb.api.Rmap;
 import com.rbnb.api.Server;
 import com.rbnb.api.Username;
@@ -55,9 +56,11 @@ public class Control extends Client
 //*****************************  Public Methods  ****************************//
 	/**
 	  * Creates a mirror to copy data from a source on the specified server 
-	  *  address to the connected server.
+	  *  address to the connected server (pull mirror).
+	  *  
+	  *  THIS METHOD IS NOT FULLY IMPLEMENTED.
 	  */
-	public Mirror CreateMirrorIn(
+	public void CreateMirrorIn(
 			String remoteServer,
 			String remoteSource,
 			String localName) throws SAPIException
@@ -68,19 +71,746 @@ public class Control extends Client
 			throw new SAPIException(e);
 		}
 		
-		return new Mirror();
 	}
 	
 	/**
 	  * Creates a mirror to copy data from a local source to the specified
-	  *   remote server.
+	  * remote server (push mirror).  This method assumes we are going to
+	  * do a frame-based mirror, mirroring starting NOW and going on forever,
+	  * that is CONTINUOUS.  Furthermore, this method will specify that the
+	  * new mirror source will match the original source's cache and archive
+	  * settings.
 	  */
-	public Mirror CreateMirrorOut(
-			String localSource,
-			String remoteServer,
-			String remoteName) throws SAPIException
+	public void CreateMirrorOut(
+			String localSourceI,
+			String remoteServerI,
+			String remoteNameI) throws SAPIException
 	{
-		return new Mirror();
+	    try {
+		Control.createMirror(
+		    controller,
+		    getServer(),
+		    null,
+		    getServer().getAddress(),
+		    null,
+		    localSourceI,
+		    null,
+		    remoteServerI,
+		    remoteNameI,
+		    com.rbnb.api.Mirror.NOW,
+		    com.rbnb.api.Mirror.CONTINUOUS,
+		    0,
+		    0,
+		    com.rbnb.api.SourceInterface.ACCESS_NONE,
+		    true);
+	    } catch (Exception e) {
+		if ( (e.getMessage() != null) && (!e.getMessage().isEmpty()) )
+		    throw new SAPIException(e.getMessage());
+		else {
+		    String errStr = new String("Unable to create mirror\n" + e);
+		    throw new SAPIException(errStr);
+		}
+	    }
+	}
+	
+	/**
+	  * Creates a mirror to copy data from a local source to the specified
+	  * remote server (push mirror).  This method assumes we are going to
+	  * do a frame-based mirror, mirroring starting NOW and going on forever,
+	  * that is CONTINUOUS.
+	  */
+	public void CreateMirrorOut(
+			String localSourceI,
+			String remoteServerI,
+			String remoteNameI,
+			long numCacheFramesI,
+			long numArchiveFramesI,
+			byte archiveModeI,
+			boolean bMatchFromSourceI) throws SAPIException
+	{
+	    try {
+		Control.createMirror(
+		    controller,
+		    getServer(),
+		    null,
+		    getServer().getAddress(),
+		    null,
+		    localSourceI,
+		    null,
+		    remoteServerI,
+		    remoteNameI,
+		    com.rbnb.api.Mirror.NOW,
+		    com.rbnb.api.Mirror.CONTINUOUS,
+		    numCacheFramesI,
+		    numArchiveFramesI,
+		    archiveModeI,
+		    bMatchFromSourceI);
+	    } catch (Exception e) {
+		if ( (e.getMessage() != null) && (!e.getMessage().isEmpty()) )
+		    throw new SAPIException(e.getMessage());
+		else {
+		    String errStr = new String("Unable to create mirror\n" + e);
+		    throw new SAPIException(errStr);
+		}
+	    }
+	}
+	
+	/**
+	  * Creates a mirror to copy data from a local source to the specified
+	  * remote server (push mirror).  This method assumes we are going to
+	  * do a frame-based mirror, mirroring starting NOW and going on forever,
+	  * that is CONTINUOUS.
+	  * 
+	  * This version of the method accepts an "int" argument for archiveModeI
+	  * and bMatchFromSourceI, to better match parameters that MATLAB can set
+	  * in its function call.
+	  * 
+	  */
+	public void CreateMirrorOut(
+			String localSourceI,
+			String remoteServerI,
+			String remoteNameI,
+			long numCacheFramesI,
+			long numArchiveFramesI,
+			int archiveModeI,
+			int bMatchFromSourceI) throws SAPIException
+	{
+	    boolean bMatchFromSource = false;
+	    if (bMatchFromSourceI != 0) {
+		bMatchFromSource = true;
+	    }
+	    
+	    byte archiveMode = (byte)archiveModeI;
+	    if ( (archiveMode != com.rbnb.api.SourceInterface.ACCESS_APPEND) &&
+		 (archiveMode != com.rbnb.api.SourceInterface.ACCESS_CREATE) &&
+		 (archiveMode != com.rbnb.api.SourceInterface.ACCESS_NONE) )
+	    {
+		if (!bMatchFromSource) {
+		    throw new SAPIException("Unknown or unsupported archive mode - cannot create mirror.");
+		} else {
+		    archiveMode = com.rbnb.api.SourceInterface.ACCESS_NONE;
+		}
+	    }
+	    
+	    try {
+		Control.createMirror(
+		    controller,
+		    getServer(),
+		    null,
+		    getServer().getAddress(),
+		    null,
+		    localSourceI,
+		    null,
+		    remoteServerI,
+		    remoteNameI,
+		    com.rbnb.api.Mirror.NOW,
+		    com.rbnb.api.Mirror.CONTINUOUS,
+		    numCacheFramesI,
+		    numArchiveFramesI,
+		    archiveMode,
+		    bMatchFromSource);
+	    } catch (Exception e) {
+		if ( (e.getMessage() != null) && (!e.getMessage().isEmpty()) )
+		    throw new SAPIException(e.getMessage());
+		else {
+		    String errStr = new String("Unable to create mirror\n" + e);
+		    throw new SAPIException(errStr);
+		}
+	    }
+	}
+	
+	/**************************************************************************
+	 * Start a frame-based mirror.
+	 * <p>
+	 * This method starts a mirror between two servers.  The arguments specify
+	 * where the data is coming from (fromServer, fromSource) and where data is
+	 * going to (toServer, toSource).  The mirror streams frames with an
+	 * increment of 1 frame.
+	 *
+	 * @author John P. Wilson
+	 * @author Ian A. Brown
+	 *
+	 * @param fromSourceI  The source on "fromServerI" data is coming from.
+	 * @param fromServerAddressI  Address of server "fromServerI".
+	 * @param fromSourceNameI  Name of source "fromSourceI".
+	 * @param toServerAddressI  Address of server "toServerI".
+	 * @param toSourceNameI  Name of the new source.
+	 * @param startFlagI  Specifies start time: oldest or now.
+	 * @param stopFlagI  Specifies stop time: now or continuous.
+	 * @param numCacheFramesI  Number of archive frames in the new source;
+	 *     this value is ignored if bMatchFromSourceI is true.
+	 * @param numArchiveFramesI  Number of archive frames in the new source;
+	 *     this value is ignored if bMatchFromSourceI is true.
+	 * @param archiveModeI  Archiving mode: none, create, or append.
+	 * @param bMatchFromSourceI  The archive/cache specs of the new source
+	 *     should be set to match "fromSource".
+	 * @exception java.lang.Exception
+	 *            thrown if there is an error starting the mirror
+	 * @since V2.0
+	 * @version 08/26/2010
+	 */
+
+	/*
+	 *
+	 *   Date      By	Description
+	 * MM/DD/YYYY
+	 * ----------  --	-----------
+	 * 08/26/2010  JPW	Moved from com.rbnb.admin.RBNBDataManager.
+	 * 03/01/2002  INB	Reworked because we don't really need as much
+	 *			information as we were getting.  I've cut this down
+	 *			to the absolute minimum needed to work.
+	 * 05/29/2001  JPW  Created.
+	 *
+	 */
+
+	public final static void createMirror(
+		Controller controllerI,
+		Server serverI,
+		Server fromServerI,
+		String fromServerAddressI,
+		com.rbnb.api.Source fromSourceI,
+		String fromSourceNameI,
+		Server toServerI,
+		String toServerAddressI,
+		String toSourceNameI,
+		int startFlagI,
+		int stopFlagI,
+		long numCacheFramesI,
+		long numArchiveFramesI,
+		byte archiveModeI,
+		boolean bMatchFromSourceI)
+	throws Exception
+	{
+	    if ( (controllerI == null) || (!controllerI.isRunning()) ) {
+		throw new Exception("You are not connected to the RBNB server - cannot create mirror.");
+	    }
+	    
+	    Server server = serverI;
+
+	    Server fromServer =
+		((fromServerI != null) ?
+			fromServerI :
+			    Server.newServerHandle(null,fromServerAddressI));
+	    Server toServer =
+		((toServerI != null) ?
+			toServerI :
+			    Server.newServerHandle(null,toServerAddressI));
+	    com.rbnb.api.Source fromSource = fromSourceI;
+
+	    /////////////////////////////////////
+	    //
+	    // Make local copies of the arguments
+	    //
+	    /////////////////////////////////////
+
+	    int startFlag = startFlagI;
+	    int stopFlag = stopFlagI;
+	    long numCacheFrames = numCacheFramesI;
+	    long numArchiveFrames = numArchiveFramesI;
+	    byte archiveMode = archiveModeI;
+	    boolean bMatchFromSource = bMatchFromSourceI;
+
+	    int numFrameSets = 10;
+
+	    //////////////////////////////////////////////////////////
+	    //
+	    // Figure out values of reference, domain, and repetitions
+	    //
+	    //////////////////////////////////////////////////////////
+
+	    byte reference = DataRequest.OLDEST;
+	    byte domain = DataRequest.ALL;
+	    long repetitions = DataRequest.INFINITE;
+
+	    if ( (startFlag == com.rbnb.api.Mirror.OLDEST) &&
+		    (stopFlag == com.rbnb.api.Mirror.CONTINUOUS) )
+	    {
+		reference = DataRequest.OLDEST;
+		domain = DataRequest.ALL;
+		repetitions = DataRequest.INFINITE;
+	    }
+	    else if ( (startFlag == com.rbnb.api.Mirror.OLDEST) &&
+		    (stopFlag == com.rbnb.api.Mirror.NOW) )
+	    {
+		// This doesn't really do what we want; the mirror will continue
+		// to request data until it "catches up" and comes to the end of
+		// the ring buffer.  If the source's data rate is slow, this will
+		// probably work fine; if it is high rate, the mirror may never
+		// catch up and will continue to mirror data indefinitely.
+		reference = DataRequest.OLDEST;
+		domain = DataRequest.EXISTING;
+		repetitions = DataRequest.INFINITE;
+	    }
+	    else if ( (startFlag == com.rbnb.api.Mirror.NOW) &&
+		    (stopFlag == com.rbnb.api.Mirror.CONTINUOUS) )
+	    {
+		reference = DataRequest.NEWEST;
+		domain = DataRequest.FUTURE;
+		repetitions = DataRequest.INFINITE;
+	    }
+	    else if ( (startFlag == com.rbnb.api.Mirror.NOW) &&
+		    (stopFlag == com.rbnb.api.Mirror.NOW) )
+	    {
+		// Get newest single frame
+		reference = DataRequest.NEWEST;
+		domain = DataRequest.EXISTING;
+		repetitions = 1;
+	    }
+
+	    /////////////////////////////////////////////////
+	    //
+	    // Check if user wants to match the "FROM" source
+	    //
+	    /////////////////////////////////////////////////
+
+	    if (bMatchFromSource) {
+		// Get the new values from "fromSource"
+
+		if (fromSource == null) {
+		    Controller tempController = null;
+		    boolean bStopControllerWhenDone = false;
+		    // Is fromServer the local server?
+		    if (server.getAddress().compareTo(fromServer.getAddress()) == 0) {
+			fromServer = server;
+			tempController = controllerI;
+			bStopControllerWhenDone = false;
+		    }
+		    else {
+			// Must create a temporary connection to fromServer
+			tempController =
+			    fromServer.createController("tempController");
+			tempController.start();
+			bStopControllerWhenDone = true;
+		    }
+		    Rmap tempRmap;
+		    /* INB 10/28/2002 - always create the name as specified by
+		     * the user.
+			if (fromSourceNameI.indexOf(Rmap.PATHDELIMITER) == 0) {
+			    tempRmap =
+				Rmap.createFromName(fromSourceNameI.substring(1));
+			} else {
+		     */
+		    tempRmap = Rmap.createFromName(fromSourceNameI);
+		    /*
+			}
+		     */
+
+		    // INB 11/20/2002: Mark the leaf node.
+		    tempRmap.markLeaf();
+
+		    Rmap rmap = tempController.getRegistered(tempRmap);
+
+		    if (bStopControllerWhenDone) {
+			tempController.stop();
+		    }
+		    // Now, search for the fromSource in this Rmap
+		    // What gets returned from getRegistered():
+		    //    EndOfStream
+		    //       RoutingMap
+		    //          fromServer
+		    //             fromSource
+		    while (true) {
+			if (rmap instanceof com.rbnb.api.Source) {
+			    // This must be our Source!
+			    fromSource = (com.rbnb.api.Source)rmap;
+			    break;
+			}
+			// Get the child of rmap
+			if (rmap.getNchildren() != 1) {
+			    throw new Exception(
+				    "Error in Rmap structure: " +
+				    "\"From\" Source, " +
+				    fromSourceNameI +
+			    ", could not be located.");
+			}
+			else {
+			    rmap = rmap.getChildAt(0);
+			}
+		    }
+		}
+		if (fromSource == null) {
+		    throw new Exception(
+			    "Error in Rmap structure: " +
+			    "\"From\" Source, " +
+			    fromSourceNameI +
+		    ", could not be located.");
+		}
+		numCacheFrames = fromSource.getCframes();
+		numArchiveFrames = fromSource.getAframes();
+		numFrameSets = fromSource.getNfs();
+		archiveMode = fromSource.getAmode();
+
+		//System.err.println("From source: " + numCacheFrames + " " +
+		//		   numArchiveFrames + " " +
+		//		   numFrameSets + " " +
+		//		   archiveMode);
+
+	    }
+
+	    /////////////////////////
+	    //
+	    // Create the DataRequest
+	    //
+	    /////////////////////////
+
+	    DataRequest req =
+		new DataRequest(
+			null,
+			null,
+			null,
+			reference,
+			domain,
+			repetitions,
+			1.,
+			false,
+			DataRequest.FRAMES);
+
+	    // 03/01/2002 - INB use relative names for the request.
+	    // 10/28/2002 - INB no, use the name as specified by the user.
+	    Rmap src;
+	    /*
+		if (fromSourceNameI.indexOf(Rmap.PATHDELIMITER) == 0) {
+		    src = Rmap.createFromName(fromSourceNameI.substring(1) +
+					      Rmap.PATHDELIMITER +
+					      "...");
+		} else {
+	     */
+	    src = Rmap.createFromName(fromSourceNameI +
+		    Rmap.PATHDELIMITER +
+		    "...");
+	    /*
+		}
+	     */
+	    src.setFrange(new com.rbnb.api.TimeRange(0.,0.));
+	    Rmap bottom = src.moveToBottom();
+	    bottom.setDblock(new com.rbnb.api.DataBlock(new byte[1],1,1));
+	    req.addChild(src);
+
+	    ////////////////////
+	    //
+	    // Set up the Mirror
+	    //
+	    ////////////////////
+
+	    com.rbnb.api.Mirror mirror = server.createMirror();
+	    if ((fromServer == server) ||
+		    (server.getAddress().compareTo(fromServer.getAddress()) == 0)) {
+		// fromServer is the local server
+		mirror.setRemote(toServer);
+		mirror.setDirection(com.rbnb.api.Mirror.PUSH);
+	    }
+	    else {
+		// toServer is the local server
+		mirror.setRemote(fromServer);
+		mirror.setDirection(com.rbnb.api.Mirror.PULL);
+	    }
+	    mirror.setRequest(req);
+	    if (toSourceNameI.indexOf(Rmap.PATHDELIMITER) == -1) {
+		mirror.getSource().setName(toSourceNameI);
+	    } else {
+		mirror.getSource().setName
+		(toSourceNameI.substring
+			(toSourceNameI.lastIndexOf(Rmap.PATHDELIMITER) + 1));
+	    }
+	    mirror.getSource().setCframes(numCacheFrames);
+	    mirror.getSource().setNfs(numFrameSets);
+	    mirror.getSource().setAmode(archiveMode);
+	    mirror.getSource().setAframes(numArchiveFrames);
+
+	    ///////////////////
+	    //
+	    // Start the mirror
+	    //
+	    ///////////////////
+
+	    controllerI.mirror(mirror);
+
+	}
+	
+	/**************************************************************************
+	 * Start a time-based mirror.
+	 * <p>
+	 * This method starts a mirror between two servers.  The arguments specify
+	 * where the data is coming from (fromServer, fromSource) and where data is
+	 * going to (toServer, toSource).  The mirror streams by time - in this
+	 * case, a duration of zero means that the data is copied point by point.
+	 * @author John P. Wilson
+	 * @author Ian A. Brown
+	 *
+	 * @param fromSourceI  The source on "fromServerI" data is coming from.
+	 * @param fromServerAddressI  Address of server "fromServerI".
+	 * @param fromSourceNameI  Name of source "fromSourceI".
+	 * @param toServerAddressI  Address of server "toServerI".
+	 * @param toSourceNameI  Name of the new source.
+	 * @param startFlagI  Specifies start time: oldest or now.
+	 * @param stopFlagI  Specifies stop time: now or continuous.
+	 * @param numCacheFramesI  Number of archive frames in the new source;
+	 *     this value is ignored if bMatchFromSourceI is true.
+	 * @param numArchiveFramesI  Number of archive frames in the new source;
+	 *     this value is ignored if bMatchFromSourceI is true.
+	 * @param archiveModeI  Archiving mode: none, create, or append.
+	 * @param bMatchFromSourceI  The archive/cache specs of the new source
+	 *     should be set to match "fromSource".
+	 * @param durationI the nominal time span of each data retrieval.  A value
+	 *			of 0 means copy point by point.
+	 * @exception java.lang.Exception
+	 *            thrown if there is an error starting the mirror
+	 * @since V2.2
+	 * @version 08/27/2010
+	 */
+
+	/*
+	 *
+	 *   Date      By	Description
+	 * MM/DD/YYYY
+	 * ----------  --	-----------
+	 * 08/27/2010  JPW	Moved from com.rbnb.admin.RBNBDataManager.
+	 * 11/24/2003  INB	Created from <code>createMirror</code>.
+	 *
+	 */
+	public final static void createTimeMirror(
+		Controller controllerI,
+		Server serverI,
+		Server fromServerI,
+		String fromServerAddressI,
+		com.rbnb.api.Source fromSourceI,
+		String fromSourceNameI,
+		Server toServerI,
+		String toServerAddressI,
+		String toSourceNameI,
+		int startFlagI,
+		int stopFlagI,
+		long numCacheFramesI,
+		long numArchiveFramesI,
+		byte archiveModeI,
+		boolean bMatchFromSourceI,
+		double durationI)
+	throws Exception
+	{
+	    if ( (controllerI == null) || (!controllerI.isRunning()) ) {
+		throw new Exception("You are not connected to the RBNB server - cannot create mirror.");
+	    }
+	    
+	    Server server = serverI;
+	    
+	    Server fromServer =
+		((fromServerI != null) ?
+			fromServerI :
+			    Server.newServerHandle(null,fromServerAddressI));
+	    Server toServer =
+		((toServerI != null) ?
+			toServerI :
+			    Server.newServerHandle(null,toServerAddressI));
+	    com.rbnb.api.Source fromSource = fromSourceI;
+
+	    /////////////////////////////////////
+	    //
+	    // Make local copies of the arguments
+	    //
+	    /////////////////////////////////////
+
+	    int startFlag = startFlagI;
+	    int stopFlag = stopFlagI;
+	    long numCacheFrames = numCacheFramesI;
+	    long numArchiveFrames = numArchiveFramesI;
+	    byte archiveMode = archiveModeI;
+	    boolean bMatchFromSource = bMatchFromSourceI;
+	    double duration = durationI;
+
+	    int numFrameSets = 10;
+
+	    //////////////////////////////////////////////////////////
+	    //
+	    // Figure out values of reference, domain, and repetitions
+	    //
+	    //////////////////////////////////////////////////////////
+
+	    byte reference = DataRequest.OLDEST;
+	    byte domain = DataRequest.ALL;
+	    long repetitions = DataRequest.INFINITE;
+
+	    if ( (startFlag == com.rbnb.api.Mirror.OLDEST) &&
+		    (stopFlag == com.rbnb.api.Mirror.CONTINUOUS) )
+	    {
+		reference = DataRequest.OLDEST;
+		domain = DataRequest.ALL;
+		repetitions = DataRequest.INFINITE;
+	    }
+	    else if ( (startFlag == com.rbnb.api.Mirror.OLDEST) &&
+		    (stopFlag == com.rbnb.api.Mirror.NOW) )
+	    {
+		// The only real way to do this at this point is to retrieve
+		// the time information for the existing data and then stream until
+		// we retrieve a time equal to or greater than that number.  This
+		// would have to be done by the mirror and we'll need a way to
+		// tell it to end.
+		throw new java.lang.IllegalArgumentException
+		("Streaming from oldest to now is not currently supported.");
+	    }
+	    else if ( (startFlag == com.rbnb.api.Mirror.NOW) &&
+		    (stopFlag == com.rbnb.api.Mirror.CONTINUOUS) )
+	    {
+		reference = DataRequest.NEWEST;
+		domain = DataRequest.FUTURE;
+		repetitions = DataRequest.INFINITE;
+	    }
+	    else if ( (startFlag == com.rbnb.api.Mirror.NOW) &&
+		    (stopFlag == com.rbnb.api.Mirror.NOW) )
+	    {
+		// Get newest single frame
+		reference = DataRequest.NEWEST;
+		domain = DataRequest.EXISTING;
+		repetitions = 1;
+	    }
+
+	    /////////////////////////////////////////////////
+	    //
+	    // Check if user wants to match the "FROM" source
+	    //
+	    /////////////////////////////////////////////////
+
+	    if (bMatchFromSource) {
+		// Get the new values from "fromSource"
+
+		if (fromSource == null) {
+		    Controller tempController = null;
+		    boolean bStopControllerWhenDone = false;
+		    // Is fromServer the local server?
+		    if (server.getAddress().compareTo(fromServer.getAddress()) ==
+			0) {
+			fromServer = server;
+			tempController = controllerI;
+			bStopControllerWhenDone = false;
+		    }
+		    else {
+			// Must create a temporary connection to fromServer
+			tempController =
+			    fromServer.createController("tempController");
+			tempController.start();
+			bStopControllerWhenDone = true;
+		    }
+
+		    Rmap tempRmap = Rmap.createFromName(fromSourceNameI);
+		    tempRmap.markLeaf();
+
+		    Rmap rmap = tempController.getRegistered(tempRmap);
+
+		    if (bStopControllerWhenDone) {
+			tempController.stop();
+		    }
+
+		    // Now, search for the fromSource in this Rmap
+		    // What gets returned from getRegistered():
+		    //    EndOfStream
+		    //       RoutingMap
+		    //          fromServer
+		    //             fromSource
+		    while (true) {
+			if (rmap instanceof com.rbnb.api.Source) {
+			    // This must be our Source!
+			    fromSource = (com.rbnb.api.Source)rmap;
+			    break;
+			}
+			// Get the child of rmap
+			if (rmap.getNchildren() != 1) {
+			    throw new Exception(
+				    "Error in Rmap structure: " +
+				    "\"From\" Source, " +
+				    fromSourceNameI +
+			    ", could not be located.");
+			}
+			else {
+			    rmap = rmap.getChildAt(0);
+			}
+		    }
+		}
+		if (fromSource == null) {
+		    throw new Exception(
+			    "Error in Rmap structure: " +
+			    "\"From\" Source, " +
+			    fromSourceNameI +
+		    ", could not be located.");
+		}
+		numCacheFrames = fromSource.getCframes();
+		numArchiveFrames = fromSource.getAframes();
+		numFrameSets = fromSource.getNfs();
+		archiveMode = fromSource.getAmode();
+
+		//System.err.println("From source: " + numCacheFrames + " " +
+		//		   numArchiveFrames + " " +
+		//		   numFrameSets + " " +
+		//		   archiveMode);
+
+	    }
+
+	    /////////////////////////
+	    //
+	    // Create the DataRequest
+	    //
+	    /////////////////////////
+
+	    DataRequest req =
+		new DataRequest(
+			null,
+			null,
+			null,
+			reference,
+			(repetitions == 1) ? DataRequest.EQUAL : DataRequest.GREATER,
+				domain,
+				repetitions,
+				1.,
+				false,
+				DataRequest.CONSOLIDATED,
+				false);
+
+	    Rmap src;
+	    src = Rmap.createFromName(fromSourceNameI +
+		    Rmap.PATHDELIMITER +
+	    "...");
+	    src.setTrange(new com.rbnb.api.TimeRange(0.,duration));
+	    Rmap bottom = src.moveToBottom();
+	    bottom.setDblock(new com.rbnb.api.DataBlock(new byte[1],1,1));
+	    req.addChild(src);
+
+	    ////////////////////
+	    //
+	    // Set up the Mirror
+	    //
+	    ////////////////////
+
+	    com.rbnb.api.Mirror mirror = server.createMirror();
+	    if ((fromServer == server) ||
+		    (server.getAddress().compareTo(fromServer.getAddress()) == 0)) {
+		// fromServer is the local server
+		mirror.setRemote(toServer);
+		mirror.setDirection(com.rbnb.api.Mirror.PUSH);
+	    }
+	    else {
+		// toServer is the local server
+		mirror.setRemote(fromServer);
+		mirror.setDirection(com.rbnb.api.Mirror.PULL);
+	    }
+	    mirror.setRequest(req);
+	    if (toSourceNameI.indexOf(Rmap.PATHDELIMITER) == -1) {
+		mirror.getSource().setName(toSourceNameI);
+	    } else {
+		mirror.getSource().setName
+		(toSourceNameI.substring
+			(toSourceNameI.lastIndexOf(Rmap.PATHDELIMITER) + 1));
+	    }
+	    mirror.getSource().setCframes(numCacheFrames);
+	    mirror.getSource().setNfs(numFrameSets);
+	    mirror.getSource().setAmode(archiveMode);
+	    mirror.getSource().setAframes(numArchiveFrames);
+
+	    ///////////////////
+	    //
+	    // Start the mirror
+	    //
+	    ///////////////////
+
+	    controllerI.mirror(mirror);
+
 	}
 
 	/**
@@ -237,16 +967,6 @@ public class Control extends Client
 		
 		private boolean isDeny;
 		private String address, permissions;
-	}
-	
-	/**
-	  * A representation of a 'mirror', which copies data from one server
-	  *   to another.
-	  */
-	public final static class Mirror
-	{
-		
-		
 	}
 	
 //*****************************  Data Members  ******************************//

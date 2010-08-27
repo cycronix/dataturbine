@@ -46,6 +46,9 @@ import com.rbnb.utility.*;
  *   Date      By	Description
  * MM/DD/YYYY
  * ----------  --	-----------
+ * 08/26/2010  JPW	Moved the definitions of OLDEST, CONTINUOUS, and NOW
+ * 			from this class to com.rbnb.api.Mirror, becasue
+ * 			these constants are also referenced in com.rbnb.sapi.Control.Mirror.
  * 03/01/2002  INB	Eliminated the server name fields as they shouldn't be
  *			necessary and may be difficult for the user to figure
  *			out.
@@ -378,7 +381,7 @@ public class MirrorDialog
      * @since V2.0
      * @version 06/07/2001
      */
-    public int startChoice = OLDEST;
+    public int startChoice = com.rbnb.api.Mirror.OLDEST;
     
     /**
      * Stores the user's stop choice: NOW or CONTINUOUS.
@@ -389,7 +392,7 @@ public class MirrorDialog
      * @since V2.0
      * @version 06/07/2001
      */
-    public int stopChoice = CONTINUOUS;
+    public int stopChoice = com.rbnb.api.Mirror.CONTINUOUS;
     
     /**
      * Stores the source server address.
@@ -524,39 +527,6 @@ public class MirrorDialog
      * @version 06/07/2001
      */
     public Vector multipleSourceInfo = new Vector();
-    
-    /**
-     * Flag for setting start time to request oldest data.
-     * <p>
-     *
-     * @author John P. Wilson
-     *
-     * @since V2.0
-     * @version 06/08/2001
-     */
-    public final static int OLDEST = 1;
-    
-    /**
-     * Flag for setting mirror to never stop (no stop time).
-     * <p>
-     *
-     * @author John P. Wilson
-     *
-     * @since V2.0
-     * @version 06/08/2001
-     */
-    public final static int CONTINUOUS = 2;
-    
-    /**
-     * Flag for setting start or stop time to the current time.
-     * <p>
-     *
-     * @author John P. Wilson
-     *
-     * @since V2.0
-     * @version 06/08/2001
-     */
-    public final static int NOW = 3;
     
     /**************************************************************************
      * Create the Mirror dialog.
@@ -1186,19 +1156,19 @@ public class MirrorDialog
 	// Start time information
 	Checkbox selection = startGroup.getSelectedCheckbox();
 	if (selection == start_OldestCB) {
-	    startChoice = OLDEST;
+	    startChoice = com.rbnb.api.Mirror.OLDEST;
 	}
 	else if (selection == start_NowCB) {
-	    startChoice = NOW;
+	    startChoice = com.rbnb.api.Mirror.NOW;
 	}
 	
 	// Stop time information
 	selection = stopGroup.getSelectedCheckbox();
 	if (selection == stop_NowCB) {
-	    stopChoice = NOW;
+	    stopChoice = com.rbnb.api.Mirror.NOW;
 	}
 	else if (selection == stop_ContinuousCB) {
-	    stopChoice = CONTINUOUS;
+	    stopChoice = com.rbnb.api.Mirror.CONTINUOUS;
 	}
 	
 	// Buffer frames information

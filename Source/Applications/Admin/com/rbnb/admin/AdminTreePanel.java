@@ -1038,7 +1038,7 @@ public class AdminTreePanel extends JPanel implements ActionListener {
 		    //       might be on another machine) has an archive.
 		    if ( (((Source)rmap).getAmode() !=
 		                           SourceInterface.ACCESS_NONE) &&
-		         (mirrorDialog.startChoice == MirrorDialog.OLDEST) )
+		         (mirrorDialog.startChoice == com.rbnb.api.Mirror.OLDEST) )
 		    {
 			dataManager.createTimeMirror
 			    (dataManager.getServer(),

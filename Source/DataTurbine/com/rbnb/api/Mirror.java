@@ -34,6 +34,9 @@ package com.rbnb.api;
  *   Date      By	Description
  * MM/DD/YYYY
  * ----------  --	-----------
+ * 08/26/2010  JPW	Moved the definitions of OLDEST, CONTINUOUS, and NOW
+ * 			from com.rbnb.admin.MirrorDialog to this class, becasue
+ * 			these constants are also be referenced in com.rbnb.sapi.Control.Mirror.
  * 09/29/2004  JPW	In order to compile under J#, need to explicitly
  *			add a declaration for the clone method in this class.
  * 05/10/2001  INB	Created.
@@ -42,6 +45,40 @@ package com.rbnb.api;
 public interface Mirror
     extends com.rbnb.api.MirrorInterface
 {
+    
+    /**
+     * Flag for setting start time to request oldest data.
+     * <p>
+     *
+     * @author John P. Wilson
+     *
+     * @since V2.0
+     * @version 06/08/2001
+     */
+    public final static int OLDEST = 1;
+    
+    /**
+     * Flag for setting mirror to never stop (no stop time).
+     * <p>
+     *
+     * @author John P. Wilson
+     *
+     * @since V2.0
+     * @version 06/08/2001
+     */
+    public final static int CONTINUOUS = 2;
+    
+    /**
+     * Flag for setting start or stop time to the current time.
+     * <p>
+     *
+     * @author John P. Wilson
+     *
+     * @since V2.0
+     * @version 06/08/2001
+     */
+    public final static int NOW = 3;
+    
     /**
      * Clones this object.
      * <p>
