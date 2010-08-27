@@ -48,7 +48,7 @@ import com.rbnb.utility.*;
  * ----------  --	-----------
  * 08/26/2010  JPW	Moved the definitions of OLDEST, CONTINUOUS, and NOW
  * 			from this class to com.rbnb.api.Mirror, becasue
- * 			these constants are also referenced in com.rbnb.sapi.Control.Mirror.
+ * 			these constants are also referenced in com.rbnb.sapi.Control.
  * 03/01/2002  INB	Eliminated the server name fields as they shouldn't be
  *			necessary and may be difficult for the user to figure
  *			out.

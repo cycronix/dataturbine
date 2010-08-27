@@ -36,7 +36,7 @@ package com.rbnb.api;
  * ----------  --	-----------
  * 08/26/2010  JPW	Moved the definitions of OLDEST, CONTINUOUS, and NOW
  * 			from com.rbnb.admin.MirrorDialog to this class, becasue
- * 			these constants are also be referenced in com.rbnb.sapi.Control.Mirror.
+ * 			these constants are also be referenced in com.rbnb.sapi.Control.
  * 09/29/2004  JPW	In order to compile under J#, need to explicitly
  *			add a declaration for the clone method in this class.
  * 05/10/2001  INB	Created.
