@@ -24,6 +24,11 @@ limitations under the License.
 	2007/07/20  WHF  Created.
 	2009/05/20  WHF  Implemented Terminate(String) method.  Renamed Terminate()
 		method to TerminateServer().
+	2010/08/30  JPW, Erigo	Added createMirror and createTimeMirror.
+				Commented out CreateMirrorIn, as it is not
+				    fully implemented.
+				Filled out several CreateMirrorOut methods as
+				    convenience functions for calling createMirror.
 */
 
 package com.rbnb.sapi;
@@ -59,12 +64,24 @@ public class Control extends Client
 	  *  address to the connected server (pull mirror).
 	  *  
 	  *  THIS METHOD IS NOT FULLY IMPLEMENTED.
+	  *  
+	  *  *** Modification History ***
+	  *  2010/08/30  JPW, Erigo  Commented out this method as it is not
+	  *                          fully implemented.  It could be
+	  *                          implemented using the new createMirror/
+	  *                          createTimeMirror calls found below.
 	  */
+	/*
 	public void CreateMirrorIn(
 			String remoteServer,
 			String remoteSource,
 			String localName) throws SAPIException
 	{
+		
+		if (!CheckServerConnection()) {
+		    throw new SAPIException("Unable to create mirror: not connected to the RBNB server.");
+		}
+		
 		try {
 			controller.mirror(Server.createMirror());	
 		} catch (Exception e) {
@@ -72,21 +89,34 @@ public class Control extends Client
 		}
 		
 	}
+	*/
 	
 	/**
 	  * Creates a mirror to copy data from a local source to the specified
-	  * remote server (push mirror).  This method assumes we are going to
-	  * do a frame-based mirror, mirroring starting NOW and going on forever,
-	  * that is CONTINUOUS.  Furthermore, this method will specify that the
+	  * remote server (push mirror).  This method is a convenience wrapper
+	  * around the createMirror method. This method assumes we are going to
+	  * do a frame-based mirror, mirroring starting NOW and going on forever
+	  * (that is, CONTINUOUS).  Furthermore, this method will specify that the
 	  * new mirror source will match the original source's cache and archive
 	  * settings.
+	  * 
+	  *  *** Modification History ***
+	  *  2010/08/30  JPW, Erigo  Filled out this method by adding a call to
+	  *                          the new createMirror method.
+	  * 
 	  */
 	public void CreateMirrorOut(
 			String localSourceI,
 			String remoteServerI,
 			String remoteNameI) throws SAPIException
 	{
+	    
+	    if (!CheckServerConnection()) {
+		 throw new SAPIException("Unable to create mirror: not connected to the RBNB server.");
+	    }
+	    
 	    try {
+		
 		Control.createMirror(
 		    controller,
 		    getServer(),
@@ -115,9 +145,15 @@ public class Control extends Client
 	
 	/**
 	  * Creates a mirror to copy data from a local source to the specified
-	  * remote server (push mirror).  This method assumes we are going to
+	  * remote server (push mirror).  This method is a convenience wrapper
+	  * around the createMirror method. This method assumes we are going to
 	  * do a frame-based mirror, mirroring starting NOW and going on forever,
 	  * that is CONTINUOUS.
+	  * 
+	  *  *** Modification History ***
+	  *  2010/08/30  JPW, Erigo  Filled out this method by adding a call to
+	  *                          the new createMirror method.
+	  * 
 	  */
 	public void CreateMirrorOut(
 			String localSourceI,
@@ -128,6 +164,11 @@ public class Control extends Client
 			byte archiveModeI,
 			boolean bMatchFromSourceI) throws SAPIException
 	{
+	    
+	    if (!CheckServerConnection()) {
+		 throw new SAPIException("Unable to create mirror: not connected to the RBNB server.");
+	    }
+	    
 	    try {
 		Control.createMirror(
 		    controller,
@@ -156,67 +197,28 @@ public class Control extends Client
 	}
 	
 	/**
-	  * Creates a mirror to copy data from a local source to the specified
-	  * remote server (push mirror).  This method assumes we are going to
-	  * do a frame-based mirror, mirroring starting NOW and going on forever,
-	  * that is CONTINUOUS.
+	  * Utility method - check to see if we are connected to the server.
+	  * Return true if we are connected, return false if not connected.
 	  * 
-	  * This version of the method accepts an "int" argument for archiveModeI
-	  * and bMatchFromSourceI, to better match parameters that MATLAB can set
-	  * in its function call.
+	  *  *** Modification History ***
+	  *  2010/08/30  JPW, Erigo  Created.
 	  * 
 	  */
-	public void CreateMirrorOut(
-			String localSourceI,
-			String remoteServerI,
-			String remoteNameI,
-			long numCacheFramesI,
-			long numArchiveFramesI,
-			int archiveModeI,
-			int bMatchFromSourceI) throws SAPIException
-	{
-	    boolean bMatchFromSource = false;
-	    if (bMatchFromSourceI != 0) {
-		bMatchFromSource = true;
-	    }
-	    
-	    byte archiveMode = (byte)archiveModeI;
-	    if ( (archiveMode != com.rbnb.api.SourceInterface.ACCESS_APPEND) &&
-		 (archiveMode != com.rbnb.api.SourceInterface.ACCESS_CREATE) &&
-		 (archiveMode != com.rbnb.api.SourceInterface.ACCESS_NONE) )
-	    {
-		if (!bMatchFromSource) {
-		    throw new SAPIException("Unknown or unsupported archive mode - cannot create mirror.");
-		} else {
-		    archiveMode = com.rbnb.api.SourceInterface.ACCESS_NONE;
-		}
-	    }
+	
+	private boolean CheckServerConnection() {
 	    
 	    try {
-		Control.createMirror(
-		    controller,
-		    getServer(),
-		    null,
-		    getServer().getAddress(),
-		    null,
-		    localSourceI,
-		    null,
-		    remoteServerI,
-		    remoteNameI,
-		    com.rbnb.api.Mirror.NOW,
-		    com.rbnb.api.Mirror.CONTINUOUS,
-		    numCacheFramesI,
-		    numArchiveFramesI,
-		    archiveMode,
-		    bMatchFromSource);
-	    } catch (Exception e) {
-		if ( (e.getMessage() != null) && (!e.getMessage().isEmpty()) )
-		    throw new SAPIException(e.getMessage());
-		else {
-		    String errStr = new String("Unable to create mirror\n" + e);
-		    throw new SAPIException(errStr);
+		if ( (controller == null) ||
+		     (!controller.isRunning()) ||
+		     (getServer() == null) )
+		{
+		    return false;
 		}
+	    } catch (Exception e) {
+		return false;
 	    }
+	    return true;
+	    
 	}
 	
 	/**************************************************************************
@@ -259,7 +261,7 @@ public class Control extends Client
 	 * 03/01/2002  INB	Reworked because we don't really need as much
 	 *			information as we were getting.  I've cut this down
 	 *			to the absolute minimum needed to work.
-	 * 05/29/2001  JPW  Created.
+	 * 05/29/2001  JPW	Created.
 	 *
 	 */
 
@@ -281,8 +283,8 @@ public class Control extends Client
 		boolean bMatchFromSourceI)
 	throws Exception
 	{
-	    if ( (controllerI == null) || (!controllerI.isRunning()) ) {
-		throw new Exception("You are not connected to the RBNB server - cannot create mirror.");
+	    if ( (controllerI == null) || (serverI == null) || (!controllerI.isRunning()) ) {
+		throw new Exception("Unable to create mirror: not connected to the RBNB server.");
 	    }
 	    
 	    Server server = serverI;
@@ -587,8 +589,8 @@ public class Control extends Client
 		double durationI)
 	throws Exception
 	{
-	    if ( (controllerI == null) || (!controllerI.isRunning()) ) {
-		throw new Exception("You are not connected to the RBNB server - cannot create mirror.");
+	    if ( (controllerI == null) || (serverI == null) || (!controllerI.isRunning()) ) {
+		throw new Exception("Unable to create mirror: not connected to the RBNB server.");
 	    }
 	    
 	    Server server = serverI;
