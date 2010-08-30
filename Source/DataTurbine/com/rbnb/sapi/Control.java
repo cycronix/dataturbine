@@ -64,13 +64,17 @@ public class Control extends Client
 	  *  address to the connected server (pull mirror).
 	  *  
 	  *  THIS METHOD IS NOT FULLY IMPLEMENTED.
-	  *  
-	  *  *** Modification History ***
-	  *  2010/08/30  JPW, Erigo  Commented out this method as it is not
-	  *                          fully implemented.  It could be
-	  *                          implemented using the new createMirror/
-	  *                          createTimeMirror calls found below.
 	  */
+	
+	/*
+	 * 
+	 *  *** Modification History ***
+	 *  2010/08/30  JPW, Erigo  Commented out this method as it is not
+	 *                          fully implemented.  It could be
+	 *                          implemented using the new createMirror/
+	 *                          createTimeMirror calls found below.
+	 */
+	
 	/*
 	public void CreateMirrorIn(
 			String remoteServer,
@@ -99,12 +103,16 @@ public class Control extends Client
 	  * (that is, CONTINUOUS).  Furthermore, this method will specify that the
 	  * new mirror source will match the original source's cache and archive
 	  * settings.
-	  * 
-	  *  *** Modification History ***
-	  *  2010/08/30  JPW, Erigo  Filled out this method by adding a call to
-	  *                          the new createMirror method.
-	  * 
 	  */
+	
+	/*
+	 * 
+	 *  *** Modification History ***
+	 *  2010/08/30  JPW, Erigo  Filled out this method by adding a call to
+	 *                          the new createMirror method.
+	 * 
+	 */
+	
 	public void CreateMirrorOut(
 			String localSourceI,
 			String remoteServerI,
@@ -149,12 +157,16 @@ public class Control extends Client
 	  * around the createMirror method. This method assumes we are going to
 	  * do a frame-based mirror, mirroring starting NOW and going on forever,
 	  * that is CONTINUOUS.
-	  * 
-	  *  *** Modification History ***
-	  *  2010/08/30  JPW, Erigo  Filled out this method by adding a call to
-	  *                          the new createMirror method.
-	  * 
 	  */
+	
+	/*
+	 *
+	 *  *** Modification History ***
+	 *  2010/08/30  JPW, Erigo  Filled out this method by adding a call to
+	 *                          the new createMirror method.
+	 * 
+	 */
+	
 	public void CreateMirrorOut(
 			String localSourceI,
 			String remoteServerI,
@@ -199,11 +211,14 @@ public class Control extends Client
 	/**
 	  * Utility method - check to see if we are connected to the server.
 	  * Return true if we are connected, return false if not connected.
-	  * 
-	  *  *** Modification History ***
-	  *  2010/08/30  JPW, Erigo  Created.
-	  * 
 	  */
+	
+	/*
+	 * 
+	 *  *** Modification History ***
+	 *  2010/08/30  JPW, Erigo  Created.
+	 * 
+	 */
 	
 	private boolean CheckServerConnection() {
 	    
