@@ -30,7 +30,7 @@
   </javac>
  </target>
 
- <!-- Copy the Matlab .m and class files into the library. -->
+ <!-- Copy the Matlab .m, README.txt, and class files into the library. -->
  <target name="library" depends="compile">
   <mkdir dir="${rbnb.librarydir}/Matlab" />
   <copy todir="${rbnb.librarydir}/Matlab">
@@ -39,6 +39,7 @@
    <fileset dir="${rbnb.classesdir}/Matlab"
             includes="*.class" />
   </copy>
+  <copy file="README.txt" todir="${rbnb.librarydir}/Matlab"/>
  </target>
 
  <!-- Cleans out all compiled and library files for the Matlab
