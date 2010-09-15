@@ -40,6 +40,8 @@ package com.rbnb.api;
  *   Date      By	Description
  * MM/DD/YYYY
  * ----------  --	-----------
+ * 09/15/2010  MJM  Added code for RSVP parent-routing, 
+ * 					i.e. not exit at startup if parent route is not available
  * 05/18/2004  INB	Catch exceptions on the timer cancel and ignore them.
  * 02/18/2004  INB	Ensure that the route is not off in addition to
  *			connected.
@@ -255,6 +257,7 @@ final class ParentServer
      *
      */
     final void lostRouting() {
+
 	synchronized (this) {
 	    if (!getConnected()) {
 		return;
@@ -269,14 +272,13 @@ final class ParentServer
 	try {
 	    ServerHandler sHandler = getLocalServerHandler();
 	    if (!sHandler.getTerminateRequested()) {
-		getLog().addMessage
+		if(getLog() != null) getLog().addMessage
 		    (getLogLevel(),
 		     getLogClass(),
 		     getFullName(),
 		     "Lost all connections to parent server. " +
 		     "Initiating reconnection task.");
 	    }
-
 	    disconnectedRouting();
 	    synchronized (this) {
 		if ((!sHandler.getTerminateRequested()) &&
@@ -301,6 +303,7 @@ final class ParentServer
 	    }
 
 	} catch (java.lang.Exception e) {
+    	System.err.println("Error trying to handle lost routing connection.");
 	}
     }
 
@@ -403,6 +406,8 @@ final class ParentServer
 	    }
 
 	    lServer = newInstance();
+//	    lServer.setName("FOO"); 
+	    
 	    Rmap entry,
 		nEntry,
 		top = lServer;
@@ -413,6 +418,8 @@ final class ParentServer
 		nEntry.addChild(top);
 		top = nEntry;
 	    }
+//	    System.err.println("ParentServer.java, top: "+top);	// MJM DEBUG
+	    
 	    java.util.Vector additional = new java.util.Vector();
 	    additional.addElement("child");
 	    additional.addElement
@@ -426,8 +433,21 @@ final class ParentServer
 	    }
 	    */
 
+//	    System.err.println("parentName: "+getParent().getName());
 	    router = createRouter();
-
+/*
+// this does get routed parent name 
+// but its too late or too hairy to reset local full path name?
+	    // MJM try to get router name before proceeding
+	    java.util.Vector add2 = new java.util.Vector();
+	    Rmap getr = new Rmap("*");
+	    add2.addElement(getr);
+	    router.send(new Ask(Ask.REGISTERED,add2));
+	    Serializable response = router.receive(ACO.rmapClass,false,TimerPeriod.PING_WAIT);
+	    Rmap rsp = (Rmap)response;
+	    System.err.println("REGISTERED: "+rsp.getChildAt(0).getName());
+	    System.err.println("additional: "+additional);
+*/
 	    /*
 	    try {
 		System.err.println(getFullName() + " ask for route.");
@@ -454,6 +474,7 @@ final class ParentServer
 		     getFullName() + " to re-establish.");
 
 	    } else if (response instanceof ExceptionMessage) {
+//	    	System.err.println("Router response: "+response);
 		if (getLog() != null) {
 		    getLog().addMessage
 			(getLogLevel(),
