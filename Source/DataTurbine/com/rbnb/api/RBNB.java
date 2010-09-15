@@ -106,6 +106,8 @@ import java.io.PrintWriter;
  *   Date      By	Description
  * MM/DD/YYYY
  * ----------  --	-----------
+ * 09/15/2010  MJM  Added code for RSVP parent-routing, 
+ * 					i.e. not exit at startup if parent route is not available
  * 08/26/2008  MJM  Changed Metrics to use zero-duration timestamps.  
  * 					Reduces archive and in-use memory by >4x.
  * 06/22/2006  JPW	Add "-H" archive home directory in parseArguments().
@@ -3279,25 +3281,39 @@ final class RBNB
 	    Rmap hierarchy = this;
 
 	    if (getParent() == null) {
-		rMap.addChild(this);
+	    	rMap.addChild(this);
 	    } else {
-		ParentServer pServer = (ParentServer) getParent();
-		pServer.setConnected(true);
-		rMap.addChild(pServer);
-		pServer.setLocalServerHandler(this);
-		Router router = pServer.grabRouter();
+			ParentServer pServer = (ParentServer) getParent();
 
-		java.util.Vector additional = new java.util.Vector();
-		additional.addElement("child");
-		additional.addElement(this.newInstance());
-		router.send(new Ask(Ask.ROUTEFROM,additional));
-		Serializable serializable = router.receive(ACO.rmapClass,
-							   false,
-							   Client.FOREVER);
-		if (serializable instanceof ExceptionMessage) {
-		    Language.throwException((ExceptionMessage) serializable);
+		Router router=null;
+		Serializable serializable=null;
+		
+		try {		// MJM: continue with lack of parent at startup 9/7/10
+			pServer.setConnected(true);
+			rMap.addChild(pServer);
+			pServer.setLocalServerHandler(this);
+	
+			router = pServer.grabRouter();	// this throws exception if no parent to connect
+			java.util.Vector additional = new java.util.Vector();
+			additional.addElement("child");
+			additional.addElement(this.newInstance());
+			router.send(new Ask(Ask.ROUTEFROM,additional));
+			serializable = router.receive(ACO.rmapClass,
+									   false,
+									   Client.FOREVER);
+			if (serializable instanceof ExceptionMessage) {
+				    Language.throwException((ExceptionMessage) serializable);
+			}
+		} catch (Exception e) {	// MJM 9/7/10
+	        String doroute=System.getProperty("parentName","");
+			if(doroute.length()>0) {  // base on -D...
+				pServer.setConnected(true);
+				getParent().setName(doroute);  // got to know in advance (bleh)
+				System.err.println("Failed routing to parent at startup, will try later...");
+				pServer.lostRouting();
+			} else throw(e);
 		}
-
+	
 		hierarchy = (Rmap) serializable;
 		if (hierarchy != null) {
 		    Rmap above = hierarchy.getChildAt(0),
@@ -3320,34 +3336,38 @@ final class RBNB
 				locator = temp;
 			}
 		    }
-		    getParent().setName(bottom.getName());
+//		    getParent().setName(bottom.getName());
+//			System.err.println("parentName: "+getParent().getName());
+
 		    if (hierarchy != null) {
 			((Rmap) rMap).removeChild(getParent());
 			locator.addChild(getParent());
 			rMap.addChild(hierarchy);
 		    }
-		}
+		} 
 
-		if (getParent() instanceof PeerServer) {
-		    ((PeerServer) getParent()).setConnected(true);
-		    Rmap lServer = getParent().newInstance(),
-			entry,
-			nEntry,
-			top = lServer;
-		    for (entry = getParent().getParent();
-			 entry != null;
-			 entry = entry.getParent()) {
-			nEntry = entry.newInstance();
-			nEntry.addChild(top);
-			top = nEntry;
-		    }
-		    lServer.addChild(newInstance());
-		    ReverseRoute reverse = new ReverseRoute(lServer);
-		    initiateReverseRoute(reverse);
-		}
-		pServer.releaseRouter(router);
+		if(router != null) {	// MJM
+			if (getParent() instanceof PeerServer) {
+			    ((PeerServer) getParent()).setConnected(true);
+			    Rmap lServer = getParent().newInstance(),
+				entry,
+				nEntry,
+				top = lServer;
+			    for (entry = getParent().getParent();
+				 entry != null;
+				 entry = entry.getParent()) {
+				nEntry = entry.newInstance();
+				nEntry.addChild(top);
+				top = nEntry;
+			    }
+			    lServer.addChild(newInstance());
+			    ReverseRoute reverse = new ReverseRoute(lServer);
+			    initiateReverseRoute(reverse);
+			}
+			pServer.releaseRouter(router);
 	    }
-
+	    }
+	
 	    rMap.setLocalName(getFullName());
 
 	    getPathDoor().setIdentification(getFullName() + "_path");
@@ -4490,6 +4510,7 @@ final class RBNB
     public final void timerTask(TimerTask ttI) {
 	try {
 	    if (ttI.getCode().equalsIgnoreCase(TT_RECONNECT)) {
+	    	System.err.println("Attempting routing reconnect...");
 		if (((ParentServer) getParent()).reconnect()) {
 		    try {
 			ttI.cancel();
