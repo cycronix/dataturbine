@@ -46,6 +46,8 @@ package com.rbnb.api;
  *   Date      By	Description
  * MM/DD/YYYY
  * ----------  --	-----------
+ * 09/15/2010  MJM  Edited OpenSocket to use default listen-on-all-interfaces
+ * 					behavior for corresponding default "localhost" connection.
  * 11/12/2004  JPW	In order to compile under J# (which is only Java 1.1.4
  *			compatable) I added preprocessor directives to be used
  *			by sed to comment out calls to Throwable.initCause()
@@ -904,7 +906,19 @@ class TCP
 
 	// 2007/11/26  WHF  Instead, let this constructor throw in the case
 	//  where the host cannot be resolved to a local binding:
-	return (new java.net.ServerSocket(getPort(),backlog, host));
+	
+	// MJM 9/3/10:  if host="localhost", bind to all interfaces by dropping host arg.
+	//				Some recent versions of Linux started to inconsistently treat 
+	//				an explicit "localhost" as only-local-connections vs the old 
+	//				default behavior of all local interfaces.
+	
+//	System.err.println("============getHost: "+getHost()+", getLocalHost: "+getLocalHost());
+	if(getHost().equals(getLocalHost())) {
+		System.err.println("ServerSocket: "+host+", listening on all interfaces...");
+		return (new java.net.ServerSocket(getPort(),backlog));
+	} else
+		return (new java.net.ServerSocket(getPort(),backlog, host));
+
     }
 
     /**
