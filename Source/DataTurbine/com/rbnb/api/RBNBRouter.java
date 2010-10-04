@@ -37,6 +37,7 @@ package com.rbnb.api;
  *   Date      By	Description
  * MM/DD/YYYY
  * ----------  --	-----------
+ * 10/04/2010  MJM  Better error checking on child routes with non-unique names.
  * 08/05/2004  INB	Updated the class documentation and added the link to
  *			RemoteServer.
  * 07/20/2004  INB	Added version information to routing connection log
@@ -233,22 +234,27 @@ final class RBNBRouter
 		throw new com.rbnb.api.AddressException
 		    ("Cannot accept route from unspecified location.");
 	    }
-
+	    
+	    // MJM:  following is not reasonable?  /Foo/Foo should be OK, i.e. parent and child names can be same
+//	    System.err.println("ParentName: "+getParent().getName()+", bottomName: "+bottom.getName());
+/*
 	    if (bottom.getName().equals(getParent().getName())) {
 		throw new java.lang.IllegalStateException
 		    ("Cannot accept " + typeI + " route from " + hierarchyI +
 		     "; a naming conflict exists.");
 	    }
-
+*/
+	    
 	    ((ServerHandler) getParent()).lockRouting();
 	    locked = true;
 
 	    if (typeI.equalsIgnoreCase("CHILD")) {
-		if (((entry = getParent().findChild(hierarchyI)) != null) &&
-		    !(entry instanceof ChildServer)) {
+		if (((entry = getParent().findChild(hierarchyI)) != null)
+//		    && !(entry instanceof ChildServer)		// MJM: child server or not, not legal for dupes
+		    ) {
 		    throw new java.lang.IllegalStateException
 			("Cannot accept " + typeI + " route from " +
-			 hierarchyI + "; a naming conflict exists.");
+			 hierarchyI + "; a naming conflict exists!");
 
 		} else if (entry != null) {
 		    ((ServerHandler) getParent()).unlockRouting();
@@ -264,6 +270,8 @@ final class RBNBRouter
 		    if (cServer.getParent() == null) {
 			cServer = null;
 		    }
+//		    System.err.println("cServer.getAddress: "+cServer.getAddress()+", bottomAddr: "+((Server)bottom).getAddress());
+
 		    if ((cServer != null) &&
 			cServer.getConnected() &&
 			(cServer.getType() != ConnectedServer.ROUTE_OFF)) {
