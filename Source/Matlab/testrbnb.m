@@ -34,6 +34,7 @@ function testrbnb(host)
   teststreamoldest(host, 1);
   testarcsub(host);
   testtimesub(host);
+  testwctimesub(host);
   teststdp(host);
   teststof(host);
   testchans(host);
