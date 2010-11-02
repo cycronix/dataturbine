@@ -1145,7 +1145,7 @@ final class RBNB
 	       java.lang.InterruptedException
     {
 	Serializable serializableR = null;
-
+	
 	if (offsetI >= messageI.getTarget().length()) {
 	    // If this is a message to the <code>RBNB</code>, then deliver it.
 	    if (!(messageI.getMessage() instanceof Login)) {
@@ -2452,14 +2452,12 @@ final class RBNB
 								 this);
 		addChild((Rmap) rHandler);
 		((RBNBRouter) rHandler).serverName = pServer.getFullName();
-
 		if (rmh == null) {
 		    rmh = getRoutingMapHandler();
 		    lpServer = (PeerServer)
 			((Rmap) rmh).findDescendant(pServer.getFullName(),
 						    false);
 		}
-
 		lpServer.addRelated(rHandler);
 		rHandler.start((ClientHandler) null);
 	    }
@@ -2479,7 +2477,6 @@ final class RBNB
 		answerR = Language.ping();
 	    }
 	}
-
 	return (answerR);
     }
 
@@ -3105,7 +3102,7 @@ final class RBNB
     {
 	System.out.print(prompt);
 	return (new java.io.BufferedReader(new java.io.InputStreamReader(
-		System.in))).readLine();
+		System.in),8192)).readLine();		// MJM
     }
 
 
@@ -3287,16 +3284,17 @@ final class RBNB
 
 		Router router=null;
 		Serializable serializable=null;
-		
+
 		try {		// MJM: continue with lack of parent at startup 9/7/10
 			pServer.setConnected(true);
 			rMap.addChild(pServer);
 			pServer.setLocalServerHandler(this);
-	
+
 			router = pServer.grabRouter();	// this throws exception if no parent to connect
 			java.util.Vector additional = new java.util.Vector();
 			additional.addElement("child");
 			additional.addElement(this.newInstance());
+
 			router.send(new Ask(Ask.ROUTEFROM,additional));
 			serializable = router.receive(ACO.rmapClass,
 									   false,
@@ -3305,16 +3303,19 @@ final class RBNB
 				    Language.throwException((ExceptionMessage) serializable);
 			}
 		} catch (Exception e) {	// MJM 9/7/10
+
 	        String doroute=System.getProperty("parentName","");
 			if(doroute.length()>0) {  // base on -D...
 				pServer.setConnected(true);
 				getParent().setName(doroute);  // got to know in advance (bleh)
 				System.err.println("Failed routing to parent at startup, will try later...");
 				pServer.lostRouting();
+				serializable = null;	// new
 			} else throw(e);
 		}
-	
-		hierarchy = (Rmap) serializable;
+		
+		if(serializable != null) // MJM add check
+			hierarchy = (Rmap) serializable;
 		if (hierarchy != null) {
 		    Rmap above = hierarchy.getChildAt(0),
 			locator = null;
@@ -3353,6 +3354,7 @@ final class RBNB
 				entry,
 				nEntry,
 				top = lServer;
+
 			    for (entry = getParent().getParent();
 				 entry != null;
 				 entry = entry.getParent()) {
@@ -3361,13 +3363,14 @@ final class RBNB
 				top = nEntry;
 			    }
 			    lServer.addChild(newInstance());
+
 			    ReverseRoute reverse = new ReverseRoute(lServer);
 			    initiateReverseRoute(reverse);
 			}
 			pServer.releaseRouter(router);
 	    }
 	    }
-	
+
 	    rMap.setLocalName(getFullName());
 
 	    getPathDoor().setIdentification(getFullName() + "_path");
@@ -3441,6 +3444,7 @@ final class RBNB
 	    // Launch metrics.
 	    if (getMetricsSource() != null) {
 		getMetricsSource().start();
+
 		Thread.currentThread().yield();
 		MetricsCollector metricsCollector = new MetricsCollector();
 		metricsCollector.setObject(this);
