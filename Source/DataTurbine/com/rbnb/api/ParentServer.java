@@ -40,6 +40,7 @@ package com.rbnb.api;
  *   Date      By	Description
  * MM/DD/YYYY
  * ----------  --	-----------
+ * 10/18/2010  MJM  Changes to improve robustness of routing reconnect
  * 09/15/2010  MJM  Added code for RSVP parent-routing, 
  * 					i.e. not exit at startup if parent route is not available
  * 05/18/2004  INB	Catch exceptions on the timer cancel and ignore them.
@@ -256,8 +257,15 @@ final class ParentServer
      * 12/14/2001  INB	Created.
      *
      */
+    private static boolean inLostRouting=false;		// MJM: inLostRouting logic
+    
     final void lostRouting() {
 
+    if(inLostRouting) {
+    	System.err.println("Recursive call to lostRouting!");
+//    	return;
+    }
+    
 	synchronized (this) {
 	    if (!getConnected()) {
 		return;
@@ -279,7 +287,11 @@ final class ParentServer
 		     "Lost all connections to parent server. " +
 		     "Initiating reconnection task.");
 	    }
-	    disconnectedRouting();
+
+	    inLostRouting = true;
+	    disconnectedRouting();		// MJM ties itself in knots with d/c?
+	    inLostRouting = false;
+	       
 	    synchronized (this) {
 		if ((!sHandler.getTerminateRequested()) &&
 		    (reconnectTT == null)) {
@@ -289,7 +301,7 @@ final class ParentServer
 			(reconnectTT,
 			 0L,
 			 TimerPeriod.RECONNECT);
-
+		    System.err.println("Started reconnectTT timer task");
 /*
 		    try {
 			System.err.println(getFullName() +
@@ -297,11 +309,10 @@ final class ParentServer
 					   reconnectTT);
 		    } catch (Exception e) {
 		    }
-*/
-
+		    */
 		}
 	    }
-
+	    
 	} catch (java.lang.Exception e) {
     	System.err.println("Error trying to handle lost routing connection.");
 	}
@@ -368,13 +379,13 @@ final class ParentServer
 
 	    } else if (inReconnect) {
 		setConnected(false);
-		/*
+		
 		try {
 		    System.err.println(getFullName() +
 				      " already reconnecting.");
 		} catch (Exception e) {
 		}
-		*/
+		
 
 		return (false);
 	    } else {
@@ -393,15 +404,15 @@ final class ParentServer
 	try {
 	    for (int idx = 0; idx < getNchildren(); ++idx) {
 		if (getChildAt(idx) instanceof Router) {
-		    /*
+		    
+//			removeChildAt(idx);		// MJM nuke it!!!!
 		    try {
 			System.err.println(getFullName() +
 					  " already connected.");
 		    } catch (Exception e) {
 		    }
-		    */
-
-		    return (false);
+//		    return (false);		// MJM comment out: too bad lumber on...
+		    break;				// MJM ditto above
 		}
 	    }
 
@@ -426,17 +437,17 @@ final class ParentServer
 		(((Rmap) getLocalServerHandler()).newInstance());
 	    additional.addElement(top);
 
-	    /*
+	    
 	    try {
 		System.err.println(getFullName() + " create router.");
 	    } catch (Exception e) {
 	    }
-	    */
+	    
 
 //	    System.err.println("parentName: "+getParent().getName());
 	    router = createRouter();
 /*
-// this does get routed parent name 
+// Regarding RSVP routing: this does get routed parent name 
 // but its too late or too hairy to reset local full path name?
 	    // MJM try to get router name before proceeding
 	    java.util.Vector add2 = new java.util.Vector();
@@ -448,33 +459,31 @@ final class ParentServer
 	    System.err.println("REGISTERED: "+rsp.getChildAt(0).getName());
 	    System.err.println("additional: "+additional);
 */
-	    /*
+/*	    
 	    try {
 		System.err.println(getFullName() + " ask for route.");
 	    } catch (Exception e) {
 	    }
-	    */
-
+*/	    
 	    router.send(new Ask(Ask.ROUTEFROM,additional));
 	    Serializable response = router.receive
 		(ACO.rmapClass,
 		 false,
 		 TimerPeriod.PING_WAIT);
 
-	    /*
+/*	    
 	    try {
 		System.err.println(getFullName() + " response:\n" + response);
 	    } catch (Exception e) {
-	    }
-	    */
-
+	    }    
+*/
 	    if (response == null) {
 		throw new com.rbnb.api.AddressException
 		    ("Timed out waiting for connection to " +
 		     getFullName() + " to re-establish.");
 
 	    } else if (response instanceof ExceptionMessage) {
-//	    	System.err.println("Router response: "+response);
+	    	System.err.println("Router response: "+response);
 		if (getLog() != null) {
 		    getLog().addMessage
 			(getLogLevel(),
@@ -486,7 +495,7 @@ final class ParentServer
 			 "a different server has been " +
 			 "established at the same address.");
 		}
-
+	    	return(false);		// MJM add this line; keep TT going.  Parent may just be lagging.
 	    } else {
 		Rmap hierarchy = (Rmap) response;
 		releaseRouter(router);
@@ -509,13 +518,12 @@ final class ParentServer
 		    reconnectTT = null;
 		}
 	    }
-
-	    /*
+	    
 	    try {
 		System.err.println(getFullName() + " done: " + getConnected());
 	    } catch (Exception e) {
 	    }
-	    */
+	    
 
 	} catch (java.lang.IllegalArgumentException e) {
 	    if (getLog() != null) {
@@ -556,13 +564,13 @@ final class ParentServer
 
 	} catch (java.lang.Throwable e) {
 
-	    /*
+	    
 	    try {
-		System.err.println(getFullName() +				   " failed on exception.\n" + router);
+		System.err.println(getFullName() + " failed on exception, router: " + router);
 	        e.printStackTrace();
 	    } catch (Exception e1) {
 	    }
-	    */
+	 
 
 	    if (router != null) {
 		try {
