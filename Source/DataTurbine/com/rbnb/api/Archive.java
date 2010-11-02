@@ -33,6 +33,7 @@ package com.rbnb.api;
  *   Date      By	Description
  * MM/DD/YYYY
  * ----------  --	-----------
+ * 10/18/2010  MJm		Explicit buffer size in BufferedReader
  * 11/16/2006  EMF      Fixed archive read and recover.
  * 10/11/2006  EMF      Added trim by time arguments to constructor.
  * 12/21/2004  MJM      Added null pointer check in archive recovery logic
@@ -702,7 +703,7 @@ final class Archive
 	java.io.FileInputStream fis = new java.io.FileInputStream
 	    (directory + "summary.rbn");
 	java.io.BufferedReader br = new java.io.BufferedReader
-	    (new java.io.InputStreamReader(fis));
+	    (new java.io.InputStreamReader(fis),8192);	// MJM explicit size
 
 	String line;
 	while ((line = br.readLine()) != null) {
