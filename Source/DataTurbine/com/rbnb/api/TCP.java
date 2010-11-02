@@ -46,6 +46,7 @@ package com.rbnb.api;
  *   Date      By	Description
  * MM/DD/YYYY
  * ----------  --	-----------
+ * 10/18/2010  MJM  Added SoLinger(false) on socket close to ensure connection not hung
  * 09/15/2010  MJM  Edited OpenSocket to use default listen-on-all-interfaces
  * 					behavior for corresponding default "localhost" connection.
  * 11/12/2004  JPW	In order to compile under J# (which is only Java 1.1.4
@@ -663,6 +664,7 @@ class TCP
 	throws java.io.IOException,
 	       java.lang.InterruptedException
     {
+    ((java.net.Socket) clientSideI).setSoLinger(false, 0);	// MJM:  don't hang on lost network (Android especially)
 	((java.net.Socket) clientSideI).close();
     }
 
