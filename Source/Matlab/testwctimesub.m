@@ -1,11 +1,11 @@
 % test wild-card time-subscription
 
-function testwctimesub(sname)
-
-  host = 'localhost';
-  if(nargin < 1) sname = 'mySource';
+function testwctimesub(host)
+  
+  if(nargin < 1) host = 'localhost';
   end
   
+  sname = 'mySource';
 % Sink
   snk = rbnb_sink(host,'mySink');
   cmapsnk = rbnb_cmap;
