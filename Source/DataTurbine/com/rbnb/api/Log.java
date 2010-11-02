@@ -609,6 +609,8 @@ final class Log
 	       java.io.IOException,
 	       java.lang.InterruptedException
     {
+//	if (!getRunnable()) return;		// MJM debug - try to stop memory leaks
+	    
 	if ((levelI <= getLevel()) &&
 	    ((levelI == STANDARD) ||
 	     ((getClasses() & classesI) == classesI))) {
@@ -628,7 +630,7 @@ final class Log
 	    // the frame.
 	    Rmap bottom = lFrame.moveToBottom();
 	    String time = Time.since1970(lFrame.getTrange().getTime());
-	    while (time.length() < 28) {
+	    while (time.length() < 28) {	// could we be any less efficient?
 		time += " ";
 	    }
 	    String message = "<" + time  + "> <" + nameI + ">\n" + messageI;
@@ -656,6 +658,7 @@ final class Log
 			logDisplay.start();
 		    }
 		    logDisplay.addMessage(lFrame);
+		    return;		// MJM 10-11/10 don't lumber on and add it anyways!!!!!
 		}
 
 	    } else {
