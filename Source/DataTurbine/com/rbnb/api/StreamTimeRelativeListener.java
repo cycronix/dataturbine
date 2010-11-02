@@ -108,6 +108,7 @@ package com.rbnb.api;
  *   Date      By	Description
  * MM/DD/YYYY
  * ----------  --	-----------
+ * 11/02/2010  MJM  Added fix for wild-card time mode subscriptions
  * 03/13/2007  JPW	Make a change in createWorking():
  *			For subscription to oldest, if there is no Trange in
  *			the extracted DataRequest, wait for data to show up.
@@ -390,9 +391,9 @@ System.err.println(
 	    Rmap match;
 	    do {
 		match = ((Rmap) getSource()).extractRmap(request,true);
-		// System.err.println(
-		//     "createWorking(): return from extractRmap(): match:\n" +
-		//     match);
+//		 System.err.println(	// MJM
+//		     "createWorking(): return from extractRmap(): match:\n" +
+//		     match);
 		
 		// JPW 03/13/2007: Add bExtractAgain; add a check if the
 		//                 DataRequest is doing a time-based subscribe
@@ -563,6 +564,7 @@ System.err.println(
      *   Date      By	Description
      * MM/DD/YYYY
      * ----------  --	-----------
+     * 11/02/2010  MJM  Added fix for wild-card time mode subscriptions
      * 02/26/2004  INB	Don't wait one time after we get something, but make
      *			sure we decrement the to pickup counter.
      * 12/10/2003  INB	Handle <code>maxWait</code> for non-streaming requests.
@@ -632,11 +634,9 @@ System.err.println(
 
 // JPW debug print
 //System.err.println("\n\nStreamTimeRelList.process(): request:\n" + request);
-
 		regRequest = ((RBO) getSource()).extractTimeRelative
 		    (request,
 		     getNBO().getRequestOptions());
-
 // JPW debug print
 //System.err.println("StreamTimeRelList.process(): regRequest:\n" + regRequest);
 
@@ -664,28 +664,46 @@ System.err.println(
 		}
 
 	    } else {
-		// If we got a regular request, then add it to the full
-		// request.
-		if (fullRequest == null) {
-		    fullRequest = regRequest;
-		} else {
-		    fullRequest = fullRequest.mergeWith(regRequest);
+			// If we got a regular request, then add it to the full
+			// request.
+			if (fullRequest == null) {
+			    fullRequest = regRequest;
+			} else {
+			    fullRequest = fullRequest.mergeWith(regRequest);
+			}
+	
+			// Add the request to the list of those being processed.
+//			System.err.println("----icount: "+icount+", request: "+request); // MJM
+//			System.err.println("fullRequest: "+fullRequest);	// MJM
+//			System.err.println("regRequest: "+regRequest);	// MJM
+			
+			// MJM FOLLOWING FIX for WILDCARD Time-Mode Subscription, 
+			// "request" here is original "_Metrics/*" format, but
+			// fullRequest and regRequest are right here with full channel list
+			// need to convert (Rmap)regRequest to TimeRelativeRequest and use that.
+			int nchild = regRequest.getNchildren();
+			if(nchild > 1) {
+				for(int i=0; i<nchild; i++) {
+					TimeRelativeRequest myRequest = TimeRelativeRequest.createFromRequest(regRequest.getChildAt(i));
+					if(myRequest == null) continue;
+					myRequest.setRelationship(request.getRelationship());
+					myRequest.setTimeRange(request.getTimeRange());
+					workRequests.put(myRequest,icount);	
+//					System.err.println("myRequest: "+myRequest);
+				}
+			} else {
+				workRequests.put(request,icount);	// original code
+		    }
 		}
-
-		// Add the request to the list of those being processed.
-		workRequests.put(request,icount);
-	    }
 	}
 
 	if (!getTerminateRequested() && (fullRequest != null)) {
 	    // If we got a request to actually try, then do so now.
 	    requests = workRequests.keys();
 
-// System.err.println("StreamTimeRelList.process(): fullRequest:\n" + fullRequest);
-
+ //System.err.println("StreamTimeRelList.process(): fullRequest:\n" + fullRequest);
 	    match = ((Rmap) getSource()).extractRmap(fullRequest,true);
-
-// System.err.println("StreamTimeRelList.process(): match:\n" + match);
+ //System.err.println("StreamTimeRelList.process(): match:\n" + match);
 
 	    if (match == null) {
 		// If we don't get a request, then we've run off the
@@ -724,7 +742,9 @@ System.err.println(
 			(++count < oRequest.getNrepetitions())) {
 			// If we still have more to do on this request, then
 			// determine where the next reference will be.
-			updateReference(request,count,match);
+			updateReference(request,count,match); 	// original code
+//			updateReference(TimeRelativeRequest.createFromRequest(regRequest), count,match);	// MJM?
+//			updateReference(fullRequest,count,match);	// MJM ???
 		    }
 		}
 
@@ -952,6 +972,7 @@ System.err.println(
 		nRequest.setRelationship(requestI.getRelationship());
 		nRequest.setTimeRange(requestI.getTimeRange());
 		try {
+//			System.err.println("MJM STRL addchan: "+trc);
 		    nRequest.addChannel(trc);
 		} catch (com.rbnb.utility.SortException e) {
 		    throw new java.lang.InternalError();
