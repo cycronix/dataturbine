@@ -1,0 +1,58 @@
+<!-- 
+     Name: build.xml
+     By:   John Wilson
+     Date: 10/29/2010
+
+     Description:
+         This file is the primary Ant build file for the RBNB Folder
+         application.
+-->
+
+<project name="APPLICATION.FOLDER" default="library" basedir=".">
+
+ <!-- Import the standard definitions (properties). -->
+ <import file="../../definitions.xml" />
+
+ <!-- Initialize by setting the timestamp. -->
+ <target name="init">
+  <tstamp />
+  <buildnumber />
+  <mkdir dir="${rbnb.builddir}" />
+  <mkdir dir="${rbnb.classesdir}" />
+  <mkdir dir="${rbnb.classesdir}/Applications" />
+  <mkdir dir="${rbnb.classesdir}/Applications/Folder" />
+  <mkdir dir="${rbnb.librarydir}" />
+ </target>
+
+ <!--
+      Compile the Folder Java source code and place the results in the Folder
+      classes directory.  References the Core library and the Folder classes for
+      dependencies.
+  -->
+ <target name="compile" depends="init">
+  <javac destdir="${rbnb.classesdir}/Applications/Folder"
+         deprecation="on"
+		 debug="on"
+         source="${rbnb.javaver}"
+         target="${rbnb.javaver}">
+   <src path="${rbnb.sourcedir}/Applications/Folder" />
+   <classpath path="${rbnb.classesdir}/Applications/Folder" />
+   <classpath path="${rbnb.librarydir}/rbnb.jar" />
+  </javac>
+ </target>
+
+ <!-- Create the Folder jar file using the Folder classes. -->
+ <target name="library" depends="compile">
+  <jar destfile="${rbnb.librarydir}/folder.jar"
+       basedir="${rbnb.classesdir}/Applications/Folder"
+       manifest="Manifest"
+   />
+ </target>
+
+ <!-- Cleans out all compiled and library files for the Folder project. -->
+ <target name="clean">
+  <delete dir="${rbnb.classesdir}/Applications/Folder" />
+  <delete file="${rbnb.librarydir}/folder.jar" />
+ </target>
+
+</project>
