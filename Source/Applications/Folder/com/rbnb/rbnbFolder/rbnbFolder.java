@@ -22,6 +22,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.Hashtable;
 
 import com.rbnb.sapi.Source;
 import com.rbnb.sapi.ChannelMap;
@@ -64,17 +65,21 @@ public class rbnbFolder extends Thread {
 	private static int Ncache=1, Narchive=10000;
 	private static String Amode="append";
 	
-	private static int iterCount=0;
+	private static long iterCount=0;
 	private static Timer myTimer;
 	public static Source source=null;
 	private static long lastMod = 0;
 	private static final String TAG = "rbnbFolder";
 	private static Pattern pattern;
+	private static File folder=null;
+	
+	private static Hashtable fileHash = new Hashtable();
 	
 //---------------------------------------------------------------------------------	
     public rbnbFolder() {
+    	
     	myTimer = new Timer();
-    	myTimer.schedule(new TimeTask(), 1000,(int)(updateInc*1000)); 	// try a delay
+    	myTimer.schedule(new TimeTask(), 1000,(int)(updateInc*1000)); 	// initial delay
     }
 
 //---------------------------------------------------------------------------------	   
@@ -123,23 +128,22 @@ public class rbnbFolder extends Thread {
 	    else	System.out.println("Running...");
 	    
         try {
-        	startSource();
+        	startSource();			// connect to RBNB server
         } catch(Exception e) {
         	e.printStackTrace();
         	System.exit(0);
         };
 
-        pattern = Pattern.compile(replaceWildcards(fileFilter));	// do this once in advance
-        
-        try {
-        	new rbnbFolder();
-        } finally {
-//        	if(source != null) source.CloseRBNBConnection();
-        }
-
+        pattern = Pattern.compile
+        			(replaceWildcards(fileFilter));	// do this once in advance
+    
+    	initializeFolder();			// initialize file hashtable
+        new rbnbFolder();			// start the timer check 
     }
     
 //---------------------------------------------------------------------------------	
+// main activity class - check for updates on timer thread
+    
 	  class TimeTask extends TimerTask {
 		    public void run() {
 				FileWatch();
@@ -165,84 +169,117 @@ public class rbnbFolder extends Thread {
 		    	source.Detach();
 		    }
 	  }
-	  
+
 //---------------------------------------------------------------------------------	
-	private void FileWatch() {
-		java.io.File file=null;
-		
+// initialize folder by building a hash table of file names and modified times
+	  
+	private static void initializeFolder() {
+		int nfound=0;
 		try {
-//			if(!Connected) startSource();	// startup may take a while to reload archives
-			
 			// get updated list of files
-//	    	System.err.println("fileFilter: "+fileFilter);
-	    	File folder;
-	    	try {
-	    		folder = new File(folderName);
-	    	} catch (Exception e) {
-	    		System.err.println("Error on opening folder: "+folderName);
-	    		return;
-	    	}
+	    	folder = new File(folderName);
+			File[] listOfFiles = folder.listFiles();
+			if(listOfFiles == null) return;
+//			System.err.println("folder: "+folderName+", nfile: "+listOfFiles.length);
+			
+			for(int i=0; i<listOfFiles.length; i++) {
+				File file = listOfFiles[i];
+				if(fileMatch(file))	{		// add to initial file hash
+					nfound++;
+					String fileName = new String(file.getName());
+					Long lastMod; 
+					if(sendInitial) lastMod = new Long(0);	// force initial update
+					else			lastMod = new Long(file.lastModified());
+					
+					fileHash.put(fileName, lastMod);
+//					System.err.println("fileHash("+fileName+","+lastMod+")");
+				}
+			}
+		} catch (Exception e) {
+    		System.err.println("Error initializing folder: "+folderName);
+			e.printStackTrace();
+		}
+		
+//		System.err.println("rbnbFolder initialized, matches found: "+nfound);
+	}
+
+//---------------------------------------------------------------------------------	
+// check if a file is legal and passes file-filter
+	
+	private static boolean fileMatch(File file) {
+		if(!file.isFile()) return(false);
+		
+		String fileName = file.getName();
+		
+		Matcher matcher = pattern.matcher(fileName);
+		if(negateFilter) { if(matcher.matches()) return(false);  }
+		else 			 { if(!matcher.matches()) return(false); }  
+		
+		if(file.length() <= 0) return(false);
+
+		return(true);	
+	}
+	
+//---------------------------------------------------------------------------------	
+// do the main file checking and send to RBNB if legal update
+	
+	private void FileWatch() {
+		try {
+			// get updated list of files
 
 			File[] listOfFiles = folder.listFiles();
 			if(listOfFiles == null) return;
-			
-			String fileName;
-			Matcher matcher;
-//			System.err.println("folder: "+folderName+", nfile: "+listOfFiles.length);
-			boolean initMod = (lastMod==0);		// initialization pass
-			
-			for(int i=0; i<listOfFiles.length; i++) {
-				if(!listOfFiles[i].isFile()) continue;
-				fileName = listOfFiles[i].getName();
-				
-				matcher = pattern.matcher(fileName);
-				if(negateFilter) { if(matcher.matches()) continue;  }
-				else 			 { if(!matcher.matches()) continue; }  
-//		        else				   System.err.println("match!, "+fileName);
 
-				// define RBNB channels
-				ChannelMap cMap = new ChannelMap();
-				String rName = fileName;	// rbnb channel name
-				if(commonName != null) rName = commonName;	// common name
-				cMap.Add(rName);
+			for(int i=0; i<listOfFiles.length; i++) {
+				File file = listOfFiles[i];
+				if(fileMatch(file)) {
+					String fileName =  file.getName();
+					long newMod = file.lastModified();
+					long oldMod = 0;
+					if(fileHash.containsKey(fileName))
+						oldMod = ((Long)fileHash.get(fileName)).longValue();
+					
+					fileHash.put(fileName, new Long(newMod));	// new/update entry
+					
+					if(newMod > oldMod) {	// it's a go
+//						System.err.println("folder update: "+fileName+", newMod: "+newMod+", oldMod: "+oldMod);
 				
-				file = new java.io.File(folderName+File.separator+fileName); 
-				
-				long fileLength = file.length();
-//				System.err.println("file: "+file+", lastMod: "+lastMod+", fileMod: "+file.lastModified());
-				if(fileLength <= 0) continue;
+					// define RBNB channels
+						ChannelMap cMap = new ChannelMap();
+						String rName = fileName;					// rbnb channel name
+						if(commonName != null) rName = commonName;	// common name
+						cMap.Add(rName);
+
+						byte[] data;
+						long fileLength = file.length();
+						data = new byte[(int)(fileLength)];	// read file update
+						java.io.FileInputStream fis = new java.io.FileInputStream(file);
+						int nread = fis.read(data);
+						fis.close();
+						if(nread > 0) {
+							System.err.println("Put file: "+fileName+", rbnbChan: "+rName+", size: "+fileLength);
+							cMap.PutDataAsByteArray(0, data);
+							source.Flush(cMap);	
+						}
 	
-				if(initMod) {	// avoid resend at startup
-					if(lastMod < file.lastModified()) lastMod = file.lastModified();	
-//					System.err.println("File: "+file);
+						if(!retainFile) {
+							boolean status = file.delete();
+							fileHash.remove(fileName);	// toss known dead files (proactively sweep/clean?)
+							if(status) System.err.println("Deleted source file: "+fileName);
+							else	System.err.println("Failed to delete source file: "+fileName);
+						}
+					}
 				}
-				// do real work after first-pass established mod-times
-				if((initMod && sendInitial) || (file.lastModified() > lastMod)) {
-					byte[] data;
-					data = new byte[(int)(fileLength)];	// read file update
-					java.io.FileInputStream fis = new java.io.FileInputStream(file);
-					int nread = fis.read(data);
-					if(nread > 0) {
-						System.err.println("Put file: "+fileName+", rbnbChan: "+rName+", size: "+fileLength);
-						cMap.PutDataAsByteArray(0, data);
-						source.Flush(cMap);	
-					}
-					if(file.lastModified() > lastMod) lastMod = file.lastModified();	
-					if(!retainFile) {
-						boolean status = file.delete();
-						if(status) System.err.println("Deleted source file: "+fileName);
-						else	System.err.println("Failed to delete source file: "+fileName);
-					}
-			    }
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			startSource();		// presume it needs to reconnect?
 		}
-		
-//		if(file != null) lastMod = file.lastModified();	// catch lastMod time after full sweep
 	}
-  
+ 
+//---------------------------------------------------------------------------------
+// utility to convert file "glob" to java wildcard logic
+	
 	private static String replaceWildcards(String wild)
 	{
 	    StringBuffer buffer = new StringBuffer();
