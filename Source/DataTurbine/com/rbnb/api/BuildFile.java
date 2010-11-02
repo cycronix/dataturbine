@@ -36,6 +36,7 @@ package com.rbnb.api;
  *   Date      By	Description
  * MM/DD/YYYY
  * ----------  --	-----------
+ * 10/18/2010  MJM  explicit buffer size in BufferedReader 
  * 10/05/2004  JPW	In loadBuildFile(), add preprocessor directives which
  *			will be used by "sed" to create a version of the code
  *			appropriate for compiling under J#.
@@ -142,7 +143,7 @@ public final class BuildFile {
 		java.io.InputStreamReader inStrReader =
 		    new java.io.InputStreamReader(inStr);
 		java.io.BufferedReader bRead =
- 		    new java.io.BufferedReader(inStrReader);
+ 		    new java.io.BufferedReader(inStrReader,8192);  // MJM
 		String line;
 
 		while ((line = bRead.readLine()) != null) {
