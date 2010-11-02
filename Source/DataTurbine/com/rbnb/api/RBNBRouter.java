@@ -251,7 +251,10 @@ final class RBNBRouter
 	    if (typeI.equalsIgnoreCase("CHILD")) {
 		if (((entry = getParent().findChild(hierarchyI)) != null)
 //		    && !(entry instanceof ChildServer)		// MJM: child server or not, not legal for dupes
+													// this leads to adding node when already a node error in WebTurbine
 		    ) {
+//			((ConnectedServer)entry).stop();		// MJM nuke it?
+			System.err.println("entry.Nchild: "+entry.getNchildren());
 		    throw new java.lang.IllegalStateException
 			("Cannot accept " + typeI + " route from " +
 			 hierarchyI + "; a naming conflict exists!");
