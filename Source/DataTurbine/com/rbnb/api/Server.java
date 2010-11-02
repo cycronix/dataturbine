@@ -33,6 +33,7 @@ package com.rbnb.api;
  *   Date      By	Description
  * MM/DD/YYYY
  * ----------  --	-----------
+ * 10/11/2010  MJM	fixed memory leak in isRunning()
  * 06/22/2006  JPW	Added -H flag (archive home directory).
  * 2005/01/19  WHF	Added -P flag.
  * 09/30/2004  JPW	In order to compile under J# (which is only compatable
@@ -1096,14 +1097,22 @@ public class Server
 	    controller.stop();
 	    runningR = true;
 	} catch (java.lang.Exception e) {
+/*		// MJM move this out of exception handler, i.e. always remove child
 	    try {
 		if (controller != null) {
 		    removeChild((Rmap) controller);
 		}
 	    } catch (java.lang.Exception e1) {
 	    }
+*/
 	}
 
+	try {
+	if (controller != null) {		// MJM 10/10, remove child in any event, memory leak!
+	    removeChild((Rmap) controller);
+	}
+    } catch (java.lang.Exception e1) {}
+    
 	return (runningR);
     }
 
