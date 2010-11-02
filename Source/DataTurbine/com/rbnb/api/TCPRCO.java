@@ -33,6 +33,7 @@ package com.rbnb.api;
  *   Date      By	Description
  * MM/DD/YYYY
  * ----------  --	-----------
+ * 10/18/2010  MJM  Moved up null-check in authorization to speed up routing connections
  * 04/28/2004  INB	Added method <code>isAllowedAccess</code>.
  * 05/10/2001  INB	Created.
  *
@@ -304,13 +305,16 @@ final class TCPRCO
 	if (tcp != null) {
 	    tcp.disconnect(getServerSide());
 	}
+
 	setServerSide(null);
+
 	if (getDataSocket() != null) {
 	    if (tcp != null) {
 		tcp.disconnect(getDataSocket());
 	    }
 	    setDataSocket(null);
 	}
+
     }
 
     /**
@@ -360,6 +364,7 @@ final class TCPRCO
      *   Date      By	Description
      * MM/DD/YYYY
      * ----------  --	-----------
+     * 10/10/10	   MJM  add quick check to avoid unecessary getHost calls
      * 04/28/2004  INB	Created.
      *
      */
@@ -371,6 +376,9 @@ final class TCPRCO
 	boolean allowedR = false;
 
 	try {
+	    if ((addressI == null) || (addressI.getAuthorization() == null)) 
+	    	return(true);	// MJM quick check, following getHost() can take time
+	    
 	    netAddr = socket.getInetAddress();
 	    Object addr;
 	    if ((netAddr.getHostName() == null) ||
