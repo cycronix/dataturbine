@@ -43,6 +43,7 @@ package com.rbnb.api;
  *   Date      By	Description
  * MM/DD/YYYY
  * ----------  --	-----------
+ * 10/18/2010  MJM		Explicit buffer size in BufferedReader
  * 03/19/2010  MJM      Added logic to conservatively add FileSets for reattaching sources
  * 08/12/2008  WHF      Implemented failSafeMode.
  * 03/26/2008  WHF      Added check for incoming frame at time of termination to
@@ -5208,7 +5209,7 @@ private boolean alreadyReset=false;
 	java.io.FileInputStream fis = new java.io.FileInputStream
 	    (directory + "summary.rbn");
 	java.io.BufferedReader br = new java.io.BufferedReader
-	    (new java.io.InputStreamReader(fis));
+	    (new java.io.InputStreamReader(fis),8192);  // MJM
 
 	String line;
 	int idx;
