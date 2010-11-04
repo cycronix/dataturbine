@@ -65,7 +65,7 @@ import com.rbnb.utility.Utility;
  *
  * @author John P. Wilson
  *
- * @version 06/27/2008
+ * @version 11/04/2010
  */
 
 /*
@@ -75,6 +75,8 @@ import com.rbnb.utility.Utility;
  *   Date      By	Description
  * MM/DD/YYYY
  * ----------  --	-----------
+ * 11/04/2010  JPW	Add bIgnoreSendErrors; if this is true, then we ignore
+ *			errors from sending out the UDP packet in writeData().
  * 06/27/2008  JPW	Add headless (no GUI) mode.  Class no longer extends JFrame.
  * 10/02/2007  JPW	Replace the single recipient with a Vector of
  *			Recipient objects (provided as an argument in the
@@ -241,6 +243,16 @@ public class UDPCaster implements ActionListener {
      */
     private JFrame frame = null;
     
+    /**
+     * Ignore errors when trying to send a UDP packet to a recipient?
+     * <p>
+     *
+     * @author John P. Wilson
+     *
+     * @version 11/04/2010
+     */
+    private boolean bIgnoreSendErrors = false;
+    
     /**************************************************************************
      * Constructor
      * <p>
@@ -254,8 +266,9 @@ public class UDPCaster implements ActionListener {
      * @param bStreamFromOldestI  Stream from oldest?
      * @param bAutostartI         Autostart?
      * @param bHeadlessI          Run in headless (no GUI) mode?
+     * @param bIgnoreSendErrorsI  Ignore UDP packet send errors?
      *
-     * @version 06/27/2008
+     * @version 11/04/2010
      */
     
     /*
@@ -263,6 +276,7 @@ public class UDPCaster implements ActionListener {
      *   Date      By	Description
      * MM/DD/YYYY
      * ----------  --	-----------
+     * 11/04/2010  JPW  Add bIgnoreSendErrorsI argument
      * 06/27/2008  JPW	Add bHeadlessI argument
      * 10/02/2007  JPW  Remove recipientHostI and recipientPortI; add
      *			Vector recipientsI.
@@ -277,10 +291,13 @@ public class UDPCaster implements ActionListener {
 		     Vector recipientsI,
 		     boolean bStreamFromOldestI,
 		     boolean bAutostartI,
-		     boolean bHeadlessI)
+		     boolean bHeadlessI,
+		     boolean bIgnoreSendErrorsI)
     {
 	
 	bHeadless = bHeadlessI;
+	
+	bIgnoreSendErrors = bIgnoreSendErrorsI;
 	
 	// super("UDPCaster    disconnected");
 	if (!bHeadless) {
@@ -500,6 +517,11 @@ public class UDPCaster implements ActionListener {
 		    System.err.println("Stream from oldest");
 		} else {
 		    System.err.println("Stream from newest");
+		}
+		if (bIgnoreSendErrors) {
+		    System.err.println("Ignore UDP send errors");
+		} else {
+		    System.err.println("Don't ignore UDP send errors");
 		}
 		System.err.println("\n");
 		// Start
@@ -1154,7 +1176,7 @@ public class UDPCaster implements ActionListener {
      *
      * @author John P. Wilson
      *
-     * @version 10/02/2007
+     * @version 11/04/2010
      */
     
     /*
@@ -1162,6 +1184,7 @@ public class UDPCaster implements ActionListener {
      *   Date      By	Description
      * MM/DD/YYYY
      * ----------  --	-----------
+     * 11/04/2010  JPW  Only throw an exception if bIgnoreSendErrors is false.
      * 10/02/2007  JPW  Send DatagramPacket to all recipients
      * 06/03/2005  JPW  Created.
      *
@@ -1170,7 +1193,9 @@ public class UDPCaster implements ActionListener {
     private void writeData(byte[] dataI) throws Exception {
 	
 	if ( (dataI == null) || (dataI.length == 0) ) {
-	    throw new Exception("Error: tried to write out empty packet.");
+	    if (!bIgnoreSendErrors) {
+		throw new Exception("Error: tried to write out empty packet.");
+	    }
 	}
 	
 	DatagramPacket dp =
@@ -1179,7 +1204,14 @@ public class UDPCaster implements ActionListener {
 	for (Enumeration e = recipients.elements(); e.hasMoreElements(); ) {
 	    Recipient rec = (Recipient)e.nextElement();
 	    dp.setSocketAddress(rec.getSocketAddr());
-	    datagramSocket.send(dp);
+	    try {
+		datagramSocket.send(dp);
+	    } catch (Exception exc) {
+		if (!bIgnoreSendErrors) {
+		    // throw the exception
+		    throw exc;
+		}
+	    }
 	}
 	
     }
