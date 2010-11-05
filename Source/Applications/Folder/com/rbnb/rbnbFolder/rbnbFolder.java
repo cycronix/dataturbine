@@ -24,8 +24,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.Hashtable;
 
-import com.rbnb.sapi.Source;
-import com.rbnb.sapi.ChannelMap;
+import com.rbnb.sapi.*;
 import com.rbnb.utility.ArgHandler;
 
 /******************************************************************************
@@ -155,8 +154,23 @@ public class rbnbFolder extends Thread {
 //---------------------------------------------------------------------------------	
 	  private static void startSource() {
 	        try {
+	        	if(Amode.equals("create")) {
+	        		try {
+//	        			System.err.println("clearing out old source...");
+	        			source = new Source(Ncache, "append", Narchive);
+	    	        	source.OpenRBNBConnection(rbnbServer,sName);
+	        			Thread.sleep(100);	// let connection close?
+	        			source.CloseRBNBConnection();		// clear up any old source
+	        		} catch (Exception e) {
+//						e.printStackTrace();
+	        		};		// np just continue
+	        	}
 	        	source = new Source(Ncache,Amode,Narchive);	
 	        	source.OpenRBNBConnection(rbnbServer,sName);
+	        	String myName = source.GetClientName();
+	        	if(myName.equals(sName)) 
+	        			System.err.println("Connected: "+myName);
+	        	else	System.err.println("Warning, name mismatch, sName: "+sName+", myName: "+myName);
 	        } catch(Exception e) {
 	        	e.printStackTrace();
 	        	System.exit(0);
@@ -223,7 +237,7 @@ public class rbnbFolder extends Thread {
 //---------------------------------------------------------------------------------	
 // do the main file checking and send to RBNB if legal update
 	
-	private void FileWatch() {
+	private synchronized void FileWatch() {
 		try {
 			// get updated list of files
 
@@ -232,6 +246,8 @@ public class rbnbFolder extends Thread {
 
 			for(int i=0; i<listOfFiles.length; i++) {
 				File file = listOfFiles[i];
+//				if(!canOpen(file)) continue;		// fis.methods catch this
+				
 				if(fileMatch(file)) {
 					String fileName =  file.getName();
 					long newMod = file.lastModified();
@@ -239,16 +255,18 @@ public class rbnbFolder extends Thread {
 					if(fileHash.containsKey(fileName))
 						oldMod = ((Long)fileHash.get(fileName)).longValue();
 					
-					fileHash.put(fileName, new Long(newMod));	// new/update entry
+//					fileHash.put(fileName, new Long(newMod));	// new/update entry
 					
 					if(newMod > oldMod) {	// it's a go
 //						System.err.println("folder update: "+fileName+", newMod: "+newMod+", oldMod: "+oldMod);
 				
 					// define RBNB channels
 						ChannelMap cMap = new ChannelMap();
-						String rName = fileName;					// rbnb channel name
-						if(commonName != null) rName = commonName;	// common name
-						cMap.Add(rName);
+						if(commonName != null) {
+							cMap.Add(commonName);
+							cMap.Add("_FileNames");
+						} else
+							cMap.Add(fileName);
 
 						byte[] data;
 						long fileLength = file.length();
@@ -257,9 +275,14 @@ public class rbnbFolder extends Thread {
 						int nread = fis.read(data);
 						fis.close();
 						if(nread > 0) {
-							System.err.println("Put file: "+fileName+", rbnbChan: "+rName+", size: "+fileLength);
-							cMap.PutDataAsByteArray(0, data);
+							System.err.println("Put file: "+fileName+", size: "+fileLength);
+							cMap.PutDataAsByteArray(0, data);	// always write data to chan0
+							if(commonName != null) {
+								cMap.PutDataAsString(1, fileName+"\n");
+							}
 							source.Flush(cMap);	
+							
+							fileHash.put(fileName, new Long(newMod));	// new/update entry on success
 						}
 	
 						if(!retainFile) {
@@ -273,10 +296,28 @@ public class rbnbFolder extends Thread {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			startSource();		// presume it needs to reconnect?
+			if(e instanceof SAPIException) 
+				startSource();		// presume it needs to reconnect?  This can make _1 source...
 		}
 	}
- 
+
+//---------------------------------------------------------------------------------
+	// utility to test if file is available (i.e. not currently being written)
+	// http://stackoverflow.com/questions/122282/can-the-java-file-method-canwrite-support-locking
+	
+	private boolean canOpen(File file) {
+		
+		try {
+			file.renameTo(new File(file.getName()));		// no-op if it succeeds
+		}
+		catch(Exception e) {
+			System.err.println("file NG: "+file.getName());
+			return(false);
+		}
+//		System.err.println("file OK: "+file.getName());
+		return(true);
+	}
+	
 //---------------------------------------------------------------------------------
 // utility to convert file "glob" to java wildcard logic
 	
