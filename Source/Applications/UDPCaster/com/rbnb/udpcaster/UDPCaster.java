@@ -22,7 +22,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowAdapter;
-import java.awt.event.WindowListener;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
@@ -31,7 +30,6 @@ import java.awt.Insets;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.InetSocketAddress;
 import java.net.SocketException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -55,7 +53,6 @@ import javax.swing.SwingConstants;
 import com.rbnb.sapi.ChannelMap;
 import com.rbnb.sapi.SAPIException;
 import com.rbnb.sapi.Sink;
-import com.rbnb.utility.ArgHandler;
 import com.rbnb.utility.Utility;
 
 /******************************************************************************
@@ -65,7 +62,7 @@ import com.rbnb.utility.Utility;
  *
  * @author John P. Wilson
  *
- * @version 11/04/2010
+ * @version 11/10/2010
  */
 
 /*
@@ -75,6 +72,10 @@ import com.rbnb.utility.Utility;
  *   Date      By	Description
  * MM/DD/YYYY
  * ----------  --	-----------
+ * 11/10/2010  JPW	Add decimationFactor; send out one out of every
+ * 			decimationFactor fetched RBNB frames.  We send out the
+ * 			very first fetched frame, followed by sending out one
+ * 			out of every decimationFactor frames.
  * 11/04/2010  JPW	Add bIgnoreSendErrors; if this is true, then we ignore
  *			errors from sending out the UDP packet in writeData().
  * 06/27/2008  JPW	Add headless (no GUI) mode.  Class no longer extends JFrame.
@@ -253,6 +254,17 @@ public class UDPCaster implements ActionListener {
      */
     private boolean bIgnoreSendErrors = false;
     
+    /**
+     * Send out one out of every decimationFactor fetched frames.
+     * <p>
+     * If decimationFactor is 1, every fetched frame will be sent out.
+     *
+     * @author John P. Wilson
+     *
+     * @version 11/10/2010
+     */
+    private int decimationFactor = 1;
+    
     /**************************************************************************
      * Constructor
      * <p>
@@ -267,8 +279,9 @@ public class UDPCaster implements ActionListener {
      * @param bAutostartI         Autostart?
      * @param bHeadlessI          Run in headless (no GUI) mode?
      * @param bIgnoreSendErrorsI  Ignore UDP packet send errors?
+     * @param decimationFactorI   Send out one out of every decimationFactorI fetched frames.
      *
-     * @version 11/04/2010
+     * @version 11/10/2010
      */
     
     /*
@@ -276,6 +289,7 @@ public class UDPCaster implements ActionListener {
      *   Date      By	Description
      * MM/DD/YYYY
      * ----------  --	-----------
+     * 11/10/2010  JPW  Add decimationFactorI argument
      * 11/04/2010  JPW  Add bIgnoreSendErrorsI argument
      * 06/27/2008  JPW	Add bHeadlessI argument
      * 10/02/2007  JPW  Remove recipientHostI and recipientPortI; add
@@ -292,14 +306,18 @@ public class UDPCaster implements ActionListener {
 		     boolean bStreamFromOldestI,
 		     boolean bAutostartI,
 		     boolean bHeadlessI,
-		     boolean bIgnoreSendErrorsI)
+		     boolean bIgnoreSendErrorsI,
+		     int decimationFactorI)
     {
 	
 	bHeadless = bHeadlessI;
 	
 	bIgnoreSendErrors = bIgnoreSendErrorsI;
 	
-	// super("UDPCaster    disconnected");
+	if (decimationFactorI > 0) {
+	    decimationFactor = decimationFactorI;
+	}
+	
 	if (!bHeadless) {
 	    frame = new JFrame("UDPCaster    disconnected");
 	}
@@ -523,6 +541,7 @@ public class UDPCaster implements ActionListener {
 		} else {
 		    System.err.println("Don't ignore UDP send errors");
 		}
+		System.err.println("Decimation factor: " + decimationFactor);
 		System.err.println("\n");
 		// Start
 		openAction();
@@ -1080,7 +1099,7 @@ public class UDPCaster implements ActionListener {
      *
      * @author John P. Wilson
      *
-     * @version 06/03/2005
+     * @version 11/11/2010
      */
     
     /*
@@ -1088,11 +1107,14 @@ public class UDPCaster implements ActionListener {
      *   Date      By	Description
      * MM/DD/YYYY
      * ----------  --	-----------
+     * 11/11/2010  JPW  Add support for decimationFactor
      * 06/03/2005  JPW  Created.
      *
      */
     
     private void runFetch() {
+	
+	int fetchNumber = 0;
 	
 	try {
 	
@@ -1100,6 +1122,13 @@ public class UDPCaster implements ActionListener {
 	    
 	    ChannelMap dataMap = sink.Fetch(1000);
 	    if ( (dataMap == null) || (dataMap.NumberOfChannels() == 0) ) {
+		continue;
+	    }
+	    ++fetchNumber;
+	    if ( (fetchNumber > 1) && (decimationFactor > 1) && (((fetchNumber - 1) % decimationFactor) != 0) ) {
+		// Don't send out this frame
+		// However, still want to increment the frame number
+		++frameNumber;
 		continue;
 	    }
 	    

@@ -30,7 +30,7 @@ import com.rbnb.utility.RBNBProcess;
  *
  * @author John P. Wilson
  *
- * @version 11/04/2010
+ * @version 11/10/2010
  */
 
 /*
@@ -55,7 +55,7 @@ public class rbnbUDPCaster {
      * @author John P. Wilson
      *
      * @param argsI  argument list
-     * @version 11/04/2010
+     * @version 11/10/2010
      */
     
     /*
@@ -63,6 +63,7 @@ public class rbnbUDPCaster {
      *   Date      By	Description
      * MM/DD/YYYY
      * ----------  --	-----------
+     * 11/10/2010  JPW  Add "-d" option to specify a frame decimation factor.
      * 11/04/2010  JPW  Add "-i" option to ignore send errors
      * 06/27/2008  JPW  Add "-g" option to run in headless mode
      * 10/01/2007  JPW  Change "-r" from a single recipient to (optionally) a
@@ -82,6 +83,7 @@ public class rbnbUDPCaster {
 	boolean bAutostartL = false;
 	boolean bHeadlessL = false;
 	boolean bIgnoreSendErrorsL = false;
+	int decimationFactorL = 1;
 	
 	//parse args
 	try {
@@ -105,6 +107,20 @@ public class rbnbUDPCaster {
 	    
 	    if (ah.checkFlag('c')) {
 		chanNameL = ah.getOption('c');
+	    }
+	    
+	    if (ah.checkFlag('d')) {
+		String decimationStr = ah.getOption('d');
+		try {
+		    decimationFactorL = Integer.parseInt(decimationStr);
+		    if (decimationFactorL < 1) {
+			throw new NumberFormatException("must use a decimation factor which is greater than 0");
+		    }
+		} catch (NumberFormatException nfe) {
+		    throw new Exception(
+			"\nFor the \"-d\" command line flag, must specify an integer " +
+			"argument (decimation factor) which is greater than 0.\n");
+		}
 	    }
 	    
 	    if (ah.checkFlag('g')) {
@@ -174,7 +190,11 @@ public class rbnbUDPCaster {
 	    System.err.println(" -h                    : print this usage info");
 	    System.err.println(" -a <server address>   : RBNB address");
 	    System.err.println("               default : localhost:3333");
-	    System.err.println(" -c <input chan>       : RBNB channel to subscribe to");
+	    System.err.println(" -c <input chan>       : RBNB source/channel to subscribe to");
+	    System.err.println(" -d <decFactor>        : Send out 1 out of every <decFactor> fetched frames; the first");
+	    System.err.println("                       :     fetched frame is sent, followed by one out of every <decFactor>");
+	    System.err.println("                       :     frames.  <decFactor> must be an integer greater than 0.");
+	    System.err.println("               default : 1");
 	    System.err.println(" -g                    : run in headless (no GUI) mode");
 	    System.err.println("                       : NOTE: to use headless mode, all parameters must be specified on command");
 	    System.err.println("                       :       line and the autostart (\"-x\") option must also be used");
@@ -217,7 +237,8 @@ public class rbnbUDPCaster {
 		bStreamFromOldestL,
 		bAutostartL,
 		bHeadlessL,
-		bIgnoreSendErrorsL);
+		bIgnoreSendErrorsL,
+		decimationFactorL);
 	
     }
 }
