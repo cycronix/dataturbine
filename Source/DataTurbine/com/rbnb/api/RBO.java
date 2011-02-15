@@ -43,6 +43,7 @@ package com.rbnb.api;
  *   Date      By	Description
  * MM/DD/YYYY
  * ----------  --	-----------
+ * 01/14/2011  MJM  	Added lock release on prolonged blocking waits
  * 10/18/2010  MJM		Explicit buffer size in BufferedReader
  * 03/19/2010  MJM      Added logic to conservatively add FileSets for reattaching sources
  * 08/12/2008  WHF      Implemented failSafeMode.
@@ -1075,6 +1076,7 @@ private boolean alreadyReset=false;
      *   Date      By	Description
      * MM/DD/YYYY
      * ----------  --	-----------
+     * 01/14/2011  MJM  Added lock release on prolonged blocking waits
      * 07/30/2004  INB	Added overview of how data is added.
      * 11/17/2003  INB	Use <code>try/finally</code> to ensure that we don't
      *			leave the flag set.
@@ -1140,6 +1142,8 @@ private boolean alreadyReset=false;
 				     getAcceptingAFrame());
 			    } catch (Exception e) {
 				e.printStackTrace();
+			    System.err.println("Releasing Locks! (hope for the best)");
+			    unlockWrite();		// MJM FOO:  try release deadlock w/ reckless abandon
 			    }
 			    startAt = now;
 			}
@@ -1485,6 +1489,8 @@ private boolean alreadyReset=false;
 				 getAddingAFrame());
 			} catch (Exception e) {
 			    e.printStackTrace();
+			    System.err.println("Releasing Locks (hope for the best)");
+			    unlockWrite();		// MJM:  try release deadlock w/ reckless abandon
 			    startAt = now;
 			}
 		    }
