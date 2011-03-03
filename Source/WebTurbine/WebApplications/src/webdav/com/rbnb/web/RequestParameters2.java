@@ -18,6 +18,10 @@ package com.rbnb.web;
 
 import com.rbnb.sapi.ChannelMap;
 //import com.rbnb.sapi.ChannelMap.ByteOrderEnum;
+import java.util.Date;		// MJM 2/11
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.TimeZone;
 
 /**
   * A structure for storing the parameters for a WebDAV based data request.
@@ -33,6 +37,7 @@ import com.rbnb.sapi.ChannelMap;
 // 2006/09/27  WHF  Removed support for the 'msg' parameter.  Entire query
 //     string now always forwarded.
 // 2007/04/20  WHF  Added plug-in-option parsing.
+// 2011/02/15  MJM  Added ISO8601 time parsing
 
 public class RequestParameters2 implements Cloneable
 {
@@ -394,13 +399,39 @@ public class RequestParameters2 implements Cloneable
 		temp=map.get("t");
 		if (temp==null)
 			temp=map.get("time");
-		if (temp!=null)
+		if (temp!=null) {	// MJM 2/15/10:  add ISO time format option
+//			System.err.println("parsing time string: "+((String[]) temp)[0]);
+			Date dp = ISOparse(((String[]) temp)[0]); 
+			if(dp != null) {
+				start = (double)dp.getTime() / 1000.;
+				timeSet=true;
+				reference="absolute";
+			}
+			else
 			try { start=Double.parseDouble(((String[]) temp)[0]); 
 				timeSet=true; 
-				reference="absolute"; // when time is changed, change 
-				// default reference to 'absolute'.
+				reference="absolute"; 
 			} 
 			catch (NumberFormatException nfe) {}
+		}
+
+		// MJM:  add 'end' option (implicitly sets duration)
+		temp=map.get("e");
+		if (temp==null)	temp=map.get("end");
+		if (temp!=null) {	// MJM 2/15/10:  add ISO time format option
+//			System.err.println("parsing time string: "+((String[]) temp)[0]);
+			Date dp = ISOparse(((String[]) temp)[0]); 
+			if(dp != null) {
+				duration = ((double)dp.getTime() / 1000.) - start; // start needs to be parsed at this point
+				timeSet=true;
+			}
+			else
+			try { duration=Double.parseDouble(((String[]) temp)[0]) - start; 
+				timeSet=true; 
+			} 
+			catch (NumberFormatException nfe) {}
+		}
+	
 		temp=map.get("d");
 		if (temp==null)
 			temp=map.get("duration");
@@ -495,6 +526,66 @@ if (temp==null) temp=map.get("requestdata");
 		plugInOptions = null;
 	}
 
+	// MJM 1/15/11: 
+	// ISO 8601 date parsing utility.
+	// The supported formats are as follows. Exactly the components shown here must be
+	// present, with exactly this punctuation. Note that the "T" appears literally
+	// in the string, to indicate the beginning of the time element, as specified in ISO 8601.
+
+	    //    Complete date plus hours, minutes and seconds (presumed local TZ):
+	    //       YYYY-MM-DDThh:mm:ss
+    	//    Complete date plus hours, minutes and seconds plus 'Z' for GMT:
+    	//       YYYY-MM-DDThh:mm:ssZ
+	    //    Complete date plus hours, minutes, seconds plus timezone:
+	    //       YYYY-MM-DDThh:mm:ssTZD (eg 1997-07-16T19:20:30EDT)
+	
+	    private static Date ISOparse( String dateString ) {
+	    	
+	    	String[] formats = new String[] {// order these most complex to least?
+	    			"yyyy-MM-dd'T'HH:mm:ssz",
+//	    			"yyyy-MM-dd'T'HH:mm:ss'Z'",
+	    			"yyyy-MM-dd'T'HH:mm:ss",
+	    			 };
+	    	
+	    	// Note: fractional seconds don't parse well with SimpleDateFormat: 
+	    	//				.2 -> 002 msec, .200 -> 200 msec
+	    	
+	    	/*
+	        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+	        SimpleDateFormat formatz = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssz");
+	        SimpleDateFormat formatZ = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+	        SimpleDateFormat formatZz = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'z");
+	        */
+	    	
+            // Parse the date
+        	Date date=null;
+//			for (String format : formats) {	// requires Java 1.5
+        	for (int i=0; i<formats.length; i++) {
+	        	   String format = formats[i];
+				   if(dateString.endsWith("Z")) 
+					   dateString = dateString.substring(0,dateString.length()-2) + "GMT";
+	  			   SimpleDateFormat sdf = new SimpleDateFormat(format);
+	  			   try { date = sdf.parse(dateString); } catch (Exception e) { date =  null; };
+	  			   if(date != null) break;
+  			}
+ /*       	
+            if(date == null) try { date = formatZ.parse(dateString); 
+            	if(date != null) date = formatZz.parse(dateString+"GMT"); 
+            } 	catch (Exception e3){};
+            if(date == null) try { date = formatz.parse(dateString); } 	catch (Exception e2){}
+            if(date == null) try { date = format.parse(dateString); } 	catch (Exception e1){}; 
+            
+            if(date !=  null) {
+                System.out.println("Original string: " + dateString);
+                System.out.println("Parsed date    : " +date.toString());
+            }
+            else {
+                System.out.println("ERROR: could not parse date in string \"" +dateString + "\"");
+            }
+*/
+            return(date);
+	    }	
+	
 	/**
 	  * Used to make calls to ChannelMap.TypeID(), which is unfortunately not
 	  *   static.
