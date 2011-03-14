@@ -142,7 +142,7 @@ public class Control extends Client
 		    com.rbnb.api.SourceInterface.ACCESS_NONE,
 		    true);
 	    } catch (Exception e) {
-		if ( (e.getMessage() != null) && (!e.getMessage().isEmpty()) )
+		if ( (e.getMessage() != null) && (e.getMessage().length() != 0) )
 		    throw new SAPIException(e.getMessage());
 		else {
 		    String errStr = new String("Unable to create mirror\n" + e);
@@ -199,7 +199,7 @@ public class Control extends Client
 		    archiveModeI,
 		    bMatchFromSourceI);
 	    } catch (Exception e) {
-		if ( (e.getMessage() != null) && (!e.getMessage().isEmpty()) )
+		if ( (e.getMessage() != null) && (e.getMessage().length() != 0) )
 		    throw new SAPIException(e.getMessage());
 		else {
 		    String errStr = new String("Unable to create mirror\n" + e);
