@@ -50,6 +50,7 @@ package com.rbnb.api;
  *   Date      By	Description
  * MM/DD/YYYY
  * ----------  --	----------
+ * 03/15/2011  MJM	Edits associated with RBO reconnect logic
  * 2007/07/23  WHF      Implemented Get/SetAddressAuthorization command support.
  * 08/12/2004  EMF      Added debug logging to login method.
  * 08/05/2004  INB	Added documentation.
@@ -1327,6 +1328,7 @@ abstract class RCO
      *   Date      By	Description
      * MM/DD/YYYY
      * ----------  --	-----------
+     * 03/15/2011  MJM	Rearranged checks for RBO reconnect logic
      * 09/07/2004  MJM  Commented out the EMF debug
      * 08/12/2004  EMF  Added logging on enter and exit, as debug for routing
      *                  lockups over ratty networks.
@@ -1369,12 +1371,15 @@ abstract class RCO
 
 	    if (rmap != null) {
 		ClientHandler clientHandler = (ClientHandler) rmap;
+		
+/*		// MJM move this check to last for reconnect-logic
 		if (!clientHandler.allowReconnect(loginI.getUsername())) {
 		    throw new java.lang.IllegalStateException
 		        ("Cannot reconnect to existing client handler " +
 		         clientHandler.getFullName() +
 		         ".");
-		} else if ((clientInterface instanceof RouterInterface) &&
+		} else 
+*/			if ((clientInterface instanceof RouterInterface) &&
 			   !isAllowedAccess
 			   (((RBNB) getServerHandler
 			     ()).getAddressHandler(),
@@ -1416,6 +1421,14 @@ abstract class RCO
 			("Client address is not authorized to reconnect " +
 			 "to source connections.");
 		}
+		// MJM do this check last - it may abort old connection
+		else if (!clientHandler.allowReconnect(loginI.getUsername())) {	
+			throw new java.lang.IllegalStateException
+			    ("Cannot reconnect to existing client handler " +
+			     clientHandler.getFullName() +
+			     ".");
+		}
+
 		clientHandler.setUsername(loginI.getUsername());
 		clientHandler.setRCO(this);
 		setClientHandler(clientHandler);
