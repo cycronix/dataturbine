@@ -43,6 +43,7 @@ package com.rbnb.api;
  *   Date      By	Description
  * MM/DD/YYYY
  * ----------  --	-----------
+ * 03/15/2011  MJM  	Allow reconnect to replace old source in special case of "dot" .fileName
  * 01/14/2011  MJM  	Added lock release on prolonged blocking waits
  * 10/18/2010  MJM		Explicit buffer size in BufferedReader
  * 03/19/2010  MJM      Added logic to conservatively add FileSets for reattaching sources
@@ -1241,13 +1242,32 @@ private boolean alreadyReset=false;
      *   Date      By	Description
      * MM/DD/YYYY
      * ----------  --	-----------
+     * 03/15/2011  MJM  Allow reconnect to replace old source in special case
      * 04/17/2003  INB	Created.
      *
      */
     public final boolean allowReconnect(Username usernameI) {
-	return ((getRCO() == null) &&
-		(getAmode() != ACCESS_NONE) &&
-		allowAccess(usernameI));
+
+	    // MJM 3/15/11:  allow reconnect with kill of old RCO... (!)
+	    if( /* (getAmode() == ACCESS_NONE) || */ !allowAccess(usernameI)) return(false);		// check if allowed?
+		if(getRCO() == null) return(true);
+		
+		// ok let's be mean and kill the old connection...
+		if(getName().startsWith(".")) {	// only if source name starts with "."
+			try{
+				this.setAkeep(true);
+				this.setCkeep(true);
+				stop((ClientHandler) this);		// MJM buh bye
+			} catch (Exception e) { 
+				System.err.println("oops can't disconnect RCO, e:"+e);
+				return(false); 
+				}
+			return(true);		// old source is gone, let new one reconnect
+    	} else {	// old code MJM
+			return ((getRCO() == null) &&
+			(getAmode() != ACCESS_NONE) &&
+			allowAccess(usernameI));
+		}	
     }
 
     /**
