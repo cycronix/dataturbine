@@ -37,6 +37,7 @@ package com.rbnb.api;
  *   Date      By	Description
  * MM/DD/YYYY
  * ----------  --	-----------
+ * 03/15/2011  MJM	Routing reconnect with same name logic
  * 10/04/2010  MJM  Better error checking on child routes with non-unique names.
  * 08/05/2004  INB	Updated the class documentation and added the link to
  *			RemoteServer.
@@ -196,6 +197,7 @@ final class RBNBRouter
      *   Date      By	Description
      * MM/DD/YYYY
      * ----------  --	-----------
+     * 03/15/2011  MJM	Routing reconnect with same name logic
      * 07/20/2004  INB	Added version information to log message.
      * 02/18/2004  INB	In addition to using <code>getConnected</code> to
      *			determine if we can talk back, use
@@ -250,21 +252,18 @@ final class RBNBRouter
 
 	    if (typeI.equalsIgnoreCase("CHILD")) {
 		if (((entry = getParent().findChild(hierarchyI)) != null)
-//		    && !(entry instanceof ChildServer)		// MJM: child server or not, not legal for dupes
-													// this leads to adding node when already a node error in WebTurbine
-		    ) {
-//			((ConnectedServer)entry).stop();		// MJM nuke it?
-			System.err.println("entry.Nchild: "+entry.getNchildren());
+			    && !(entry instanceof ChildServer)		// MJM: child server dupe checked seperately below
+	    ) {
 		    throw new java.lang.IllegalStateException
 			("Cannot accept " + typeI + " route from " +
 			 hierarchyI + "; a naming conflict exists!");
 
-		} else if (entry != null) {
+		} else if (entry != null) {						// Routed child has same name as parent
 		    ((ServerHandler) getParent()).unlockRouting();
 		    locked = false;
 		    cServer = (ConnectedServer) entry;
 		    synchronized (cServer) {
-			while (cServer.getTerminateRequested()) {
+			while (cServer.getTerminateRequested()) {	// make sure route isn't in process of being terminated?
 			    cServer.wait(TimerPeriod.NORMAL_WAIT);
 			}
 		    }
@@ -278,12 +277,21 @@ final class RBNBRouter
 		    if ((cServer != null) &&
 			cServer.getConnected() &&
 			(cServer.getType() != ConnectedServer.ROUTE_OFF)) {
-			if (!cServer.getAddress().equals
+
+		    if (!cServer.getAddress().equals
 			    (((Server) bottom).getAddress())) {
+				if(cServer.getName().startsWith("."))	// MJM: allow dot .Names to bypass address check
+					System.err.println("Routing same-name different-address, special exemption for .Name...");
+				else
 			    throw new java.lang.IllegalStateException
 				("Cannot accept " + typeI + " route from " +
 				 hierarchyI + "; a naming conflict exists.");
 			}
+		    
+			if(true) {		// MJM force reconnect regardless (more robust?, enables same-name reconnect)
+				cServer.lostRouting();
+				cServer = null;
+			} else
 			try {
 			    Router router = cServer.grabRouter();
 			    router.send(new Ping());
