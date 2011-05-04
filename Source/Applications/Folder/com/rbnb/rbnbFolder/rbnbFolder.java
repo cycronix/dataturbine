@@ -73,6 +73,9 @@ public class rbnbFolder extends Thread {
 	private static File folder=null;
 	
 	private static Hashtable fileHash = new Hashtable();
+	private static Hashtable fileHash2 = new Hashtable();
+	final static String FileNames = "_FileNames";
+	final static String CommonName = "commonName";		// hard wire for now
 	
 //---------------------------------------------------------------------------------	
     public rbnbFolder() {
@@ -223,12 +226,12 @@ public class rbnbFolder extends Thread {
 	private static boolean fileMatch(File file) {
 		if(!file.isFile()) return(false);
 		
-		String fileName = file.getName();
+		String fName = file.getName();
 		
-		Matcher matcher = pattern.matcher(fileName);
+		Matcher matcher = pattern.matcher(fName);
 		if(negateFilter) { if(matcher.matches()) return(false);  }
 		else 			 { if(!matcher.matches()) return(false); }  
-		
+
 		if(file.length() <= 0) return(false);
 
 		return(true);	
@@ -246,17 +249,19 @@ public class rbnbFolder extends Thread {
 
 			for(int i=0; i<listOfFiles.length; i++) {
 				File file = listOfFiles[i];
-//				if(!canOpen(file)) continue;		// fis.methods catch this
+				String fileName =  file.getName();
+				
+				// fis.methods catch already-open file on Windows, not Unix
+//				if(!canOpen(fileName))continue;		// this method doesn't seem to help on any OS
 				
 				if(fileMatch(file)) {
-					String fileName =  file.getName();
+//					String fileName =  file.getName();
 					long newMod = file.lastModified();
 					long oldMod = 0;
 					if(fileHash.containsKey(fileName))
 						oldMod = ((Long)fileHash.get(fileName)).longValue();
 					
 //					fileHash.put(fileName, new Long(newMod));	// new/update entry
-					
 					if(newMod > oldMod) {	// it's a go
 //						System.err.println("folder update: "+fileName+", newMod: "+newMod+", oldMod: "+oldMod);
 				
@@ -303,18 +308,20 @@ public class rbnbFolder extends Thread {
 
 //---------------------------------------------------------------------------------
 	// utility to test if file is available (i.e. not currently being written)
-	// http://stackoverflow.com/questions/122282/can-the-java-file-method-canwrite-support-locking
+	// doesnt seem to work bleh
 	
-	private boolean canOpen(File file) {
+	private boolean canOpen(String fname) {
 		
 		try {
-			file.renameTo(new File(file.getName()));		// no-op if it succeeds
+			File wfile = new File(fname);
+			java.io.FileOutputStream fos = new java.io.FileOutputStream(wfile);
+			fos.close();
 		}
 		catch(Exception e) {
-			System.err.println("file NG: "+file.getName());
+			System.err.println("file NG: "+fname);
 			return(false);
 		}
-//		System.err.println("file OK: "+file.getName());
+//		System.err.println("file OK: "+fname);
 		return(true);
 	}
 	
@@ -342,8 +349,8 @@ public class rbnbFolder extends Thread {
 	    return buffer.toString();
 	 
 	}// end replaceWildcards method
-}
 
+}
 
 
 
