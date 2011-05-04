@@ -100,7 +100,7 @@
 	</target>
 
  <!-- Builds a complete set of the documentation, including class privates. -->
-	<target name="programmer-documentation">
+	<target name="programmer-documentation" depends="library-dataturbine">
 		<mkdir dir="${rbnb.builddir}/ProgrammerDocumentation" />
 		<javadoc sourcepathref="rbnb.javadoc.source.path"
 				destdir="${rbnb.builddir}/ProgrammerDocumentation"
@@ -134,7 +134,7 @@
  <!-- Compile all of the applications, but don't build any libraries. -->
  <!-- JPW 08/20/2007: Since Third_Party has been pulled out of Source, -->
  <!--                 need to separately call its "compile" target.    -->
-	<target name="compile" depends="documentation">
+	<target name="compile" depends="programmer-documentation">
 		<mkdir dir="${rbnb.classesdir}" />
 		<subant target="compile">
 			<fileset dir="."
@@ -150,7 +150,7 @@
  <!-- Compile and make libraries for all of the applications.          -->
  <!-- JPW 08/20/2007: Since Third_Party has been pulled out of Source, -->
  <!--                 need to separately call its "library" target.    -->
-	<target name="library" depends="documentation">
+	<target name="library" depends="programmer-documentation">
 		<mkdir dir="${rbnb.librarydir}" />
 		<subant target="library">
 			<fileset dir="."
