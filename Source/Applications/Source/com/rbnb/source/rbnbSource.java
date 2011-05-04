@@ -150,7 +150,7 @@ public class rbnbSource extends JFrame implements ActionListener,
 		startMin=false;
 
 	// RBNB objects:
-	private static int CACHEDEFAULT=100;
+	private static int CACHEDEFAULT=10;		// MJM try smaller cache 4/11
 	private final Source sb=new Source();
 	private final ChannelMap cm=new ChannelMap();
 	private boolean connected=false,
@@ -694,7 +694,8 @@ public class rbnbSource extends JFrame implements ActionListener,
 					archiveDialog.getArchiveMode(),
 					archiveDialog.getArchiveSize()); */
 				try {
-				sb.SetRingBuffer(CACHEDEFAULT,
+				sb.SetRingBuffer( //CACHEDEFAULT,		// MJM
+					archiveDialog.getCacheSize(),
 					archiveDialog.getArchiveMode(),
 					archiveDialog.getArchiveSize());				
 				fixChannels=true;
@@ -874,6 +875,8 @@ public class rbnbSource extends JFrame implements ActionListener,
 			}
 			else if ("-timeofday".equals(args[ii]))
 				rs.setTimeofday();
+			else if ("-ncache".equals(args[ii]))
+				rs.setNcache(Integer.parseInt(args[++ii]));
 			else throw new Exception();
 		}
 		} catch (Exception e) { e.printStackTrace(); showHelp(); System.exit(1); }
@@ -1170,6 +1173,10 @@ public class rbnbSource extends JFrame implements ActionListener,
 System.err.println("WARNING: using local timeofday timestamps, data will not be continuous.");
 	}
 		
+	public void setNcache(int ncache) {
+		CACHEDEFAULT = ncache;		// MJM 4/5/2011
+	}
+	
 	public void setChannels(int numChan)
 	{
 		if (numChan==0) return;
@@ -1828,8 +1835,10 @@ System.err.println("WARNING: using local timeofday timestamps, data will not be 
 		private JComboBox archiveMode= new JComboBox(archiveStrings);
 		private int theMode=0;
 		private JTextField archiveFrames=new JTextField("0",7),
-			clientNameField=new JTextField(CLIENTNAMEDEFAULT,7);
-		private int theFrames=0;		
+			clientNameField=new JTextField(CLIENTNAMEDEFAULT,7),
+			cacheFrames=new JTextField("10",7);		// MJM
+
+		private int theFrames=0, theFramesC=CACHEDEFAULT;		
 		private boolean okhit=false;
 		private String clientName=CLIENTNAMEDEFAULT;
 		ArchiveDialog(Frame parent)
@@ -1877,7 +1886,7 @@ System.err.println("WARNING: using local timeofday timestamps, data will not be 
 
 			gbc.gridx=0;  gbc.gridy+=gbc.gridheight;
 			gbc.anchor=gbc.EAST;
-			jl=new JLabel("Frames:");
+			jl=new JLabel("Archive Size:");
 			gbl.setConstraints(jl,gbc);
 			cp.add(jl);
 			gbc.gridx=1;
@@ -1885,6 +1894,16 @@ System.err.println("WARNING: using local timeofday timestamps, data will not be 
 			gbl.setConstraints(archiveFrames,gbc);
 			cp.add(archiveFrames);
 
+			gbc.gridx=0;  gbc.gridy+=gbc.gridheight;
+			gbc.anchor=gbc.EAST;
+			jl=new JLabel("Cache Size:");
+			gbl.setConstraints(jl,gbc);
+			cp.add(jl);
+			gbc.gridx=1;
+			gbc.anchor=gbc.CENTER;
+			gbl.setConstraints(cacheFrames,gbc);
+			cp.add(cacheFrames);
+			
 			gbc.insets.top=gbc.insets.bottom=10;
 			gbc.gridx=0;  gbc.gridy+=gbc.gridheight;
 			JButton b=new JButton("Ok");
@@ -1910,6 +1929,10 @@ System.err.println("WARNING: using local timeofday timestamps, data will not be 
 		{ 
 			return theFrames;
 		}
+		int getCacheSize()	// MJM
+		{
+			return theFramesC;
+		}
 		boolean okHit()
 		{ return okhit; }
 		String getClientName() { return clientName; }
@@ -1929,15 +1952,20 @@ System.err.println("WARNING: using local timeofday timestamps, data will not be 
 					.getText());
 				archiveFrames.setText(String
 					.valueOf(theFrames));
+				theFramesC=Integer.parseInt(cacheFrames	// MJM
+						.getText());
+				cacheFrames.setText(String
+						.valueOf(theFramesC));
 				} catch ( NumberFormatException nfe)
 				{
-					theFrames=0; 
+					theFrames=0; theFramesC=10;
 					JOptionPane.showMessageDialog(
 						this,
 						"Invalid frame size.",
 						"Error:",
 						JOptionPane.ERROR_MESSAGE);
 					archiveFrames.setText("0");
+					cacheFrames.setText("10");
 					return;
 				}
 				okhit=true;
@@ -1947,6 +1975,8 @@ System.err.println("WARNING: using local timeofday timestamps, data will not be 
 				archiveMode.setSelectedIndex(theMode);
 				archiveFrames.setText(String
 					.valueOf(theFrames));
+				cacheFrames.setText(String
+						.valueOf(theFramesC));
 				okhit=false;
 			}
 					
