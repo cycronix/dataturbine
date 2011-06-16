@@ -35,7 +35,7 @@ package com.rbnb.api;
  * @author Ian Brown
  *
  * @since V2.0
- * @version 11/12/2004
+ * @version 06/16/2011
  */
 
 /*
@@ -46,9 +46,12 @@ package com.rbnb.api;
  *   Date      By	Description
  * MM/DD/YYYY
  * ----------  --	-----------
- * 10/18/2010  MJM  Added SoLinger(false) on socket close to ensure connection not hung
- * 09/15/2010  MJM  Edited OpenSocket to use default listen-on-all-interfaces
- * 					behavior for corresponding default "localhost" connection.
+ * 06/16/2011  JPW      In accept(), added catch SocketTimeoutException;
+ *                      ServerSocket.accept() will throw this exception on
+ *                      timeout.  This is a Java 1.4 feature.
+ * 10/18/2010  MJM      Added SoLinger(false) on socket close to ensure connection not hung
+ * 09/15/2010  MJM      Edited OpenSocket to use default listen-on-all-interfaces
+ * 			behavior for corresponding default "localhost" connection.
  * 11/12/2004  JPW	In order to compile under J# (which is only Java 1.1.4
  *			compatable) I added preprocessor directives to be used
  *			by sed to comment out calls to Throwable.initCause()
@@ -178,7 +181,7 @@ class TCP
      *		  thrown if the address is rejected for any reason.
      * @see #newServerSide(com.rbnb.api.ServerHandler)
      * @since V2.0
-     * @version 11/11/2004
+     * @version 06/16/2011
      */
 
     /*
@@ -186,6 +189,9 @@ class TCP
      *   Date      By	Description
      * MM/DD/YYYY
      * ----------  --	-----------
+     * 06/16/2011  JPW  Add catch SocketTimeoutException; ServerSocket.accept()
+     *                  will throw this exception on timeout.  This is a
+     *                  Java 1.4 feature.
      * 11/12/2004  JPW  Add sed preprocessor directives such that in the J#
      *                  version of the code the call to Throwable.initCause()
      *                  is commented out.
@@ -314,6 +320,15 @@ class TCP
 	    setup(socket);
 	    connectionR = socket;
 
+	} catch (java.net.SocketTimeoutException e) {
+	    // JPW 06/16/2011: Added check on SocketTimeoutException
+	    //                 ServerSocket.accept() will throw this exception
+	    //                 on timeout.
+	    //
+	    // NOTE THAT THIS IS A JAVA 1.4 FEATURE
+	    //
+	    // This is a benign exception; don't do anything.
+	    // System.err.println("socket timeout:\n" + e);
 	} catch (java.io.InterruptedIOException e) {
 	    // JPW 08/04/2004: Add check on "Timeout" in exception message
 	    //                 (this is so the code will run under J#)
@@ -322,7 +337,6 @@ class TCP
 		(e.getMessage().indexOf("Timeout") == -1)) {
 		throw e;
 	    }
-
 	} catch (java.net.SocketException e) {
 	    if (e.getMessage() == null) {
 	    } else if (e.getMessage().indexOf("Interrupted") != -1) {
@@ -334,7 +348,7 @@ class TCP
 
 	return (connectionR);
     }
-
+    
     /**
      * Builds a valid TCP address.
      * <p>

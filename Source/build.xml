@@ -126,15 +126,18 @@
 		</javadoc>
   <!-- pfh add doxygen here, as is also developer docs. 
    See http://ant-doxygen.sourceforge.net/usage.php -->
+  <!-- JPW 06/16/2011: Comment out doxygen - build system won't work if it isn't installed on your system -->
+  <!--
 		<doxygen>
 			<property name="INPUT" value="." />
 		</doxygen>
+  -->
 	</target>
 
  <!-- Compile all of the applications, but don't build any libraries. -->
  <!-- JPW 08/20/2007: Since Third_Party has been pulled out of Source, -->
  <!--                 need to separately call its "compile" target.    -->
-	<target name="compile" depends="programmer-documentation">
+	<target name="compile" depends="documentation,programmer-documentation">
 		<mkdir dir="${rbnb.classesdir}" />
 		<subant target="compile">
 			<fileset dir="."
@@ -150,7 +153,7 @@
  <!-- Compile and make libraries for all of the applications.          -->
  <!-- JPW 08/20/2007: Since Third_Party has been pulled out of Source, -->
  <!--                 need to separately call its "library" target.    -->
-	<target name="library" depends="programmer-documentation">
+	<target name="library" depends="documentation,programmer-documentation">
 		<mkdir dir="${rbnb.librarydir}" />
 		<subant target="library">
 			<fileset dir="."
