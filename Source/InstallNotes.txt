@@ -9,15 +9,25 @@ Usage
 To use this product, start the Web server by either:
 
     1) WINDOWS: using the shortcut provided on the desktop.
-    2) LINUX/UNIX/MACOSX: by executing the script:
+    2) LINUX/UNIX/MACOSX: by executing the script as root:
 
           $INSTALL_PATH/bin/Start_WebServer.sh
 
+Unix notes:
+
+	Make sure this script has execute permissions, if not:
+		chmod a+x Start_WebServer.sh
+	You will need to run the webserver as superuser to access the default port 80.
+	Make sure 'java' is in your command path.
+
 Once the Web server has been started, point your Web browser to:
 
-    http://localhost
+	http://localhost
+or
+	http://127.0.0.1
+or
+	http://<your-local-IP-address>
 
-(You may need to tell your browser not to try the firewall for that address).
 There you will find documentation and links that will allow you to start and
 configure the RBNB DataTurbine server and applications.
 
