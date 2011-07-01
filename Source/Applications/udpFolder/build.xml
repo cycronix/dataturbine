@@ -1,0 +1,57 @@
+<!-- 
+     Name: build.xml
+     By:   John Wilson
+     Date: 10/29/2010
+
+     Description:
+         This file is the primary Ant build file for udpFolder
+-->
+
+<project name="APPLICATION.FOLDER" default="library" basedir=".">
+
+ <!-- Import the standard definitions (properties). -->
+ <import file="../../definitions.xml" />
+
+ <!-- Initialize by setting the timestamp. -->
+ <target name="init">
+  <tstamp />
+  <buildnumber />
+  <mkdir dir="${rbnb.builddir}" />
+  <mkdir dir="${rbnb.classesdir}" />
+  <mkdir dir="${rbnb.classesdir}/Applications" />
+  <mkdir dir="${rbnb.classesdir}/Applications/udpFolder" />
+  <mkdir dir="${rbnb.librarydir}" />
+ </target>
+
+ <!--
+      Compile the udpFolder Java source code and place the results in the udpFolder
+      classes directory.  References the Core library and the udpFolder classes for
+      dependencies.
+  -->
+ <target name="compile" depends="init">
+  <javac destdir="${rbnb.classesdir}/Applications/udpFolder"
+         deprecation="on"
+		 debug="on"
+         source="${rbnb.javaver}"
+         target="${rbnb.javaver}">
+   <src path="${rbnb.sourcedir}/Applications/udpFolder" />
+   <classpath path="${rbnb.classesdir}/Applications/udpFolder" />
+   <classpath path="${rbnb.librarydir}/rbnb.jar" />
+  </javac>
+ </target>
+
+ <!-- Create the udpFolder jar file using the udpFolder classes. -->
+ <target name="library" depends="compile">
+  <jar destfile="${rbnb.librarydir}/udpfolder.jar"
+       basedir="${rbnb.classesdir}/Applications/udpFolder"
+       manifest="Manifest"
+   />
+ </target>
+
+ <!-- Cleans out all compiled and library files for the udpFolder project. -->
+ <target name="clean">
+  <delete dir="${rbnb.classesdir}/Applications/udpFolder" />
+  <delete file="${rbnb.librarydir}/udpfolder.jar" />
+ </target>
+
+</project>
