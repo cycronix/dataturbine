@@ -109,6 +109,10 @@ limitations under the License.
   ***		    Avoid duplicate timestamps - force each	***
   ***		    frame sent to the RBNB to have a unique	***
   ***		    timestamp.  This change was made in PostRBNB***
+  ***	   07/29/2011 - MJM					***
+  ***		PutDataAsString for output channel names	***
+  ***		ending in ".txt".  Compatable with rbnbPlot	***
+  ***		display of text data				***
   ***								***
   *****************************************************************
 */
@@ -2054,7 +2058,10 @@ public class Capture extends Applet implements ActionListener {
 	      }
 	      lastStartTime = currStartTime;
 	      sourceMap.PutTime( currStartTime, 0.0);
-	      sourceMap.PutDataAsByteArray(chanNumber, cInf.data);
+	      if(chanName.toLowerCase().endsWith(".txt")) // heuristic to force text datatype
+	      	      sourceMap.PutDataAsString(chanNumber, new String(cInf.data));
+              else    sourceMap.PutDataAsByteArray(chanNumber, cInf.data);
+//	      sourceMap.PutDataAsByteArray(chanNumber, cInf.data);
 	      for (int i = 0; i < connection.length; ++i) {
 		  // Post the data to the RBNB.
 		  connection[i].Flush(sourceMap);
