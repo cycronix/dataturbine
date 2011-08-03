@@ -6,14 +6,13 @@
          Ant build file for XMLDemux application.
 	 
      Modified: 09/13/2006 EMF to work from Source/Applications
+               08/03/2011 JPW to build the xmldemux.jar file
 -->
 
-<project name="XMLDemux" default="compile" basedir=".">
-
-  <!-- Import the standard definitions (properties). -->
+<project name="APPLICATION.XMLDEMUX" default="library" basedir=".">
+ <!-- Import the standard definitions (properties). -->
  <import file="../../definitions.xml" />
- 
-  <!-- Initialize by setting the timestamp. -->
+ <!-- Initialize by setting the timestamp. -->
  <target name="init">
   <tstamp />
   <buildnumber />
@@ -23,37 +22,34 @@
   <mkdir dir="${rbnb.classesdir}/Applications/XMLDemux" />
   <mkdir dir="${rbnb.librarydir}" />
  </target>
- 
- <!-- Compile the XMLDemux source code; put class files in the same directory
-      as the source code files.
+
+ <!-- Compile the XMLDemux Java source code and place the results in the
+      classes directory.  References the Core library and the XMLDemux classes
+      for dependencies.
   -->
  <target name="compile" depends="init">
-   <javac destdir="${rbnb.classesdir}/Applications/XMLDemux"
+  <javac destdir="${rbnb.classesdir}/Applications/XMLDemux"
          deprecation="on"
-         excludes="**/SinkDav.java"
-		 debug="${rbnb.compiledebug}"
-		 source="${rbnb.javaver}"
-		 target="${rbnb.javaver}">
+  	 source="${rbnb.javaver}"
+  	 target="${rbnb.javaver}">
    <src path="${rbnb.sourcedir}/Applications/XMLDemux" />
    <classpath path="${rbnb.classesdir}/Applications/XMLDemux" />
    <classpath path="${rbnb.librarydir}/rbnb.jar" />
   </javac>
-  <echo>Compiled XMLDemux</echo>
  </target>
- 
- <!-- A dummy library target to keep the build system happy. -->
- <target name="library" depends="compile">
-  <echo message="XMLDemux: Dummy library target to keep build system happy."/> 
- </target>
- 
- <!-- Cleans out all compiled files. -->
- <target name="clean">
-  <delete>
-    <!-- Delete all files with ".class" extension from -->
-    <!-- the current directory and any subdirectories. -->
-    <fileset dir="${rbnb.classesdir}/Applications/XMLDemux"/>
-  </delete>
- </target>
- 
-</project>
 
+ <!-- Create the XMLDemux jar file using the XMLDemux classes. -->
+ <target name="library" depends="compile">
+  <jar destfile="${rbnb.librarydir}/xmldemux.jar"
+       basedir="${rbnb.classesdir}/Applications/XMLDemux"
+       manifest="Manifest"
+   />
+ </target>
+
+ <!-- Cleans out all compiled and library files for the XMLDemux project. -->
+ <target name="clean">
+  <delete dir="${rbnb.classesdir}/Applications/XMLDemux" />
+  <delete file="${rbnb.librarydir}/xmldemux.jar" />
+ </target>
+
+</project>

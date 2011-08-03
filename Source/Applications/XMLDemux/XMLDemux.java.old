@@ -26,7 +26,6 @@ limitations under the License.
 *
 *   Modified Version for header version 8,4,4,8
 *
-* JPW 12/14/2006 Add "-z" flag (recovery mode)
 *
 *
 */
@@ -114,25 +113,6 @@ public class XMLDemux{
     // Marker used at the head of the IWG1 string
     String iwgMarker = "IWG1";
     
-    // JPW 12/14/2006: Add recover mode; a single request is made for data
-    //                 from recoverStartTime to recoverStopTime
-    boolean bRecoverMode = false;
-    double recoverStartTime = 0;
-    double recoverStopTime = 0;
-    
-    // JPW 08/07/2007: Add filter channel; only demux those UDP packets where
-    //                 the value of filterChan is above filterValue
-    // The channel to filter on
-    String filterChan = null;
-    // Only save data from those UDP packets whose values of filterChan are above filterValue
-    double filterValue = 0;
-    // The channel index into the UDP packet of where the filter chan is found
-    int filterChanIdx = -1;
-    // Index of filterChan's start byte in the UDP packet
-    int filterChanStartByte = -1;
-    // Number of bytes which make up filterChan's value
-    int filterChanLength = -1;
-    
     //-------------------------------------------------------------------------
     //Main
     public static void main(String[] arg) throws Exception {
@@ -153,7 +133,6 @@ public class XMLDemux{
                System.err.println("             default : localhost:3333");
 	       System.err.println(" -b                  : if set, use native bytes (default = swap)");
                System.err.println(" -c <num>            : cache frames");
-	       System.err.println(" -f <chan>=<value>   : only demux those UDP packets where the value of the given channel is above the specified value");
 	       System.err.println(" -h                  : print this usage info");
 	       System.err.println(" -i <name>           : name of input");
 	       System.err.println("             no default; required option");
@@ -182,8 +161,6 @@ public class XMLDemux{
 	       System.err.println("             default : " + numIWGParams);
 	       System.err.println(" -x <name>           : name of XML file");
 	       System.err.println("             no default; required option");
-	       System.err.println(" -z <start>,<stop>   : Recover mode; read from input channel from time <start> to time <stop>");
-	       System.err.println("                     : <start> and <stop> must be in seconds since epoch");
                RBNBProcess.exit(0);
             }
 	    
@@ -207,34 +184,6 @@ public class XMLDemux{
 	    if(ah.checkFlag('c')) {
 		String tc = ah.getOption('c');
 		cache = Integer.parseInt(tc);
-	    }
-	    
-	    // filter on given channel
-	    if (ah.checkFlag('f')) {
-		String filterStr = ah.getOption('f');
-		if ( (filterStr == null) || (filterStr.trim().equals("")) ) {
-		    System.err.println("Missing arguments to the \"-f\" flag.  Must be \"-f <filter chan>=<filter value>\".");
-		    System.exit(0);
-		}
-		// Parse filterChan and filterValue
-		String[] filterStrArray = filterStr.split("=");
-		if ( (filterStrArray == null)              ||
-		     (filterStrArray.length != 2)          ||
-	             (filterStrArray[0] == null)           ||
-		     (filterStrArray[0].trim().equals("")) ||
-		     (filterStrArray[1] == null)           ||
-		     (filterStrArray[1].trim().equals("")) )
-		{
-		    System.err.println("Missing or illegal arguments to the \"-f\" flag.  Must be \"-f <filter chan>=<filter value>\".");
-		    System.exit(0);
-		}
-		try {
-		    filterChan = filterStrArray[0];
-		    filterValue = Double.parseDouble(filterStrArray[1]);
-		} catch (NumberFormatException nfe) {
-		    System.err.println("Missing or illegal arguments to the \"-f\" flag.  Must be \"-f <filter chan>=<filter value>\".");
-		    System.exit(0);
-		}
 	    }
 	    
 	    //input
@@ -373,38 +322,6 @@ public class XMLDemux{
 		System.exit(0);
 	    }
 	    
-	    // JPW 12/14/2006: Recover mode
-	    if (ah.checkFlag('z')){
-		bRecoverMode = true;
-		// The argument must be <start time>,<stop time>
-		String timesStr = ah.getOption('z');
-		if ( (timesStr == null) || (timesStr.trim().equals("")) ) {
-		    System.err.println("Missing arguments to the \"-z\" flag.  Must be \"-z <start time>,<stop time>\".");
-		    System.exit(0);
-		}
-		String[] timesStrArray = timesStr.split(",");
-		if ( (timesStrArray == null)              ||
-		     (timesStrArray.length != 2)          ||
-	             (timesStrArray[0] == null)           ||
-		     (timesStrArray[0].trim().equals("")) ||
-		     (timesStrArray[1] == null)           ||
-		     (timesStrArray[1].trim().equals("")) )
-		{
-		    System.err.println("Missing or illegal arguments to the \"-z\" flag.  Must be \"-z <start time>,<stop time>\".");
-		    System.exit(0);
-		}
-		try {
-		    recoverStartTime = Double.parseDouble(timesStrArray[0]);
-		    recoverStopTime = Double.parseDouble(timesStrArray[1]);
-		    if (recoverStopTime < recoverStartTime) {
-			System.err.println("Illegal argument to the \"-z\" flag: Stop time must be greater than or equal to start time.");
-			System.exit(0);
-		    }
-		} catch (NumberFormatException nfe) {
-		    System.err.println("Missing or illegal arguments to the \"-z\" flag.  Must be \"-z <start time>,<stop time>\".");
-		    System.exit(0);
-		}
-            }
 	 }
          catch (Exception e) {
              System.err.println("Exception parsing arguments");
@@ -419,10 +336,13 @@ public class XMLDemux{
             System.exit(0);
          }
          xml = new XMLParser(XMLFile);
+         
+
 	 
 	 //add new channel map
          csub.Add(In);
-	 
+
+         
 	 //open connection
          String []info = xml.getInfo();      
 	 
@@ -437,6 +357,7 @@ public class XMLDemux{
 	     // if(out.length() >= 16) out = out.substring(8,16);
 	     out = out + suffix;
 	 }
+	 
 	 
       	//registering channel map with channel info 
          regmap = new ChannelMap();
@@ -470,35 +391,7 @@ public class XMLDemux{
             int idx  = regmap.Add(cname);
             if(info[i] != null) regmap.PutUserInfo(idx,info[i]);
 	    else                regmap.PutUserInfo(idx,"<null userinfo>");    // need to put userInfo on all or none
-	    
-	    // JPW 08/07/2007: See if this is our filterChan
-	    if ( (filterChan != null) && (cname.equals(filterChan)) ) {
-		filterChanIdx = i;
-	    }
-	    
          }
-	 
-	 // JPW 08/07/2007: If we were expecting a filter channel, and none was
-	 //                 found, quit
-	 if ( (filterChan != null) && (filterChanIdx <= 0) ) {
-	     System.err.println("The filter channel, " + filterChan + ", was not found in this demux specification; quitting.");
-	     System.exit(0);
-	 }
-	 // Determine where to find filterChan in the UDP packet
-	 if (filterChanIdx > 0) {
-	    filterChanStartByte = xml.getMarker().length();
-	    for (int chanIdx = 1; chanIdx < filterChanIdx; ++chanIdx) {
-		if(type[chanIdx].equals("double")) {
-		    filterChanStartByte += 8;
-		} else {
-		    filterChanStartByte += 4;
-		}
-	    }
-	    filterChanLength = 8;
-	    if (!type[filterChanIdx].equals("double")) {
-		filterChanLength = 4;
-	    }
-	 }
 	 
 	 /* add latency channel */
          int idx = regmap.Add("_Latency");
@@ -524,26 +417,14 @@ public class XMLDemux{
 		   src.SetRingBuffer(cache,mode,archive);
 		   System.err.println("Output to: " + out);
 		   //System.err.println("Connecting to source: "+serverAddressOut);
-		   src.OpenRBNBConnection(serverAddressOut,out);
+		   src.OpenRBNBConnection(serverAddressOut,out); 
 		   System.err.println("Connected to Source: "+serverAddressOut);
-		   // JPW/EMF 09/22/2006: If it takes a while for the Source to come up,
-		   //                     this Register() call can throw an exception.
-		   //                     Therefore, try it in a loop.
-		   boolean bRegistered = false;
-		   while (!bRegistered) {
-			   try {
-				   src.Register(regmap);
-				   bRegistered = true;
-			   } catch (Exception ex) {
-				   System.err.println("Can't yet register chans...try again...");
-			   }
-		   }
+		   src.Register(regmap); 
 		   break;
 	       } catch (Exception e) {
-		   System.err.println("exception creating source; will try again after a 100 sec sleep");
+		   System.err.println("exception creating source; will try again");
 		   e.printStackTrace();
-		   // JPW/MJM 08/01/2007: Sleep longer in case archive recovery is happening
-		   try {Thread.currentThread().sleep(100000);} catch (Exception e2) {}
+		   try {Thread.currentThread().sleep(10000);} catch (Exception e2) {}
 	       }
 	   } while (true);
        } //end method makeSource
@@ -559,27 +440,16 @@ public class XMLDemux{
 		       if (snk.VerifyConnection()) snk.CloseRBNBConnection();
 		   }
 		   snk=new Sink();
-		   snk.OpenRBNBConnection(serverAddress,"XMLDemuxSink");
+		   snk.OpenRBNBConnection(serverAddress,"DemuxSink");
 		   System.err.println("Connected to Sink: "+serverAddress);
-		   // JPW 12/14/2006: Add recover mode; we'll make one request
-		   //                 for all the data
-		   if (bRecoverMode) {
-		       System.err.println(
-		           "\nRecover mode: make one request for data from time " +
-			   recoverStartTime +
-			   " to time " +
-			   recoverStopTime);
-		       double duration = recoverStopTime - recoverStartTime;
-		       snk.Request(csub,recoverStartTime,duration,"absolute");
+		   System.err.println("             Name: "+snk.GetClientName());
+		   if(reference == null || reference.equals("")) 	{
+		       System.err.println("Running subscribe-by-frame newest mode");
+		       snk.Subscribe(csub);
 		   } else {
-		       if(reference == null || reference.equals("")) 	{
-		           System.err.println("Running subscribe-by-frame newest mode");
-			   snk.Subscribe(csub);
-		       } else {
-		           System.err.println("Running subscribe-by-time mode: "+start+", "+reference);
-			   snk.Subscribe(csub,start,0,reference);
-		       }
-		   }
+		       System.err.println("Running subscribe-by-time mode: "+start+", "+reference);
+		       snk.Subscribe(csub,start,0,reference);
+		   }      
 		   break;
 	       } catch (Exception e) {
 		   System.err.println("exception creating sink; will try again");
@@ -592,29 +462,11 @@ public class XMLDemux{
    	//-------------------------------------------------------------------------
    	//loop listening for incoming data
        public void start() throws Exception {
-	 
-	 int index=0;
+         int index=0;
          count = 0;
-	 
 	 //create RBNB connections
 	 makeSource();
 	 makeSink();
-	 
-	 // JPW 08/07/2007: Add filter mode
-	 if (filterChanIdx > 0) {
-	     System.err.println(
-	         "\nFilter on channel " +
-		 filterChan +
-		 ": values must be greater than " +
-		 filterValue +
-		 " to save data from the UDP packet");
-	 }
-	 
-	 // JPW 12/14/2006: Add recovery mode
-	 if (bRecoverMode) {
-	     processRecoverRequest();
-	     return;
-	 }
 	 
          while (true)
          {
@@ -650,9 +502,6 @@ public class XMLDemux{
 	       
             } else {
 		System.err.print("x");
-		// MJM 07/21/2011: for network disruption tolerance,
-		//                 reset connection on any timeout
-		makeSink();
 	    }
 	    
 	    // Reset count if needed
@@ -664,69 +513,11 @@ public class XMLDemux{
          }
       }
       
-	//---------------------------------------------------------------------
-	// processRecoverRequest
-	//
-	// JPW 12/14/2006
-	//
-	// Make one request for all data from recoverStartTime to
-	// recoverStopTime.  Then loop through the fetched data and process it.
-	// Detach from the Source when complete.
-	private void processRecoverRequest() {
-	    
-	    try {
-		System.err.println("Fetching data to recover...");
-		cmin=snk.Fetch(-1);
-		System.err.println("Got the data.");
-	    } catch (Exception e) {
-		System.err.println("Exception fetching from sink; closing connections");
-		e.printStackTrace();
-		snk.CloseRBNBConnection();
-		src.CloseRBNBConnection();
-		return;
-	    }
-	    
-	    if ( (cmin.NumberOfChannels() != 1) || (cmin.GetIfFetchTimedOut()) ) {
-		System.err.println("Didn't fetch any data; closing connections");
-		snk.CloseRBNBConnection();
-		src.CloseRBNBConnection();
-		return;
-	    }
-	    
-	    if (cmin.GetIndex(In)!=0) {
-		System.err.println("Wrong name for input channel; closing connections");
-		snk.CloseRBNBConnection();
-		src.CloseRBNBConnection();
-		return;
-	    }
-	    
-	    try {
-		process(cmin);
-	    } catch (Exception e) {
-		System.err.println("Exception processing data; closing connections");
-		e.printStackTrace();
-		snk.CloseRBNBConnection();
-		src.CloseRBNBConnection();
-		return;
-	    }
-	    
-	    snk.CloseRBNBConnection();
-	    src.Detach();
-	    System.err.println("Recovered data.  Source detached.");
-	    
-	}
-      
-      
       //-------------------------------------------------------------------------
-      // process data channels
-      //
-      // JPW 08/07/2007: Add filtering capability; if filterChan's value is not
-      //                 above filterValue, then don't flush the data for this
-      //                 UDP packet to the RBNB.
-      //
+      //process data channels
       public void process(ChannelMap in) throws Exception {
 	
-	ChannelMap out = new ChannelMap();
+	ChannelMap out = new ChannelMap();  
 	
 	try {
 	    if (in.GetIndex(In)!=0) return;
@@ -751,17 +542,8 @@ public class XMLDemux{
             
             //size of packet to be read
             int size = xml.getSize();
-	    
-	    int data_length = data.length;
-	    if (bRecoverMode) {
-		System.err.println("Recover " + data_length + " packets");
-	    }
             
-            for (int i=0; i<data.length; ++i) {
-		
-		if ( (bRecoverMode) && ((i % 10) == 0) ) {
-		    System.err.println("Packet " + i + " out of " + data_length);
-		}
+            for (int i=0;i<data.length;i++) {
 		
 		if(data[i].length < lmarker) {
 		    // We know this can't be good - the entire data packet
@@ -785,43 +567,6 @@ public class XMLDemux{
 		//       "cmarker" is the expected marker (read from XML config file)
 		if (data[i].length==size && udpmarker.equals(cmarker)) {
 		    // got a good UDP packet!
-		    
-		    // JPW 08/07/2007: If we are filtering, determine the value
-		    //                 of the filter channel to see if we want
-		    //                 to store data from this UDP packet
-		    if (filterChanIdx > 0) {
-			double currentFilterChanValue = 0;
-			if (filterChanLength == 4) {
-			    byte[] doubleArray = new byte[8];
-			    doubleArray[0] = data[i][filterChanStartByte + 0];
-			    doubleArray[1] = data[i][filterChanStartByte + 1];
-			    doubleArray[2] = data[i][filterChanStartByte + 2];
-			    doubleArray[3] = data[i][filterChanStartByte + 3];
-			    float[] valArray = ByteConvert.byte2Float(doubleArray,swapBytes);
-			    currentFilterChanValue = (double)valArray[0];
-			} else {
-			    byte[] doubleArray = new byte[8];
-			    doubleArray[0] = data[i][filterChanStartByte + 0];
-			    doubleArray[1] = data[i][filterChanStartByte + 1];
-			    doubleArray[2] = data[i][filterChanStartByte + 2];
-			    doubleArray[3] = data[i][filterChanStartByte + 3];
-			    doubleArray[4] = data[i][filterChanStartByte + 4];
-			    doubleArray[5] = data[i][filterChanStartByte + 5];
-			    doubleArray[6] = data[i][filterChanStartByte + 6];
-			    doubleArray[7] = data[i][filterChanStartByte + 7];
-			    double[] valArray = ByteConvert.byte2Double(doubleArray,swapBytes);
-			    currentFilterChanValue = valArray[0];
-			}
-			if (!bSilent) System.err.println("Current value of the filter channel = " + currentFilterChanValue);
-			if ( (currentFilterChanValue == Double.NaN) ||
-			     (currentFilterChanValue <= filterValue) )
-			{
-			    // Go on to the next data point
-			    if (!bSilent) System.err.println("    UDP packet didn't pass filter; go on to next packet");
-			    continue;
-			}
-		    }
-		    
 		    //Starts reading after marker size
 		    ByteArrayInputStream bais = new ByteArrayInputStream(data[i],lmarker,data[i].length);
 		    
@@ -889,7 +634,7 @@ public class XMLDemux{
 				    embeddedTime = arrivalTime;
 				    if (!bSilent || (count == printPeriod)) {
 					System.err.println(
-					    "Warning: embedded time is zero or negative; using arrival time");
+					    "Warning, zero embedded time, using arrival time");
 				    }
 				}
 				if(roundtime==true) embeddedTime = Math.round(embeddedTime);
