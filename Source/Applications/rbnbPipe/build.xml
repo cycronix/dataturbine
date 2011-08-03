@@ -1,0 +1,53 @@
+<!-- Name: build.xml
+     By:   John Wilson
+     Date: 08/03/2011
+
+     Description:
+         Ant build file for rbnbPipe application.
+	 
+-->
+
+<project name="APPLICATION.RBNBPIPE" default="library" basedir=".">
+ <!-- Import the standard definitions (properties). -->
+ <import file="../../definitions.xml" />
+ <!-- Initialize by setting the timestamp. -->
+ <target name="init">
+  <tstamp />
+  <buildnumber />
+  <mkdir dir="${rbnb.builddir}" />
+  <mkdir dir="${rbnb.classesdir}" />
+  <mkdir dir="${rbnb.classesdir}/Applications" />
+  <mkdir dir="${rbnb.classesdir}/Applications/rbnbPipe" />
+  <mkdir dir="${rbnb.librarydir}" />
+ </target>
+
+ <!-- Compile the rbnbPipe Java source code and place the results in the
+      classes directory.  References the Core library and the rbnbPipe classes
+      for dependencies.
+  -->
+ <target name="compile" depends="init">
+  <javac destdir="${rbnb.classesdir}/Applications/rbnbPipe"
+         deprecation="on"
+  	 source="${rbnb.javaver}"
+  	 target="${rbnb.javaver}">
+   <src path="${rbnb.sourcedir}/Applications/rbnbPipe" />
+   <classpath path="${rbnb.classesdir}/Applications/rbnbPipe" />
+   <classpath path="${rbnb.librarydir}/rbnb.jar" />
+  </javac>
+ </target>
+
+ <!-- Create the rbnbPipe jar file using the rbnbPipe classes. -->
+ <target name="library" depends="compile">
+  <jar destfile="${rbnb.librarydir}/pipe.jar"
+       basedir="${rbnb.classesdir}/Applications/rbnbPipe"
+       manifest="Manifest"
+   />
+ </target>
+
+ <!-- Cleans out all compiled and library files for the rbnbPipe project. -->
+ <target name="clean">
+  <delete dir="${rbnb.classesdir}/Applications/rbnbPipe" />
+  <delete file="${rbnb.librarydir}/pipe.jar" />
+ </target>
+
+</project>
