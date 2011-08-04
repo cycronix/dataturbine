@@ -15,6 +15,9 @@
 			  "rbnb.thirdpartydir".  Add a check that Third_Party
 			  exists in proper location (fail build if it isn't).
 	 2009/04/29  WHF  Added rbnb.thirdpartyout, rbnb.tomcatver.
+	 2011/07/29  JPW  Changed Tomcat version from 6.0.18 to 7.0.19;
+	                  to compile with Tomcat 7, changed rbnb.javaver from
+	                  1.4 to 1.5.
  -->
 
 <project name="DEFINITIONS">
@@ -53,7 +56,9 @@
  <!-- The version of the Tomcat webserver currently compiled against and
       shipped with the product.  Note that this value must match the variable
 	  TOMCATVER in IzPack/distribute.xml. -->
- <property name="rbnb.tomcatver" value="apache-tomcat-6.0.18" />
+ <!-- JPW 07/29/2011: change tomcat version from 6.0.18 to 7.0.19 -->
+ <!--property name="rbnb.tomcatver" value="apache-tomcat-6.0.18" /-->
+ <property name="rbnb.tomcatver" value="apache-tomcat-7.0.19" />
 
 
  <!-- The build directory contains all of the intermediate files created by
@@ -92,7 +97,7 @@
  <!-- Set to the version of Java to compile to.  Certain applications may 
 		require different versions than this flag, but this is intended as the
 		default for all targets. -->
- <property name="rbnb.javaver" value="1.4" />
+  <property name="rbnb.javaver" value="1.5" />
  
  <!-- JPW 08/17/2007: Check for the existance of the Third_Party directory -->
  <!--                 NOTE: Perform this check before setting the taskdefs -->

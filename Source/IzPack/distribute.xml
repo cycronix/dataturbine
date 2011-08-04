@@ -24,7 +24,9 @@
  </info>
  
  <variables>
- 	<variable name="TOMCATVER" value="apache-tomcat-6.0.18" />
+ 	<!-- JPW 07/29/2011: change tomcat version from 6.0.18 to 7.0.19 -->
+ 	<!--variable name="TOMCATVER" value="apache-tomcat-6.0.18" /-->
+ 	<variable name="TOMCATVER" value="apache-tomcat-7.0.19" />
  </variables>
 
  <guiprefs resizable="yes" width="800" height="600" />

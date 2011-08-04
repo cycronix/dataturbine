@@ -277,7 +277,9 @@
 			<fileset dir = "${rbnb.sourcedir}/WebTurbine/WebServer" >
 				<include name = "conf/**" />
 				<include name = "bin/JavaEnv*" />
-				<include name = "bin/setclasspath.bat" />
+				<!-- JPW 07/29/2011 Keep the default version of setclasspath.bat;
+				         this change was made when we upgraded to apache-tomcat-7.0.19 -->
+				<!--include name = "bin/setclasspath.bat" /-->
 			</fileset>
 			<fileset dir = "${rbnb.wasourcedir}">
 				<include name="webapps/stylesheets/**" />
