@@ -1,0 +1,52 @@
+<!-- Name: build.xml
+     By:   John Wilson
+     Date: 08/03/2011
+
+     Description:
+         Ant build file for UDPChatSource application.
+	 
+-->
+
+<project name="APPLICATION.UDPCHATSOURCE" default="library" basedir=".">
+ <!-- Import the standard definitions (properties). -->
+ <import file="../../definitions.xml" />
+ <!-- Initialize by setting the timestamp. -->
+ <target name="init">
+  <tstamp />
+  <buildnumber />
+  <mkdir dir="${rbnb.builddir}" />
+  <mkdir dir="${rbnb.classesdir}" />
+  <mkdir dir="${rbnb.classesdir}/Applications" />
+  <mkdir dir="${rbnb.classesdir}/Applications/UDPChatSource" />
+  <mkdir dir="${rbnb.librarydir}" />
+ </target>
+
+ <!-- Compile the UDPChatSource Java source code and place the results in the
+      classes directory.  References the Core library and the UDPChatSource classes
+      for dependencies.
+  -->
+ <target name="compile" depends="init">
+  <javac destdir="${rbnb.classesdir}/Applications/UDPChatSource"
+         deprecation="on"
+  	 source="${rbnb.javaver}"
+  	 target="${rbnb.javaver}">
+   <src path="${rbnb.sourcedir}/Applications/UDPChatSource" />
+   <classpath path="${rbnb.classesdir}/Applications/UDPChatSource" />
+  </javac>
+ </target>
+
+ <!-- Create the UDPChatSource jar file using the UDPChatSource classes. -->
+ <target name="library" depends="compile">
+  <jar destfile="${rbnb.librarydir}/udpchatsource.jar"
+       basedir="${rbnb.classesdir}/Applications/UDPChatSource"
+       manifest="Manifest"
+   />
+ </target>
+
+ <!-- Cleans out all compiled and library files for the UDPChatSource project. -->
+ <target name="clean">
+  <delete dir="${rbnb.classesdir}/Applications/UDPChatSource" />
+  <delete file="${rbnb.librarydir}/udpchatsource.jar" />
+ </target>
+
+</project>

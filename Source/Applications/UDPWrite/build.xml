@@ -1,0 +1,52 @@
+<!-- Name: build.xml
+     By:   John Wilson
+     Date: 08/03/2011
+
+     Description:
+         Ant build file for UDPWrite application.
+	 
+-->
+
+<project name="APPLICATION.UDPWRITE" default="library" basedir=".">
+ <!-- Import the standard definitions (properties). -->
+ <import file="../../definitions.xml" />
+ <!-- Initialize by setting the timestamp. -->
+ <target name="init">
+  <tstamp />
+  <buildnumber />
+  <mkdir dir="${rbnb.builddir}" />
+  <mkdir dir="${rbnb.classesdir}" />
+  <mkdir dir="${rbnb.classesdir}/Applications" />
+  <mkdir dir="${rbnb.classesdir}/Applications/UDPWrite" />
+  <mkdir dir="${rbnb.librarydir}" />
+ </target>
+
+ <!-- Compile the UDPWrite Java source code and place the results in the
+      classes directory.  References the Core library and the UDPWrite classes
+      for dependencies.
+  -->
+ <target name="compile" depends="init">
+  <javac destdir="${rbnb.classesdir}/Applications/UDPWrite"
+         deprecation="on"
+  	 source="${rbnb.javaver}"
+  	 target="${rbnb.javaver}">
+   <src path="${rbnb.sourcedir}/Applications/UDPWrite" />
+   <classpath path="${rbnb.classesdir}/Applications/UDPWrite" />
+  </javac>
+ </target>
+
+ <!-- Create the UDPWrite jar file using the UDPWrite classes. -->
+ <target name="library" depends="compile">
+  <jar destfile="${rbnb.librarydir}/udpwrite.jar"
+       basedir="${rbnb.classesdir}/Applications/UDPWrite"
+       manifest="Manifest"
+   />
+ </target>
+
+ <!-- Cleans out all compiled and library files for the UDPWrite project. -->
+ <target name="clean">
+  <delete dir="${rbnb.classesdir}/Applications/UDPWrite" />
+  <delete file="${rbnb.librarydir}/udpwrite.jar" />
+ </target>
+
+</project>
