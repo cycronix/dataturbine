@@ -7,6 +7,64 @@
 <body>
 <h1>RBNB Release Notes</h1>
 <h1>RBNB V3.2 Release Notes</h1>
+<h2>V3.2B5 to V3.2B6 Changes</h2>
+V3.2B6 released 08/05/2011<br>
+This release corresponds to RBNB Subversion repository revision number 257<br>
+<h3>Updated Java version requirements</h3>
+<ul>
+<li>DataTurbine server requires Java 1.4 to run (needed to support updated socket timeout exception handling).</li>
+<li>Updated Tomcat 7.0.19 requires Java 1.6.</li>
+<li>All other client applications require Java 1.5.</li>
+</ul>
+<h3>Server</h3>
+<ul>
+<li>Updated socket timeout exception handling.  Added to support running the server under Android 3.1.</li>
+<li>Changes to support client reconnect logic.  A source or routed child server with a name beginning with dot (e.g. ".myName") will kick a pre-existing client with the same name. This allows roaming clients to reconnect to orphaned prior instances of themselves.  (Eventually we will want a better authentication scheme than the dot-name syntax.)</li>
+<li>Added deadlock cleanup.</li>
+<li>Fix for wild-card time mode subscriptions.  A previously broken case would be subscribe-from-oldest for Metrics for example.  Added new matlab test script for wild-card time subscription bug fix. (Matlab/testwctimesub.m)</li>
+<li>Added check to not actually generate logging info when logging is turned off.</li>
+<li>Fix small but steady memory leak.  Would not amount enough to matter in most cases, but for a small-memory system that continually checks over long durations, would cause out of memory problems.</li>
+<li>Avoid unnecessary DNS/IP lookup upon client/routing connection when no authorization record is specified.  This will particularly speed up cases where DNS is slow or unavailable.</li>
+<li>"localhost" definition cleanup.  Some recent flavors of Linux have begun treating the explicit "localhost" behavior differently than the default behavior that we have historically expected, i.e. to listen on the external network interface(s) vs *only* accept local connections from clients that specifically specify "localhost".</li>
+<li>Make routing more robust.  A child server normally goes into auto-reconnect mode when it fails to connect, but it would give up trying if it were rejected due to a “another server with same name exists” error.  Changed code to continue auto-reconnect mode in this case – this can be caused by parent lag in cleaning up previous connection and would result in failed reconnect that otherwise could succeed on subsequent attempt.  Note that this does not cause duplicate names to occur – it only waits for the old duplicate to clear out.</li>
+<li>Better error checking for child routes with duplicate names.  This could happen if two child RBNBs with same "address" field (e.g. the ubiquitous "localhost" or "127.0.0.1") tried to connect.  When it did happen the parent server routing map would be munged and may require restarting to fix. Also relieved the old restriction that a child not have the same name as a parent, e.g. Foo/Foo is fine so long as names are not at same level in hierarchy.</li>
+<li>Added enhanced code to enable an RBNB server to wait for a parent route (-p option) versus exiting at startup if parent is unreachable at the time.</li>
+</ul>
+<h3>WebTurbine/Tomcat updates</h3>
+<ul>
+<li>Update Tomcat distribution from 6.0.18 to 7.0.19.  (Developer notes on performing this Tomcat update are at Source/README_update_Tomcat.txt.)</li>
+<li>Turn on directory listings (which are off by default in Tomcat 7).  This is needed, for example, to look at the WebTurbine documentation link http://localhost/documentation/.</li>
+<li>Added ISO8601 time parsing to Web URL time munge.</li>
+</ul>
+<h3>Application updates and additions</h3>
+<ul>
+<li>MakeTimeMirror: create a time mirror from one RBNB source to another</li>
+<li>NMEAParser: parse GPS data and put it in RBNB source</li>
+<li>TCPCapture and UDPCapture: capture TCP or UDP content and store it in an RBNB source</li>
+<li>UDPWrite: write text messages out to a UDP host and port</li>
+<li>UDPChatSource: very similar to UDPWrite (just different message formatting)</li>
+<li>rbnbPipe: grab content from a pipe and store it in an RBNB source</li>
+<li>CSVDemux: demultiplex CSV data based on formatting specified in an XML configuration file</li>
+<li>XMLDemux: significant updates; demultiplexes binary packed data based on formatting specified in an XML configuration file</li>
+<li>UDPCaster: updates; Add an optional decimation factor flag to UDPCaster ("-d").  New command line option ("-i"), which indicates that the user wishes to ignore UDP send errors.</li>
+<li>UDPHeadlessCaster: headless version of UDPCaster</li>
+<li>udpFolder: watch a file folder and if any files in it update, send the new content to UDP port</li>
+<li>rbnbFolder: watch a file folder and if any files in it update, send the new content to RBNB source</li>
+<li>Capture: minor update; output data as string for output channel names ending in ".txt" (makes this compatable with rbnbPlot text data display)</li>
+<li>rbnbSource: minor update; added ability to specify cache size</li>
+</ul>
+<h3>Development build system</h3>
+<ul>
+<li>Update build system to use IzPack 4.3.4 (previously used IzPack 3.5.4), for install on 64-bit Windows.</li>
+<li>Updated build system to use Tomcat 7.0.19.</li>
+<li>Added new applications to build system (see "Application updates and additions", found above).</li>
+<li>Removed the automatic Doxygen build, which was failing on a system which doesn't have Doxygen installed.</li>
+<li>Construct both the regular Documentation as well as ProgrammerDocumentation for every build.</li>
+</ul>
+<h3>Miscellaneous</h3>
+<ul>
+<li>Add a README file to the Matlab directory in the distribution; provides some documentation on using the Matlab/SAPI interface.</li>
+</ul>
 <h2>V3.2B4 to V3.2B5 Changes</h2>
 V3.2B5 released 08/30/2010<br>This release corresponds to RBNB Subversion repository revision number 199<br>
 <ul>
