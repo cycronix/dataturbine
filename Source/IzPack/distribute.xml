@@ -5,7 +5,13 @@
   <langpack iso3="eng" />
  </locale>
 
- <native type="izpack" name="ShellLink.dll" />
+<!-- MJM 08/05/2011: add 64bit dll for IzPack 4.3.4 -->
+<native type="izpack" name="ShellLink.dll">
+  <os family="windows" />
+</native>
+<native type="izpack" name="ShellLink_x64.dll">
+  <os family="windows" />
+</native>
 
  <resources>
   <res id="HTMLLicencePanel.licence" src="Lib/Documentation/EULA.html" />
@@ -53,12 +59,15 @@
    </fileset>
    <fileset dir="Lib/Scripts/LinuxScripts"
             targetdir="$INSTALL_PATH/bin"
-	    override="yes">
+            >
+<!-- MJM illegal option for new izpack 8/11
+	    override="yes"> -->
+	    
     <include name="*.sh" />
     <os name="Linux" />
    </fileset>
   
-   <fileset dir="ThirdParty" targetdir="$INSTALL_PATH" override="yes">
+   <fileset dir="ThirdParty" targetdir="$INSTALL_PATH"> 
    		<include name="**" />
 	</fileset>
    		
@@ -66,8 +75,7 @@
    <file src="IzPack/RBNB.ico"
          targetdir="$INSTALL_PATH/$TOMCATVER/bin" />
    <fileset dir="Lib/WebServerImage"
-            targetdir="$INSTALL_PATH/$TOMCATVER"
-	    override="yes">
+            targetdir="$INSTALL_PATH/$TOMCATVER">
     <include name="**" />
    </fileset>
 
