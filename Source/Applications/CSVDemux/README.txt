@@ -83,10 +83,9 @@ Startup
 -------
 
 Various command line flags can be used with CSVDemux.  To see the list of
-options, run CSVDemux with the "-h" option, as follows (use the appropriate
-separator character in the classpath designation; here we are using ";" :
+options, run CSVDemux with the "-h" option, as follows:
 
-java -cp <path to CSVDemux folder>;<path to rbnb.jar> CSVDemux -h
+java -jar csvdemux.jar -h
 
 Here is the output from this running this command:
 
@@ -128,7 +127,7 @@ Note that two of these command line flags are required:
 
 Here's an example command line to start CSVDemux on a Linux box:
 
-   java -cp $INDS_UTILITY/CSVDemux:$RBNBBIN/rbnb.jar CSVDemux -a localhost:3333 -A localhost:3333 -d yyyyMMdd\'T\'HHmmss -i B200/B200_ASR_reduced.txt -x B200.xml -c200 -K1000000 -p -S
+   java -jar csvdemux.jar -a localhost:3333 -A localhost:3333 -d yyyyMMdd\'T\'HHmmss -i B200/B200_ASR_reduced.txt -x B200.xml -c200 -K1000000 -p -S
 
 Note that the syntax of the date format with the "-d" flag can be a
 bit tricky.  On some platforms, single quotes used in the date

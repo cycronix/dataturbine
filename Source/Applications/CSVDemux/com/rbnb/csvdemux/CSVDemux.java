@@ -42,6 +42,8 @@ limitations under the License.
      *
      */
     
+    package com.rbnb.csvdemux;
+    
     import java.io.*;
     import java.lang.String;
     import java.lang.StringBuffer;

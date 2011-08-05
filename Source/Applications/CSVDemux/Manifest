@@ -1,2 +1,2 @@
-Main-Class: CSVDemux
+Main-Class: com.rbnb.csvdemux.CSVDemux
 Class-Path: rbnb.jar

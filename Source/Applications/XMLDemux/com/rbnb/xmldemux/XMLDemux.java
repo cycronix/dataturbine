@@ -31,6 +31,8 @@ limitations under the License.
 *
 */
    
+   package com.rbnb.xmldemux;
+   
    import java.io.ByteArrayInputStream;
    import java.io.DataInputStream;
    import java.io.*;
