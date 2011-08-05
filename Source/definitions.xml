@@ -18,6 +18,7 @@
 	 2011/07/29  JPW  Changed Tomcat version from 6.0.18 to 7.0.19;
 	                  to compile with Tomcat 7, changed rbnb.javaver from
 	                  1.4 to 1.5.
+	 2011/08/05  MJM  Updated IzPack from 3.5.4 to 4.3.4
  -->
 
 <project name="DEFINITIONS">
@@ -108,7 +109,7 @@
       with ant. -->
  <taskdef name="izpack"
           classname="com.izforge.izpack.ant.IzPackTask"
-          classpath="${rbnb.thirdpartydir}/izpack-3.5.4/lib/compiler.jar"
+    	  classpath="${rbnb.thirdpartydir}/izpack-4.3.4/lib/compiler.jar"
    />
  <!-- Doxygen is a freely distributable documentation generator that also parses javadoc. -->
  <taskdef name="doxygen" classname="org.doxygen.tools.DoxygenTask"
