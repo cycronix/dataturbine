@@ -12,6 +12,7 @@
      2005/12/08  EMF  Added Java1.4 compatibility kit for Tomcat 5.5.
 	 2005/12/09  EMF  Unpack war files, so config can be easily changed by users.
 	 2009/04/29  WHF  Updated for Tomcat 6.0.
+	 2011/80/05  MJM  Updates for IzPack 4.3.4
 -->
 
 <project name="IZPACK" default="distribute" basedir=".">
@@ -48,12 +49,18 @@
 			 dest="${rbnb.builddir}/Third_Party" />
 		<unzip src="${rbnb.builddir}/Lib/Third_Party/apache-tomcat-5.5.12-compat.zip"
 			 dest="${rbnb.builddir}/Third_Party" /> -->
-
+<!--  update to new izpack MJM 8/11		
 		<izpack input="${rbnb.builddir}/IzPack/distribute.xml"
 				output="${rbnb.distributedir}/RBNB-${rbnb.version}-install.jar"
 				installerType="standard-kunststoff"
 				basedir="${rbnb.builddir}"
 				izPackDir="${rbnb.thirdpartydir}/izpack-3.5.4" />
+-->		
+		<izpack input="${rbnb.builddir}/IzPack/distribute.xml"
+				output="${rbnb.distributedir}/RBNB-${rbnb.version}-install.jar"
+				installerType="standard"
+				basedir="${rbnb.builddir}"
+				izPackDir="${rbnb.thirdpartydir}/izpack-4.3.4" />
 	</target>
 
  <!-- Cleans out all compiled and library files for the applications. -->
