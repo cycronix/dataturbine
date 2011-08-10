@@ -39,6 +39,10 @@ limitations under the License.
      * 10/22/10  JPW  Add a filter capability; channels to be filtered, along with the associated MIN and MAX settings, are
      *                provided in a file whose name is specified with the "-f" command line argument.  To implement this
      *                new capability, I added the ChannelFilter class.
+     * 08/10/11  JPW  To match XMLDemux, change name of "_CSV" channel to "_IWG1";
+     *                get this channel name from a variable, iwgChanName.
+     *                Only print NumberFormatException when in verbose mode (since these are probably benign exceptions).
+     *                Rearrange what info is printed to System.out versus System.err
      *
      */
     
@@ -110,6 +114,9 @@ limitations under the License.
 	private static final int printPeriod = 1000;
 	// num packets read; print debug once every printPeriod number of packets
 	private int count = 0;
+	
+	// JPW 08/10/2011: Name of the CSV ouptut channel
+	private String iwgChanName = "_IWG1";
 	
 	// Recover mode; a single request is made for data from recoverStartTime to recoverStopTime
 	private boolean bRecoverMode = false;
@@ -313,14 +320,14 @@ limitations under the License.
 		    }
 		    if (tstampField != 1) {
 			System.err.println(
-			    "\n\n\nNOTE: XMLDemux currently requires the\n" +
+			    "\n\n\nNOTE: CSVDemux currently requires the\n" +
 			    "timestamp parameter to be the first\n" +
 			    "parameter in the UDP packet.\n\n" +
 			    "You have specified that the timestamp\n" +
 			    "parameter is number " +
 			    tstampField +
 			    ".\n\n" +
-			    "XMLDemux will not work correctly.\n\n");
+			    "CSVDemux will not work correctly.\n\n");
 			try { Thread.sleep(10000); } catch (Exception e) {}
 		    }
 		} else tstampField = 1;
@@ -409,9 +416,9 @@ limitations under the License.
 	    xmlTypeList = xml.getType();
 	    // Get info (used as registration user info)
 	    String[] info = xml.getInfo();
-	    System.err.println("\nChannel information:");
+	    System.out.println("\nChannel information:");
 	    for (int i = 0; i < numParameters; ++i) {
-		System.err.println(
+		System.out.println(
 		    "\t" +
 		    i +
 		    ": id = " +
@@ -423,7 +430,7 @@ limitations under the License.
 		    ", type = " +
 		    xmlTypeList[i]);
 	    }
-	    System.err.println(" ");
+	    System.out.println(" ");
 	    
 	    // Channel map for subscription
 	    csub.Add(In);
@@ -469,9 +476,8 @@ limitations under the License.
 	    regmap.PutUserInfo(reg_idx,"recieved_time - embedded_time");
 	    
 	    // JPW 02/13/2008: add CSV string as an output channel
-	    cname = "_CSV";
-	    System.out.println("Adding Channel \"" + cname + "\"");
-	    reg_idx = regmap.Add(cname);
+	    System.out.println("Adding Channel \"" + iwgChanName + "\"");
+	    reg_idx = regmap.Add(iwgChanName);
 	    regmap.PutUserInfo(reg_idx,"CSV string");
 	    
 	    // If any filters have been defined, go through the filter list and
@@ -706,9 +712,9 @@ limitations under the License.
             if ((cmin.NumberOfChannels() > 0) && !cmin.GetIfFetchTimedOut()) 
             {
                index++;
-               if (!bSilent) System.out.println("\n\n" + index+" -Packet Recieved-, size: "+cmin.GetData(0).length);          	
+               if (!bSilent) System.err.println("\n\n" + index+" -Packet Recieved-, size: "+cmin.GetData(0).length);          	
                process(cmin);
-	       if (bSilent) System.out.print(".");
+	       if (bSilent) System.err.print(".");
             } else {
 		System.err.print("x");
 	    }
@@ -856,12 +862,12 @@ limitations under the License.
 			    bPass = filters[filterIdx].checkValue(strArray);
 			    if (!bPass) {
 				if (!bSilent) System.err.println("Data didn't pass filter:\n\tData string = <" + nextCSVStr.trim() + ">\n\t" + filters[filterIdx]);
-				else System.out.print("F");
+				else System.err.print("F");
 				break;
 			    }
 			} catch (Exception filterE) {
 			    if (!bSilent) System.err.println("Filter error:\n\tData string = <" + nextCSVStr.trim() + ">\n\t" + filters[filterIdx]);
-			    else System.out.print("F");
+			    else System.err.print("F");
 			    break;
 			}
 		    }
@@ -992,7 +998,10 @@ limitations under the License.
 				dataVal = Double.parseDouble(tempValStr);
 			    }
 			} catch (NumberFormatException nfe) {
-			    System.err.println("\nCaught NumberFormatException parsing data value; set value to NaN:\n" + nfe);
+			    // JPW 08/10/2011: Probably a benign exception; only print message in verbose mode
+			    if (!bSilent) {
+				System.err.println("\nNumberFormatException parsing " + cname + " data value; set value to NaN:\n" + nfe);
+			    }
 			    dataVal = Double.NaN;
 			}
 			dataArray = new double[1];
@@ -1048,11 +1057,11 @@ limitations under the License.
 		}
 		if (!bSilent) System.err.println("Put _Latency value: " + lat[0]);
 		
-		// JPW 02/13/2008: send the CSV string to the _CSV channel
+		// JPW 02/13/2008: send the CSV string to the CSV channel
 		if (multichan) {
 		    out.Clear();
 		}
-		idx = out.Add("_CSV");
+		idx = out.Add(iwgChanName);
 		if (multichan) {
 		    out.PutTime(rbnbOutTime,0);
 		}
@@ -1060,7 +1069,9 @@ limitations under the License.
 		//               components not skipped
 		// out.PutDataAsString(idx,nextCSVStr);
 		// Append a final "\n" to the CSV string
-		outputCSVStr.append("\n");
+		// JPW 08/10/2011: instead of just appending "\n", we now append "\r\n"
+		//                 this is to match what XMLDemux does
+		outputCSVStr.append("\r\n");
 		String outStr = outputCSVStr.toString();
 		out.PutDataAsString(idx,outStr);
 		out.PutMime(idx,STR_MIMETYPE);
@@ -1076,7 +1087,7 @@ limitations under the License.
 			}
 		    } while (true);
 		}
-		if (!bSilent) System.err.println("Put _CSV value: " + outStr);
+		if (!bSilent) System.err.println("Put " + iwgChanName + " value: " + outStr);
 		
 		// JPW 07/01/08: If we aren't in multichan mode, send the ChannelMap now
 		if (!multichan) {
