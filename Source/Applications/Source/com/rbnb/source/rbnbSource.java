@@ -49,6 +49,7 @@ import javax.swing.event.*;
  *   Date      By	Description
  * MM/DD/YYYY
  * ----------  --	-----------
+ * 04/2011     MJM		Added GUI option to spec number of cache frames.
  * 09/20/2005  EMF      Added option for local timeofday timestamps.
  * 11/05/2004  MJM      Changed Detach to CloseRBNBConnection.  Detach would create sequence of
  *                      rbnbSource_X sources with each change in channel list etc
