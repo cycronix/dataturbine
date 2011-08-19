@@ -39,6 +39,7 @@ package com.rbnb.api;
  *   Date      By	Description
  * MM/DD/YYYY
  * ----------  --	-----------
+ * 08/19/2011  MJM  Catch *any* exceptions on timer
  * 08/04/2004  INB	Added documentation.
  * 05/18/2004  INB	Catch exceptions on the timer cancel and ignore them.
  * 02/11/2004  INB	Log exceptions at standard level.
@@ -366,7 +367,8 @@ class RBNBController
 			    (statusTT,
 			     getLocalServerHandler().getLogStatusPeriod(),
 			     getLocalServerHandler().getLogStatusPeriod());
-		    } catch (java.lang.NullPointerException e) {
+//		    } catch (java.lang.NullPointerException e) {
+		    } catch (Exception e) {		// mjm 8.18.11 catch any exception!
 			setTerminateRequested(true);
 		    }
 		}
