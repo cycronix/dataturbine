@@ -1005,7 +1005,12 @@ class TCP
 		// If the colon appears in the middle of the address, then the
 		// address contains both the host and the port.
 		hostName = lAddress.substring(0,colon);
-		setPort(Integer.parseInt(lAddress.substring(colon + 1)));
+		try {
+			setPort(Integer.parseInt(lAddress.substring(colon + 1)));
+		} catch(Exception e) { 
+			System.err.println("IPV6 address?  Check IPV4 hostname config");	// MJM 8/11
+			throw((com.rbnb.api.AddressException)e);
+		}
 	    }
 
 	    if (hostName != null) {
