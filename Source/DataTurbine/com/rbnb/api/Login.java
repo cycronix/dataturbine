@@ -16,6 +16,8 @@ limitations under the License.
 
 package com.rbnb.api;
 
+import java.text.ParsePosition;
+
 /**
  * Login to an <code>RBNB</code> server.
  * <p>
@@ -36,6 +38,7 @@ package com.rbnb.api;
  *   Date      By	Description
  * MM/DD/YYYY
  * ----------  --	-----------
+ * 10/06/2011  MJM  Handle parse exception in SimpleDateFormat (Android JVM)
  * 07/21/2004  INB	Changed zzz in SimpleDateFormat to z.
  * 03/28/2003  INB	Eliminated unnecessary synchronization.
  * 05/09/2001  INB	Created.
@@ -630,10 +633,13 @@ final class Login
 		try {
 		    setBuildDate
 			((new java.text.SimpleDateFormat
-			    ("MMM dd yyyy HH:mm:ss z",
-			     java.util.Locale.US)).parse(isI.readUTF()));
-		} catch (java.text.ParseException e) {
-		    throw new com.rbnb.api.SerializeException(e.getMessage());
+			    ("MMM dd yyyy HH:mm:ss z",	// MJM: z can cause parse exception?
+			     java.util.Locale.US)).parse(isI.readUTF()));	
+		} 
+		catch (java.text.ParseException e) {
+			System.err.println("OOPS exception on parse date: "+e.getMessage());
+			setBuildDate(new java.util.Date());	// MJM 10/6/11: avoid parseException?
+//		    throw new com.rbnb.api.SerializeException(e.getMessage());
 		}
 		break;
 

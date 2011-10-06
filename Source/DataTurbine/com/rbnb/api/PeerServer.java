@@ -39,6 +39,7 @@ package com.rbnb.api;
  *   Date      By	Description
  * MM/DD/YYYY
  * ----------  --	-----------
+ * 10/06/2011  MJM  Handle parse exception in SimpleDateFormat (Android JVM)
  * 07/21/2004  INB	Changed zzz in SimpleDateFormat to z.
  * 01/14/2004  INB	Added synchronization of metrics.
  * 05/23/2003  INB	Find paths only if things change when disconnected.
@@ -1687,10 +1688,11 @@ class PeerServer
 		    String date = isI.readUTF();
 		    setBuildDate
 			((new java.text.SimpleDateFormat
-			    ("MMM dd yyyy HH:mm:ss z",
+			    ("MMM dd yyyy HH:mm:ss z",		// MJM parse error on z?
 			     java.util.Locale.US)).parse(date));
 		} catch (java.text.ParseException e) {
-		    throw new com.rbnb.api.SerializeException(e.getMessage());
+			setBuildDate(new java.util.Date());	// MJM 10/6/11: avoid parseException?
+//		    throw new com.rbnb.api.SerializeException(e.getMessage());
 		}
 		break;
 
