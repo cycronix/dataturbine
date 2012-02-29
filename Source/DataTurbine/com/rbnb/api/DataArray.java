@@ -34,6 +34,7 @@ package com.rbnb.api;
  *   Date      By	Description
  * MM/DD/YYYY
  * ----------  --	-----------
+ * 01/26/2012  MJM  compress point times to start+duration if it is net savings
  * 2005/03/31  WHF  Added getDataType().
  * 11/12/2003  INB	Handle case where the number of points of data is not
  *			equal to the number of point times given a duration of
@@ -1433,6 +1434,7 @@ public class DataArray
      *   Date      By	Description
      * MM/DD/YYYY
      * ----------  --	-----------
+     * 01/26/2012  MJM  compress point times to start+duration if it is net savings
      * 11/12/2003  INB	Handle case where the number of points of data is not
      *			equal to the number of point times given a duration of
      *			zero.
@@ -1760,6 +1762,51 @@ public class DataArray
 	    // end mjm grope
 	    */
 
+	    // MJM 1/2012:  compress point times to start+duration if it is net savings
+	    boolean compressPoints = false;
+	    String compressTolStr = System.getProperty("compressTol");
+	    double compressTol=0.;
+//	    if(dType != DataBlock.TYPE_FLOAT32) System.err.println("**********************************Unexpected dType: "+dType);
+	    if(compressTolStr != null) {
+	    	compressPoints = true;
+	    	compressTol = Double.parseDouble(compressTolStr);
+//	    	System.err.println("Time-Point Compression! tolerance: "+compressTol);
+//	    	System.err.println("Time-Point Compression! DataType: "+dType+", vs STRING: "+DataBlock.TYPE_STRING+", vs FLOAT32: "+DataBlock.TYPE_FLOAT32);
+	    }
+	    if(compressPoints) {
+	    	int npts = pTimes.length;
+	    	double t0 = pTimes[0];
+	    	double fDuration = pTimes[npts-1]-t0;
+	    	double dt = 0.;
+	    	boolean passTol = false;
+    		double maxerr = 0.;
+    		
+	    	if(npts > 2) {		// need a few points, else don't bother
+	    		dt = fDuration / (npts-1.);
+		    	double ttol = 0.;			// test tol
+		    	
+		    	double tol = compressTol * dt;		// 1% tolerance good enough
+		
+//		    	System.err.println("compressPoints, dt: "+dt+", tol: "+tol);
+	    		passTol = true;
+		    	for(int i=1; i<npts; i++) {		// CPU intensive?
+		    		ttol = Math.abs( (t0 + i*dt) - pTimes[i] );
+		    		if(ttol > maxerr) maxerr = ttol;
+		    		if(ttol > tol) {
+		    			passTol=false;
+		    			break;
+		    		}
+		    	}
+
+		    	fDuration = dt * npts;		// add last point interval, presume average 
+		    	if(passTol) ltRange = new TimeRange(t0, fDuration);
+		    	else		ltRange = new TimeRange(pTimes,0.);
+	    	} else {
+	    		ltRange = new TimeRange(pTimes,0.);
+	    	}
+//	    	System.err.println("compressPoints, dt: "+dt+", npts: "+npts+", maxerr: "+maxerr+", passTol: "+passTol+", ltRange: "+ltRange);
+		} else
+	
 	    ltRange = new TimeRange(pTimes,0.);
 	    //System.err.println("ltRrange: "+ltRange);
 	}
