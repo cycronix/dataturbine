@@ -73,7 +73,7 @@ import com.rbnb.utility.Utility;
  *
  * @author John P. Wilson
  *
- * @version 09/15/2005
+ * @version 04/17/2012
  */
 
 /*
@@ -83,6 +83,7 @@ import com.rbnb.utility.Utility;
  *   Date      By	Description
  * MM/DD/YYYY
  * ----------  --	-----------
+ * 04/17/2012  JPW	Removed unneeded mouse events in MouseHandlerClass.
  * 09/14/2005  JPW	Remove the rest of the synchronization blocks from
  *			the code; not sure they are necessary.
  *			Add the following methods:
@@ -1482,7 +1483,7 @@ public class JChannelDialog extends JFrame
      *
      * @author John P. Wilson
      *
-     * @version 11/01/2005
+     * @version 04/17/2012
      */
 
     /*
@@ -1492,6 +1493,10 @@ public class JChannelDialog extends JFrame
      *   Date      By	Description
      * MM/DD/YYYY
      * ----------  --	-----------
+     * 04/17/2012  JPW  Removed mouse events that weren't needed.  Only kept
+     *                  mouseClicked().  The mouseEntered() and mouseExited()
+     *                  events in particular would result in undesired channel
+     *                  selection or unselection events.
      * 11/01/2005  JPW	Created.
      *
      */
@@ -1557,7 +1562,7 @@ public class JChannelDialog extends JFrame
 	 *
 	 * @param e  the event that was fired
 	 * @see #handlePopup
-	 * @version 11/01/2005
+	 * @version 04/17/2012
 	 */
 
 	/*
@@ -1565,12 +1570,14 @@ public class JChannelDialog extends JFrame
 	 *   Date      By	Description
 	 * MM/DD/YYYY
 	 * ----------  --	-----------
+	 * 04/17/2012  JPW	This event isn't needed; just return.
 	 * 11/01/2005  JPW	Created.
 	 *
 	 */
 	
 	public void mousePressed(MouseEvent e) {
-	    handlePopup(e);
+	    // JPW 04/17/2012: This event isn't needed; just return.
+	    // handlePopup(e);
 	}
 	
 	/**********************************************************************
@@ -1582,7 +1589,7 @@ public class JChannelDialog extends JFrame
 	 *
 	 * @param e  the event that was fired
 	 * @see #handlePopup
-	 * @version 11/01/2005
+	 * @version 04/17/2012
 	 */
 
 	/*
@@ -1590,12 +1597,14 @@ public class JChannelDialog extends JFrame
 	 *   Date      By	Description
 	 * MM/DD/YYYY
 	 * ----------  --	-----------
+	 * 04/17/2012  JPW	This event isn't needed; just return.
 	 * 11/01/2005  JPW	Created.
 	 *
 	 */
 	
 	public void mouseReleased(MouseEvent e) {
-	    handlePopup(e);
+	    // JPW 04/17/2012: This event isn't needed; just return.
+	    // handlePopup(e);
 	}
 	
 	/**********************************************************************
@@ -1607,7 +1616,7 @@ public class JChannelDialog extends JFrame
 	 *
 	 * @param e  the event that was fired
 	 * @see #handlePopup
-	 * @version 11/01/2005
+	 * @version 04/17/2012
 	 */
 
 	/*
@@ -1615,12 +1624,14 @@ public class JChannelDialog extends JFrame
 	 *   Date      By	Description
 	 * MM/DD/YYYY
 	 * ----------  --	-----------
+	 * 04/17/2012  JPW	This event isn't needed; just return.
 	 * 11/01/2005  JPW	Created.
 	 *
 	 */
 	
 	public void mouseEntered(MouseEvent e) {
-	    handlePopup(e);
+	    // JPW 04/17/2012: This event isn't needed; just return.
+	    // handlePopup(e);
 	}
 	
 	/**********************************************************************
@@ -1632,7 +1643,7 @@ public class JChannelDialog extends JFrame
 	 *
 	 * @param e  the event that was fired
 	 * @see #handlePopup
-	 * @version 11/01/2005
+	 * @version 04/17/2012
 	 */
 
 	/*
@@ -1640,12 +1651,14 @@ public class JChannelDialog extends JFrame
 	 *   Date      By	Description
 	 * MM/DD/YYYY
 	 * ----------  --	-----------
+	 * 04/17/2012  JPW	This event isn't needed; just return.
 	 * 11/01/2005  JPW	Created.
 	 *
 	 */
 	
 	public void mouseExited(MouseEvent e) {
-	    handlePopup(e);
+	    // JPW 04/17/2012: this event isn't needed; just return
+	    // handlePopup(e);
 	}
 	
 	/**********************************************************************
