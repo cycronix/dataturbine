@@ -116,7 +116,7 @@ public class udpFolder extends Thread {
 	    		"udpFolder"+
 	    		"\n -f<folder>      \tdefault="+folderName+ 
 	    		"\n -a<host>        \tdefault="+recipientHost+
-	    		"\n -p<host>        \tdefault="+recipientPort+
+	    		"\n -p<port>        \tdefault="+recipientPort+
 	    		"\n -F<filter>      \tdefault="+fileFilter+
 	    		"\n -T<timeInterval>\tdefault="+updateInc+
 	    		"\n -D<deleteFile>  \tdefault=false"+
