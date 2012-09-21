@@ -390,7 +390,10 @@ System.err.println(getClass() + " " + bytesR + "\n");
 
 		if (entry != null) {
 		    Server sEntry = (Server) entry;
-		    if (!sEntry.getAddress().equals
+		    
+		    boolean islocal = ((Server)peerHierarchyI).getAddress().contains("127.0.0.1");	// mjm grope to fix shortcuts
+		    
+		    if (!islocal && !sEntry.getAddress().equals
 			(((Server) peerHierarchyI).getAddress())) {
 			throw new com.rbnb.api.AddressException
 			    ("Cannot create entry for " +
