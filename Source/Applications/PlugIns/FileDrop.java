@@ -101,6 +101,7 @@ public class FileDrop {
 		ChannelMap cmr=new ChannelMap();
 		ChannelMap cm=new ChannelMap();
 		cmr.Add(pickup);
+		System.err.println("FileDrop monitoring: '"+pickup+"'");
 		if(subscribe) {
 		    sink.Subscribe(cmr, 0., 0., "newest");  // only time-based subs work w wildcards
 		    //sink.Subscribe(cm); 
