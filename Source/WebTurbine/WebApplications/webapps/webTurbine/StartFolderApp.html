@@ -1,0 +1,60 @@
+<html>
+<head>
+	<title>Start Folder Application</title>
+	<LINK REL=STYLESHEET HREF="/stylesheets/rbnbstyles.css" TYPE="text/css">
+</head>
+<body>
+<h1>RBNB Folder Application</h1>
+<p>Monitor a folder for updates, send modified files to the RBNB server.</p>
+<p>Note that this is different from the Folder *PlugIn*, which only fetches file contents on-demand</p>
+<form action="StartPlugIn.jsp" method="GET">
+	<input type="hidden" name="className" value="rbnbFolder" />
+	<input type="hidden" name="plugInName" value="rbnbFolder App" />
+	
+	<div class="centered">
+	<table celpadding=5 class="leftjustified">
+	<tr>
+		<td>RBNB Server Address:</td>
+		<td><input type="hidden" name="arg" value="-a"/>
+		<input type="TEXT" name="arg" 
+			value="localhost:3333" size=30/></td>
+	</tr><tr>
+		<td>Source Name:</td>
+		<td><input type="hidden" name="arg" value="-s"/>
+		<input type="TEXT" name="arg" value="Folder" size=30/></td>
+	</tr><tr>
+		<td>Folder to Monitor:</td>
+		<td><input type="hidden" name="arg" value="-f"/>
+		<input type="TEXT" name="arg" value="/temp" size=30/></td>
+	</tr><tr>
+		<td>Update Period (sec):</td>
+		<td><input type="hidden" name="arg" value="-T"/>
+		<input type="TEXT" name="arg" value="5" size=30/></td>
+	</tr>
+	</tr><tr>
+		<td>Cache Frames:</td>
+		<td><input type="hidden" name="arg" value="-c"/>
+		<input type="TEXT" name="arg" value="10" size=10/></td>
+	</tr>
+	</tr><tr>
+		<td>Archive Frames:</td>
+		<td><input type="hidden" name="arg" value="-n"/>
+		<input type="TEXT" name="arg" value="1000" size=10/></td>
+	</tr>
+	</tr><tr>
+		<td>Archive Mode:</td>
+		<td><input type="hidden" name="arg" value="-m"/>
+		<select name="arg">
+			<option value="create">create</option>
+			<option value="append">append</option>
+			<option selected value="none">none</option>
+		</select></td>
+	</tr>	
+	</table>
+	<p><input type="submit" value="Start rbnbFolder" /></p></div>
+</form>
+<p class="footer"><a href="/documentation/Folder/rbnbFolder.html">Help</a> -
+	<a href="/webTurbine">Home</a></p>
+</body>
+</html>
+
