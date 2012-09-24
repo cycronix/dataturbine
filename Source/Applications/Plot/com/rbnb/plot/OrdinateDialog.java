@@ -16,6 +16,11 @@ limitations under the License.
 
 
 // JPW 04/12/2005: Convert to Swing
+// JPW 09/21/2012: This dialog is now also used to set default ordinate
+//                 settings when it is called from the new RBNBPlotMain menu
+//                 item "Default ordinate settings...".  When called from this
+//                 menu item, the PlotContainer object given to the constructor
+//                 will be null.
 
 // OrdinateDialog - a dialog box for setting ordinate range and scaling
 
@@ -74,6 +79,12 @@ public class OrdinateDialog extends JDialog
    public OrdinateDialog(JFrame parent, Hashtable h, PlotContainer pc) {
 	
 	super(parent,"Y Axis Configuration",true);
+	
+	if (pc == null) {
+	    // JPW 09/21/2012: this is for the "Default ordinate settings..."
+	    //                 menu item; reset the title
+	    this.setTitle("Default Y Axis Configuration");
+	}
 	
 	ht=h;
 	
@@ -199,15 +210,26 @@ public class OrdinateDialog extends JDialog
 	
 	pack();
 	
-	//EMF 8/23/05: locate dialog over matching plot window
-	Point p=pc.getLocation();
-	Container c=(Container)pc.getParent();
-	while ((c=c.getParent())!=null) {
+	// EMF 8/23/05: locate dialog over matching plot window
+	// JPW 9/21/12: this dialog is now also used to set default ordinate
+	//              settings when it is called from RBNBPlotMain's
+	//              "Default ordinate settings..." menu item - in this
+	//              case, pc will be null
+	if (pc == null) {
+	    Point p = parent.getLocation();
+	    p.x += 20;
+	    p.y += 20;
+	    setLocation(p);
+	} else {
+	    Point p=pc.getLocation();
+	    Container c=(Container)pc.getParent();
+	    while ((c=c.getParent())!=null) {
 		Point p2=c.getLocation();
 		p.x+=p2.x;
 		p.y+=p2.y;
+	    }
+	    setLocation(p);
 	}
-	setLocation(p);
 	
 	if (autoScale && autoDecrease) {
 	   divLabel.setEnabled(false);

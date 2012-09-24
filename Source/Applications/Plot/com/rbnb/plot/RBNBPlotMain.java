@@ -36,6 +36,11 @@ limitations under the License.
   ***   Returns :                                               ***
   ***								***
   ***	Modification History :					***
+  ***   09/21/2012      JPW     Add new menu item:		***
+  ***                           "Default ordinate settings...", ***
+  ***                           which is used to set default    ***
+  ***                           Environment autoscale and       ***
+  ***                           scaling values.                 ***
   ***	09/16/2005	JPW	Replace the existing Window	***
   ***				menu (Cascade button, Tile	***
   ***				button, and Auto toggle button)	***
@@ -610,6 +615,24 @@ public class RBNBPlotMain extends Applet implements ActionListener,Runnable,Prin
 		    pc.setDisplayGroup(Integer.parseInt((String)config.get("dg.current")));
 		}
 	    }
+	    // JPW 9/21/2012: add "Default ordinate settings..."
+	    else if (arg.equals("Default ordinate settings...")) {
+		Hashtable ht=new Hashtable();
+		ht.put("divisions",new Integer(environment.SCALE_DIV));
+		ht.put("min",new Double(environment.SCALE_MIN));
+		ht.put("max",new Double(environment.SCALE_MAX));
+		ht.put("autoscale",new Boolean(environment.SCALE_AUTO));
+		ht.put("autodecrease",new Boolean(environment.SCALE_DECREASE));
+		OrdinateDialog od=new OrdinateDialog(frame,ht,null);
+		od.setVisible(true);
+		if (od.proceed) {
+		    environment.SCALE_AUTO = ((Boolean)ht.get("autoscale")).booleanValue();
+		    environment.SCALE_DECREASE = ((Boolean)ht.get("autodecrease")).booleanValue();
+		    environment.SCALE_DIV = ((Integer)ht.get("divisions")).intValue();
+		    environment.SCALE_MIN = ((Double)ht.get("min")).doubleValue();
+		    environment.SCALE_MAX = ((Double)ht.get("max")).doubleValue();
+		}
+	    }
 	    // EMF 9/8/99: added Export
 	    else if (arg.equals("Export to Clipboard")) {
 		loc.set(LayoutCubby.ExportToCB);
@@ -736,6 +759,13 @@ public class RBNBPlotMain extends Applet implements ActionListener,Runnable,Prin
 	save.setEnabled(true); //save config not implemented
 	save.addActionListener(this);
 	file.add(save);
+	file.addSeparator();
+	// JPW 9/21/2012: add dialog for setting default ordinate settings
+	JMenuItem defaultOrdinateSettings = new JMenuItem("Default ordinate settings...");
+	defaultOrdinateSettings.setFont(Environment.FONT12);
+	defaultOrdinateSettings.setEnabled(true);
+	defaultOrdinateSettings.addActionListener(this);
+	file.add(defaultOrdinateSettings);
 	file.addSeparator();
 	// EMF 9/8/99: added Export
 	JMenuItem export = new JMenuItem("Export to Clipboard");

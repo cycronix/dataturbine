@@ -16,6 +16,7 @@ limitations under the License.
 
 
 // JPW 04/07/2005: Convert to Swing
+// JPW 09/21/2012: use default autoscale and scaling values from Environment
 
 package com.rbnb.plot;
 
@@ -126,13 +127,22 @@ import com.rbnb.utility.KeyValueHash;
 			pArea.setVisible(false);
 			}
 		//set scaling if necessary
-		if (environment.SCALE_DIV!=-1) {
-			scaleAuto=false;
-			beenScaled=true;
-			scaleMin=environment.SCALE_MIN;
-			scaleMax=environment.SCALE_MAX;
-			scaleDiv=environment.SCALE_DIV;
-			}
+		// if (environment.SCALE_DIV!=-1) {
+		// 	scaleAuto=false;
+		//	beenScaled=true;
+		//	scaleMin=environment.SCALE_MIN;
+		//	scaleMax=environment.SCALE_MAX;
+		//	scaleDiv=environment.SCALE_DIV;
+		//	}
+      		// JPW 9/21/2012: use default autoscale and scaling values from Environment
+      		scaleAuto = environment.SCALE_AUTO;
+      		scaleDecrease = environment.SCALE_DECREASE;
+      		if (!scaleAuto) {
+      		    beenScaled = true;
+      		}
+      		scaleMin = environment.SCALE_MIN;
+      		scaleMax = environment.SCALE_MAX;
+      		scaleDiv = environment.SCALE_DIV;
 		setOrdinate(scaleMin,scaleMax,scaleDiv);
 		//check static userdata for scale,offset,units
 		if (rc.isStaticUserData((short)1)) {

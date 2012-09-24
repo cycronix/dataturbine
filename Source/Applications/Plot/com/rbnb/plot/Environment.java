@@ -28,6 +28,8 @@ limitations under the License.
 //             the variable names have been left in all caps, though this
 //             does not follow Java conventions.
 
+//JPW 09/21/12: Add SCALE_AUTO and SCALE_DECREASE to the environment
+
 
 package com.rbnb.plot;
 
@@ -48,12 +50,15 @@ public boolean	KILLRBNB = false;
 public int DISPLAYGROUPS = 10;
 public int POSITION_X = -1; //if -1, window will be set to center of screen
 public int POSITION_Y = -1;
-public int SCALE_DIV = -1; // if -1, plot will start in increasing autoscale mode
 public Time DURATION = null; // if null, estimate from data source
 public Time MAXDURATION = null; //duration slider max position
 public String TIME_LABEL = new String(" Sec");
-public double SCALE_MIN = 0;
-public double SCALE_MAX = 0;
+// JPW 9/21/2012: by default, start plot containers in increasing autoscale mode
+public boolean SCALE_AUTO = true;
+public boolean SCALE_DECREASE = false;
+public int SCALE_DIV = 5;
+public double SCALE_MIN = 0.0;
+public double SCALE_MAX = 1.0;
 public int RTWAIT = 0; //wait time in milliseconds during RT mode
 public static Color BGCOLOR = new Color(236,233,216);
 //# ifdef DUMMYVERSION
@@ -106,9 +111,11 @@ public void showState() {
    System.err.println("DISPLAYGROUPS "+DISPLAYGROUPS);
    System.err.println("POSITION_X "+POSITION_X);
    System.err.println("POSITION_Y "+POSITION_Y);
+   System.err.println("SCALE_AUTO "+SCALE_AUTO);
+   System.err.println("SCALE_DECREASE "+SCALE_DECREASE);
    System.err.println("SCALE_DIV "+SCALE_DIV);
    System.err.println("SCALE_MIN "+SCALE_MIN);
-   System.err.println("SCLAE_MAX "+SCALE_MAX);
+   System.err.println("SCALE_MAX "+SCALE_MAX);
    System.err.println("DURATION "+DURATION);
    System.err.println("MAXDURATION "+MAXDURATION);
    System.err.println("TIME_LABEL "+TIME_LABEL);
