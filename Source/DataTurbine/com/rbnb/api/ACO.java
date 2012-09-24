@@ -92,7 +92,7 @@ package com.rbnb.api;
  * @see com.rbnb.api.ClientHandle
  * @see com.rbnb.api.RCO
  * @since V2.0
- * @version 09/08/2005
+ * @version 09/21/2012
  */
 
 /*
@@ -102,6 +102,12 @@ package com.rbnb.api;
  *   Date      By	Description
  * MM/DD/YYYY
  * ----------  --	-----------
+ * 2012/09/21  JPW	Change name of the archive load timeout flag from
+ * 			"archiveLoadClientHandlerTO" to "archiveLoadTimeout"
+ * 2012/07/18  JPW      When starting a ClientHandler, to optionally support
+ *                      longer timeouts, see if user has defined
+ *                      "archiveLoadClientHandlerTO".  This would allow large
+ *                      archives to load w/o the ClientHandler timing out.
  * 2005/09/08  WHF	Added Ping to the isRunnable code to execercise the
  *			data channel.  Added pingValue.
  * 09/28/2004  JPW	In order to compile under J# (which is only Java 1.1.4
@@ -2011,7 +2017,7 @@ System.err.println("Bad Ping response.");
      *		  thrown if the operation is interrupted.
      * @see #stop(com.rbnb.api.Client)
      * @since V2.0
-     * @version 05/07/2003
+     * @version 09/21/2012
      */
 
     /*
@@ -2019,6 +2025,10 @@ System.err.println("Bad Ping response.");
      *   Date      By	Description
      * MM/DD/YYYY
      * ----------  --	-----------
+     * 09/21/2012  JPW  Change name of the archive load timeout from
+ * 			"archiveLoadClientHandlerTO" to "archiveLoadTimeout"
+     * 07/18/2012  JPW  To optionally support longer timeouts, see if user has
+     *                  defined "archiveLoadClientHandlerTO"
      * 05/07/2003  INB	Use <code>STARTUP_WAIT</code> rather than
      *			<code>PING_WAIT</code>.
      * 04/01/2003  INB	Don't wait forever.
@@ -2033,8 +2043,24 @@ System.err.println("Bad Ping response.");
 	       java.io.IOException,
 	       java.lang.InterruptedException
     {
+	long timeOut = TimerPeriod.STARTUP_WAIT;
+	// JPW 7/18/2012: See if user has defined a different timeout
+	String timeoutStr = System.getProperty("archiveLoadTimeout");
+	if (timeoutStr != null) {
+	    try {
+		timeOut = Long.parseLong(timeoutStr);
+		if (timeOut <= 0) {
+		    throw new NumberFormatException("illegal value");
+		}
+	    } catch (NumberFormatException nfe) {
+		throw new com.rbnb.api.AddressException(
+		    "Failed to start up " +
+		    clientI +
+		    ": the specified value of archiveLoadTimeout isn't an integer whose value is greater than 0.");
+	    }
+	}
 	send(new Start(clientI));
-	if (receive(okClass,false,TimerPeriod.STARTUP_WAIT) == null) {
+	if (receive(okClass,false,timeOut) == null) {
 	    throw new com.rbnb.api.AddressException
 		("Failed to start up " + clientI +
 		 " in a reasonable amount of time.");
