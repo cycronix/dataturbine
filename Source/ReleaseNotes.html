@@ -7,7 +7,8 @@
 	<META NAME="AUTHOR" CONTENT="Matt Miller">
 	<META NAME="CREATED" CONTENT="0;0">
 	<META NAME="CHANGEDBY" CONTENT="Matt Miller">
-	<META NAME="CHANGED" CONTENT="20120925;15572665">
+	<META NAME="CHANGED" CONTENT="20120926;13183926">
+	<META NAME="CHANGEDBY" CONTENT="Matt Miller">
 	<STYLE TYPE="text/css">
 	<!--
 		H2.cjk { font-family: "SimSun" }
@@ -24,32 +25,32 @@
 <H1>RBNB Release Notes</H1>
 <H1>RBNB V3.2 Release Notes</H1>
 <H2 CLASS="western">V3.2 Production Release</H2>
-<P STYLE="margin-bottom: 0.1in">V3.2 released 09/28/2012.  This
+<P STYLE="margin-bottom: 0.1in">V3.2 released 09/28/2012. This
 release corresponds to RBNB Subversion repository revision number
-272.  See repository change log for details.  There have been several
+279. See repository change log for details. There have been several
 well tested changes relative to last beta release, i.e. V3.2B6:</P>
 <H3 CLASS="western">Server</H3>
 <UL>
 	<LI><P STYLE="margin-bottom: 0.08in; line-height: 100%">Added catch
-	*any* exception on Timer().  One could slip thru doing Android port
+	*any* exception on Timer(). One could slip thru doing Android port
 	testing.</P>
 	<LI><P STYLE="margin-bottom: 0.08in; line-height: 100%">Add warning
-	message for IPV6 (vs IPV4) address parsing.  Eventually need to
+	message for IPV6 (vs IPV4) address parsing. Eventually need to
 	handle IPV6 addresses.</P>
 	<LI><P STYLE="margin-bottom: 0.08in; line-height: 100%">Handle Date
-	parsing exception.  The build-date info field had a parsing
-	exception in latest Android JVM.  Simple change to use current date
-	in this case. 
+	parsing exception. The build-date info field had a parsing exception
+	in latest Android JVM. Simple change to use current date in this
+	case. 
 	</P>
 	<LI><P STYLE="margin-bottom: 0.08in; line-height: 100%">Compress
-	point times to start+duration if it is net savings.  Activated by
+	point times to start+duration if it is net savings. Activated by
 	-DcompressTol=X system property flag, where X is point-to-point
 	relative time-tolerance.</P>
 	<LI><P STYLE="margin-bottom: 0.08in; line-height: 100%">Tweek to
 	improve reliability of establishing shortcut routes.</P>
 	<LI><P STYLE="margin-bottom: 0.08in; line-height: 100%">Added flag
 	to specify load-archive timeout (to give time for very large
-	archives to load).  Example: java -DarchiveLoadTimeout=300000 -jar
+	archives to load). Example: java -DarchiveLoadTimeout=300000 -jar
 	rbnb.jar</P>
 </UL>
 <H3 CLASS="western">rbnbPlot</H3>
@@ -61,10 +62,6 @@ well tested changes relative to last beta release, i.e. V3.2B6:</P>
 	unneeded mouse events from channel selection dialog to fix undesired
 	channel selection events.</P>
 </UL>
-<H3 CLASS="western">rbnbFolder</H3>
-<UL>
-	<LI><P>Added rbnbFolder to WebTurbine home page links</P>
-</UL>
 <H3 CLASS="western">CSVDemux</H3>
 <UL>
 	<LI><P>CSV output string is now flushed to channel &quot;_IWG1&quot;
@@ -73,9 +70,9 @@ well tested changes relative to last beta release, i.e. V3.2B6:</P>
 <H3 CLASS="western">Known Issues</H3>
 <UL>
 	<LI><P>Certain recent version 64-bit Java JVMs have been noted to
-	crash upon launch of RBNB server, most notably on Macs and Linux. 
-	This issue continues to be investigated.  Work-around is to use
-	older or 32 bit JVM. 
+	crash upon launch of RBNB server, most notably on Macs and Linux.
+	This issue continues to be investigated. Work-around is to use older
+	or 32 bit JVM. 
 	</P>
 </UL>
 <H2 CLASS="western">V3.2B5 to V3.2B6 Changes</H2>
