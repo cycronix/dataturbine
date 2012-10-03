@@ -1754,9 +1754,9 @@ private boolean alreadyReset=false;
 			seenBefore = false;
 
 			// MJM 10/2012:  add try-again if file delete fails.  
-			if(!files[idx].delete()) {
+			if(!files[idx].delete() || files[idx].exists()) {
 				System.err.println("Retry delete: "+files[idx].toString());
-				Thread.sleep(200);		// slow down
+				Thread.sleep(1000);		// slow down
 				files[idx].delete();
 			}
 			if (files[idx].exists()) {
