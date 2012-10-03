@@ -43,6 +43,7 @@ package com.rbnb.api;
  *   Date      By	Description
  * MM/DD/YYYY
  * ----------  --	-----------
+ * 10/03/2013  MJM  	deleteArchive: try-again if file delete fails 
  * 03/15/2011  MJM  	Allow reconnect to replace old source in special case of "dot" .fileName
  * 01/14/2011  MJM  	Added lock release on prolonged blocking waits
  * 10/18/2010  MJM		Explicit buffer size in BufferedReader
@@ -1681,6 +1682,7 @@ private boolean alreadyReset=false;
      *   Date      By	Description
      * MM/DD/YYYY
      * ----------  --	-----------
+     * 10/03/2013  MJM  try-again if file delete fails 
      * 02/11/2004  INB	Log exceptions at standard level.
      * 01/08/2004  INB	Don't abort on first failed delete, but instead
      *			hold a list of the files that don't delete.
@@ -1751,7 +1753,12 @@ private boolean alreadyReset=false;
 			}
 			seenBefore = false;
 
-			files[idx].delete();
+			// MJM 10/2012:  add try-again if file delete fails.  
+			if(!files[idx].delete()) {
+				System.err.println("Retry delete: "+files[idx].toString());
+				Thread.sleep(200);		// slow down
+				files[idx].delete();
+			}
 			if (files[idx].exists()) {
 			    failures.addElement(files[idx].toString());
 			}
