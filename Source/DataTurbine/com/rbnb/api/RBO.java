@@ -16,6 +16,10 @@ limitations under the License.
 
 package com.rbnb.api;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
 
 /**
  * RBNB Ring Buffer Object (RBO) class.
@@ -1753,12 +1757,7 @@ private boolean alreadyReset=false;
 			}
 			seenBefore = false;
 
-			// MJM 10/2012:  add try-again if file delete fails.  
-			if(!files[idx].delete() || files[idx].exists()) {
-				System.err.println("Retry delete: "+files[idx].toString());
-				Thread.sleep(1000);		// slow down
-				files[idx].delete();
-			}
+			files[idx].delete();
 			if (files[idx].exists()) {
 			    failures.addElement(files[idx].toString());
 			}
@@ -1795,13 +1794,21 @@ private boolean alreadyReset=false;
 		}
 
 		if (failures.size() > 0) {
-		    StringBuffer errorMsg = new StringBuffer
-			("Failed to delete: ");
-		    for (int idx = 0; idx < failures.size(); ++idx) {
-			errorMsg.append("\n   ");
-			errorMsg.append((String) failures.elementAt(idx));
-		    }
-		    throw new java.io.IOException(errorMsg.toString());
+			try { // MJM 10/9/12:  try again using simple recursive delete
+				System.err.println("Trouble deleting archive: "+aDir);
+				Thread.sleep(2000);	// let collision pass...
+				deleteRecursive(aDir);	
+				System.err.println("Recursive delete succeeded!");
+			} catch (IOException e) {	// failed second try
+				System.err.println(e.getMessage());	// more info
+			    StringBuffer errorMsg = new StringBuffer
+				("Failed to delete: ");
+			    for (int idx = 0; idx < failures.size(); ++idx) {
+				errorMsg.append("\n   ");
+				errorMsg.append((String) failures.elementAt(idx));
+			    }
+			    throw new java.io.IOException(errorMsg.toString());
+			}
 		}
 	    }
 
@@ -1845,7 +1852,37 @@ private boolean alreadyReset=false;
 	    unlockWrite();
 	}
     }
-
+    
+    /**
+     * Recursive delete file folder method. 
+     * Backup for failure in deleteArchive()
+     * 
+     * @author Matt Miller
+     * @param file File or Folder to delete
+     * @throws IOException
+     * @since V3.6
+     * @version 10/09/2012
+     */
+    /*
+    *
+    *   Date      By	Description
+    * MM/DD/YYYY
+    * ----------  --	-----------
+    * 10/09/2012  MJM	Created.
+    *
+    */
+	private static void deleteRecursive(File file) throws IOException {
+		if (file.isDirectory()) {
+//		    for (File c : file.listFiles())	// no for-each loop in java1.4
+			File[] c = file.listFiles();
+			for(int i=0;i<c.length;i++)
+		      deleteRecursive(c[i]);
+		}
+		if (!file.delete()) {
+		    throw new IOException("Failed to delete: " + file);
+		}
+	}
+
     /**
      * Deletes one or more channels from the <code>RBO</code>.
      * <p>
