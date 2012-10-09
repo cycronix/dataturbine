@@ -32,9 +32,9 @@ release corresponds to RBNB Subversion repository revision number
 well tested changes relative to last beta release, i.e. V3.2B6:</P>
 <H3 CLASS="western">Server</H3>
 <UL>
-	<LI><P STYLE="margin-bottom: 0.08in; line-height: 100%">Second-try
-	with short delay if a file fails to delete.  Some systems sometimes
-	would fail to clean up old archives on close.</P>
+	<LI><P STYLE="margin-bottom: 0.08in; line-height: 100%">Added failsafe 
+	second-pass recursive delete-archive after short delay if an archive fails to delete.
+	Some systems sometimes would fail to clean up old archives on close.</P>
 	<LI><P STYLE="margin-bottom: 0.08in; line-height: 100%">Added catch
 	*any* exception on Timer(). One could slip thru doing Android port
 	testing.</P>
