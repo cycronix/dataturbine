@@ -2,6 +2,7 @@ Build
 Distribute
 bin
 .metadata
+.project
 Source/*/build.number
 Source/*/*/build.number
 Source/*/*/*/build.number
