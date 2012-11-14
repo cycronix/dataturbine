@@ -35,6 +35,7 @@ package com.rbnb.api;
  *   Date      By	Description
  * MM/DD/YYYY
  * ----------  --	-----------
+ * 10/24/2012  MJM  Make sure files are sync'd fully to disk upon release
  * 11/16/2006  EMF      Fixed recoverFromDataFiles(), reduced memory usage.
  * 01/12/2004  INB	Ensure that we don't try to write out a
  *			<code>FrameSet</code> that doesn't point to this
@@ -2370,6 +2371,7 @@ int i=0;
      *   Date      By	Description
      * MM/DD/YYYY
      * ----------  --	-----------
+     * 10/24/2012  MJM  Make sure files are sync'd fully to disk
      * 10/23/2003  INB	Modified code to hold onto the files unless someone
      *			else needs to be able to open other files via the
      *			<code>LimitedResourceInterface</code>.
@@ -2382,9 +2384,12 @@ int i=0;
 	       java.io.IOException,
 	       java.lang.InterruptedException
     {
-	synchronized (this) {
+	synchronized (this) {	
 	    if ((--accessCount == 0) & (openFileSets != null)) {
 		if (files != null) {
+		    for (int i=0; i<files.length; ++i) // MJM 10/12:  SYNC the files to disk!
+		    	if (files[i] != null) files[i].getFD().sync();				
+			
 		    openFileSets.holdResource(this,files);
 		}
 		filesUsable = false;
