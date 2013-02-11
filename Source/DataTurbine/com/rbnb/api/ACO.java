@@ -102,6 +102,7 @@ package com.rbnb.api;
  *   Date      By	Description
  * MM/DD/YYYY
  * ----------  --	-----------
+ * 2013/02/11  MJM  check for pingValue overflow
  * 2012/09/21  JPW	Change name of the archive load timeout flag from
  * 			"archiveLoadClientHandlerTO" to "archiveLoadTimeout"
  * 2012/07/18  JPW      When starting a ClientHandler, to optionally support
@@ -1033,7 +1034,7 @@ abstract class ACO
 	//   data channel.
 	if (isRunningR) {
 	    //short pingValue = -1; // -1234;
-	    
+	    if(pingValue >= 32767) pingValue=0;		// avoid overflow.  MJM 2/11/2013
 	    send(new Ping(true, pingValue++));
 	    
 	    // Get the response Ping:
