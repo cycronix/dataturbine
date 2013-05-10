@@ -1396,8 +1396,8 @@ class MirrorController
 			    // First, the output Source must be terminated and
 			    // then the Source can reconnect.  Otherwise, when
 			    // the Source reconnects, an IllegalStateException
-			    // will be thrown (“Cannot reconnect to existing
-			    // client handler”).
+			    // will be thrown (Cannot reconnect to existing
+			    // client handler).
 			    stopOutputSource();
 			    reinitializeSource();
 			    getLog().addMessage(
@@ -1936,8 +1936,8 @@ class MirrorController
      * Stop the output source.  This is used when the Mirror's output Source is
      * trying to reconnect - first, the output Source must be terminated
      * and then the Source can reconnect.  Otherwise, when the Source
-     * reconnects, an IllegalStateException will be thrown (“Cannot reconnec
-     * to existing client handler”).
+     * reconnects, an IllegalStateException will be thrown (Cannot reconnec
+     * to existing client handler).
      * <p>
      * This method uses the same logic as rbnbAdmin for terminating a Source.
      * <p>
