@@ -37,6 +37,7 @@
          deprecation="on" debug="on"
   	 source="${rbnb.javaver}"
   	 target="${rbnb.javaver}">
+   <compilerarg value="-XDignore.symbol.file"/>
    <src path="${rbnb.sourcedir}/Applications/PlugIns" />
    <exclude name="Unsupported/**" />
    <classpath path="${rbnb.classesdir}/Applications/PlugIns" />
