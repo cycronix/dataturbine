@@ -1,0 +1,569 @@
+Function Documentation Generated on 08-May-2013
+
+------------------------------------------------------------------------------------------------------------------------
+
+DTlatest.m --
+
+	 Retrieves all data from a DataTurbine server after a specified starting date
+	 
+	 syntax: [s,msg,lastdate,dts] = DTlatest(server,source,startdate,time_offset,maxdays,chan)
+	 
+	 input:
+	    server = DataTurbine server IP address (string; required)
+	    source = DataTurbine source (string; required)
+	    startdate = starting date for data retrieval (string date or numeric MATLAB serial date;
+	       optional; default = [] for earliest date available in DataTurbine)
+	    time_offset = offset from server in hours for both startdate and 'Date' field in s (numeric; optional;
+	       default = 0 for no offset)
+	    maxdays = maximum days of data to retrieve from Data Turbine in a single request - 
+	       if maxdays is > 0 then data arrays will be retrieved in chunks and concatenated to limit
+	       load on the server or network link (number; optional; default = [] or 0 for unlimited)
+	    chan = channel to retrieve (string or cell array of strings for multiple channels; 
+	       optional; default = '*' for all)
+	 
+	 output:
+	    s = struct containing a 'Date' field (array of MATLAB serial dates) and fields
+	        for each channel containing aligned data arrays
+	    msg = text of any error message
+	    lastdate = MATLAB serial date of the most recent observation (with time_offset applied)
+	    dts = struct returned from the DTget function for analysis and debugging, containing server
+	        information and raw channel data
+	 
+	 notes:
+	    1) this function depends on DTstruct and DTget in the DTMatlabTK library; DTget requires that
+	       rbnb.jar is registered in the permanent or runtime Java path, e.g. javaaddpath(which('rbnb.jar'))
+	    2) specifying a non-zero time_offset will adjust both startdate and the aligned 'Date' field in [s] 
+	       by time_offset
+	    3) if startdate preceeds the earliest records available for source, all available data will be
+	       returned without error (use datestr(s.Date(1)) to determine the actual earliest record date)
+	    4) 1 extra day of data is requested from the server to account for discrepancies in the system
+	       clocks of the local machine and Data Turbine server
+	 
+	 author:
+	   Wade Sheldon
+	   Department of Marine Sciences
+	   University of Georgia
+	   Athens, GA 30602-3636
+	   sheldon@uga.edu
+	 
+	 Copyright 2013 Open Source Data Turbine Initiative
+	 
+	 Licensed under the Apache License, Version 2.0 (the "License");
+	 you may not use this file except in compliance with the License.
+	 You may obtain a copy of the License at
+	 
+	     http://www.apache.org/licenses/LICENSE-2.0
+	 
+	 Unless required by applicable law or agreed to in writing, software
+	 distributed under the License is distributed on an "AS IS" BASIS,
+	 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	 See the License for the specific language governing permissions and
+	 limitations under the License.
+	 
+	 last modified: 08-Mar-2013
+
+------------------------------------------------------------------------------------------------------------------------
+
+DTalign.m --
+
+	 Aligns channels in a DTstruct returned from DTget to create a unified data structure 
+	 with a single Date field, named channel fields and duplicate observation records removed
+	 
+	 syntax: [s,msg] = DTalign(chan,time_offset,prefix)
+	 
+	 input:
+	    chan = structure from then 'chan' field of a DTstruct returned from DTget.m (struct; required)
+	    time_offset = time offset from server in hours (number; optional; default = 0 for none)
+	    prefix = prefix to add to numeric channel names to prevent MATLAB struct field naming errors
+	        (string; optional; default = 'channel_', e.g. 'channel_10')
+	 
+	 output:
+	    s = struct containing a 'Date' field (array of MATLAB serial dates) and fields
+	        for each channel containing numeric or character data arrays aligned to 'Date'
+	    msg = text of any error message
+	 
+	 notes:
+	    1) if the entire DTstruct is input as 'chan', the 'chan' field will be extracted automatically
+	    2) if fields in chan contain different numbers of observations or vary in frequency, 
+	       NaN or ' ' will be added to numeric or string channel data arrays, resp., to align 
+	       all observations to the output 'Date' array
+	 
+	 author:
+	   Wade Sheldon
+	   Department of Marine Sciences
+	   University of Georgia
+	   Athens, GA 30602-3636
+	   sheldon@uga.edu
+	 
+	 Copyright 2013 Open Source Data Turbine Initiative
+	 
+	 Licensed under the Apache License, Version 2.0 (the "License");
+	 you may not use this file except in compliance with the License.
+	 You may obtain a copy of the License at
+	 
+	     http://www.apache.org/licenses/LICENSE-2.0
+	 
+	 Unless required by applicable law or agreed to in writing, software
+	 distributed under the License is distributed on an "AS IS" BASIS,
+	 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	 See the License for the specific language governing permissions and
+	 limitations under the License.
+	 
+	 last modified: 08-May-2013
+
+------------------------------------------------------------------------------------------------------------------------
+
+DTappend.m --
+
+	 Appends channel data retrieved from DTget or DTlatest to existing channel data in a variable or file
+	 
+	 syntax: [dts,msg] = DTappend(dts_old,dts_new,varname,saveoption)
+	 
+	 input:
+	    dts_old = DTstruct from DTget or DTlatest, or a fully qualified filename for a .mat file
+	       containing a DTstruct to append to (struct or string filename; required)
+	    dts_new = DTstruct to append (struct; required)
+	    varname = variable containing the dts_old structure to append to if dts_old is a filename
+	       (string; optional; default = 'dts')
+	    saveoption = option to save the combined DTstruct if dts_old is a filename (integer; 
+	        0 = no, 1 = yes/default, ignored if dts_old is a struct)
+	 
+	 output:
+	    dts = unified DTstruct structure with concatenated channel arrays and metadata from the first structure
+	    msg = text of any error message
+	 
+	 notes:
+	    1. if dts_old is a filename and it does not exist, dts_new will be saved as varname
+	       to create the file
+	    2. channels will be matched by name, and 'time' and 'data' field arrays
+	       from the multiple structures will be concatenated in order
+	    3. if structures are included from multiple Data Turbine sources with 
+	       overlapping channel names, the source will be appended to the channel
+	       name for redundant channels to prevent inappropriate concatenation
+	    4. data with overlapping times will not be removed - use DTalign.m to 
+	       produce a unified data set with aligned data arrays from the 'dts' output
+	 
+	 author:
+	   Wade Sheldon
+	   Department of Marine Sciences
+	   University of Georgia
+	   Athens, GA 30602-3636
+	   sheldon@uga.edu
+	 
+	 Copyright 2013 Open Source Data Turbine Initiative
+	 
+	 Licensed under the Apache License, Version 2.0 (the "License");
+	 you may not use this file except in compliance with the License.
+	 You may obtain a copy of the License at
+	 
+	     http://www.apache.org/licenses/LICENSE-2.0
+	 
+	 Unless required by applicable law or agreed to in writing, software
+	 distributed under the License is distributed on an "AS IS" BASIS,
+	 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	 See the License for the specific language governing permissions and
+	 limitations under the License.
+	 
+	 last modified: 05-Apr-2013
+
+------------------------------------------------------------------------------------------------------------------------
+
+DTcombine.m --
+
+	 Combines channel data retrieved in multiple requests from a Data Turbine server
+	 
+	 syntax: dts = combine_channels(dts_array)
+	 
+	 input:
+	    dts_array = cell array of DTstruct structures returned from DTget
+	 
+	 output:
+	    dts = unified DTstruct structure with concatenated channel arrays and
+	       metadata from the first structure
+	 
+	 notes:
+	    1. channels will be matched by name, and 'time' and 'data' field arrays
+	       from the multiple structures will be concatenated in order
+	    2. if structures are included from multiple Data Turbine sources with 
+	       overlapping channel names, the source will be appended to the channel
+	       name for redundant channels to prevent inappropriate concatenation
+	    3. data with overlapping times will not be removed - use DTalign.m to 
+	       produce a unified data set with aligned data arrays from the 'dts' output
+	 
+	 author:
+	   Wade Sheldon
+	   Department of Marine Sciences
+	   University of Georgia
+	   Athens, GA 30602-3636
+	   sheldon@uga.edu
+	 
+	 Copyright 2013 Open Source Data Turbine Initiative
+	 
+	 Licensed under the Apache License, Version 2.0 (the "License");
+	 you may not use this file except in compliance with the License.
+	 You may obtain a copy of the License at
+	 
+	     http://www.apache.org/licenses/LICENSE-2.0
+	 
+	 Unless required by applicable law or agreed to in writing, software
+	 distributed under the License is distributed on an "AS IS" BASIS,
+	 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	 See the License for the specific language governing permissions and
+	 limitations under the License.
+	 
+	 last modified: 08-May-2013
+
+------------------------------------------------------------------------------------------------------------------------
+
+DTharvest.m --
+
+	 Manages automatic retrieval and archiving of channel data from a Data Turbine source
+	 
+	 syntax: [msg,status] = DTharvest(operation,server,source,options)
+	 
+	 input:
+	    operation = operation to perform (string; default = 'list'):
+	       'start' = initialize or restart a timer for collecting data on a schedule
+	       'stop' = pause data collection
+	       'resume' = resume data collection from last logged harvest
+	       'delete' = stop data collection and clear the timer from memory
+	       'list' = list the status of all operating Data Turbine harvesters
+	       'harvest' = harvest new data observations from the Data Turbine source (called by the timer)
+	       'viewlog' = returns all log messages for the specified server and source as a character array
+	       'options' = returns the options structure for the specified server and source
+	    server = DataTurbine server IP address (string; required unless option = 'list')
+	    source = DataTurbine source (string; required unless option = 'list')
+	    options = structure containing harvest configuration options - see DTharvestStruct.m
+	       (struct; required if operation = 'start' and harvest timer not already initialized)
+	 
+	 output:
+	    msg = text of any error or warning message
+	    status = status flag (1 = success, 0 = failure)
+	 
+	 usage notes:
+	    1) this function will generate or update a log file 'DTharvestLog.mat' in the DTharvest.m directory
+	       when first run; this file can be moved to another directory in the MATLAB path if desired
+	    2) options will be ignored unless operation = 'start' or 'resume'
+	    3) server, source and options will be ignored if operation = 'list'
+	    4) if operation = 'viewlog' or 'options' and server and source do not match any running timers,
+	       cached logs and options will be retrieved from DTharvestLog.mat if present
+	    5) see 'help DTharvestStruct' for information on defining post-harvest workflows and
+	       other advanced options
+	 
+	 example code:
+	 
+	   %DTharvest.m example using the built-in _Metrics channel of Data Turbine, with a simple plot workflow
+	   %(note: substitute a remote server address for 'localhost' if not running Data Turbine locally)
+	 
+	   %get initial options struct for a 1-minute harvest with data saved to 'dt_metrics.mat', with no time offset
+	   options = DTharvestStruct('dt_metrics.mat',1/60,0);
+	 
+	   %add workflow step to plot MemoryUsed at the time of harvest (help DTharvestStruct for information)
+	   options.Workflow = 'plot(s_aligned.Date,s_aligned.MemoryUsed,''bd-''); datetick(''x'',''HH:MM:SS'')';
+	 
+	   %start harvests
+	   DTharvest('start','localhost','_Metrics',options)
+	 
+	   %wait for several minutes, watching plots update after each harvest
+	   pause(180)
+	 
+	   %view cumulative harvest logs
+	   DTharvest('viewlog','localhost','_Metrics') 
+	 
+	   %stop harvests temporarily
+	   DTharvest('stop','localhost','_Metrics')
+	 
+	   %revise options to include a workflow for plotting all harvested data (not just the latest)
+	   %(note that [FileAligned] and [VariableAligned] tokens are resolved to fields in options when run)
+	   options.Workflow = ['vars=load(''[FileAligned]'',''[VariableAligned]'');' ...
+	      'plot(vars.[VariableAligned].Date,vars.[VariableAligned].MemoryUsed,''bd-'');' ...
+	      'datetick(''x'',''HH:MM:SS'')'];
+	 
+	   %resume harvests with the revised options
+	   DTharvest('resume','localhost','_Metrics',options)
+	 
+	   %wait for several minutes, watching plots update after each harvest
+	   pause(180)
+	 
+	   %cancel harvests
+	   DTharvest('delete','localhost','_Metrics')
+	 
+	 
+	 author:
+	   Wade Sheldon
+	   Department of Marine Sciences
+	   University of Georgia
+	   Athens, GA 30602-3636
+	   sheldon@uga.edu
+	 
+	 Copyright 2013 Open Source Data Turbine Initiative
+	 
+	 Licensed under the Apache License, Version 2.0 (the "License");
+	 you may not use this file except in compliance with the License.
+	 You may obtain a copy of the License at
+	 
+	     http://www.apache.org/licenses/LICENSE-2.0
+	 
+	 Unless required by applicable law or agreed to in writing, software
+	 distributed under the License is distributed on an "AS IS" BASIS,
+	 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	 See the License for the specific language governing permissions and
+	 limitations under the License.
+	 
+	 last modified: 08-May-2013
+
+------------------------------------------------------------------------------------------------------------------------
+
+DTharvestStruct.m --
+
+	 Generates an options structure for use with DTharvest.m containing default settings for fields
+	 
+	 syntax: options = DTharvestStruct(fn,period,time_offset)
+	 
+	 input:
+	    fn = fully-qualified filename to use for saving harvested channel data (string; optional; default = '')
+	    period = data collection frequency in hours (number; optional; default = 1)
+	    time_offset = time offset from server in hours (number; optional; default = 0)
+	 
+	 output:
+	    options = harvest timer configuration options - see DTharvest.m (struct):
+	       'Period' = data collection frequency in hours (number)
+	       'StartTime' = time of day to start harvests; used in conjunction with Period to determine
+	          exact start time of the first harvest, e.g. 
+	          Period = 1 and StartTime = 09:45 will start hourly harvests at 09:45 or the next interval
+	          Period = 24 and StartTime = 05:00 will start daily harvests at 05:00 or the next interval
+	          (string; hh:mm; default = '' to start harvests without any delay)
+	       'TimeOffset' = offset from server time for converting start times and harvested data time 
+	          stamps to local time (numeric; default = 0 for no offset)
+	       'FileRaw' = fully qualified filename for saving or appending raw Data Turbine channel data
+	          (i.e. DTstruct file) (string; '' to disable saving raw data)
+	       'VariableRaw' = variable name for saving the raw channel data (string; default = 'dts_raw')
+	       'FileAligned' = fully qualified filename for saving aligned channel structures 
+	          (string; '' to disable saving aligned structures)
+	       'VariableAligned' = variable name for saving the aligned channel structure (string, default = 'dts_aligned')
+	       'Workflow' = MATLAB code to evaluate following a successful data harvest to perform workflow actions
+	          (string; optional)
+	       'LogOption' = options for logging a summary of operations:
+	          'file' = save a log of operations to a variable 'log' in the 'FileRaw' file (default)
+	          'email' = email a log of operations the the address specified in 'Email' (see 'sendmail' help for setup)
+	          'file,email' = save a log to both disk and email
+	          '' = do not log operations
+	       'Email' = email address to use if 'LogOption' includes an 'email' option
+	       'Console' = option to display status messages on the computer console:
+	          'all' = display all harvest status messages (default)
+	          'error' = only display error messages
+	          '' = do not display console messages
+	       'LastDate' = date of last data retrieved (MATLAB serial data or date string; use [] to request 
+	          all available data on the first harvest)
+	       'Log' = harvest operations log (automatically assigned by DTharvest.m)
+	 
+	 notes:
+	   1) inputs fn, period and time_offset are provided for convenience when instantiating an options
+	      structure for DTharvest.m; if they are not used then corresponding fields should be filled 
+	      in manually before calling DTharvest.m, along with other options
+	   2) date/time patterns within square brackets can be included in FileRaw and FileAligned
+	      to automate date-based file management (e.g. 'met_[yyyymmdd].mat', where yyyymmdd is converted
+	      to the current date when the harvest is run)
+	   3) Workflow code can contain tokens for FileRaw, VariableRaw, FileAligned and VariableAligned e.g.
+	      'vars = load(''[FileAligned]''); data = vars.[VariableAligned]; plot(data.Date,data.Channel1,'bd');'
+	   4) Workflow code can also reference the variables 's_aligned' and 's_raw' containing aligned and raw
+	      channel structures from DTlatest.m, resp.
+	 
+	 
+	 author:
+	   Wade Sheldon
+	   Department of Marine Sciences
+	   University of Georgia
+	   Athens, GA 30602-3636
+	   sheldon@uga.edu
+	 
+	 Copyright 2013 Open Source Data Turbine Initiative
+	 
+	 Licensed under the Apache License, Version 2.0 (the "License");
+	 you may not use this file except in compliance with the License.
+	 You may obtain a copy of the License at
+	 
+	     http://www.apache.org/licenses/LICENSE-2.0
+	 
+	 Unless required by applicable law or agreed to in writing, software
+	 distributed under the License is distributed on an "AS IS" BASIS,
+	 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	 See the License for the specific language governing permissions and
+	 limitations under the License.
+	 
+	 last modified: 08-May-2013
+
+------------------------------------------------------------------------------------------------------------------------
+
+date2sec.m --
+
+	 Calculates cumulative seconds past a reference date from a MATLAB serial date
+	 
+	 syntax: sec = date2sec(dt,refdate,time_offset)
+	 
+	 input:
+	    dt = array of date strings or MATLAB serial dates from datenum - required
+	    refdate = numeric or string reference date at which sc = 0 
+	        (e.g. '1/1/1970' for Unix time) - required
+	    time_offset = time offset in hours for local<->UTC conversion 
+	        (number; optional; default = 0 for none)
+	 
+	 output:
+	    sc = seconds since the reference date
+	 
+	 notes:
+	    1) seconds will be fixed at 5 decimal places to remove arbitrary digits from floating-point math
+	    2) time_offset will be converted to days and added to dt to support conventional UTC corrections
+	       (e.g. use time_offset = -5 to adjust a date in UTC to EST (UTC-05:00), and use 
+	        time_offset = 5 to convert from EST to UTC)
+	 
+	 author:
+	   Wade Sheldon
+	   Department of Marine Sciences
+	   University of Georgia
+	   Athens, GA 30602-3636
+	   sheldon@uga.edu
+	 
+	 Copyright 2013 Open Source Data Turbine Initiative
+	 
+	 Licensed under the Apache License, Version 2.0 (the "License");
+	 you may not use this file except in compliance with the License.
+	 You may obtain a copy of the License at
+	 
+	     http://www.apache.org/licenses/LICENSE-2.0
+	 
+	 Unless required by applicable law or agreed to in writing, software
+	 distributed under the License is distributed on an "AS IS" BASIS,
+	 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	 See the License for the specific language governing permissions and
+	 limitations under the License.
+	 
+	 last modified: 08-May-2013
+
+------------------------------------------------------------------------------------------------------------------------
+
+sec2date.m --
+
+	 Calculates a MATLAB serial date from cumulative seconds past a reference date
+	 
+	 syntax: dt = sec2date(sc,refdate,time_offset)
+	 
+	 input:
+	    sc = array of seconds past the base date (numeric; required)
+	    refdate = numeric or string reference date at which sc = 0 
+	        (e.g. '1/1/1970' for Unix time) - required
+	    time_offset = time offset in hours for local<->UTC conversion 
+	        (number; optional; default = 0 for none)
+	 
+	 output:
+	    dt = array of MATLAB serial dates (numeric)
+	 
+	 notes:
+	    1) time_offset will be converted to days and added to dt to support conventional UTC corrections
+	       (e.g. use time_offset = -5 to adjust a date in UTC to EST (UTC-05:00), and use 
+	        time_offset = 5 to convert from EST to UTC)
+	 
+	 author:
+	   Wade Sheldon
+	   Department of Marine Sciences
+	   University of Georgia
+	   Athens, GA 30602-3636
+	   sheldon@uga.edu
+	 
+	 Copyright 2013 Open Source Data Turbine Initiative
+	 
+	 Licensed under the Apache License, Version 2.0 (the "License");
+	 you may not use this file except in compliance with the License.
+	 You may obtain a copy of the License at
+	 
+	     http://www.apache.org/licenses/LICENSE-2.0
+	 
+	 Unless required by applicable law or agreed to in writing, software
+	 distributed under the License is distributed on an "AS IS" BASIS,
+	 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	 See the License for the specific language governing permissions and
+	 limitations under the License.
+	 
+	 last modified: 08-May-2013
+
+------------------------------------------------------------------------------------------------------------------------
+
+getUTCOffset.m --
+
+	 Calculates the offset of the computer clock from UTC based on time zone settings
+	 
+	 syntax: offset = getUTCOffset()
+	 
+	 input:
+	    none
+	 
+	 output:
+	    offset = UTC offset in hours
+	 
+	 author:
+	   Wade Sheldon
+	   Department of Marine Sciences
+	   University of Georgia
+	   Athens, GA 30602-3636
+	   sheldon@uga.edu
+	 
+	 Copyright 2013 Open Source Data Turbine Initiative
+	 
+	 Licensed under the Apache License, Version 2.0 (the "License");
+	 you may not use this file except in compliance with the License.
+	 You may obtain a copy of the License at
+	 
+	     http://www.apache.org/licenses/LICENSE-2.0
+	 
+	 Unless required by applicable law or agreed to in writing, software
+	 distributed under the License is distributed on an "AS IS" BASIS,
+	 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	 See the License for the specific language governing permissions and
+	 limitations under the License.
+	 
+	 last modified: 08-May-2013
+
+------------------------------------------------------------------------------------------------------------------------
+
+fillDateTokens.m --
+
+	 Replaces date/time field tokens in strings with current date/time from the system clock
+	 
+	 syntax: str2 = fillDateTokens(str)
+	 
+	 input:
+	   str = string containing date/time tokens in square brackets (e.g. 'met_data_[yyyymmdd].mat')
+	 
+	 output:
+	   str2 = updated string with date/time tokens resolved
+	 
+	 notes:
+	   1) date/time tokens must be enclosed in square brackets (e.g. 'loggerfile_[yyyymmdd].mat')
+	   2) multiple date/time tokens can be included in str (e.g. 'loggerfile_[yyyymmdd]_[HHMM].mat')
+	   3) see 'datestr' help for supported tokens (e.g. yyyy = year, mm = numeric month,
+	      mmm = 3-letter month, dd = day, HH = hour, MM = minute)
+	   4) if no date tokens are present or if calls to datestr() return an error for text within
+	      brackets the unmodified string will be returned as str2
+	 
+	 author:
+	   Wade Sheldon
+	   Department of Marine Sciences
+	   University of Georgia
+	   Athens, GA 30602-3636
+	   sheldon@uga.edu
+	 
+	 Copyright 2013 Open Source Data Turbine Initiative
+	 
+	 Licensed under the Apache License, Version 2.0 (the "License");
+	 you may not use this file except in compliance with the License.
+	 You may obtain a copy of the License at
+	 
+	     http://www.apache.org/licenses/LICENSE-2.0
+	 
+	 Unless required by applicable law or agreed to in writing, software
+	 distributed under the License is distributed on an "AS IS" BASIS,
+	 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	 See the License for the specific language governing permissions and
+	 limitations under the License.
+	 
+	 last modified: 08-May-2013

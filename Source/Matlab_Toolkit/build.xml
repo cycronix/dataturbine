@@ -1,0 +1,51 @@
+<!-- Name: build.xml
+     By:   Ian Brown
+     Date: 06/18/2004
+
+     Description:
+         This file is the primary Ant build file for the RBNB Matlab interface.
+-->
+
+<project name="MATLAB" default="library" basedir=".">
+
+ <!-- Import the standard definitions (properties). -->
+ <import file="../definitions.xml" />
+
+ <!-- Initialize by setting the timestamp. -->
+ <target name="init">
+  <tstamp />
+  <buildnumber />
+ </target>
+
+
+ <!-- No-Op compile target
+  -->
+ <target name="compile" depends="init">
+ </target>
+
+ <!-- Copy the Matlab .m, and related files into the library -->
+ <target name="library" depends="compile">
+  <mkdir dir="${rbnb.librarydir}/Matlab_Toolkit" />
+  <mkdir dir="${rbnb.librarydir}/Matlab_Toolkit/Core" />
+  <mkdir dir="${rbnb.librarydir}/Matlab_Toolkit/Extras" />
+  <copy todir="${rbnb.librarydir}/Matlab_Toolkit/Core">
+   <fileset dir="${rbnb.sourcedir}/Matlab_Toolkit/Core"
+            includes="*" />
+  </copy>
+  <copy todir="${rbnb.librarydir}/Matlab_Toolkit/Extras">
+   <fileset dir="${rbnb.sourcedir}/Matlab_Toolkit/Extras"
+            includes="*" />
+  </copy>
+  <copy file="README.txt" todir="${rbnb.librarydir}/Matlab_Toolkit"/>
+ </target>
+
+ <!-- Cleans out all compiled and library files for the Matlab
+      project.
+   -->
+ <target name="clean">
+  <delete file="${rbnb.librarydir}/Matlab_Toolkit/Core" />
+  <delete file="${rbnb.librarydir}/Matlab_Toolkit/Extras" />
+  <delete file="${rbnb.librarydir}/Matlab_Toolkit" />
+ </target>
+ 
+</project>

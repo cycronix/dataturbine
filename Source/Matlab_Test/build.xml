@@ -15,39 +15,39 @@
  <target name="init">
   <tstamp />
   <buildnumber />
-  <mkdir dir="${rbnb.classesdir}/Matlab" />
+  <mkdir dir="${rbnb.classesdir}/Matlab_Test" />
  </target>
 
  <!-- Compile the Matlab Java source code and place the results in the Matlab
       classes directory.  References the Matlab class files for dependencies.
   -->
  <target name="compile" depends="init">
-  <javac destdir="${rbnb.classesdir}/Matlab"
+  <javac destdir="${rbnb.classesdir}/Matlab_Test"
   	 source="${rbnb.javaver}"
 	 target="${rbnb.javaver}">
-   <src path="${rbnb.sourcedir}/Matlab" />
-   <classpath path="${rbnb.librarydir}/rbnb.jar:${rbnb.classesdir}/Matlab" /> 
+   <src path="${rbnb.sourcedir}/Matlab_Test" />
+   <classpath path="${rbnb.librarydir}/rbnb.jar:${rbnb.classesdir}/Matlab_Test" /> 
   </javac>
  </target>
 
  <!-- Copy the Matlab .m, README.txt, and class files into the library. -->
  <target name="library" depends="compile">
-  <mkdir dir="${rbnb.librarydir}/Matlab" />
-  <copy todir="${rbnb.librarydir}/Matlab">
-   <fileset dir="${rbnb.sourcedir}/Matlab"
+  <mkdir dir="${rbnb.librarydir}/Matlab_Test" />
+  <copy todir="${rbnb.librarydir}/Matlab_Test">
+   <fileset dir="${rbnb.sourcedir}/Matlab_Test"
             includes="*.m" />
-   <fileset dir="${rbnb.classesdir}/Matlab"
+   <fileset dir="${rbnb.classesdir}/Matlab_Test"
             includes="*.class" />
   </copy>
-  <copy file="README.txt" todir="${rbnb.librarydir}/Matlab"/>
+  <copy file="README.txt" todir="${rbnb.librarydir}/Matlab_Test"/>
  </target>
 
  <!-- Cleans out all compiled and library files for the Matlab
       project.
    -->
  <target name="clean">
-  <delete dir="${rbnb.classesdir}/Matlab" />
-  <delete file="${rbnb.librarydir}/Matlab" />
+  <delete dir="${rbnb.classesdir}/Matlab_Test" />
+  <delete file="${rbnb.librarydir}/Matlab_Test" />
  </target>
  
 </project>
