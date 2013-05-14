@@ -26,7 +26,37 @@
 <H1>RBNB Release Notes</H1>
 <H1>RBNB V3.3 Release Notes</H1>
 <H2 CLASS="western">V3.2 to V3.3B1 Changes</H2>
-<P STYLE="margin-bottom: 0.1in">V3.3B1 released 05/31/2013.</P>
+<P STYLE="margin-bottom: 0.1in">V3.3B1 released on 05/31/2013.</P>
+<H3 CLASS="western">Server</H3>
+<UL>
+	<LI><P STYLE="margin-bottom: 0.08in; line-height: 100%">Check for "pingValue" overflow (in ACO.java); reset pingValue to 0 when it reaches its max value.</P>
+	<LI><P STYLE="margin-bottom: 0.08in; line-height: 100%">Ensure filesystem sync on archive file updates (Source/DataTurbine/com/rbnb/api/FileSet.java).</P>
+</UL>
+<H3 CLASS="western">OSDT-Matlab interface</H3>
+<UL>
+	<LI><P STYLE="margin-bottom: 0.08in; line-height: 100%">Add "Matlab_Toolkit", a new Matlab/DataTurbine interface library.</P>
+	<LI><P STYLE="margin-bottom: 0.08in; line-height: 100%">Moved older Matlab source to "Matlab_Test" (a more appropriate name, as its primary utility is for regression testing).</P>
+</UL>
+<H3 CLASS="western">Applications</H3>
+<UL>
+	<LI><P STYLE="margin-bottom: 0.08in; line-height: 100%">New utility: Source/Applications/PlugIns/dtList.java plugin provides text list of DT sources and channels</P>
+	<LI><P STYLE="margin-bottom: 0.08in; line-height: 100%">New utility: Source/Applications/Examples/dtParseFile.java reads text file line by line to DT source</P>
+	<LI><P STYLE="margin-bottom: 0.08in; line-height: 100%">Applications requiring JMF (Java Media Framework) have been moved to separate folder, Source/Applications_JMF.  They are not built by default, as they require a separate download of the JMF library, which is getting hard to find for some modern OS versions.</P>
+</UL>
+<H3 CLASS="western">Version control using Bitbucket and Git</H3>
+<P STYLE="margin-bottom: 0.1in">This is the first full release conducted since
+transitioning OSDT to Bitbucket and Git for version control. A few tweaks to
+support this change:</P>
+<UL>
+	<LI><P STYLE="margin-bottom: 0.08in; line-height: 100%">Added "README.txt" to OSDT repository's root directory; the content of this file is displayed at the main OSDT repository web page in Bitbucket</P>
+	<LI><P STYLE="margin-bottom: 0.08in; line-height: 100%">Added ".gitignore" file to OSDT repository's root directory; this file specifies certain files and directories that shouldn't be added to the repository.</P>
+	<LI><P STYLE="margin-bottom: 0.08in; line-height: 100%">Removed build.number files from repository.</P>
+</UL>
+<H3 CLASS="western">Miscellaneous</H3>
+<UL>
+	<LI><P STYLE="margin-bottom: 0.08in; line-height: 100%">Added compiler flag (in Source/Applications/PlugIns/build.xml) to allow build under JDK7; a quasi-obsolete reference to com.sun.image.codec.jpeg library requires this patch to compile.</P>
+	<LI><P STYLE="margin-bottom: 0.08in; line-height: 100%">Removed some strange non-printing characters from comments within source code. Apparently benign on some systems, was causing compile errors on JDK7.</P>
+</UL>
 <H1>RBNB V3.2 Release Notes</H1>
 <H2 CLASS="western">V3.2 Production Release</H2>
 <P STYLE="margin-bottom: 0.1in">V3.2 released 09/28/2012. This
