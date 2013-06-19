@@ -105,7 +105,7 @@ public class dtList {
 						Iterator<ChannelTree.Node> itree = ctree.iterator();
 						while(itree.hasNext()) {
 							ChannelTree.Node node = itree.next();
-							if(node.getType() == ChannelTree.SOURCE) {
+							if((node.getType() == ChannelTree.SOURCE) || (node.getType() == ChannelTree.PLUGIN)) {
 								resp += node.getName();
 								resp += "\n";
 							}
