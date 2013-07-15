@@ -157,10 +157,22 @@ public class ResamplePlugIn extends com.rbnb.plugins.PlugInTemplate
 					for (int ii = 0; ii < npts; ++ii)
 						ddata[ii] = Array.getDouble(data, ii);
 				}
-				double[] dataOut = new double[ddata.length];
+				// pre-pad offset data to avoid filter startup transient.  MJM 7/2013
+				int padpts = ddata.length/2;
+				double[] pdata = new double[padpts+ddata.length];
+				for(int i=0; i<padpts; i++) pdata[i]=ddata[0];
+				System.arraycopy(ddata, 0, pdata, padpts, ddata.length);
+				   
+				double[] dataOut = new double[pdata.length];
 				Filter lowPass = new Filter(1.0 / ndeci);
-				lowPass.filter(ddata, dataOut);
-				data = dataOut;
+				lowPass.filter(pdata, dataOut);
+				System.arraycopy(dataOut, padpts, ddata, 0, ddata.length);
+				data = ddata;
+				
+//				double[] dataOut = new double[ddata.length];
+//				Filter lowPass = new Filter(1.0 / ndeci);
+//				lowPass.filter(ddata, dataOut);
+//				data = dataOut;
 			}		
 			
 			Object result = decimate(data, ndeci);

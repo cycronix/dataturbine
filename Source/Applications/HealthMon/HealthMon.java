@@ -67,7 +67,7 @@ public class HealthMon
     		report(delim);
     		details("Exception/Error Details:\n");
     		report("DataTurbine HealthMonitor Summary Report");
-    		report("Date:  "+new Date(Tmillis));
+    		report("Date:  "+new Date(Tmillis).toGMTString());
     		report("Server: "+server);
 
     		// Create a sink:
