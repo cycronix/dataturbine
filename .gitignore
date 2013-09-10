@@ -3,6 +3,7 @@ Distribute
 bin
 .metadata
 .project
+.classpath
 Source/*/build.number
 Source/*/*/build.number
 Source/*/*/*/build.number
