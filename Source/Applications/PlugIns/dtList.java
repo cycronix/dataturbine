@@ -138,28 +138,36 @@ public class dtList {
 						Iterator<ChannelTree.Node> itree = ctree.rootIterator();
 						while(itree.hasNext()) {
 							ChannelTree.Node node = itree.next();
-//							System.err.println("node: "+node);
 							String nodeName = node.getName();
 							if(nodeName.equals(pluginName)) continue;		// don't list yourself
-							if(node.getType() == ChannelTree.SOURCE) {
+//							if(node.getType() == ChannelTree.SOURCE) {
+							if(node.getType() == ChannelTree.SOURCE || node.getType() == ChannelTree.PLUGIN) {
 								resp += (nodeName + "\n");							
 							}
+/*// following needs work					
 							else if(node.getType() == ChannelTree.PLUGIN) {	// recurse one level into plugins
+								System.err.println("plugin: "+nodeName);
+
 								ChannelMap pget = new ChannelMap();
+//								pget.Add(nodeName+"/...");
+								System.err.println("get: "+pget);
 								sink.RequestRegistration(pget);		// get plugin channels
 								pget = sink.Fetch(60000);	
+								System.err.println("got: "+pget);
+
 								ChannelTree ptree = ChannelTree.createFromChannelMap(pget);
 								@SuppressWarnings("unchecked")
-								Iterator<ChannelTree.Node> iptree = ptree.rootIterator();
+								Iterator<ChannelTree.Node> iptree = ptree.iterator();
 								while(iptree.hasNext()) {
 									ChannelTree.Node pnode = iptree.next();
-//									System.err.println("pnode: "+pnode);
+									System.err.println("pnode: "+pnode);
 									String pnodeName = pnode.getName();
 									if(pnode.getType() == ChannelTree.SOURCE) {
 										resp += (nodeName + "/" + pnodeName + "\n");							
 									}
 								}
 							}
+*/
 						}
 					}
 					else {			// channel list request	
@@ -197,6 +205,7 @@ public class dtList {
 				}
 
 				if(picm.NumberOfChannels()==0) {			// another try to prevent long delays
+					System.err.println("oops, empty request (nchan=0)");
 					picm.Add("reply");
 					picm.PutDataAsString(0,"<No Data>");
 				}
@@ -205,8 +214,9 @@ public class dtList {
 	    	} catch(Exception e) {
 				System.err.println("oops, exception: "+e);
 				try{
-					picm.PutDataAsString(0,"error: "+e);  plugin.Flush(picm);
 					Thread.sleep(1000);
+					picm.PutDataAsString(0,"error: "+e);  
+					plugin.Flush(picm);
 				} catch(Exception ee){};	// no busy loop
 //				System.exit(0);		// no infinite loops
 			}
