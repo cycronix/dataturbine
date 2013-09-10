@@ -332,14 +332,7 @@ public class PlotsContainer extends JComponent implements ActionListener, Compon
 		//EMF 8/23/05: redo layout
 		if (dm==LayoutCubby.TableMode) tile(true);
 		else tile(false);
-		// JPW 7/26/2013:
-		//     calling validateTree() was causing an exception to be
-		//     thrown when run under Java 1.7; see the following for a
-		//     description of the issue:
-		//     http://stackoverflow.com/questions/9758069/validatetree-in-java-7-x-doesnt-work-in-java-6-x-was-fine
-		//     The fix was to call validate() instead.
-		// validateTree();
-		validate();
+		validateTree();
 		}
 	
 	//labelDisplayGroups method - sets labels on buttons
