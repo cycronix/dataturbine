@@ -47,7 +47,8 @@ import java.io.IOException;
  *   Date      By	Description
  * MM/DD/YYYY
  * ----------  --	-----------
- * 10/03/2013  MJM  	deleteArchive: try-again if file delete fails 
+ * 08/17/2013  JPW/MJM	moveDownFromStandard:  resolve wildcard request if needed
+ * 10/03/2012  MJM  	deleteArchive: try-again if file delete fails 
  * 03/15/2011  MJM  	Allow reconnect to replace old source in special case of "dot" .fileName
  * 01/14/2011  MJM  	Added lock release on prolonged blocking waits
  * 10/18/2010  MJM		Explicit buffer size in BufferedReader
@@ -4763,6 +4764,7 @@ private boolean alreadyReset=false;
      *   Date      By	Description
      * MM/DD/YYYY
      * ----------  --	-----------
+     * 2013-08-17  JPW: resolve wildcard request if needed
      * 07/13/2004  INB	Added length check to "..." substring comparison to
      *			ensure that no string index out of range errors can
      *			occur.  Eliminated check for RBO name in the channel
@@ -4821,6 +4823,12 @@ private boolean alreadyReset=false;
 		Rmap currentRequest = unsatisfiedI.getRequest();
 		String[] channelNames = currentRequest.extractNames();
 
+		// JPW 2013-08-17: resolve wildcard request if needed
+		// MJM 2013-09-06: insert fix
+		if ( (channelNames.length == 1) && (channelNames[0].equals("/*")) ) {
+		    // This should match all channel names
+		    channelNames[0] = "...";
+		}
 		boolean doAll = false,
 		    doSome = false;
 		java.util.Vector requestVector = new java.util.Vector();

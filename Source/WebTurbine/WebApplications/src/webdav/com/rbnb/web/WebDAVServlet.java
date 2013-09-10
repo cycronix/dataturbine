@@ -86,6 +86,7 @@ import org.apache.catalina.util.XMLWriter;
 // 2008/05/05  MJM	Added auto-connect to detached source logic
 // 2008/05/28  MJM	Tweeked reconnect logic (restored the delete zero-file logic)
 // 2008/07/31  WHF  Fixed delete of original file on MOVE; added deleteNode().
+// 2013/09/03  MJM  Added f=b for fetching both time and data single request
 //
 
 /**
@@ -1273,6 +1274,24 @@ if (debug) System.err.println("Last-Modified (data): "+requestDate);
 				res.setContentLength(b.length);
 				os.write(b);
 			}
+		}	
+			//-------------
+			// Time
+		else if(fetchtype == conn.reqParam.FETCH_BOTH) {		// MJM 9/13
+				double[] t = c.GetTimes(0); //double[]
+				String datastring = convertToString(c);			// convert data to string
+				String[] datavals = datastring.split("\n");		// re-split to array (NG with multi-line strings)
+				if(conn.reqParam.datatype==ChannelMap.TYPE_STRING){
+					PrintWriter out = res.getWriter();
+					res.setContentType("text/html");
+					for(int i=0;i<t.length;i++) {
+						out.println(t[i]+","+datavals[i]);
+					}
+				} else {
+					res.setContentType("text/html");
+					PrintWriter out = res.getWriter();
+					out.println("Unsupported fetch type (binary time + data)");
+				}
 		}
 	} // end getFile()
 

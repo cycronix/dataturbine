@@ -44,6 +44,7 @@ function testrbnb(host)
   testdetach(host);
   testreattach(host);
   testpw(host);
+  testoldest(host);
   
 %  testarc2(varargin{:});
 %  testmulti(varargin{:});

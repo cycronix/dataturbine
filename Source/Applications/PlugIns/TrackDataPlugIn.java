@@ -87,6 +87,8 @@ import com.rbnb.utility.Utility;
  *   Date      By	Description
  * MM/DD/YYYY
  * ----------  --	-----------
+ * 2013/07/26  MJM  added convert feet to meters altitude conversion (GE presumes meters)
+ * 2013/07/25  MJM	added noise-rejection filter (reject zero lat/lon/alt "drop out" values)
  * 2008/04/08  WHF      Corrected heading calculation.
  * 2008/03/24  JPW	In addTrackChans(), for pseudo-alt, when defining the
  * 			source channel name, don't prepend  remoteSourceI onto
@@ -209,6 +211,12 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
     // Perform geo-filtering?
     private boolean bGeoFilter = false;
     
+    // perform noise-rejection?
+    private boolean bRejectNoise = false;
+    
+    // perform feet to meters altitude conversion?
+    private boolean bConvertMeters = false;
+    
     // BoundingBox for filtering output
     private BoundingBox boundingBox = null;
     
@@ -329,6 +337,12 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
 	    //
 	    if (ah.checkFlag('g')) bShowGUI=false;
 	    
+	    // 'r' - noise rejection filter
+	    if (ah.checkFlag('r')) bRejectNoise=true;
+
+	    // 'm' - convert altitude feet to meters
+	    if (ah.checkFlag('m')) bConvertMeters=true;
+	    
 	    //
 	    // 'h' Help
 	    //
@@ -342,6 +356,8 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
 		System.err.println("   -f <config file>");
 		System.err.println("       default: TrackResources/TrackConfig.txt");
 		System.err.println("   -g (do not display GUI)");
+		System.err.println("   -r (reject filter out zero points)");
+		System.err.println("   -m (convert altitude from feet to meters)");
 		System.err.println("   -h (display this help message)");
 		System.err.println("   -n <PlugIn name>");
 		System.err.println("       default: TrackData");
@@ -445,7 +461,7 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
 		tolerance);
 	}
 	System.err.println("Desired PlugIn name: " + pluginName);
-	System.err.println("RBNB Fetch timeout: " + timeout);
+//	System.err.println("RBNB Fetch timeout: " + timeout);
 	
 	// Read the configuration file
 	try {
@@ -814,9 +830,7 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
 	    picm.PutMime(0,"text/xml");
 	}
 	plugin.Flush(picm);
-	System.err.println(
-	    (new Date()).toString() +
-	    "  Responded to registration request.");
+//	System.err.println((new Date()).toString() +"  Responded to registration request.");
     }	
       
     /**
@@ -2076,6 +2090,7 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
      *   Date      By	Description
      * MM/DD/YYYY
      * ----------  --	-----------
+     * 07/25/2013  MJM  Added noise-rejection logic (reject 0 alt/lon/lat)
      * 02/21/2008  WHF  Refactored; added pitch and roll.
      * 11/09/2006  JPW  Ancillary data is now stored in arrays
      * 11/08/2006  JPW	Add support for new ancillary chans: speed and heading
@@ -2566,10 +2581,55 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
 		"\tnumber of alt/lat/lon points (post-filtering): " + numPts);
 	}
 	
+	if(bRejectNoise) rejectNoise();			// convert altitude to meters
+	if(bConvertMeters) convertMeters();		//  Noise rejection check (smooth across zero-points)
+//	System.err.println("bRejectNoise: "+bRejectNoise+", bConvertMeters: "+bConvertMeters);
 	return true;
 	
     }
+  
+    /**
+     * Convert feet to meters altitude (GE presumes meters)
+     * @since 07/26/2013
+     */
+    /*
+     *   Date      By	Description
+     * MM/DD/YYYY
+     * ----------  --	-----------
+     * 07/26/2013  MJM  Created. 
+     */
+    private void convertMeters()
+    {
+    	int numPts = alt.length;
+    	int i;
+    	for(i=0; i<numPts; i++) {
+    		alt[i] *= 0.3048;		// feet to meters conversion
+    	}
+    	
+    }
     
+    /**
+     * Noise (zero) rejection
+     * @since 07/25/2013
+     */
+    /*
+     *   Date      By	Description
+     * MM/DD/YYYY
+     * ----------  --	-----------
+     * 07/25/2013  MJM  Created. 
+     */
+    private void rejectNoise()
+    {
+    	int numPts = alt.length;
+    	int i;
+    	for(i=1; i<numPts; i++) {
+    		if(alt[i] == 0.) alt[i] = alt[i-1];
+    		if(lat[i] == 0.) lat[i] = lat[i-1];
+    		if(lon[i] == 0.) lon[i] = lon[i-1];
+    	}
+    	
+    }
+      
     /**
       * Returns true if array lengths are logical.
       * @since 02/27/2008

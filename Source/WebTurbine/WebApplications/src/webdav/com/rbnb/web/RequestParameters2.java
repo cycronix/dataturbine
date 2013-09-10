@@ -38,6 +38,7 @@ import java.util.TimeZone;
 //     string now always forwarded.
 // 2007/04/20  WHF  Added plug-in-option parsing.
 // 2011/02/15  MJM  Added ISO8601 time parsing
+// 2013/09/03  MJM  Added FETCH_BOTH for fetching both time and data single request
 
 public class RequestParameters2 implements Cloneable
 {
@@ -131,7 +132,8 @@ public class RequestParameters2 implements Cloneable
 								FETCH_SIZE=3,
 								FETCH_DATATYPE=4,
 								FETCH_MIME=5,
-								FETCH_INFO = 6;
+								FETCH_INFO = 6,
+								FETCH_BOTH = 7;		// MJM 9/13:  fetch both data and time
 						
 	/**
 	  * Now loaded from server properties.
@@ -174,6 +176,8 @@ public class RequestParameters2 implements Cloneable
 			fetchtype=FETCH_MIME;
 		else if ("info".equals(toFetch)||"i".equals(toFetch))
 			fetchtype = FETCH_INFO;
+		else if ("both".equals(toFetch)||"b".equals(toFetch))			// MJM 9/13
+			fetchtype=FETCH_BOTH;
 		else throw new IllegalArgumentException("Fetch type \""+toFetch
 			+"\" not recognized.");
 	}
