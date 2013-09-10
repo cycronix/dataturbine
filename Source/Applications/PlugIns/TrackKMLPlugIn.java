@@ -112,6 +112,8 @@ import com.rbnb.kml.*;
  *   Date      By	Description
  * MM/DD/YYYY
  * ----------  --	-----------
+ * 2013/07/25  MJM	updated URL reference for DataTurbine site
+ * 2013/07/19  MJM  improved LookAt to work with GE browser plugin
  * 2008/03/10  WHF      Moved calculateHeading() and validDataPoint() to 
  *                      TrackDataPlugIn.
  * 2008/02/28  WHF      PseudoAlt now in its own virtual channel.
@@ -261,7 +263,7 @@ public class TrackKMLPlugIn implements ActionListener, ItemListener {
     
     // Elevation offset (in meters) for the view from the current UAV position;
     // this can be specified by the "-e" command line option.
-    private double viewpointElevationOffset = 5000.0;
+    private double viewpointElevationOffset = 20000.0;
     // No longer have a viewpoint text field
     // private TextField viewpointElevationOffsetTF = null;
     
@@ -1858,9 +1860,7 @@ public class TrackKMLPlugIn implements ActionListener, ItemListener {
 		    picm.PutMime(0,"text/xml");
 		}
 		plugin.Flush(picm);
-		System.err.println(
-		    (new Date()).toString() +
-		    "  Responded to registration request.");
+//		System.err.println((new Date()).toString() +"  Responded to registration request.");
 		continue;
 	    }
 	    
@@ -2745,6 +2745,17 @@ public class TrackKMLPlugIn implements ActionListener, ItemListener {
 	if (pAlt == null) {
 	    
 	    kmlSB.append(
+	    // MJM: LookAt needs to be outside Placemark
+	    "<LookAt>\n" +
+		    "<longitude>" + lastLonStr + "</longitude>\n" +
+		    "<latitude>"  + lastLatStr + "</latitude>\n" +
+		    "<altitude>"  + lastAltStr + "</altitude>" +		// MJM add altitude, otherwise view goes into ground
+		    "<altitudeMode>absolute</altitudeMode>" +
+		    "<range>" + (viewpointElevationOffset + alt[numPts - 1]) + "</range>\n" +
+//		    "<heading>0</heading>\n" +
+//		    "<tilt>0</tilt>\n" +
+	    "</LookAt>\n" +	
+	
 		"<Placemark id=\"" + trackName + "\">\n" +
 		
 		"<Style id=\"" + styleID + "\">\n" +
@@ -2820,8 +2831,9 @@ public class TrackKMLPlugIn implements ActionListener, ItemListener {
 		// System.currentTimeMillis() +
 		// "\"></center>" +
 		"<p>For more information, go to:\n" +
-		"http://rbnb.creare.com" +
-		// Can't display the png image; display jpg instead
+//		"http://rbnb.creare.com" +			// no longer maintained
+		"http://dataturbine.org" +
+ 		// Can't display the png image; display jpg instead
 		// "<center><Img src=\"http://analysis.creare.com/rbnbNet/Analysis/PNGPlugIn/NOAADEMO/LN-100G Altitude@d=1000\"></center>]]></description>\n" +
 		// NOTE: Add URL "i=X" munge so the most recent picture is always returned (a cached copy isn't displayed instead)
 		// "<center><Img src=\"http://rbnb.creare.com:8080/rbnbNet/Creare/sdp/ThumbNail/Video/WRBV.jpg@i=" +
@@ -2829,13 +2841,16 @@ public class TrackKMLPlugIn implements ActionListener, ItemListener {
 		// "\"></center>" +
 		"]]>\n" +
 		"</description>\n" +
+		// MJM 7/13: for proper operation in Google Maps, also need LookAt at Document level (outside PlaceMark)
 		"<LookAt>\n" +
-		"<longitude>" +
-		lastLonStr +
-		"</longitude>\n" +
-		"<latitude>" +
-		lastLatStr +
-		"</latitude>\n" +
+		"<longitude>" + lastLonStr + "</longitude>\n" +
+		"<latitude>"  + lastLatStr + "</latitude>\n" +
+		"<altitude>"  + lastAltStr + "</altitude>" +		// MJM add altitude, otherwise view goes into ground
+		"<altitudeMode>absolute</altitudeMode>" +
+//		"<range>" + (viewpointElevationOffset + alt[numPts - 1]) + "</range>\n" +
+//		"<heading>0</heading>\n" +
+//		"<tilt>0</tilt>\n" +
+		"</LookAt>\n" +
 		/*
 		 *
 		 * JPW 03/07/2006
@@ -2856,7 +2871,7 @@ public class TrackKMLPlugIn implements ActionListener, ItemListener {
 		"<heading>0</heading>\n" +
 		*
 		*/
-		"</LookAt>\n" +
+
 		"<visibility>1</visibility>\n" +
 		"<MultiGeometry>\n" +
 		"<styleUrl>#" + styleID + "</styleUrl>\n" +
