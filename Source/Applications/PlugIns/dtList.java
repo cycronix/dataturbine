@@ -70,13 +70,15 @@ public class dtList {
 	//process is to wait for request, get data from sink, convert data, send response, repeat
 	    while (true) {
 	    	try {
-	    		if(debug) System.err.println("about to fetch");
+	    		if(debug) System.err.println("\n-----------about to fetch");
 		        picm=plugin.Fetch(-1); //block until request arrives
-		        if(debug) System.err.println("got: "+picm);
+		        if(picm.NumberOfChannels()==0) {
+		        	System.err.println("oops, no channels in request");
+		        	continue;
+		        }
 		        
 				if (picm.GetRequestReference().equals("registration")) {
-//		        if(false) {
-					if(debug) System.err.println("got registration request");
+					if(debug) System.err.println("registration request (generic response)");
 					// send generic header to avoid problems
 					String result=
 						"<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n"
@@ -87,21 +89,52 @@ public class dtList {
 						+"</rbnb>\n";
 					picm.PutDataAsString(0,result);
 					picm.PutMime(0,"text/xml");
+					plugin.Flush(picm);
+					continue;
 				} else {
+			        if(debug) System.err.println("request: "+picm+", nchan: "+picm.NumberOfChannels());
 
-					
 					ChannelMap cget = new ChannelMap();
 					String rchan = picm.GetName(0);
 					String sname = new String(rchan);
+					if(debug) System.err.println("requesting chan: "+sname);
 					String resp="";
 					
+					// special case for _oldest, _newest time request
+					if(rchan.endsWith("_limits")) {
+						sname = sname.split("/",2)[0] + "/...";		// full-depth channel list this source
+						cget.Add(sname);
+//						System.err.println("sname: "+sname);
+						sink.RequestRegistration(cget);
+//						System.err.println("fetch: "+cget);
+						cget = sink.Fetch(60000);
+//						System.err.println("got: "+cget);
+						double told = 0., tnew = 0.;
+						for(int i=0; i<cget.NumberOfChannels(); i++) {
+							double tstart = cget.GetTimeStart(i);
+							double tend = tstart + cget.GetTimeDuration(i);
+//							System.err.println("tstart: "+tstart+", tend: "+tend);
+							if(i==0) { told = tstart;  tnew = tend; }
+							else {
+								if(tstart < told) told = tstart;
+								if(tend > tnew) tnew = tend;
+							}
+						}
+						String Told = new java.util.Date((long)(told*1000)).toString();
+						String Tnew = new java.util.Date((long)(tnew*1000)).toString();
+
+						resp = Told+"  -  "+Tnew;
+//						System.out.println("resp: "+resp);
+					}
 					// special case for source-list request (/*)
-					if(rchan.equals("*"))  {
-						sink.RequestRegistration(cget);		// get what was asked for
+					else if(rchan.equals("*"))  {
+						sink.RequestRegistration();		// get what was asked for
 						cget = sink.Fetch(60000);	
 						ChannelTree ctree = ChannelTree.createFromChannelMap(cget);
+//						System.err.println("itree: "+ctree);
+
 						@SuppressWarnings("unchecked")
-						Iterator<ChannelTree.Node> itree = ctree.iterator();
+						Iterator<ChannelTree.Node> itree = ctree.rootIterator();
 						while(itree.hasNext()) {
 							ChannelTree.Node node = itree.next();
 							String nodeName = node.getName();
@@ -136,29 +169,34 @@ public class dtList {
 */
 						}
 					}
-					else {					
+					else {			// channel list request	
+						if(debug) System.err.println("rchan: '"+rchan+"'");
 						if(!sname.endsWith("/")) sname += "/";
 						if(rchan.equals("*")) rchan = "/...";
 						//					if(rchan.equals("*")) rchan = "*";		// let /* mean get sources
 						if(!rchan.endsWith("*") && !rchan.endsWith("...")) rchan += "/...";
-						if(debug) System.err.println("rchan: '"+rchan+"'");
-
 						cget.Add(rchan);
 						if(debug) System.err.println("request: "+cget);
 						sink.RequestRegistration(cget);		// get what was asked for
 						cget = sink.Fetch(60000);					
 						if(debug) System.err.println("got: "+cget);					
+						if(cget.NumberOfChannels()==0) {
+							System.err.println("no channels!");
+							picm.Add("reply");
+							resp="<No Channels>";
+//							continue;
+						} else {
+							int ngot = cget.NumberOfChannels();
 
-						int ngot = cget.NumberOfChannels();
-
-						for(int i=0; i<ngot; i++) {
-							resp += cget.GetName(i);
-							resp = resp.replace(sname, "");			// strip leading source name
-							//						if(getInfo) resp += ", ["+cget.GetUserInfo(i) +"]";
-							String ui = cget.GetUserInfo(i);
-							//						if(debug) System.err.println("cget("+i+").GetName: "+cget.GetName(i)+", GetUserInfo: "+ui);
-							if(getInfo && !ui.equals("")) resp += ","+ui;
-							resp += "\n";
+							for(int i=0; i<ngot; i++) {
+								resp += cget.GetName(i);
+								resp = resp.replace(sname, "");			// strip leading source name
+								//						if(getInfo) resp += ", ["+cget.GetUserInfo(i) +"]";
+								String ui = cget.GetUserInfo(i);
+								//						if(debug) System.err.println("cget("+i+").GetName: "+cget.GetName(i)+", GetUserInfo: "+ui);
+								if(getInfo && !ui.equals("")) resp += ","+ui;
+								resp += "\n";
+							}
 						}
 					}
 					
@@ -192,6 +230,7 @@ public class dtList {
 			if ((opt=ah.getOption('i')) != null) {
 				if(opt.startsWith("n")) getInfo = false;
 			}
+			if ((opt=ah.getOption('x')) != null) debug=true;
 		} catch(Exception e) {
 			System.err.println("dtList Exception: "+e);
 		}
