@@ -106,6 +106,7 @@ import java.io.PrintWriter;
  *   Date      By	Description
  * MM/DD/YYYY
  * ----------  --	-----------
+ * 07/03/2013  MJM  Avoid division by zero in SocketRate
  * 09/15/2010  MJM  Added code for RSVP parent-routing, 
  * 					i.e. not exit at startup if parent route is not available
  * 08/26/2008  MJM  Changed Metrics to use zero-duration timestamps.  
@@ -846,6 +847,7 @@ final class RBNB
      *   Date      By	Description
      * MM/DD/YYYY
      * ----------  --	-----------
+     * 07/03/2013  MJM  Avoid division by zero in SocketRate
      * 08/26/2008  MJM  Use zero-duration timestamps for reduced memory use
      * 01/16/2004  INB	Initialize the data byte sizes to 0.
      * 11/15/2002  INB	Created.
@@ -912,7 +914,11 @@ final class RBNB
 			       0,
 			       8));
 
-	    double[] socketRate = { (socketBytes[0] - metricsBytes)/duration };
+//	    double[] socketRate = { (socketBytes[0] - metricsBytes)/duration };
+	    double srate=0.;		// avoid div-by-0.  MJM 7/2/2013
+	    if(duration > 0.) srate = (socketBytes[0] - metricsBytes)/duration;
+	    double[] socketRate = { srate };
+	    	    
 	    metricsBytes = socketBytes[0];
 	    rmapR.findDescendant("/SocketRate",false).setDblock
 		(new DataBlock(socketRate,

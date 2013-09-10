@@ -46,6 +46,7 @@ package com.rbnb.api;
  *   Date      By	Description
  * MM/DD/YYYY
  * ----------  --	-----------
+ * 06/19/2013  MJM  	Check for null pointer in newServerSide()
  * 06/16/2011  JPW      In accept(), added catch SocketTimeoutException;
  *                      ServerSocket.accept() will throw this exception on
  *                      timeout.  This is a Java 1.4 feature.
@@ -891,6 +892,7 @@ class TCP
      *   Date      By	Description
      * MM/DD/YYYY
      * ----------  --	-----------
+     * 06/19/2013  MJM  Check for null pointer
      * 11/26/2007  WHF  Supports multi-homed machines.
      * 10/03/2003  INB	Set the backlog large enough to ensure that we can
      *			load all of the archives and still have a few slots
@@ -929,7 +931,8 @@ class TCP
 	//				default behavior of all local interfaces.
 	
 //	System.err.println("============getHost: "+getHost()+", getLocalHost: "+getLocalHost());
-	if(getHost().equals(getLocalHost())) {
+//	if(getHost().equals(getLocalHost())) {
+	if(getHost()==null || getHost().equals(getLocalHost())) {			// check for null pointer.  MJM 6/19/2013
 		System.err.println("ServerSocket: "+host+", listening on all interfaces...");
 		return (new java.net.ServerSocket(getPort(),backlog));
 	} else

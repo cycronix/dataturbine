@@ -293,7 +293,8 @@ final class AwaitNotification
 		   (eventsHandled < eventNumber)) {
 		wait(TimerPeriod.NORMAL_WAIT);
 		nowAt = System.currentTimeMillis();
-		if (nowAt - startAt >= TimerPeriod.LOCK_WAIT) {
+//		if (nowAt - startAt >= TimerPeriod.LOCK_WAIT) {
+		if (nowAt - startAt >= (5*TimerPeriod.LOCK_WAIT)) {	// be extra patient MJM 6/13
 		    try {
 			throw new java.lang.Exception
 			    (nowAt + " " + this +
@@ -301,7 +302,12 @@ final class AwaitNotification
 			     "for event " + eventNumber +
 			     ".  Currently at " + eventsHandled + ".");
 		    } catch (java.lang.Exception e) {
-			e.printStackTrace();
+		    	e.printStackTrace();
+		    	// MJM 5/31/2013:  attempt to break out of infinite deadlock:
+		    	System.err.println("AwaitNotification Deadlock: Forcibly clearing locks and events...");
+		    	clearEvents();  	// MJM 6/13, try for a clean slate to recover
+		    	ensureLocksCleared(toString(),"addEvent()",null,(byte) 0,0L);  // MJM
+		    	interrupt();		// MJM bail			
 		    }
 		    startAt = nowAt;
 		}
