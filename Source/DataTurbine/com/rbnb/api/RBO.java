@@ -2619,7 +2619,6 @@ private boolean alreadyReset=false;
      *   Date      By	Description
      * MM/DD/YYYY
      * ----------  --	-----------
-     * 06/19/2013  MJM	move lRCO refs inside try/catch block: can be null on reconnect errors
      * 02/11/2004  INB	Log exceptions at standard level.
      * 01/16/2004  INB	Ensure that the RCO shutdown happens before we
      *			disconnect from our parent to ensure that we properly
@@ -2680,11 +2679,12 @@ private boolean alreadyReset=false;
 		    synchronized (metricsSyncObj) {
 			RCO lRCO = getRCO();
 			setRCO(null);
-			try {			// MJM 6/2013:  move lRCO refs inside try/catch block:  can be null on reconnect errors
-				lRCO.setClientHandler(null);
+			lRCO.setClientHandler(null);
+			try {
 			    lRCO.stop();
-				metricsBytes += lRCO.bytesTransferred();
-			} catch (java.lang.Throwable e) {}
+			} catch (java.lang.Throwable e) {
+			}
+			metricsBytes += lRCO.bytesTransferred();
 		    }
 		    try {
 			lockWrite("RBO.doShutdown(keepCache)");
