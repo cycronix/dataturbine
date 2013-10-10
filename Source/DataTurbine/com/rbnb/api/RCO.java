@@ -2213,6 +2213,7 @@ abstract class RCO
 		getWriteDoor().setIdentification(this + "_write");
 
 		if ((message = receive(TimerPeriod.NORMAL_WAIT)) == null) {
+			try{Thread.sleep(20);}catch(Exception ee){};		// MJM 10/2013 avoid busy loop on errors
 		    continue;
 		}
 
