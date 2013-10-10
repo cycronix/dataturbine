@@ -58,6 +58,7 @@ import com.rbnb.utility.Utility;
  * ----------  --	-----------
  * 11/29/2006  JPW	Created.
  * 12/21/2007  MJM	Tweeked output "frames" for trimByTime mode, changed "Cancel" to "Exit" on popup dialog
+ * 9/18/13	   MJM  export user info
  *
  */
 
@@ -269,6 +270,7 @@ public class ExportToDT extends JDialog
      * MM/DD/YYYY
      * ----------  --	-----------
      * 11/29/2006  JPW  Created.
+     * 9/18/13	   MJM  export user info
      *
      */
     
@@ -318,12 +320,22 @@ private void exportData() {
 			    outMap.PutDataRef(j,inMap,i);
 			}
 	    }
+	    ChannelMap cmSinkReg = sink.getRegMap();
+	    
+	    // MJM 9/13:  export user info
 	    ChannelMap cmReg=new ChannelMap();
 	    for (int i=0;i<outMap.NumberOfChannels();i++) {
 	    	cmReg.Add(outMap.GetName(i));
+	    	if(cmSinkReg != null) {
+	    		String ui = cmSinkReg.GetUserInfo(i);
+	    		System.err.println("chan: "+i+", userinfo: "+ui+", uilen: "+ui.length());
+	    		if(ui.length() > 0) cmReg.PutUserInfo(i,ui);	// put ui in outMap vs separate regmap??		
+//	    		if(ui.length() > 0) outMap.PutUserInfo(i,ui);	// put ui in outMap vs separate regmap??		
+	    	}
+	    	else System.err.println("oops, user info not available!");
 	    }
 
-	    src.Register(cmReg);
+	    if(cmReg != null) src.Register(cmReg);		// messes up Size field (data chans look like folders)??
 	    src.Flush(outMap,true);
 	    System.err.println("Exported " + outMap);
 	    src.Detach();

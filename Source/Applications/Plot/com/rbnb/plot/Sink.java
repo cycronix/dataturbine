@@ -25,6 +25,7 @@ limitations under the License.
 //                      most recent data fetch.  It is used
 //                      by ExportData to avoid recreating one
 //                      from the V2/V1 converted structures.  Yuch.
+// 09/18/2013  MJM  new routine, getRegMap(), registration map info for export
 
 package com.rbnb.plot;
 
@@ -58,6 +59,7 @@ public Map getTimeLimits(Map inMap) {
 
     sink.RequestRegistration(cm);
     ChannelMap regMap=sink.Fetch(2000); //wait at most two seconds for an answer
+    
     ChannelMap cm2=null;
     for (int i=0;i<regMap.NumberOfChannels();i++) {
 //System.err.println(regMap.GetName(i)+" times: "+regMap.GetTimeStart(i)+" "+regMap.GetTimeDuration(i));
@@ -367,5 +369,22 @@ public ChannelMap getLastMap() {
 	return lastMap;
 }
 
+// MJM 9/18/13:  registration map info for export
+public ChannelMap getRegMap() {
+	ChannelMap regMap=new ChannelMap();
+	try {
+	    int nchan = lastMap.NumberOfChannels();
+	    for (int i=0;i<nchan;i++) {
+	      regMap.Add(lastMap.GetName(i));
+	    }
+	    
+		sink.RequestRegistration(regMap);
+		regMap=sink.Fetch(10000); //wait at most 10 seconds for an answer
+	} catch (Exception e) {
+		System.err.println("Exception in Sink.getRegMap");
+		e.printStackTrace();
+	}
+	return regMap;	
+}
 }
 
