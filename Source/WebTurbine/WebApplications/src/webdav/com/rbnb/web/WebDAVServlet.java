@@ -1562,13 +1562,14 @@ if (debug) System.err.println("registering null channel(s): "+sourceMap);
 				"/"+conn.reqParam.servlet).getChildrenMap().get(
 				conn.reqParam.source);
 		if (theSource == null || theSource.getType()!=ChannelTree.SERVER
-				&& theSource.getType()!=ChannelTree.PLUGIN)
+				&& theSource.getType()!=ChannelTree.PLUGIN)	
 			return conn; // No further processing needed.
 
 		conn.cm.Clear();
 		String toAdd;
 		if (conn.reqParam.pathHadTrailingSlash) { // wants a directory listing
-			toAdd = "/*";
+//			toAdd = "/*";
+			toAdd = "/...";		// MJM 10/13.  "/*" fails for plugin/source/*, server wants "/..."
 		} else {
 			toAdd = "";
 		}
