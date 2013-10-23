@@ -157,12 +157,13 @@ public class ResamplePlugIn extends com.rbnb.plugins.PlugInTemplate
                                         for (int ii = 0; ii < npts; ++ii)
                                                 ddata[ii] = Array.getDouble(data, ii);
                                 }
-                                // pre-pad offset data to avoid filter startup transient.  MJM 7/2013
+                        // post-pad and shift data to avoid filter startup transient and adjust for delay.  MJM 10/2013
                                 int padpts = ddata.length/2;
                                 double[] pdata = new double[padpts+ddata.length];
-                                for(int i=0; i<padpts; i++) pdata[i]=ddata[0];
-                                System.arraycopy(ddata, 0, pdata, padpts, ddata.length);
-                                   
+//                                for(int i=0; i<padpts; i++) pdata[i]=ddata[0];
+                                System.arraycopy(ddata, 0, pdata, 0, ddata.length);		// MJM 10/2013:  post pad to remove delay
+//                                System.arraycopy(ddata, 0, pdata, padpts, ddata.length);
+                        
                                 double[] dataOut = new double[pdata.length];
                                 Filter lowPass = new Filter(1.0 / ndeci);
                                 lowPass.filter(pdata, dataOut);
