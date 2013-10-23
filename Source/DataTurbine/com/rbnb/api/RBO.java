@@ -2684,9 +2684,8 @@ private boolean alreadyReset=false;
 			try {	// MJM 6/2013:  move lRCO refs inside try/catch block:  can be null on reconnect errors
 				lRCO.setClientHandler(null);
 			    lRCO.stop();
-			} catch (java.lang.Throwable e) {
-			}
-			metricsBytes += lRCO.bytesTransferred();
+				metricsBytes += lRCO.bytesTransferred();	// skootch this inside try block also MJM 10/13
+			} catch (java.lang.Throwable e) {}
 		    }
 		    try {
 			lockWrite("RBO.doShutdown(keepCache)");

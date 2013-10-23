@@ -412,6 +412,7 @@ abstract class StreamServerListener
 			    }
 			}
 		    }
+		    if(consolidated != null)	// MJM 10/13:  fail-safe
 		    consolidated.mergeWith(response);
 		}
 	    }

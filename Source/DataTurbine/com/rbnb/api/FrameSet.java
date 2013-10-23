@@ -1144,6 +1144,10 @@ final class FrameSet
 		his.seek(getHoffset());
 		dis.seek(getDoffset());
 
+		if(his == null) {	// MJM debug.  something bad happened need to throw exception
+			throw new java.io.InterruptedIOException("readfromArchive failed, null stream!");	// should get logged at RBO
+		}
+		
 		// Read the <code>FrameSet</code>.
 		if (his.readParameter(ARCHIVE_PARAMETERS) == ARC_FST) {
 		    //EMF 11/8/06: only read data if told to do so

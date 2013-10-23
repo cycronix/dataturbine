@@ -753,6 +753,9 @@ final class Door {
 			if ((nowAt = System.currentTimeMillis()) - lastAt >=
 			    TimerPeriod.LOCK_WAIT) {
 			    try {
+			    System.err.println("lockReadWrite blocked, clearing read locks and moving on!");
+			    unlockRead();			// MJM clear locks and lumber on.  10/13
+			    /*
 				throw new Exception
 				    (System.currentTimeMillis() + " " +
 				     this +
@@ -760,7 +763,9 @@ final class Door {
 				     + " waiting for read locks to " +
 				     " clear for " +
 				     Thread.currentThread());
-			    } catch (Exception e) {
+				    */
+			    } 
+			    catch (Exception e) {
 				e.printStackTrace();
 				lastAt = nowAt;
 			    }
