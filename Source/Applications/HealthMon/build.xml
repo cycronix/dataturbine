@@ -1,0 +1,58 @@
+<!-- 
+     Name: build.xml
+     By:   John Wilson
+     Date: 10/29/2010
+
+     Description:
+         This file is the primary Ant build file for the RBNB Folder
+         application.
+-->
+
+<project name="APPLICATION.FOLDER" default="library" basedir=".">
+
+ <!-- Import the standard definitions (properties). -->
+ <import file="../../definitions.xml" />
+
+ <!-- Initialize by setting the timestamp. -->
+ <target name="init">
+  <tstamp />
+  <buildnumber />
+  <mkdir dir="${rbnb.builddir}" />
+  <mkdir dir="${rbnb.classesdir}" />
+  <mkdir dir="${rbnb.classesdir}/Applications" />
+  <mkdir dir="${rbnb.classesdir}/Applications/HealthMon" />
+  <mkdir dir="${rbnb.librarydir}" />
+ </target>
+
+ <!--
+      Compile the HealthMon Java source code and place the results in the HealthMon
+      classes directory.  References the Core library and the HealthMon classes for
+      dependencies.
+  -->
+ <target name="compile" depends="init">
+  <javac destdir="${rbnb.classesdir}/Applications/HealthMon"
+         deprecation="on"
+		 debug="on"
+         source="${rbnb.javaver}"
+         target="${rbnb.javaver}">
+   <src path="${rbnb.sourcedir}/Applications/HealthMon" />
+   <classpath path="${rbnb.classesdir}/Applications/HealthMon" />
+   <classpath path="${rbnb.librarydir}/rbnb.jar" />
+  </javac>
+ </target>
+
+ <!-- Create the HealthMon jar file using the HealthMon classes. -->
+ <target name="library" depends="compile">
+  <jar destfile="${rbnb.librarydir}/healthmon.jar"
+       basedir="${rbnb.classesdir}/Applications/HealthMon"
+       manifest="Manifest"
+   />
+ </target>
+
+ <!-- Cleans out all compiled and library files for the HealthMon project. -->
+ <target name="clean">
+  <delete dir="${rbnb.classesdir}/Applications/HealthMon" />
+  <delete file="${rbnb.librarydir}/healthmon.jar" />
+ </target>
+
+</project>
