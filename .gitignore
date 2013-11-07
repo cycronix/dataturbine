@@ -4,6 +4,7 @@ bin
 .metadata
 .project
 .classpath
+.settings
 Source/*/build.number
 Source/*/*/build.number
 Source/*/*/*/build.number
