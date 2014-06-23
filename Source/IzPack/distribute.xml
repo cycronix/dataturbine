@@ -31,8 +31,9 @@
  
  <variables>
  	<!-- JPW 07/29/2011: change tomcat version from 6.0.18 to 7.0.19 -->
+ 	<!-- MJM 05/07/2014: change tomcat version from 7.0.19 to 7.0.53 -->
  	<!--variable name="TOMCATVER" value="apache-tomcat-6.0.18" /-->
- 	<variable name="TOMCATVER" value="apache-tomcat-7.0.19" />
+ 	<variable name="TOMCATVER" value="apache-tomcat-7.0.53" />
  	<variable name="DesktopShortcutCheckboxEnabled" value="true" />	
  </variables>
 
