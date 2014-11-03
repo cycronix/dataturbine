@@ -108,7 +108,8 @@
 				Windowtitle="RBNB ${rbnb.version} Java API Programmer Documentation"
 				Private="yes"
 				linksource="yes"
-				Use="yes">
+				Use="yes"
+				maxmemory="1024m">
 			<package name="com.rbnb.api" />
 			<package name="com.rbnb.sapi" />
 			<package name="com.rbnb.simpleplayer" />
