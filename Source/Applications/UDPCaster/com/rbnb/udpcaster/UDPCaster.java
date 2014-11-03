@@ -54,6 +54,7 @@ import com.rbnb.sapi.ChannelMap;
 import com.rbnb.sapi.SAPIException;
 import com.rbnb.sapi.Sink;
 import com.rbnb.utility.Utility;
+import com.rbnb.utility.SignBytes;
 
 /******************************************************************************
  * Subscribe to an RBNB channel and send the data, one frame at a time, to
@@ -72,6 +73,7 @@ import com.rbnb.utility.Utility;
  *   Date      By	Description
  * MM/DD/YYYY
  * ----------  --	-----------
+ * 10/22/2014  MJM  Add digital packet signature (password) option
  * 11/10/2010  JPW	Add decimationFactor; send out one out of every
  * 			decimationFactor fetched RBNB frames.  We send out the
  * 			very first fetched frame, followed by sending out one
@@ -205,6 +207,8 @@ public class UDPCaster implements ActionListener {
      */
     private boolean bStreamFromOldest = false;
     
+	private SignBytes signBytes=null;		// MJM Cycronix 10/1014
+	
     /**
      * GUI objects
      * <p>
@@ -280,6 +284,7 @@ public class UDPCaster implements ActionListener {
      * @param bHeadlessI          Run in headless (no GUI) mode?
      * @param bIgnoreSendErrorsI  Ignore UDP packet send errors?
      * @param decimationFactorI   Send out one out of every decimationFactorI fetched frames.
+     * @param passwordI           Optional password to generate crytographic hash to sign data packets.
      *
      * @version 11/10/2010
      */
@@ -307,9 +312,13 @@ public class UDPCaster implements ActionListener {
 		     boolean bAutostartI,
 		     boolean bHeadlessI,
 		     boolean bIgnoreSendErrorsI,
-		     int decimationFactorI)
+		     int decimationFactorI,
+		     String passwordI)
     {
 	
+    if(passwordI != null) 	signBytes = new SignBytes("SHA-1",passwordI);			// MJM Cycronix 10/2014
+    else					signBytes = null;
+    
 	bHeadless = bHeadlessI;
 	
 	bIgnoreSendErrors = bIgnoreSendErrorsI;
@@ -1225,6 +1234,10 @@ public class UDPCaster implements ActionListener {
 	    if (!bIgnoreSendErrors) {
 		throw new Exception("Error: tried to write out empty packet.");
 	    }
+	}
+	
+	if(signBytes != null) {
+		dataI = signBytes.putSigned(dataI);		// MJM Cycronix 10/2014
 	}
 	
 	DatagramPacket dp =

@@ -1,5 +1,8 @@
+
+
 /*
 Copyright 2011 Erigo Technologies LLC
+Copyright 2013 Cycronix
 
 Licensed under the Apache License, Version 2.0 (the "License"); 
 you may not use this file except in compliance with the License. 
@@ -19,32 +22,54 @@ limitations under the License.
 // 3/31/05
 // for IOScan
 
+// Added word-parsing option -w, MJM 1/31/2013
+// Added digital packet signature (password) option -p, MJM 10/22/2014
+
+
 import java.lang.NumberFormatException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Enumeration;
+import java.util.TimeZone;
 import java.util.Vector;
 
 import com.rbnb.sapi.Source;
 import com.rbnb.sapi.ChannelMap;
 import com.rbnb.utility.ArgHandler;
 import com.rbnb.utility.RBNBProcess;
+import com.rbnb.utility.SignBytes;
+
+import java.nio.ByteBuffer;
+
 
 public class UDPCapture {
 	DatagramSocket ds = null; //listen for data here
-	Source src = null; //write data here
+	Source src = null; 	//write data here
+	Source srcR = null;	// secondary raw source if -r
 	String serverAddress = "localhost:3333";
 	// JPW 07/08/08: change "name" to "srcName"
 	String srcName = new String("UDPCapture");
 	// JPW 07/08/08: add chanName
-	String chanName = new String("UDP");
+	String chanName = new String("c");
+	
 	int cache = 100;
 	String mode = new String("none");
 	int archive = 0;
 	int ssNum = 4444;
 	double lastTime = 0;
+	double packetTime = 0;
+	String wordfmt=null;
+	boolean swapflag = false;		// word order swap flag.  false = BigEndian (java default)
+	
+	int nchan=1;					// num chans for -W multiplex. nchan=0 for auto multiplex Nchan per frame
+	double deltaTime=0.;			// channel sample delta-time for multi-point frames
+	boolean doRaw=false;			// force raw output (in addition to -W words)
+	String Marker=null;				// optional prepend marker to output
 	
 	// JPW 01/12/2007: using "-i" flag, user can specify a list of IP addresses from which to accepts packets
 	Vector<InetAddress> allowedIPAddresses = null;
@@ -56,20 +81,31 @@ public class UDPCapture {
 	int packetMinSize = -1;
 	int packetMaxSize = -1;
 	
+	SignBytes signBytes = null;		// MJM Cycronix 10/2014
+	String password = null;
+
+	//--------------------------------------------------------------------------------------------------------
 	public static void main(String[] arg) {
 		new UDPCapture(arg).start();
 	}
 	
+	//--------------------------------------------------------------------------------------------------------
 	public UDPCapture(String[] arg) {
+		boolean uniqueFlag=false;
+		
 		try {
-		    	System.err.println("");
+	//	    System.err.println("");
 			ArgHandler ah=new ArgHandler(arg);
 			if (ah.checkFlag('h')) {
 				throw new Exception("show usage");
 			}
 			if (ah.checkFlag('a')) {
 				String serverAddressL=ah.getOption('a');
-				if (serverAddress!=null) serverAddress=serverAddressL;
+				if (serverAddressL!=null) serverAddress=serverAddressL;
+			}
+			if (ah.checkFlag('m')) {					// optionally prepend data marker
+				String markerL=ah.getOption('m');
+				if (markerL!=null) Marker=markerL;
 			}
 			if (ah.checkFlag('i')) {
 				String hostStr = ah.getOption('i');
@@ -93,6 +129,10 @@ public class UDPCapture {
 				    }
 				}
 			}
+			if (ah.checkFlag('j')) {
+				String ncf=ah.getOption('j');
+				if (ncf!=null) cache=Integer.parseInt(ncf);
+			}
 			if (ah.checkFlag('k')) {
 				String naf=ah.getOption('k');
 				if (naf!=null) archive=Integer.parseInt(naf);
@@ -109,6 +149,26 @@ public class UDPCapture {
 					if (archive<cache) cache=archive;
 				}
 			}
+			if (ah.checkFlag('w') || ah.checkFlag('W')) {
+				if(ah.checkFlag('W')) 	{  swapflag=false; wordfmt=ah.getOption('W'); }		// big endian (java default)
+				else					{  swapflag=true; wordfmt=ah.getOption('w'); }		// little endian (intel)
+			}
+			if(ah.checkFlag('R')) {
+				if(wordfmt != null) doRaw = true;		//  no extra effort if not in -W mode
+			}
+			if (ah.checkFlag('c')) {
+				String nc=ah.getOption('c');
+				if (nc!=null) nchan=Integer.parseInt(nc);
+			}	
+			if (ah.checkFlag('t')) {
+				String st=ah.getOption('t');
+				if (st!=null) deltaTime=Double.parseDouble(st);
+			}
+			if (ah.checkFlag('r')) {
+				String st=ah.getOption('r');
+				if (st!=null) deltaTime=1./Double.parseDouble(st);
+			}
+//			System.err.println("deltatime: "+deltaTime);
 			if (ah.checkFlag('l')) {
 				String sizeStr = ah.getOption('l');
 				// See if a ',' is separating min/max values
@@ -153,6 +213,12 @@ public class UDPCapture {
 				    srcName = nameL;
 				}
 			}
+			if (ah.checkFlag('p')) {
+				password = ah.getOption('p');
+			}
+			if (ah.checkFlag('u')) {
+				uniqueFlag = true;
+			}
 			if (ah.checkFlag('o')) {
 				String chanNameL = ah.getOption('o');
 				if (chanNameL != null) {
@@ -173,20 +239,36 @@ public class UDPCapture {
 			System.err.println(" -h                     : print this usage info");
 			System.err.println(" -a <server address>    : address of RBNB server to write packets to");
 			System.err.println("                default : localhost:3333");
+			System.err.println(" -m <Marker>            : prepend line marker string to output");
+			System.err.println("                default : none");
 			System.err.println(" -n <source name>       : name of RBNB source to write packets to");
 			System.err.println("                default : " + srcName);
 			System.err.println(" -o <channel name>      : name of RBNB channel to write packets to");
 			System.err.println("                default : " + chanName);
+			System.err.println(" -p <password>          : optional password (UDPCaster must match)");
+			System.err.println("                default : none");
+			System.err.println(" -u                     : require unique packets (along with password)");
+			System.err.println("                default : false");
 			System.err.println(" -s <server socket>     : socket number to listen for UDP packets on");
 			System.err.println("                default : 4444");
 			System.err.println(" -k <num>               : archive (disk) frames, append");
 			System.err.println(" -K <num>               : archive (disk) frames, create");
+			System.err.println(" -j <num>               : cache (RAM) frames");
 			System.err.println("                default : 0 (no archiving)");
-			System.err.println(" -i <host1[,host2,...]> : optional list of IP addresses from which packets will be accepted");
-			System.err.println(" -l <num1[,num2]>       : Optional arguments to specify the required size of received packets");
-			System.err.println("                        : Two options:");
-			System.err.println("                        : a) If only num1 is provided, this specifies the number of bytes that must be in the received packet.");
-			System.err.println("                        : b) If num1,num2 is provided, then num1 is treated as a minimum acceptable received packet size and num2 is a maximum acceptable received packet size.");
+			System.err.println(" -w <word fmt>          : j,i,I,f,F for i16,I32,I64,f32,F64 respectively");
+			System.err.println("                default : byteArray");
+			System.err.println(" -W <word fmt>          : same as -w with reverse byte order");
+			System.err.println(" -c <nchan>             : chans per multiplexed frame (-w,-W). ");
+			System.err.println("                default : default=1, nchan=0 for auto");
+			System.err.println(" -t <deltaTime>         : sampling interval for multiplexed frames (-w,-W)");
+			System.err.println("                default : default = heuristic based on packet arrival time");
+			System.err.println(" -r <sampRate>          : sample rate for multiplexed frames (-w,-W)");
+			System.err.println("                default : default = 1/deltaTime");
+			System.err.println(" -R                     : force raw output (in addition to -W words)");
+			System.err.println(" -i <host1[,host2,...]> : optional list of acceptable IP addresses from which packets will be accepted");
+			System.err.println(" -l <num1[,num2]>       : specify required size of received packets, two options:");
+			System.err.println("                        : a) If only num1 provided, specifies required packet size");
+			System.err.println("                        : b) If num1,num2 provided, specifies min,max packet size range");
 			RBNBProcess.exit(0);
 		}
 		
@@ -197,6 +279,7 @@ public class UDPCapture {
 		System.err.println("Cache size: " + cache);
 		System.err.println("Archive mode: " + mode);
 		System.err.println("Archive size: " + archive);
+		System.err.println("DataWord format: "+wordfmt);
 		if (allowedIPAddresses != null) {
 		    System.err.println("Only accept packets from the following addresses:");
 		    for (Enumeration e = allowedIPAddresses.elements(); e.hasMoreElements();) {
@@ -204,6 +287,9 @@ public class UDPCapture {
 		         System.err.println("\t" + addr.toString());
 		    }
 		}
+		
+		if(password != null) signBytes = new SignBytes("SHA-1", password, uniqueFlag);		// MJM Cycronix 10/2014
+		
 		if (packetExactSize > -1) {
 		    System.err.println("Packets must be exactly " + packetExactSize + " bytes.");
 		} else if (packetMinSize > -1) {
@@ -213,16 +299,24 @@ public class UDPCapture {
 		try {
 			ds=new DatagramSocket(ssNum); //open port for incoming UDP
 			src=new Source(cache,mode,archive);
+			
 			src.OpenRBNBConnection(serverAddress,srcName);
-                        System.err.println("\nUDPCapture opened RBNB connection to " + src.GetServerName() + "\n");
-
+            System.err.println("\nOpened RBNB connection:" + src.GetServerName() + "\n");
+            if(doRaw) { 		 // open second raw data source
+    			srcR=new Source(cache,mode,archive);
+    			srcR.OpenRBNBConnection(serverAddress,srcName+"_raw");
+                System.err.println("Secondary Raw Source:" + srcR.GetClientName() + "\n");
+            }
 		} catch (Exception e) { e.printStackTrace(); }
                 
 	}
 	
+	
+	//--------------------------------------------------------------------------------------------------------
 	public void start() {
 		try {
 			DatagramPacket dp=new DatagramPacket(new byte[65536],65536);
+			double oldTime=0.;
 			while (true) {
 				ds.receive(dp);
 				int packetSize = dp.getLength();
@@ -243,38 +337,156 @@ public class UDPCapture {
 						continue;
 					    }
 					}
-					ChannelMap[] cm=process(dp);
-					for (int i=0;i<cm.length;i++) {
-					    //System.err.println("flushing "+cm[i]);
-					    if (cm[i]!=null) src.Flush(cm[i]);
+					
+					double time=System.currentTimeMillis()/1000.0;
+					packetTime = time - oldTime;		// for estimating dt in processW()
+					oldTime = time;
+
+					if(lastTime == 0.) lastTime = time;					// startup transient
+					if(deltaTime > 0.) time = lastTime;					// force time-step to spec
+					else if (time <= lastTime) time=lastTime+0.01;		// avoid duplicate timestamps (was +0.01)
+					lastTime=time;										// over-ridden if processW with deltaTime
+
+					byte[] data = readUDP(dp);
+					if(password != null) {
+						data = signBytes.getSigned(data, password);		// MJM Cycronix 10/2014
+						if(data == null) {
+							System.err.println("UDPCapture bad signature! (discarded)");
+							continue;
+						}
 					}
+					System.err.println("received "+data.length+" bytes at "+com.rbnb.api.Time.since1970(time));
+
+					ChannelMap cm;
+					if(wordfmt==null || wordfmt.equals("")) cm=process(time,data);
+					else									cm=processW(time,data,deltaTime,wordfmt);
+					if (cm!=null) src.Flush(cm);
+					
+					if(doRaw) srcR.Flush(process(time,data));		// secondary raw data source
 				}
 			}
 		} catch (Exception e) { e.printStackTrace(); }
+		finally{ src.CloseRBNBConnection(); }
 	}
 	
+	//--------------------------------------------------------------------------------------------------------
+	// readUDP:  get UDP data into buffer 		(MJM 1/2014)
+	public byte[] readUDP(DatagramPacket dp) {
+		byte[] data=new byte[dp.getLength()];		// accessed from process() and/or processW()
+		System.arraycopy(dp.getData(),dp.getOffset(),data,0,dp.getLength());
+		return data;
+	}
+	
+	//--------------------------------------------------------------------------------------------------------
 	//method may be overridden to convert data into more meaningful values
-	public ChannelMap[] process(DatagramPacket dp) {
-		ChannelMap[] cm=new ChannelMap[1];
-		cm[0]=new ChannelMap();
+	public ChannelMap process(double time, byte[] data) {
+		ChannelMap cm=new ChannelMap();
+		cm=new ChannelMap();
 		try {
-			byte[] data=new byte[dp.getLength()];
-			System.arraycopy(dp.getData(),dp.getOffset(),data,0,dp.getLength());
-			//System.err.println("received "+new String(data));
-			// JPW 07/08/08: No longer hardwire the channel name to "UDP";
-			//               use variable chanName (which the user can set
-			//               via the "-o" command line option)
-			int idx=cm[0].Add(chanName);
-			double time=System.currentTimeMillis()/1000.0;
-			System.err.println("received "+data.length+" bytes at "+com.rbnb.api.Time.since1970(time));
-			//avoid duplicate timestamps
-			if (time <= lastTime) time=lastTime+0.01;
-			lastTime=time;
-			cm[0].PutTime(time,0);
-			//cm[0].PutTimeAuto("timeofday");
-			cm[0].PutDataAsByteArray(idx,data);
+			int idx=cm.Add(chanName);
+			cm.PutTime(time,0);
+			if(Marker == null) cm.PutDataAsByteArray(idx,data);
+			else {		// prepend Marker plus current time fields to make CSVDemux happy
+				DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");		// CSVDemux default time format
+				df.setTimeZone(TimeZone.getTimeZone("UTC"));
+				String prepend = Marker + "," + df.format(new Date()) + ",";		// marker plus time
+				byte[] prependb = prepend.getBytes();
+				byte[] concat = new byte[prependb.length + data.length];
+				System.arraycopy(prependb, 0, concat, 0, prependb.length);
+				System.arraycopy(data, 0, concat, prependb.length, data.length);
+				cm.PutDataAsByteArray(idx,concat);
+			}
 		} catch (Exception e) { e.printStackTrace(); }
 		return cm;
+	}
+	
+	//--------------------------------------------------------------------------------------------------------
+	// process into words (vs bytearray).  MJM 1/2013
+	public ChannelMap processW(double time, byte[] data, double dt, String wordfmt) {
+		ChannelMap cm=new ChannelMap();
+		try {
+//			cm.PutTime(time,0);		// move to inner loops
+
+			//cm[0].PutTimeAuto("timeofday");
+			
+			int i=0;
+			int idx;
+			java.nio.ByteOrder border = java.nio.ByteOrder.BIG_ENDIAN;
+			if(swapflag) border = java.nio.ByteOrder.LITTLE_ENDIAN;
+	    	int wsize = 4;			// word size
+	    	
+			if		(wordfmt.equals("f")) wsize = 4;
+			else if	(wordfmt.equals("F")) wsize = 8;
+			else if	(wordfmt.equals("i")) wsize = 4;
+			else if	(wordfmt.equals("I")) wsize = 8;
+			else if	(wordfmt.equals("j")) wsize = 2;
+			else if	(wordfmt.equals("J")) wsize = 2;
+			else  {
+				System.err.println("unrecognized word format!");
+				return null;
+			}
+
+			int nword = data.length / wsize;
+			int nch = nchan;
+			if(nchan == 0) 	{ nch = nword; nword = 1; }		// mux-by-1, auto-nchan
+			else  			{ nword /= nchan; }				// block-muxed, spec-nchan
+			if((dt == 0.) && (nword > 1)) dt = packetTime / nword;		// est multi-word blocks w/o spec dt (single-word blocks @ systime)
+//			System.err.println("nch: "+nch+", nword: "+nword+", dt: "+dt);
+			for(int j=0; j<nch; j++) {
+				if(nch==1) 	idx = cm.Add(chanName);
+				else		idx=cm.Add(cname(j));
+				double t = time;
+				for(i=0; i<nword; i++) {
+					cm.PutTime(t,0);
+					int ipt = j*nword + i;
+					if(wordfmt.equals("f")) {
+						float  dd[] = new float[1];
+						dd[0] = ByteBuffer.wrap(data, ipt*4, 4).order(border).getFloat();
+						cm.PutDataAsFloat32(idx,dd);
+					}
+					else if	(wordfmt.equals("F")) {
+						double dd[] = new double[1]; 
+						dd[0] = ByteBuffer.wrap(data, ipt*8, 8).order(border).getDouble();
+//						dd[0]=buf.getDouble(i*8); 
+						cm.PutDataAsFloat64(idx,dd);
+					}
+					else if	(wordfmt.equals("i")) {
+						int    dd[] = new int[1];    
+						dd[0] = ByteBuffer.wrap(data, ipt*4, 4).order(border).getInt();
+						cm.PutDataAsInt32(idx,dd);
+					}
+					else if	(wordfmt.equals("j")) {
+						short    dd[] = new short[1]; 
+						dd[0] = ByteBuffer.wrap(data, ipt*2, 2).order(border).getShort();
+						cm.PutDataAsInt16(idx,dd);
+					}
+					else if	(wordfmt.equals("J")) {		// read as short, put as int (rbnbPlot etc don't like shorts)
+						short    sdd[] = new short[1];    
+						sdd[0] = ByteBuffer.wrap(data, ipt*2, 2).order(border).getShort();
+						int idd[] = new int[sdd.length];
+						for(int k=0; k<sdd.length; k++) idd[k] = sdd[k];
+						cm.PutDataAsInt32(idx,idd);
+					}
+					else if	(wordfmt.equals("I")) {
+						long   dd[] = new long[1];   
+						dd[0] = ByteBuffer.wrap(data, ipt*8, 8).order(border).getLong();
+						cm.PutDataAsInt64(idx,dd);
+					}
+					t += dt;			// time-increment multi-point blocks
+				}
+				lastTime = t;		// skootch
+			}
+
+//			cm.PutDataAsByteArray(idx,data);
+		} catch (Exception e) { e.printStackTrace(); }
+		return cm;
+	}
+	
+	//--------------------------------------------------------------------------------------------------------
+	private String cname(int idx) {
+    	String cname = null;
+    	cname = chanName+idx;
+    	return(cname);
 	}
 	
 } //end class UDPCapture

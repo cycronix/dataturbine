@@ -63,6 +63,7 @@ public class rbnbUDPCaster {
      *   Date      By	Description
      * MM/DD/YYYY
      * ----------  --	-----------
+     * 10/22/2014  MJM  Add "-p" password option for digital packet signature
      * 11/10/2010  JPW  Add "-d" option to specify a frame decimation factor.
      * 11/04/2010  JPW  Add "-i" option to ignore send errors
      * 06/27/2008  JPW  Add "-g" option to run in headless mode
@@ -84,6 +85,7 @@ public class rbnbUDPCaster {
 	boolean bHeadlessL = false;
 	boolean bIgnoreSendErrorsL = false;
 	int decimationFactorL = 1;
+	String password = null;					// MJM Cycronix 10/2014
 	
 	//parse args
 	try {
@@ -127,6 +129,10 @@ public class rbnbUDPCaster {
 		bHeadlessL = true;
 	    }
 	    
+		if (ah.checkFlag('p')) {
+			password = ah.getOption('p');
+		}
+		
 	    if (ah.checkFlag('i')) {
 		bIgnoreSendErrorsL = true;
 	    }
@@ -206,6 +212,8 @@ public class rbnbUDPCaster {
 	    System.err.println("               default : " + defaultRecipient);
 	    System.err.println(" -s <port>             : socket port for sending out UDP packets");
 	    System.err.println("               default : 3456");
+		System.err.println(" -p <password>         : optional password (UDPCapture must match)");
+		System.err.println("               default : none");
 	    System.err.println(" -x                    : auto-start");
 	    RBNBProcess.exit(0);
 	}
@@ -238,7 +246,8 @@ public class rbnbUDPCaster {
 		bAutostartL,
 		bHeadlessL,
 		bIgnoreSendErrorsL,
-		decimationFactorL);
+		decimationFactorL,
+		password);
 	
     }
 }
