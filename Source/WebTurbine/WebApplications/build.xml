@@ -16,6 +16,7 @@
 	 2007/08/23  PFH  Removing references to proguard and obfuscation.
 	 2008/08/29  WHF  Cleaned up build.  Added ChartServlet.
 	 2009/04/29  WHF  Minor changes for Tomcat 6.0 support.
+	 2014/10/27  MJM  Added webscan app
 -->
 
 <project name="WebApplications" default="library" basedir=".">
@@ -321,7 +322,12 @@
 		<mkdir dir = "${rbnb.walibdir}/webapps/TimeDrive/WEB-INF/classes" />
 		<copy todir = "${rbnb.walibdir}/webapps/TimeDrive/WEB-INF/classes">
 			<fileset dir = "${rbnb.webdavclassesdir}" />
-		</copy>			
+		</copy>		
+		<!-- webscan web app -->
+		<mkdir dir = "${rbnb.walibdir}/webapps/webscan" />
+		<copy todir = "${rbnb.walibdir}/webapps/webscan">
+			<fileset dir = "${rbnb.wasourcedir}/webapps/webscan" />
+		</copy>	
 	</target>
 
 	<target name="clean" description = "Delete binary files.">
