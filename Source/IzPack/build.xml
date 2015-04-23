@@ -13,6 +13,7 @@
 	 2005/12/09  EMF  Unpack war files, so config can be easily changed by users.
 	 2009/04/29  WHF  Updated for Tomcat 6.0.
 	 2011/80/05  MJM  Updates for IzPack 4.3.4
+	 2015/04/16  MJM  Excluded RBNB.ico filter - was being corrupted
 -->
 
 <project name="IZPACK" default="distribute" basedir=".">
@@ -31,10 +32,14 @@
  <!-- Copy the IzPack stuff to the build directory. -->
 	<target name="library" depends="compile">
 		<filter token="__RBNB.VERSION__" value="${rbnb.version}" />
+		<copy todir="${rbnb.builddir}/IzPack" filtering="false">
+			<fileset dir="${rbnb.sourcedir}/IzPack"
+					includes="RBNB.ico" />
+		</copy>
 		<copy todir="${rbnb.builddir}/IzPack" filtering="true">
 			<fileset dir="${rbnb.sourcedir}/IzPack"
 					includes="**"
-					excludes="build.xml" />
+					excludes="build.xml, RBNB.ico" />
 			<fileset dir="${rbnb.builddir}/Lib"
 					includes="InstallNotes.txt" />
 		</copy>
