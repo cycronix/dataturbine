@@ -2616,6 +2616,7 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
      *   Date      By	Description
      * MM/DD/YYYY
      * ----------  --	-----------
+     * 03/34/2015  MJM  Added check for NaN
      * 07/25/2013  MJM  Created. 
      */
     private void rejectNoise()
@@ -2623,9 +2624,9 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
     	int numPts = alt.length;
     	int i;
     	for(i=1; i<numPts; i++) {
-    		if(alt[i] == 0.) alt[i] = alt[i-1];
-    		if(lat[i] == 0.) lat[i] = lat[i-1];
-    		if(lon[i] == 0.) lon[i] = lon[i-1];
+    		if(alt[i] == 0. || Double.isNaN(alt[i])) alt[i] = alt[i-1];		
+    		if(lat[i] == 0. || Double.isNaN(lat[i])) lat[i] = lat[i-1];
+    		if(lon[i] == 0. || Double.isNaN(lon[i])) lon[i] = lon[i-1];
     	}
     	
     }

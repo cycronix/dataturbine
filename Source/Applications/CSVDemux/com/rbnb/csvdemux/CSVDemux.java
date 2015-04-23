@@ -43,6 +43,10 @@ limitations under the License.
      *                get this channel name from a variable, iwgChanName.
      *                Only print NumberFormatException when in verbose mode (since these are probably benign exceptions).
      *                Rearrange what info is printed to System.out versus System.err
+     * 03/05/15  MJM  Substitute 1-char blank string (vs empty string) for empy string params (avoid SAPI illegal arg exception)
+     * 03/15/15  MJM  Add -Z flag to replace noise values with zero (0) vs NaN (NaN's problematic for some viewers)
+     * 04/10/15  MJM  Add -y flag to run in "multimarker" mode.  This puts out new channels for every new unique marker ID.
+     *                No pre-registration in mulitmarker mode (new channels dynamically arrive).  Warning this may cause lots 'o channels if noisy input.  
      *
      */
     
@@ -148,6 +152,12 @@ limitations under the License.
 	private String filterFileName = null;
 	private ChannelFilter[] filters = null;
 	
+	// MJM 03/24/2015:  -Z sub zero (0) for noise (vs NaN)
+	private boolean zeroNoise = false;
+	
+	// MJM 04/07/2015:	-y option for separate channels on each marker (multi-aircraft mode)
+	private boolean multiMarker = false;
+	
 	//-------------------------------------------------------------------------
 	//Main
 	public static void main(String[] arg) throws Exception {
@@ -178,6 +188,7 @@ limitations under the License.
 		    System.err.println("             default : 0 (no archiving)");
 		    System.err.println(" -m                  : flush each channel individually to the RBNB (this is the default mode)");
 		    System.err.println(" -M                  : flush all channels together to the RBNB");
+		    System.err.println(" -Z                  : substitute zero (0) for missing data values (default=NaN)");
 		    System.err.println(" -o <name>           : name of output Source");
 		    System.err.println("             default : use the marker string");
 		    System.err.println(" -p                  : Check embedded timestamp in received data; if it matches the previously");
@@ -192,6 +203,7 @@ limitations under the License.
 		    System.err.println("             no default; required option");
 		    System.err.println(" -z <start>,<stop>   : Recover mode; read from input channel from time <start> to time <stop>");
 		    System.err.println("                     : <start> and <stop> must be in seconds since epoch");
+		    System.err.println(" -y                  : Separate channels for each marker (warning: possible numerous channels on bad input)");
 		    RBNBProcess.exit(0);
 		}
 		
@@ -276,6 +288,16 @@ limitations under the License.
 		if (ah.checkFlag('M')){
 		    // All channels will share one RingBuffer
 		    multichan = false;
+		}
+		
+		// zero for noise flag 
+		if (ah.checkFlag('Z')){			// MJM 3/15
+		    zeroNoise = true;
+		}
+		
+		// zero for noise flag 
+		if (ah.checkFlag('y')){			// MJM 4/15
+		    multiMarker = true;
 		}
 		
 		//output
@@ -612,6 +634,7 @@ limitations under the License.
 		   //System.err.println("Connecting to source: "+serverAddressOut);
 		   src.OpenRBNBConnection(serverAddressOut,out);
 		   System.err.println("Connected to Source: "+serverAddressOut);
+		   if(multiMarker) break;				// MJM 4/15:  don't pre-register if multiMarker
 		   // If it takes a while for the Source to come up,
 		   // this Register() call can throw an exception.
 		   // Therefore, try it in a loop.
@@ -826,7 +849,7 @@ limitations under the License.
 		String nextCSVStr = data[i];
 		StringBuffer outputCSVStr = new StringBuffer("");
 		
-		if ( (nextCSVStr == null) || (!nextCSVStr.trim().startsWith(markerStr)) ) {
+		if ( (nextCSVStr == null) || (!nextCSVStr.trim().startsWith(markerStr) && !multiMarker) ) {		// MJM 4/15: multiMarker
 		    System.err.println("String didn't start with correct marker");
 		    continue;
 		}
@@ -848,7 +871,9 @@ limitations under the License.
 		
 		// Marker
 		String marker = strArray[0].trim();
-		if (!marker.equals(markerStr)) {
+		String chanPrefix = "";								// MJM 4/15: multiMarker
+		if(multiMarker) chanPrefix = marker + "/";
+		else if (!marker.equals(markerStr)) {			
 		    System.err.println("Marker mismatch: expecing \"" + markerStr + "\", got \"" + marker + "\"");
 		    continue;
 		}
@@ -935,7 +960,7 @@ limitations under the License.
 		    // Only need to add the timestamp once if we aren't in multichan mode
 		    out.PutTime(rbnbOutTime,0);
 		}
-		int idx = out.Add(cname);
+		int idx = out.Add(chanPrefix + cname);
 		dataArray = new double[1];
 		dataArray[0] = embeddedTime;
 		if (multichan) {
@@ -969,7 +994,7 @@ limitations under the License.
 		    if (xmlSkipList[j]) {
 			continue;
 		    }
-		    cname = xmlFieldList[j];
+		    cname = chanPrefix + xmlFieldList[j];			// MJM 4/15: multiMarker
 		    
 		    if (multichan) {
 			out.Clear();
@@ -984,6 +1009,7 @@ limitations under the License.
 		    if (xmlTypeList[j].equalsIgnoreCase("string")) {
 			// String data
 			strVal = strArray[j].trim();
+			if(strVal.isEmpty()) strVal = " ";	// MJM 3/2015:  empty strings cause PutDataAsString illegal argument exception
 			out.PutDataAsString(idx,strVal);
 			out.PutMime(idx,STR_MIMETYPE);
 			if (!bSilent) {
@@ -994,6 +1020,7 @@ limitations under the License.
 			try {
 			    String tempValStr = strArray[j].trim();
 			    dataVal = Double.NaN;
+			    if(zeroNoise) dataVal = 0.;
 			    if (!tempValStr.isEmpty()) {
 				dataVal = Double.parseDouble(tempValStr);
 			    }
@@ -1035,7 +1062,7 @@ limitations under the License.
 		if (multichan) {
 		    out.Clear();
 		}
-		idx = out.Add("_Latency");
+		idx = out.Add(chanPrefix + "_Latency");
 		double lat[] = new double[1];
 		lat[0] = arrivalTime - embeddedTime;
 		if (multichan) {
@@ -1055,13 +1082,13 @@ limitations under the License.
 			}
 		    } while (true);
 		}
-		if (!bSilent) System.err.println("Put _Latency value: " + lat[0]);
+		if (!bSilent) System.err.println("Put "+chanPrefix+"_Latency value: " + lat[0]);
 		
 		// JPW 02/13/2008: send the CSV string to the CSV channel
 		if (multichan) {
 		    out.Clear();
 		}
-		idx = out.Add(iwgChanName);
+		idx = out.Add(chanPrefix + iwgChanName);
 		if (multichan) {
 		    out.PutTime(rbnbOutTime,0);
 		}
@@ -1087,7 +1114,7 @@ limitations under the License.
 			}
 		    } while (true);
 		}
-		if (!bSilent) System.err.println("Put " + iwgChanName + " value: " + outStr);
+		if (!bSilent) System.err.println("Put " + chanPrefix + iwgChanName + " value: " + outStr);
 		
 		// JPW 07/01/08: If we aren't in multichan mode, send the ChannelMap now
 		if (!multichan) {
