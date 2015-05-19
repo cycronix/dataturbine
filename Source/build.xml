@@ -82,6 +82,7 @@
 				destdir="${rbnb.documentationdir}/JavaDoc"
 				classpathref="rbnb.javadoc.class.path"
 				Windowtitle="RBNB ${rbnb.version} Java API Documentation"
+				maxmemory="512m"
 				Use="yes">
 			<package name="com.rbnb.api" />
 			<package name="com.rbnb.sapi" />
