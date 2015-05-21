@@ -1,5 +1,5 @@
 /*
-Copyright 2014 Cycronix
+Copyright 2015 Cycronix
 
 WebScan V1.0 was developed under NASA Contract NAS4-00047 
 and the U.S. Government retains certain rights.
@@ -33,6 +33,11 @@ limitations under the License.
  * V2.0A2:  add scroll bar, reorganize display
  * V2.0B1:	merged javascript files for easier delivery
  * V2.0B3:  support next/prev images
+ * V2.0B4:  Tight scaling
+ * V2.0B5:  Manual scaling
+ * V2.0B6:  Improved popup Options menu
+ * V2.0B6a: Reworked touch-controls for IE10/11 (disabled pointer syntax for now)
+ * V2.0B7:  Bug fixes... better setTime logic
  */
 
 //----------------------------------------------------------------------------------------	
@@ -84,6 +89,8 @@ top.plotDuration=0;					// sec
 var PAUSE=0;						// play mode pseudo-constants
 var RT=1;
 var PLAY=2;
+
+var scalingMode="Standard";			// scaling "Standard" (1-2-5) or "Tight" (MJM 11/2014)
 
 var paramTime = new Array();		// array of times for each parameter
 
@@ -246,6 +253,7 @@ function configParams(src) {
 	var fill 	 = getURLParam(src,'f');	setFill(fill=="true");							setConfig('f', fill=="true");
 	var smooth 	 = getURLParam(src,'s');	setSmooth(smooth=="true");						setConfig('s', smooth=="true");
 	var duration = getURLParam(src,'v');	if(duration != null) setDuration(duration);		setConfig('v', duration);
+	var scaling  = getURLParam(src,'sc');	if(scaling != null) setScaling(scaling);		setConfig('sc', scaling);
 	
 //	console.debug('configParams, tDelay: '+tDelay+", nplot: "+nplot);
 	
@@ -318,6 +326,22 @@ function setCols(ncol) {
 	var el = document.getElementById('Ncol');
 	for(var i=0; i<el.options.length; i++) {
 		if(ncol == el.options[i].value) {		// enforce consistency
+			el.options[i].selected=true;
+			break;
+		}
+	}
+}
+
+//----------------------------------------------------------------------------------------
+//setScaling:  initialize scalingMode
+
+function setScaling(scaling) {
+	scalingMode = "Standard";
+	if(scaling == 't') scalingMode = "Tight";
+	else if(scaling == 'm') scalingMode = "Manual";
+	var el = document.getElementById('myScaling');
+	for(var i=0; i<el.options.length; i++) {
+		if(scalingMode == el.options[i].value) {		// enforce consistency
 			el.options[i].selected=true;
 			break;
 		}
@@ -526,6 +550,7 @@ function setParamValue(text, url, args) {
 
 var playDelay=0;
 function rtCollection(time) {
+	icount = 0;				// image cache buster
 	stopRT();
 	inProgress = 0;		// reset
 	if(time != 0) playDelay = (new Date().getTime() - time);		// playback mode
@@ -612,7 +637,9 @@ function rtCollection(time) {
 			for(var j=0; j<plots.length; j++) {
 				if(plots[j].type != 'video') continue;		// non-video go 1/10 nominal rate
 				anyvideo = true;
-				fetchData(plots[j].params[0], j, 0, ptime, "absolute");		// RT->playback mode
+				if(debug) console.debug('video play mode: '+top.rtflag);
+				if(top.rtflag==RT) 	fetchData(plots[j].params[0], j, 0, ptime, "newest&cc="+icount++);		// mjm 5/18/2015:  go back to newest mode 
+				else				fetchData(plots[j].params[0], j, 0, ptime, "absolute");	// RT->playback mode
 			}
 //			console.debug('-----------anyvideo: '+anyvideo+', ptime: '+ptime+', newestTime: '+newestTime+', top.rtflag: '+top.rtflag);
 
@@ -622,7 +649,9 @@ function rtCollection(time) {
 				intervalID2 = 0;
 				if(intervalID==0) goPause();
 			}
-			else if(!intervalID) setTime(ptime);		// let stripchart set time if available
+//			else if(!intervalID) 			// let stripchart set time if available
+//				setTime(ptime);				// no: video times are set from received images
+			
 		}, 
 		tDelay/10);				// 10x rate
 }	
@@ -864,7 +893,7 @@ function parseWT(page,url,selel) {
 	for(var i=1; i<x.length; i++) {		// skip href[0]="..."
 		var opt = x.item(i).textContent;	// not .text
 		if(opt == '_Log/') continue;		// skip log text chans
-
+//		opt.replace("//","/");				// collapse any double slash to single ('//' -> '/)
 		if(endsWith(opt, "/")) {
 			AjaxGet(parseWT,url+"/"+opt,"chanList");		// chase down multi-part names
 		} else {										// Channel
@@ -935,6 +964,17 @@ function updateSelect() {
 	};
 }
 
+//----------------------------------------------------------------------------------------
+//updateScaling:  handle update-scaling select
+
+function scalingSelect(cb) {
+	scalingMode = cb.options[cb.selectedIndex].value;
+	if(scalingMode == "Tight") 			setConfig('sc','t');
+	else if(scalingMode == "Manual") 	setConfig('sc','m');
+	else								setConfig('sc','s');
+	rebuildPage();
+}
+
 //----------------------------------------------------------------------------------------    
 //nplotSelect:  onchange nplot select
 
@@ -985,7 +1025,7 @@ function setPlay(mode, time) {
 	top.rtflag = mode;				
 	if(mode==PAUSE) singleStep=false;
 	else			setSingleStep();
-//	console.debug('setPlay: mode: '+mode+', time: '+time+', singleStep: '+singleStep);
+	if(debug) console.debug('setPlay: mode: '+mode+', time: '+time+', singleStep: '+singleStep);
 	/*
 	if(time >= 0) {			// cluge: PAUSE doesn't change RT/> display mode
 		if(mode==RT) 	document.getElementById('RTlab').innerHTML = 'RT';
@@ -994,7 +1034,7 @@ function setPlay(mode, time) {
 	 */	
 	if(mode==PAUSE) {				// stop RT
 		stopRT();
-		for(var i=0; i<plots.length; i++) plots[i].stop(); 
+//		for(var i=0; i<plots.length; i++) plots[i].stop(); 
 		inProgress=0;			// make sure not spinning
 		document.body.style.cursor = 'default';		
 	}
@@ -1048,6 +1088,7 @@ function stopRT() {
 	if(intervalID2 != 0) clearInterval(intervalID2);
 	intervalID = intervalID2 = 0;
 	document.getElementById('||').checked = true;
+	for(var i=0; i<plots.length; i++) plots[i].stop(); 
 }
 
 //----------------------------------------------------------------------------------------	
@@ -1163,12 +1204,12 @@ function rebuildPage() {
 	stopRT();
 	buildCharts();
 	resetParams();						// ensure buttons match parameter values
+	stopRT();		// ??
+
+//	for(var i=0; i<plots.length; i++) plots[i].stop();		// shouldn't need this?
+	refreshCollection(true,getTime(),getDuration(),"absolute");	// auto-refill plots to full duration??
 
 	if(!isPause()) 	goRT();
-//	else			rePlay();
-	
-//	setTime(getTime());
-//	console.debug('rebuildPage, old: '+oldestTime+", new: "+newestTime);
 }
 
 //----------------------------------------------------------------------------------------
@@ -1176,17 +1217,19 @@ function rebuildPage() {
 
 function setTimeNoSlider(time) {
 	if(time == 0 || isNaN(time)) return;		// uninitialized
+	updateTimeLimits(time);
 	d = new Date(time);		// msec
 	var dstring = d.toUTCString();
 	dstring = dstring.split(", ")[1];		// string leading "Day, "
 	document.getElementById("timestamp").innerHTML = dstring;
 	top.plotTime = time / 1000.;		// global, units=sec
 	
-	if(debug) console.debug('setTime: '+time);
+	if(debug) console.debug('setTimeNoSlider: '+time);
 }
 
 function setTime(time) {
 	if(time == 0 || isNaN(time)) return;		// uninitialized
+	if(debug) console.debug("setTime!");
 	setTimeNoSlider(time);
 
 //	d = new Date(time);		// msec
@@ -1213,7 +1256,7 @@ function setTimeSlider(time) {
 	var mDur = 0.
 	if(!isImage) mDur = getDuration();		// duration msec	
 	var percent = 100. * (time - oldestTime - mDur) / (newestTime - oldestTime - mDur);
-	if(debug) console.debug('setTimeSlider: '+percent+', oldestTime: '+oldestTime+', newestTime: '+newestTime+', isImage: '+isImage+', mDur: '+mDur);
+	if(debug) console.debug('setTimeSlider, time: '+time+", percent: "+percent+', oldestTime: '+oldestTime+', newestTime: '+newestTime+', isImage: '+isImage+', mDur: '+mDur);
 	el.value = percent;
 }
 
@@ -1223,13 +1266,19 @@ function getTime() {
 }
 
 var lastSet=0;
-function timeSelect(value) {
+function timeSelect(el) {
 	if(inProgress) return;
 	var now = new Date().getTime();
 	if((now - lastSet) < 100) return;			// ease up if busy
 	lastSet = now;
-	goTime(value);
+	goTime(el.value);
 //	console.debug("timeSelect: "+value);
+}
+
+function updateTimeLimits(time) {
+	if(time <= 0) return;
+	if(time > newestTime) newestTime = time;
+	if(time < oldestTime) oldestTime = time;
 }
 
 var resetMode=false;
@@ -1382,24 +1431,40 @@ function buildCharts() {
 //drag-plot utilities
 
 //figure out if mouse or touch events supported
-isTouchSupported = 'ontouchstart' in window;
-var startEvent = isTouchSupported ? 'touchstart' : 'mousedown';
-var moveEvent = isTouchSupported ? 'touchmove' : 'mousemove';
-var endEvent = isTouchSupported ? 'touchend' : 'mouseup';
-var outEvent = isTouchSupported ? 'touchcancel' : 'mouseout';
+isTouchSupported = 		'ontouchstart' in window 			// works on most browsers 
+					|| 	'onmsgesturechange' in window;		// IE10
+
+isPointerEnabled = window.navigator.msPointerEnabled;
+if(isPointerEnabled) isTouchSupported = false;				// IE10 pointer/gesture events not yet supported
+
+//isTouchSupported = false;			// for debugging 
+var startEvent = isTouchSupported ? (isPointerEnabled ? 'MSPointerDown' : 'touchstart') : 'mousedown';
+var moveEvent = isTouchSupported ?  (isPointerEnabled ? 'MSPointerMove' : 'touchmove')  : 'mousemove';
+var endEvent = isTouchSupported ?   (isPointerEnabled ? 'MSPointerUp'   : 'touchend')   : 'mouseup';
+var outEvent = isTouchSupported ?   (isPointerEnabled ? 'MSPointerOut'  : 'touchcancel'): 'mouseout';
 
 //var clickEvent = isTouchSupported ? 'click touchend touchcancel mouseup' : 'click';		// ?
 
 function addListeners(c) {
+//	console.debug('isTouchSupported: '+isTouchSupported);
+
 	c.addEventListener(startEvent,mouseDown, false); 	
 	c.addEventListener(endEvent,  mouseUp,   false);	
 	c.addEventListener(outEvent,  mouseOut,   false);	 
 //	c.addEventListener(moveEvent, mouseMove, false);	
 //	c.addEventListener(clickEvent, mouseClick, false);			// ?
 //	c.addEventListener('dblclick', mouseDblClick, false);
+
+//	if(isTouchSupported) {
+//		c.addEventListener('gesturestart', pinchStart);
+//		c.addEventListener('gestureend',   pinchEnd);
+//	}
+	c.addEventListener("mousewheel", mouseWheel, false);
 }
 
 var rect1x=0;
+var rect1y=0;
+var rect2y=0;
 var rect;
 var startMoveTime=0;
 var thiswin=0;
@@ -1415,11 +1480,28 @@ function mouseDown(e) {
 	mouseIsMove=false;		// not yet
 //	console.log('mousedown, e: '+e.target.id);
 	setPlay(PAUSE,0);
-	if(isTouchSupported) rect1x = e.touches[0].clientX;
-	else 				 rect1x = e.clientX;
+	
+	if(isTouchSupported) { 	
+		if(isPointerEnabled) {
+			rect1x = e.offsetX;
+			rect1y = e.offsetY;
+		}
+		else {
+			rect1x = e.touches[0].clientX; 	
+			rect1y = e.touches[0].clientY; 
+		}
+		if(e.touches.length>1) rect2y = e.touches[1].clientY; 
+	} 
+	else {	
+		rect1x = e.clientX;				
+		rect1y = e.offsetY;				
+	}
+	
 	startMoveTime = getTime();
 	this.addEventListener(moveEvent, mouseMove);
 	thiswin = this;		// for mouseout
+//	thiswin = e.window;		// for mouseout
+
 	thisplot = mouseClickPlot(e);
 	
 	// mouse-step logic:
@@ -1447,7 +1529,9 @@ function mouseStep(dir) {
 
 function mouseOut(e) {
 //	console.log('mouseOut');
-	clearTimeout();
+//	e.preventDefault();		// for IE
+
+//	clearTimeout();
 	if(thiswin) {
 		thiswin.removeEventListener(moveEvent, mouseMove);
 		thiswin=0;		// avoid thrash
@@ -1458,7 +1542,9 @@ function mouseOut(e) {
 
 function mouseUp(e) {
 //	console.log('mouseUp');
-	clearTimeout();
+//	e.preventDefault();		// for IE
+
+//	clearTimeout();
 	if(mouseIsStep && getTime() == startMoveTime) {
 		if(mouseClickX >= 0.5) 	stepCollection(thisplot,startMoveTime,"next");
 		else					stepCollection(thisplot,startMoveTime,"prev");
@@ -1494,23 +1580,78 @@ function mouseMove(e) {
 		var rect = e.target.getBoundingClientRect();
 		var rectw = rect.right - rect.left;			// box width
 		var eclientX;
-		if(isTouchSupported) eclientX = e.touches[0].clientX;
+		if(isTouchSupported) {
+			if(isPointerEnabled) eclientX = e.offsetX;
+			else				 eclientX = e.touches[0].clientX;
+		}
 		else				 eclientX = e.clientX;
 		var relstep = (rect1x - eclientX)/rectw;
 		
 		stepDir= 0;		// no side effects
 		var mDur = getDuration();		// duration msec
 		var inc = relstep * mDur;			// msec
-//		console.log('rect1x: '+rect1x+', eclientX: '+eclientX+', relstep: '+relstep+', inc: '+inc);
-		if(Math.abs(relstep) < 0.01) return;				// too small to bother
+		if(debug) console.log('rect1x: '+rect1x+', eclientX: '+eclientX+', relstep: '+relstep+', inc: '+inc);
 		
+//		if(Math.abs(relstep) < 0.01) return;				// too small to bother
+		if(e.touches && e.touches.length == 2) 	pinchScale(e);
+		else									mouseScale(e);
+
 		mouseIsStep = false;		// switch gears
 		var newTime = Math.round(startMoveTime + inc);
-		if(getTime() != newTime) {
+		if(getTime() != newTime || scalingMode == "Manual") {
 			refreshCollection(true,newTime,mDur,"absolute");
 			setTime(newTime);			// was cmt out...
 		}
 	}
+}
+
+function mouseScale(e) {
+	
+	var rect = e.target.getBoundingClientRect();
+	var recth = rect.bottom - rect.top;			// box height
+	var eclientY;
+	if(isTouchSupported) {
+		if(isPointerEnabled) eclientY = e.offsetY;
+		else				 eclientY = e.touches[0].clientY;
+	} else				 eclientY = e.offsetY;
+//	else				 eclientY = e.clientY;
+
+	var relStart = rect1y/recth - 0.5;
+	var relStepY = (eclientY - rect1y) / recth;
+	if(debug) console.debug('rect1y: '+rect1y+', recth: '+recth+', eclientY: '+eclientY+', mouseScale: '+relStepY+', relStepY: '+relStepY);
+	
+	rect1y = eclientY;								// reset baseline for setScale logic
+
+	if(e.shiftKey) {	 // zoom
+		plots[mouseClickPlot(e)].display.setScale(null, 1./(1.-relStepY));
+	}
+	else {				// offset
+		plots[mouseClickPlot(e)].display.setScale(relStepY, null);
+	}
+
+}
+
+function pinchScale(e) {
+//	var rect = e.target.getBoundingClientRect();
+//	var recth = rect.bottom - rect.top;			// box height
+	var drecty = Math.abs(rect1y - rect2y);
+	var erecty = Math.abs(e.touches[0].clientY-e.touches[1].clientY);
+	var scale = drecty / erecty;
+	
+	rect1y = e.touches[0].clientY;			// reset baseline for setScale logic
+	rect2y = e.touches[1].clientY;
+
+//	console.debug('pinchScale: '+scale+', erecty: '+erecty+', drecty: '+drecty);
+
+	plots[mouseClickPlot(e)].display.setScale(null, scale);
+}
+
+function mouseWheel(e) {
+	if(inProgress || refreshInProgress || scalingMode!="Manual") return;			// pacing
+	var delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));
+//	console.debug('mouseWheel delta: '+delta);
+	plots[mouseClickPlot(e)].display.setScale(null, 1.-(delta/4.));
+	refreshCollection(true,getTime(),getDuration(),"absolute");
 }
 
 //----------------------------------------------------------------------------------------
@@ -1699,6 +1840,7 @@ function goEOF() {
 }
 
 function goRT() {
+	if(debug) console.log("goRT!");
 	getLimits(0,0);			// for RT playback
 	goTime(100);
 	setTimeout(function(){ goRT2(); }, 500);		// wait for limits update?
@@ -1777,6 +1919,11 @@ function plot() {
 									// ref:  86400 is one day at 1Hz
 	duration=0;								// book keeping
 	this.oldest=0;							// reference
+	this.yoffset = 0;						// default autoscale
+	this.yrange = 1;
+	this.autoScale=true;					
+	this.ymin = 0;
+	this.ymax = 0;
 	
 	// over-ride defaults if provided 
 	for (var n in arguments[0]) { this[n] = arguments[0][n]; }
@@ -1788,8 +1935,9 @@ function plot() {
 	
 	// create smoothie chart
 	if(debug) console.log('new chart');
+	
 	this.chart = new SmoothieChart({
-		yRangeFunction:myYRangeFunction,
+		yRangeFunction:myYRangeFunction.bind(this),
 		interpolation:interpolate,			// linear, bezier
 		grid:{ 
 			fillStyle:'#ffffff', 
@@ -1820,9 +1968,10 @@ function plot() {
 	      
 		var prec=5;		// digits of precision
 		if(aval == 0 || isNaN(aval)) prec=0;
-		else if(aval > 10) 	prec=0;
+		else if(aval > 20) 	prec=0;
 		else if(aval > 1)  	prec=1;
 		else 				prec = Math.ceil(-Math.log(aval)/Math.LN10);
+		if(scalingMode != "Standard") prec = prec+1;		// need more digits if tight scaling
 		if(prec < 0 || prec > 5) Precision=5;
 	      
 	    valStr = parseFloat(val).toFixed(prec);
@@ -1988,14 +2137,57 @@ function plot() {
 		}
 	};
 	
+	// set scale in terms of normalized offset and range
+	this.setScale = function(yoffset, yrange) {
+		if(scalingMode != "Manual") return;			// notta
+		
+		if(this.autoScale) {						// initialize, then switch to manual scaling
+			this.yrange = (this.ymax - this.ymin);
+			this.yoffset = this.ymin + this.yrange / 2;
+			this.autoScale = false;
+		}
+		if(yoffset != null) this.yoffset += yoffset * this.yrange;
+		if(yrange != null)  this.yrange   = yrange  * this.yrange;
+//		console.debug('setCale, yoffset: '+yoffset+', this.yoffset: '+this.yoffset+', yrange: '+yrange+', this.yrange: '+this.yrange);
+	}
+	
 	// myYRangeFunction:  custom y-range function
 	function myYRangeFunction(range) {
+		
+		if(scalingMode != "Manual") this.autoScale = true;
+
+		if(!this.autoScale) {
+			this.ymax = this.yoffset + this.yrange/2;
+			this.ymin = this.yoffset - this.yrange/2;
+			return { min: this.ymin, max: this.ymax};
+		}
+		
+		
 //		console.log('myrange: '+range.min+', '+range.max);
-//		return({min: range.min, max: range.max});		// foo
-		var vmin = roundHumane(range.min,0);
-		var vmax = roundHumane(range.max,1);
-		if((vmin*vmax>0) && (vmin/vmax <= 0.25)) vmin = 0.;
-		return {min: vmin, max: vmax};
+		else if(scalingMode != "Standard") {			// Tight and pre-Manual state
+			this.ymin = range.min;
+			this.ymax = range.max;
+			return({min: range.min, max: range.max});
+		}
+
+		else {
+			var vmin = roundHumane(range.min,0);
+			var vmax = roundHumane(range.max,1);
+			if((vmin*vmax>0) && (vmin/vmax <= 0.25)) vmin = 0.;
+
+			// adjust by any manual tweeks:
+//			var vrange = this.yrange * (vmax - vmin);						// scaled range
+//			var voffset = (vmax+vmin)/2. + this.yoffset *(vmax-vmin);		// new midpoint
+//			vmax = voffset + vrange / 2;
+//			vmin = voffset - vrange / 2;
+//			console.debug('myYRange, ymin: '+vmin+', ymax: '+vmax+', this.yrange: '+this.yrange);
+
+			this.ymax = vmax;
+			this.ymin = vmin;
+			this.yrange = this.ymax - this.ymin;
+			this.yoffset = this.ymin + this.yrange / 2;
+			return {min: vmin, max: vmax};
+		}
 	} 
 	
 	// roundHumane: nicely round numbers up for human beings (adapted from smoothieChart)
@@ -2022,7 +2214,7 @@ function plot() {
 // plot.prototype.color:  get color from array, limit length
 
 plot.prototype.color = function(idx) {
-	var colors = new Array('#0000ff','#ff0000','#00dd00','#880088','#000000','#808080');	// ~RGB
+	var colors = new Array('#2020ee','#ee1010','#00dd00','#880088','#000000','#808080');	// ~RGB
 	if(idx < colors.length) return colors[idx];
 	else					return colors[colors.length-1];
 };
@@ -2320,15 +2512,16 @@ function vidscan(param) {
     this.setImage = function(imgurl,param) {
     	if(debug) console.log("vidscan setImage, inprogress: "+this.video_inprogress+', imgurl: '+imgurl);
 		var now = new Date().getTime();
-//    	if((imgurl.indexOf("r=newest") != -1) || (imgurl.indexOf("r=oldest") != -1)) { // no wait check on limits requests
-//		console.log('inprogress: '+this.video_inprogress+', now-last: '+(now-lastload));
-
+//   	if((imgurl.indexOf("newest") != -1) || (imgurl.indexOf("oldest") != -1)) { // no wait check on limits requests
+//		console.log('inprogress: '+this.video_inprogress+', now-last: '+(now-lastload)+" isnew: "+(imgurl.indexOf("newest")));
+//   	}
 		if((now-lastload)>2000) {		// checks to avoid deadlock
-//			console.debug('reset video_inprogress');
+			if(debug) console.debug('reset video_inprogress');
     		this.video_inprogress = false;
     	}
-		else if(this.video_inprogress && imgurl.indexOf("oldest")!=-1 && imgurl.indexOf("newest")!=-1) {		// don't overwhelm 
+		else if(this.video_inprogress /* && imgurl.indexOf("oldest")!=-1 && imgurl.indexOf("newest")!=-1 */) {		// don't overwhelm 
     		if(debug) console.debug('video busy, skipping');
+    		this.video_inprogress = false;		// single wait?
     		return;						
     	}
 		
@@ -2348,9 +2541,8 @@ function vidscan(param) {
 
 //  ----------------------------------------------------------------------------------------    
 //  imgload:  draw upon image load
-
     function imgload() {
-//    	console.log('imgload: '+this.img);
+ //   	console.log('imgload: '+this.img+", complete: "+this.img.complete);
     	this.video_inprogress = false;
 
     	ratiox = this.img.width / this.canvas.width;
@@ -2371,6 +2563,7 @@ function vidscan(param) {
     	var ctx = this.canvas.getContext('2d');
 		ctx.clearRect(0,0,this.canvas.width,this.canvas.height); 		// clear old image
     	ctx.drawImage(this.img,x,y,w,h);
+
 //    	console.log('imgload done');
 //    	nreq = 0;			// reset
     }
@@ -2413,7 +2606,7 @@ function vidscan(param) {
 // setImageTime:  get image time via separate Ajax request
     
     function setImageTime(imgurl,param) {
-//    	console.debug("image.setTime: "+imgurl);
+    	if(debug) console.debug("image.setTime: "+imgurl);
     	AjaxGetV(imageSetTime, imgurl+"&dt=s&f=t", param);
     	function imageSetTime(txt) {
     		stime = Math.floor(1000*parseFloat(txt));
@@ -2464,7 +2657,7 @@ function vidscan(param) {
 //		if(url.indexOf("r=newest") != -1) getTnew(url);		// update
 //		if(url.indexOf("r=oldest") != -1) getTold(url);
 		
-//    	console.log('AjaxGetImage, url: '+url);
+    	if(debug) console.log('AjaxGetImage, url: '+url);
 //    	if(this.nreq > 2) return;		// drop frames if getting behind...
     	var xmlhttp=new XMLHttpRequest();
     	xmlhttp.onreadystatechange=function() {
@@ -2487,6 +2680,7 @@ function vidscan(param) {
 //        		    	if(T == Tlast) console.log("AjaxGetImage: duplicate time: "+T);
 //        		    	console.log("T: "+T+", Tlast: "+Tlast+", newestTime: "+newestTime);
         		    	Tlast = T;
+        		    	if(debug) console.debug('AjaxGetImage, header Time: '+T);
         	    		setTimeNoSlider(T);
         	    		paramTime[param] = T;
 //        	    		console.debug('AjaxGetImage paramTime['+param+']: '+paramTime[param]);

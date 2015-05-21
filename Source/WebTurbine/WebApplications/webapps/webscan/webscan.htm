@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-<body bgcolor="midnightblue">
+<body>
 
 <head>
 <meta charset="UTF-8">
@@ -12,28 +12,8 @@
 </head>
 <link rel="stylesheet" type="text/css" href="webscan.css" />
 
-<table id="supertable" width="100%">
-<tbody>
-
-<tr>
-<table id="title" class="a" border=1>
-<tr>
-<td style="white-space: nowrap; padding: 0px 4px 0px 4px" align="center" width="1%">
-<label class="h" id="timestamp">TimeStamp</>
-</td><td align="center" >
-<label class="h">WebScan by Cycronix <i>(V2.0B3)</i></>
-</td>
-</tr>
-</table>
-</td>
-
-<td>
-<table id="options" class="c" border=1>
-<tr><td align="center" >
-    <div id="list1" class="dropdown-check-list" align="left">
-        <span class="anchor">Options</span>
-        <ul class="items">
-        <table>
+<div id="options"  border=1>
+        <table class="o">
         
             <tr><td>Smooth</td><td><input id="smooth" type="checkbox" onclick="smoothCheck(this)"></td></tr>
             
@@ -111,6 +91,14 @@
 				</select>
 			</td></tr>
 			
+			<tr><td>Scaling</td><td>
+				<select id="myScaling" onchange="scalingSelect(this)">
+					<option value="Standard" selected="selected">Standard</option>
+					<option value="Tight">Tight</option>
+					<option value="Manual">Manual</option>
+				</select>
+			</td></tr>
+			
 			<!--
 			<tr><td>Server</td><td>
 				<input type="text" id="myServer" onchange="serverSelect(this)">
@@ -126,27 +114,35 @@
 			<button onclick='window.open("webscan.jpg")'/>Help</td>
 			</tr>
         </table>
-        </ul>
-    </div>
+</div>
+    
+<table id="supertable" width="100%">
+<tbody>
+<tr>
 
+<table id="title" class="a" border=1>
+<tr>
+<td style="white-space: nowrap; padding: 0px 4px 0px 4px" align="center" width="20%"><label class="h" id="timestamp">TimeStamp</></td>
+<td align="center" ><label class="h">WebScan by Cycronix <i>(V2.0B7)</i></></td>
+<td style="white-space: nowrap; padding: 0px 4px 0px 4px" align="center" width="20%"><label class="h" id="opt1">Options</></td>
     <script type="text/javascript">
-        var checkList = document.getElementById('list1');
-        checkList.getElementsByClassName('anchor')[0].onclick = function (evt) {
-            if (checkList.classList.contains('visible')) 
-            		checkList.classList.remove('visible');
-            else	checkList.classList.add('visible');
-        }
+        document.getElementById('opt1').onclick =  function() {
+    		var disp = document.getElementById('options').style.display;
+    		if(disp == "block") { document.getElementById('options').style.display = "none";  }	
+    		else				{ 
+    			document.getElementById('options').style.display = "block";  
+    		}
+    	}
     </script>
-</td>
-</table>
 </tr>
+</table>
 
-<tr><td>
+
 <table id="controls" class="a" align="center" border=1>
 <tr>
 <td style="white-space: nowrap;"> <input type="radio" name="radios" id="||"> <label for="||"  onMouseDown="goPause()"	>||</label> </td> 
 <td style="white-space: nowrap;"> <input type="radio" name="radios" id=">">  <label id="RTlab" for=">"  onMouseDown="playFwd()"	>&#62;</label></td> 
-<td width="99%"> <input id="TimeSelect" type="range" offsetHeight="0" clientHeight="10px" min="0" max="100" step=0.1 onchange="timeSelect(value)" oninput="timeSelect(value)"> </td>
+<td width="99%"> <input id="TimeSelect" type="range" offsetHeight="0" clientHeight="10px" min="0" max="100" step=0.1 onchange="timeSelect(this)" oninput="timeSelect(this)"> </td>
 <td style="white-space: nowrap;"><input type="radio" name="radios" id="RT"> <label for="RT"  onMouseDown="goRT()"	>RT</label> </td> 
 </tr>
 </table>

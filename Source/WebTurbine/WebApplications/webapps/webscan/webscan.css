@@ -1,13 +1,29 @@
+* {
+	-webkit-touch-callout:none;
+	-webkit-user-select:none;
+	-khtml-user-select:none;
+	-moz-user-select:none;
+	-ms-user-select:none;
+	user-select:none;
+	-webkit-tap-highlight-color:rgba(0,0,0,0);
+    -webkit-text-size-adjust: auto;
+    -ms-touch-action:none;
+}
 
 label.h {font-family:Arial; font-size:medium;}
 p, body, label, select {font-family:Arial; font-size:small;}
 button {font-family:Arial; font-size:12px;}
 
-table.a {
-	background-color: antiquewhite;
-	text-align: center; 
+body {
+	background-color: black;
 }
 
+table.a {
+	background-color: rgb(96, 96, 96);
+	text-align: center; 
+	color: white;
+}
+	
 table.b {text-align: center; }
 
 td.r {
@@ -19,6 +35,11 @@ td.l {
 	text-align: left;
 	width: '*';
 	white-space:nowrap;
+}
+table.o {
+	border-spacing: 8px;
+	font-family:Arial; 
+	font-size:1.2em;
 }
 
 input[type=range] {
@@ -32,7 +53,7 @@ input[type=range] {
 #supertable{
 	display:block;
 	position: relative;
-	border: 1px solid black;
+	border: 1px solid white;
 	top:0%;
 	height:99.5%;
 	left: 1%;
@@ -41,28 +62,30 @@ input[type=range] {
 
 #title{
 	position: absolute;
-	border: 1px solid black;
+	border: 1px solid white;
 	top: 0.5%;
 	height: 5%;
 	left: 1%;
-	width: 73%;
+	width: 98%;
 	z-index:97;
 }
 
+
 #options{
-	background-color: antiquewhite;
+	display: none;
+	color: white;
+	background-color: rgba(128,128,128,0.7);
 	position: absolute;
-	top: 0.5%;
-	left: 75%;
-	height: 5%;
-	width: 24%;
-	z-index:99;
+	top: 6%;
+	right: 5%;
+	float: right;
+	z-index:100;
 }
 
 #graphs{
-	background-color: antiquewhite;
+	background-color: rgb(155,155,155);
 	position: absolute;
-	border: 1px solid black;
+	border: 1px solid white;
 	top: 6%;
 	height: 86%;
 	left: 1%;
@@ -71,7 +94,7 @@ input[type=range] {
 
 #controls{
 	position: absolute;
-	border: 1px solid black;
+	border: 1px solid white;
 	top: 92.5%;
 	height: 5%;
 	left: 1%;
@@ -122,70 +145,3 @@ input[type=radio]:checked + label {
         background-color:#e0e0e0;
 }
 
-
-.dropdown-check-list {
-  display: inline-block;
-  margin-top: 1px;
-}
-
-.dropdown-check-list.visible {
-  display: inline-block;
-  border: 0px solid black;
-  background-color: antiquewhite;
-}
-
-.dropdown-check-list .anchor {
-  position: relative;
-  cursor: pointer;
-  display: inline-block;
-  padding: 1px 35px 1px 10px;
-  border: 0px solid #ccc;
-}
-.dropdown-check-list .anchor:after {
-  position: absolute;
-  content: "";
-  border-left: 2px solid black;
-  border-top: 2px solid black;
-  padding: 4px;
-  right: 10px;
-  top: 20%;
-  -moz-transform: rotate(-135deg);
-  -ms-transform: rotate(-135deg);
-  -o-transform: rotate(-135deg);
-  -webkit-transform: rotate(-135deg);
-  transform: rotate(-135deg);
-}
-.dropdown-check-list.visible .anchor:after {
-  position: absolute;
-  content: "";
-  border-left: 2px solid black;
-  border-top: 2px solid black;
-  padding: 4px;
-  right: 10px;
-  top: 20%;
-  -moz-transform: rotate(45deg);
-  -ms-transform: rotate(45deg);
-  -o-transform: rotate(45deg);
-  -webkit-transform: rotate(45deg);
-  transform: rotate(45deg);
-}
-.dropdown-check-list .anchor:active:after {
-  right: 8px;
-  top: 21%;
-}
-.dropdown-check-list ul.items {
-  padding: 10px;
-  display: none;
-  margin: 0;
-  border-top: none;
-}
-.dropdown-check-list ul.items li {
-  list-style: none;
-  padding:8px;
-}
-.dropdown-check-list.visible .anchor {
-  color: #0094ff;
-}
-.dropdown-check-list.visible .items {
-  display: block;
-}
