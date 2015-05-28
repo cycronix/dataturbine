@@ -83,7 +83,7 @@ input[type=range] {
 }
 
 #graphs{
-	background-color: rgb(155,155,155);
+	background-color: rgb(220,220,220);
 	position: absolute;
 	border: 1px solid white;
 	top: 6%;
