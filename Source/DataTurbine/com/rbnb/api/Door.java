@@ -755,6 +755,7 @@ final class Door {
 			    try {
 			    System.err.println("lockReadWrite blocked, clearing read locks and moving on!");
 			    unlockRead();			// MJM clear locks and lumber on.  10/13
+			    blocked=false;			// MJM actually lumber on... 6/15
 			    /*
 				throw new Exception
 				    (System.currentTimeMillis() + " " +
@@ -1072,7 +1073,7 @@ final class Door {
 			      ""));
 					     
 		    } catch (Exception e) {
-			e.printStackTrace();
+//			e.printStackTrace();				// MJM 6/15: unecessarily scary debug?
 		    }
 
 		    if (getReadLocks().size() == 0) {
