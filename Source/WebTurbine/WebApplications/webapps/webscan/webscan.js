@@ -100,7 +100,7 @@ var paramTime = new Array();		// array of times for each parameter
 function webscan() {
 	if(debug) console.log('start');
 	HTML5check();
-	
+
 	myName = window.location.host + window.location.pathname;		// store cookies unique to full URL path
 //	console.debug("getCookie("+myName+"): "+getCookie(myName));
 	
@@ -155,7 +155,10 @@ function HTML5check() {
 //GetURLValue:  get URL munge parameter
 
 function getURLValue(key) {
-	return getURLParam(window.location.search.substring(1), key);
+//	var myurl = (window.location != window.parent.location) ? window.parent.location : window.location;
+//	console.debug('url: '+myurl+', window.location: '+window.location+', substring: '+myurl.search.substring(1)+", key: "+key);
+	return getURLParam(myURL().search.substring(1), key);
+//	return getURLParam(window.location.search.substring(1), key);
 }
 
 function getURLParam(uri, key) {
@@ -170,6 +173,14 @@ function getURLParam(uri, key) {
 	}
 //	if(value) console.log('getURLParam: '+key+' = '+value);
 	return value;
+}
+
+// return URL of local window or parent window if embedded iframe
+function myURL() {
+	var myurl = (window.location != window.parent.location) ? window.parent.location : window.location;
+//	console.debug('myURL: '+myurl+', window.location: '+window.location+', window.parent.location: '+window.parent.location);
+//	console.debug('top.document.URL: '+top.document.URL);
+	return myurl;
 }
 
 //----------------------------------------------------------------------------------------
@@ -243,7 +254,13 @@ function getConfig(param) {
 function reloadConfig() {
 	stopRT();			// stop RT
 	configParams(getCookie(myName));
-	window.location.href = location.protocol + '//' + location.host + location.pathname + getCookie(myName);
+	
+	var url = myURL();
+	var urlhref = url.protocol + '//' + url.host + url.pathname + getCookie(myName);
+	console.debug('reloadConfig getCookie: '+getCookie(myName)+', myName: '+myName+', href: '+urlhref);
+
+	url.href = urlhref		
+//	window.location.href = location.protocol + '//' + location.host + location.pathname + getCookie(myName);
 }
 
 function configParams(src) {
@@ -269,7 +286,7 @@ function configParams(src) {
 
 function urlConfig() {
 	resetConfig();
-	configParams(window.location.search.substring(1));
+	configParams(myURL().search.substring(1));
 }
 
 function resetConfig() {
@@ -2259,12 +2276,16 @@ function plotbox() {
 				if(this.display == null) this.display = new plot({doFill:doFill,doSmooth:doSmooth});	
 				this.display.addLine(param);
 				break;
-			case 'video':	
-				if(this.display == null) this.display = new vidscan(param);	
+			case 'video':
+//				if(this.display == null) this.display = new vidscan(param);	
+				this.params.length=0;			// only one vid per plot
+				this.display = new vidscan(param);	
+				/*
 				else if(paramtype == 'video') {		// presume a stripchart added to video is audio
 					alert("only one video per plot");	
 					return;
 				}
+				*/
 				break;	
 			case 'audio':		
 				if(this.display == null) this.display = new audioscan(param);	
