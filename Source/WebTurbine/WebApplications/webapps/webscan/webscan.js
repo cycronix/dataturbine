@@ -2278,7 +2278,7 @@ function plotbox() {
 				break;
 			case 'video':
 //				if(this.display == null) this.display = new vidscan(param);	
-				this.params.length=0;			// only one vid per plot
+				if(paramtype == 'video') this.params.length=0;			// only one vid per plot
 				this.display = new vidscan(param);	
 				/*
 				else if(paramtype == 'video') {		// presume a stripchart added to video is audio
