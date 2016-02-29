@@ -87,6 +87,7 @@ import com.rbnb.utility.Utility;
  *   Date      By	Description
  * MM/DD/YYYY
  * ----------  --	-----------
+ * 2015/07/13  MJM  added optional specified source name to facilitate predetermined configuration
  * 2013/07/26  MJM  added convert feet to meters altitude conversion (GE presumes meters)
  * 2013/07/25  MJM	added noise-rejection filter (reject zero lat/lon/alt "drop out" values)
  * 2008/04/08  WHF      Corrected heading calculation.
@@ -158,6 +159,7 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
     private Sink sink = null;
     private String pluginName = "TrackData";
     private PlugIn plugin = null;
+    private String sourceName=null;			// optional pre-determined source name
     
     // Fetch timeout; can be set via the "-t" command line option
     private long timeout=60000;
@@ -440,6 +442,7 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
 			"\"-t\" flag is not a number; value ignored");
 		}
 	    }
+	    
 	} catch (Exception e) {
 	    System.err.println(
 		"TrackDataPlugIn argument exception " +
@@ -482,6 +485,7 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
 	System.err.println("Name of the heading channel: " + headingChanName);
 	System.err.println("Name of the pitch channel: " + pitchChanName);
 	System.err.println("Name of the roll channel: " + rollChanName);
+	if(sourceName != null) System.err.println("Name of track data source: "+sourceName);
 	
 	System.err.print("\n");
 	
@@ -682,6 +686,7 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
 	headingChanName = extract(hashtable, "heading", headingChanName);
 	pitchChanName = extract(hashtable, "pitch", pitchChanName);
 	rollChanName = extract(hashtable, "roll", rollChanName);
+	sourceName = extract(hashtable, "source", sourceName);		// MJM 7/13/2015
     }
     
     /**************************************************************************
@@ -1368,6 +1373,8 @@ public class TrackDataPlugIn implements ActionListener, ItemListener {
 	    
 	    String[] chanList = picm.GetChannelList();
 	    String remoteSource = chanList[0];
+	    if(sourceName != null) remoteSource = sourceName;		// over-ride given (nominal) name.  MJM 7/2015
+	    
 	    // Make sure remoteSource ends in a slash
 	    if (!remoteSource.endsWith("/")) {
 		remoteSource = remoteSource + "/";
