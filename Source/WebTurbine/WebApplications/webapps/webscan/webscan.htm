@@ -9,8 +9,10 @@
 <script type="text/javascript" src="smoothie.js"></script>
 <script type="text/javascript" src="webscan.js"></script>
 
+<link rel="icon" href="favicon.ico" type="image/x-icon" />
 </head>
 <link rel="stylesheet" type="text/css" href="webscan.css" />
+
 
 <div id="options"  border=1>
         <table class="o">
@@ -70,6 +72,10 @@
 					<option>14</>
 					<option>15</>
 					<option>16</>
+					<option>17</>
+					<option>18</>
+					<option>19</>
+					<option>20</>
 				</select>
 			</td></tr>       
               
@@ -93,7 +99,7 @@
 			
 			<tr><td>Scaling</td><td>
 				<select id="myScaling" onchange="scalingSelect(this)">
-					<option value="Standard" selected="selected">Standard</option>
+					<option value="Auto" selected="selected">Auto</option>
 					<option value="Tight">Tight</option>
 					<option value="Manual">Manual</option>
 				</select>
@@ -123,7 +129,7 @@
 <table id="title" class="a" border=1>
 <tr>
 <td style="white-space: nowrap; padding: 0px 4px 0px 4px" align="center" width="20%"><label class="h" id="timestamp">TimeStamp</></td>
-<td align="center" ><label class="h">WebScan by Cycronix <i>(V2.0B7)</i></></td>
+<td align="center" ><label class="h">WebScan by Cycronix <i>(V2.0)</i></></td>
 <td style="white-space: nowrap; padding: 0px 4px 0px 4px" align="center" width="20%"><label class="h" id="opt1">Options</></td>
     <script type="text/javascript">
         document.getElementById('opt1').onclick =  function() {
@@ -142,7 +148,12 @@
 <tr>
 <td style="white-space: nowrap;"> <input type="radio" name="radios" id="||"> <label for="||"  onMouseDown="goPause()"	>||</label> </td> 
 <td style="white-space: nowrap;"> <input type="radio" name="radios" id=">">  <label id="RTlab" for=">"  onMouseDown="playFwd()"	>&#62;</label></td> 
+
+<td style="white-space: nowrap;"> <input type="radio" name="radios" id="|<"> <label for="|<"  onMouseDown="goBOF()"	>|&lt;</label> </td> 
+
 <td width="99%"> <input id="TimeSelect" type="range" offsetHeight="0" clientHeight="10px" min="0" max="100" step=0.1 onchange="timeSelect(this)" oninput="timeSelect(this)"> </td>
+<td style="white-space: nowrap;"> <input type="radio" name="radios" id=">|"> <label for=">|"  onMouseDown="goEOF()"	>&gt;|</label> </td> 
+
 <td style="white-space: nowrap;"><input type="radio" name="radios" id="RT"> <label for="RT"  onMouseDown="goRT()"	>RT</label> </td> 
 </tr>
 </table>
