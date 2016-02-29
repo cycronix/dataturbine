@@ -47,6 +47,7 @@ import java.io.IOException;
  *   Date      By	Description
  * MM/DD/YYYY
  * ----------  --	-----------
+ * 06/18/2015  MJM  	Add -DNFS property flag to set number of filesets other than default (10)
  * 08/17/2013  JPW/MJM	moveDownFromStandard:  resolve wildcard request if needed
  * 10/03/2012  MJM  	deleteArchive: try-again if file delete fails 
  * 03/15/2011  MJM  	Allow reconnect to replace old source in special case of "dot" .fileName
@@ -6743,6 +6744,7 @@ private boolean alreadyReset=false;
      *   Date      By	Description
      * MM/DD/YYYY
      * ----------  --	-----------
+     * 06/18/2015  MJM  Add -DNFS property flag to set number of filesets other than default (10)
      * 08/02/2006  MJM  Trim number of filesets if archiveSize does not require that much data
      * 10/07/2005  MJM  Firewalled zero sized frameset/set
      * 02/17/2003  INB	Modified to store the calculated sizes locally so that
@@ -6781,6 +6783,9 @@ private boolean alreadyReset=false;
 	    // If the number of frames should be limited, then do so.
 	    fsA = (int) Math.ceil(mLimit/cFrFrameSet);
 	}
+	
+	aFS = Integer.parseInt(System.getProperty("NFS",""+aFS));		// over-ride default filesets (10)  MJM 6/18/2015
+	
 	fsFS = (int) Math.ceil(fsA*1./aFS);
    	aFS = (int) Math.min(aFS, Math.ceil(mLimit / cFrFrameSet));  // trim FileSets if not needed (mjm 8/06)
 //System.err.println("Debug:  fsFS: "+fsFS+", fsA: "+fsA+", aFS: "+aFS+", mLimit: "+mLimit+", cFrFrameSet: "+cFrFrameSet);
