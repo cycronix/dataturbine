@@ -839,7 +839,7 @@ function playTime() {		// time at which to fetch (msec)
 			if(playDelay > avgLag) 	playDelay = 0.7*playDelay + 0.3*avgLag;			// decrease slowly
 			else					playDelay = 0.3*playDelay + 0.7*avgLag;			// increase faster
 			playDelay = playDelay * 0.9;					// keep it from drifting higher?
-			playDelay += getDuration()/2;					// skootch half a screen older data?
+//			playDelay += getDuration()/2;					// skootch half a screen older data?
 			
 			if(debug) console.log("------------update playDelay: "+playDelay);
 			if(!playDelay) playDelay = 0;
