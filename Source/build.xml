@@ -83,6 +83,7 @@
 				classpathref="rbnb.javadoc.class.path"
 				Windowtitle="RBNB ${rbnb.version} Java API Documentation"
 				maxmemory="512m"
+				additionalparam="-Xdoclint:none"
 				Use="yes">
 			<package name="com.rbnb.api" />
 			<package name="com.rbnb.sapi" />
@@ -110,6 +111,7 @@
 				Private="yes"
 				linksource="yes"
 				Use="yes"
+				additionalparam="-Xdoclint:none"
 				maxmemory="1024m">
 			<package name="com.rbnb.api" />
 			<package name="com.rbnb.sapi" />
