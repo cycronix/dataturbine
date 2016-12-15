@@ -100,7 +100,7 @@
  <!-- Set to the version of Java to compile to.  Certain applications may 
 		require different versions than this flag, but this is intended as the
 		default for all targets. -->
-  <property name="rbnb.javaver" value="1.5" />
+  <property name="rbnb.javaver" value="1.7" />
  
  <!-- JPW 08/17/2007: Check for the existance of the Third_Party directory -->
  <!--                 NOTE: Perform this check before setting the taskdefs -->

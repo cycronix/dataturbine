@@ -141,8 +141,8 @@ public class MakeTimeMirror {
      * Mirror that went away and left the output Source) then we need to
      * terminate this existing output Source first before establishing the
      * new Mirror.  Otherwise, when the new Mirror tries to make the new output
-     * Source, an IllegalStateException will be thrown (“Cannot reconnect to
-     * existing client handler”).
+     * Source, an IllegalStateException will be thrown (Cannot reconnect to
+     * existing client handler).
      * <p>
      * This method is largely based on com.rbnb.api.MirrorController.stopOutputSource()
      * This method uses the same logic as rbnbAdmin for terminating a Source.

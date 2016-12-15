@@ -162,6 +162,7 @@
 			<classpath refid = "corecp" />
 			<classpath refid = "servletcp" />
 			<classpath path="${rbnb.thirdpartydir}/jfreechart-0.9.7.jar" />
+			<classpath path="${rbnb.thirdpartydir}/jcommon-0.7.3.jar" />
 		</javac>
 		<!-- HttpForward: -->
 		<!-- JPW 02/25/08: Add source and target Java version -->
