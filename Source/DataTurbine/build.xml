@@ -21,7 +21,7 @@
  <import file="../definitions.xml" />
  
  <!-- Override this property for this sub-project.  -->
- <property name="rbnb.api.javaver" value="1.4" />
+ <property name="rbnb.api.javaver" value="1.7" />
 
 
  <!-- Initialize by setting the timestamp. -->

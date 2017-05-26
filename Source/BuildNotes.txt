@@ -1,0 +1,11 @@
+To Do Notes:
+
+Folder ~/Documents/GIT/DataTurbine is "master" source per GitHub, but the buildable-source is still under Eclipse workspace (~/Documents/OSDT_GIT).
+Cluge for now is to edit/build under Eclipse and copy/commit to here (~/Documents/GIT/DataTurbine).
+
+Running ant build *outside* Eclipse (JVM8+) has some dangling issues:
+- javadoc through V3.4 would bail on errors, latest trunk code has added -Xdoclint:none to build.xml that re-enables javadoc build
+- ChartServlet is not building, error on "Drawable".  This class is in jcommon.jar, but build isn't finding it now?  (To Fix)
+
+Moving forward (if supported), fold build system into GitHub system and update ant build to run stand-alone under JVM8+.
+
