@@ -485,11 +485,11 @@
   </init-param>
   <init-param>
     <param-name>cors.allowed.headers</param-name>
-    <param-value>time,oldest,newest,lagtime</param-value>
+    <param-value>time,oldest,newest,lagtime,If-None-Match</param-value>
   </init-param>
   <init-param>
     <param-name>cors.exposed.headers</param-name>
-    <param-value>time,oldest,newest,lagtime</param-value>
+    <param-value>time,oldest,newest,lagtime,If-None-Match</param-value>
   </init-param>
 </filter>
 
