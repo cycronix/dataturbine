@@ -8,4 +8,5 @@ bin
 Source/*/build.number
 Source/*/*/build.number
 Source/*/*/*/build.number
+.DS_Store
 
